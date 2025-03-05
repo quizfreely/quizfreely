@@ -416,6 +416,12 @@
                 </tr>
               </tbody>
             </table>
+            <div class="flex">
+              <button class="alt" onclick={function () { document.getElementById("import-terms-modal").classList.remove("hide"); }}>
+                <IconPlus />
+                Import Terms
+              </button>
+            </div>
             {#if (data.new && data.authed) }
             <button id="create-button-authed">
               <IconCheckmark />
@@ -443,6 +449,15 @@
               Save Changes
             </button>
             {/if}
+
+            <div class="modal hide" id="import-terms-modal">
+              <div class="content">
+                <div class="flex">
+                  <button>Import</button>
+                  <button class="alt" onclick={function () { document.getElementById("import-terms-modal").classList.add("hide")}}>Cancel</button>
+                </div>
+              </div>
+            </div>
         </div>
       </div>
     </main>
