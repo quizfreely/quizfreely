@@ -4,10 +4,6 @@
     import IconArrowDown from "$lib/icons/ArrowDown.svelte"
     import IconTrash from "$lib/icons/Trash.svelte"
 
-    function resizeTextarea(event) {
-        event.target.style.height = "auto";
-        event.target.style.height = (event.target.scrollHeight + 10) + "px";
-    }
 </script>
 <div class="box">
     <input type="text" placeholder="Term" />
