@@ -18,7 +18,7 @@
         event.target.style.height = (event.target.scrollHeight + 10) + "px";
     }
 
-    var termsRowsCount = $state(0);
+    var terms = $state([]);
     onMount(function () {
       var editTermsTable = {
       insert: function (index) {
@@ -418,15 +418,15 @@
             </table>-->
 
             <div id="edit-terms-rows">
-              {#each Array(termsRowsCount) as _}
+              {#each terms as term, index (index)}
               <div class="box">
-                  <input type="text" placeholder="Term" />
+                  <input type="text" placeholder="Term" value={term[0]} />
                   <textarea
                       class="vertical"
                       rows="2"
                       placeholder="Definition"
                       oninput={resizeTextarea}
-                  ></textarea>
+                  >{term[1]}</textarea>
                   <div class="flex center">
                       <div class="dropdown">
                           <button class="dropdown-toggle" aria-label="Actions dropdown menu">
