@@ -13,6 +13,12 @@
     import IconArrowDown from "$lib/icons/ArrowDown.svelte";
     import IconPlus from "$lib/icons/Plus.svelte";
 
+    function resizeTextarea(event) {
+        event.target.style.height = "auto";
+        event.target.style.height = (event.target.scrollHeight + 10) + "px";
+    }
+
+    var termsRowsCount = $state(0);
     onMount(function () {
       var editTermsTable = {
       insert: function (index) {
@@ -146,9 +152,6 @@
         }
       },
     };
-    document.getElementById("edit-terms-add-row-button").addEventListener("click", function () {
-      editTermsTable.add();
-    })
     if (data.authed && !(data.local)) {
       document.getElementById("edit-private-false").addEventListener("click",
         function () {
@@ -164,7 +167,7 @@
       )
     }
     if (data.new) {
-      editTermsTable.add();
+      termsRowsCount = 1;
       document.getElementById("create-button-local").addEventListener("click", function () {
         openIndexedDB(function (db) {
           var studysetsObjectStore = db.transaction("studysets", "readwrite").objectStore("studysets");
@@ -394,7 +397,7 @@
               </div>
             </div>
             {/if}
-            <table class="outer" id="edit-terms-table">
+            <!--<table class="outer" id="edit-terms-table">
               <thead>
                 <tr>
                   <th class="center">Term</th>
@@ -405,17 +408,73 @@
                 <tr>
                   <td>
                     <div class="flex">
-                      <button id="edit-terms-add-row-button">
-                        <IconPlus />
-                        Add row
-                      </button>
+                      
                     </div>
                   </td>
                   <td></td>
                   <td></td>
                 </tr>
               </tbody>
-            </table>
+            </table>-->
+
+            <div id="edit-terms-rows">
+              {#each Array(termsRowsCount) as _}
+              <div class="box">
+                  <input type="text" placeholder="Term" />
+                  <textarea
+                      class="vertical"
+                      rows="2"
+                      placeholder="Definition"
+                      oninput={resizeTextarea}
+                  ></textarea>
+                  <div class="flex center">
+                      <div class="dropdown">
+                          <button class="dropdown-toggle" aria-label="Actions dropdown menu">
+                              <IconMoreDotsHorizontal />
+                          </button>
+                          <div class="content">
+                              <button onclick={
+                                  function (event) {
+                                    var currentRow = event.target.parentElement.parentElement.parentElement.parentElement;
+                                      document.getElementById("edit-terms-rows").insertBefore(
+                                          currentRow,
+                                          currentRow.previousElementSibling ?? currentRow /* if prev sibling is null, i amalready first, so insert before myself, which basically does nothing, cause there is no more elements to go up */
+                                      )
+                                  }
+                              }>
+                                  <IconArrowUp /> Move Up
+                              </button>
+                              <button onclick={
+                                  function (event) {
+                                    var currentRow = event.target.parentElement.parentElement.parentElement.parentElement;
+                                      document.getElementById("edit-terms-rows").insertBefore(
+                                        currentRow,
+                                        (currentRow.nextElementSibling ?? currentRow).nextElementSibling
+                                      )
+                                  }
+                              }>
+                                  <IconArrowDown /> Move Down
+                              </button>
+                              <button onclick={
+                                  function (event) {
+                                      event.target.parentElement.parentElement.parentElement.parentElement.remove()
+                                  }
+                              }>
+                                  <IconTrash /> Delete
+                              </button>
+                          </div>
+                      </div>
+                  </div>
+              </div>            
+              {/each}
+            </div>
+            <div class="box">
+              <button onclick={function () { termsRowsCount++ }}>
+                <IconPlus />
+                Add row
+              </button>
+            </div>
+
             <div class="flex">
               <button class="alt" onclick={function () { document.getElementById("import-terms-modal").classList.remove("hide"); }}>
                 <IconPlus />
