@@ -13,12 +13,23 @@
     import IconArrowDown from "$lib/icons/ArrowDown.svelte";
     import IconPlus from "$lib/icons/Plus.svelte";
 
+    import { flip } from "svelte/animate";
+
     function resizeTextarea(event) {
         event.target.style.height = "auto";
         event.target.style.height = (event.target.scrollHeight + 10) + "px";
     }
 
     var terms = $state([]);
+    var termId = 0;
+    function addTerm() {
+      terms.push({
+        id: termId,
+        term: "",
+        def: ""
+      })
+      termId++;
+    }
     onMount(function () {
       var editTermsTable = {
       insert: function (index) {
@@ -418,15 +429,16 @@
             </table>-->
 
             <div id="edit-terms-rows">
-              {#each terms as term, index (index)}
-              <div class="box">
-                  <input type="text" placeholder="Term" value={term[0]} />
+              {#each terms as term (term.id)}
+              <div class="box" animate:flip>
+                  <input type="text" placeholder="Term" bind:value={term.term} />
                   <textarea
                       class="vertical"
                       rows="2"
                       placeholder="Definition"
                       oninput={resizeTextarea}
-                  >{term[1]}</textarea>
+                      bind:value={term.def}
+                  ></textarea>
                   <div class="flex center">
                       <div class="dropdown">
                           <button class="dropdown-toggle" aria-label="Actions dropdown menu">
@@ -469,7 +481,7 @@
               {/each}
             </div>
             <div class="box">
-              <button onclick={function () { termsRowsCount++ }}>
+              <button onclick={addTerm}>
                 <IconPlus />
                 Add row
               </button>
