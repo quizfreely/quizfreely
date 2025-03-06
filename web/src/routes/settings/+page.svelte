@@ -121,6 +121,10 @@
     })
 </script>
 
+<svelte:head>
+  <title>Quizfreely Settings</title>
+</svelte:head>
+
 <Noscript />
 <main>
   <div class="grid page">
