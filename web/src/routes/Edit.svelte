@@ -14,6 +14,7 @@
     import IconPlus from "$lib/icons/Plus.svelte";
 
     import { flip } from "svelte/animate";
+    import { scale } from "svelte/transition";
 
     function resizeTextarea(event) {
         event.target.style.height = "auto";
@@ -307,7 +308,7 @@
 
             <div id="edit-terms-rows">
               {#each terms as term, index (term.id)}
-              <div class="box" animate:flip>
+              <div class="box" animate:flip={{ duration: 400 }} in:scale out:scale>
                   <input type="text" placeholder="Term" bind:value={term.term} />
                   <textarea
                       class="vertical"
