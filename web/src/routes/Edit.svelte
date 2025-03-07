@@ -308,7 +308,7 @@
 
             <div id="edit-terms-rows">
               {#each terms as term, index (term.id)}
-              <div class="box" animate:flip={{ duration: 400 }} in:scale out:scale>
+              <div class="box" animate:flip={{ duration: 400 }} in:scale={{ duration: 200 }} out:scale={{ duration: 200 }}>
                   <input type="text" placeholder="Term" bind:value={term.term} />
                   <textarea
                       class="vertical"
