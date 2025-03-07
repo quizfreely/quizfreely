@@ -250,6 +250,14 @@
     <title>Quizfreely</title>
 </svelte:head>
 
+<style>
+  .term-row-box {
+    gap: 1rem;
+    grid-template-rows: 1fr;
+    grid-template-columns: 1fr 1fr auto;
+  }
+</style>
+
     <Noscript />
     <main>
       <div class="grid page" style="min-height: 80vh;">
@@ -308,14 +316,20 @@
 
             <div id="edit-terms-rows">
               {#each terms as term, index (term.id)}
-              <div class="box" animate:flip={{ duration: 400 }} in:scale={{ duration: 200 }} out:scale={{ duration: 200 }}>
-                  <input type="text" placeholder="Term" bind:value={term.term} />
+              <div class="grid box term-row-box" animate:flip={{ duration: 400 }} in:scale={{ duration: 200 }} out:scale={{ duration: 200 }}>
+                  <textarea
+                      class="vertical"
+                      rows="2"
+                      placeholder="Term"
+                      bind:value={term.term}
+                      oninput={resizeTextarea}
+                  ></textarea>
                   <textarea
                       class="vertical"
                       rows="2"
                       placeholder="Definition"
-                      oninput={resizeTextarea}
                       bind:value={term.def}
+                      oninput={resizeTextarea}
                   ></textarea>
                   <div class="flex center">
                       <div class="dropdown">
@@ -327,15 +341,15 @@
                                 moveTerm(index, index - 1);
                                 event.target.blur();
                               }}>
-                                  <IconArrowUp /> Move Up
+                                  <IconArrowUp /> Move up
                               </button>
                               <button onclick={function (event) {
                                 moveTerm(index, index + 1);
                                 event.target.blur();
                               }}>
-                                  <IconArrowDown /> Move Down
+                                  <IconArrowDown /> Move down
                               </button>
-                              <button onclick={function () { deleteTerm(index) }}>
+                              <button class="ohno" onclick={function () { deleteTerm(index) }}>
                                   <IconTrash /> Delete
                               </button>
                           </div>
@@ -347,7 +361,7 @@
             <div class="box">
               <button onclick={addTerm}>
                 <IconPlus />
-                Add row
+                Add term
               </button>
             </div>
 
