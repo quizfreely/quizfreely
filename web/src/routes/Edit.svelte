@@ -30,139 +30,13 @@
       })
       termId++;
     }
+    function moveTerm(oldIndex, newIndex) {
+      var term = terms[oldIndex];
+      terms.splice(oldIndex, 1);
+      terms.splice(newIndex, 0, term);
+    }
+
     onMount(function () {
-      var editTermsTable = {
-      insert: function (index) {
-        var newRow = document
-          .getElementById("edit-terms-table")
-          .insertRow(index);
-        newRow.insertCell(0).innerHTML = "<input type='text' placeholder='Term' />";
-        var col1 = newRow.insertCell(1);
-        col1.innerHTML =
-          "<textarea class='vertical' rows='2' placeholder='Definition'></textarea>";
-        col1.addEventListener("input", function(event) {
-          event.target.style.height = "auto";
-          event.target.style.height = (event.target.scrollHeight + 10) + "px";
-        });
-        var actions = newRow.insertCell(2);
-        actions.innerHTML =
-          "<div class='flex center'><div class='dropdown'>" +
-          "  <button class='dropdown-toggle'></button>" +
-          "  <div class='content'>" +
-          "    <button></button>" +
-          "    <button></button>" +
-          "    <button class='ohno'></button>" +
-          "  </div>" +
-          "</div></div>";
-        mount(IconMoreDotsHorizontal, {
-          target: actions.children[0].children[0].children[0]
-        })
-        mount(IconArrowUp, {
-          target: actions.children[0].children[0].children[1].children[0]
-        })
-        actions.children[0].children[0].children[1].children[0].innerHTML += " Move Up"
-        mount(IconArrowDown, {
-          target: actions.children[0].children[0].children[1].children[1]
-        })
-        actions.children[0].children[0].children[1].children[1].innerHTML += " Move Down"
-        mount(IconTrash, {
-          target: actions.children[0].children[0].children[1].children[2]
-        })
-        actions.children[0].children[0].children[1].children[2].innerHTML += " Delete"
-        actions.children[0].children[0].children[1].children[0].addEventListener("click", function (event) {
-          editTermsTable.move(
-            event.target.parentElement.parentElement
-              .parentElement.parentElement
-              .parentElement.rowIndex,
-            event.target.parentElement.parentElement
-              .parentElement.parentElement
-              .parentElement.rowIndex - 1,
-          );
-        });
-        actions.children[0].children[0].children[1].children[1].addEventListener("click", function (event) {
-          editTermsTable.move(
-            event.target.parentElement.parentElement
-              .parentElement.parentElement
-              .parentElement.rowIndex,
-            event.target.parentElement.parentElement
-              .parentElement.parentElement
-              .parentElement.rowIndex + 2,
-          );
-        });
-        actions.children[0].children[0].children[1].children[2].addEventListener("click", function (event) {
-          editTermsTable.delete(
-            event.target.parentElement.parentElement
-              .parentElement.parentElement
-              .parentElement.rowIndex,
-          );
-        });
-      },
-      add: function () {
-        editTermsTable.insert(
-          document.getElementById("edit-terms-table").rows.length - 1,
-        );
-      },
-      delete: function (index) {
-        document.getElementById("edit-terms-table").deleteRow(index);
-      },
-      move: function (index, newIndex) {
-        /*
-            Note to self: make this readable later
-            */
-        if (
-          index !== newIndex &&
-          ((index > newIndex && index !== 1) || index < newIndex) &&
-          ((index < newIndex &&
-            index <
-              document.getElementById("edit-terms-table").rows.length -
-                2) ||
-            index > newIndex)
-        ) {
-          editTermsTable.insert(newIndex);
-          var newOldIndex;
-          if (index > newIndex) {
-            newOldIndex = index + 1;
-          } else if (index < newIndex) {
-            newOldIndex = index;
-          }
-          document.getElementById("edit-terms-table").rows[
-            newIndex
-          ].children[0].children[0].value = document.getElementById(
-            "edit-terms-table"
-          ).rows[newOldIndex].children[0].children[0].value;
-          document.getElementById("edit-terms-table").rows[
-            newIndex
-          ].children[1].children[0].value = document.getElementById(
-            "edit-terms-table"
-          ).rows[newOldIndex].children[1].children[0].value;
-          editTermsTable.delete(newOldIndex);
-        }
-      },
-      arrayFromTable: function () {
-        var element = document.getElementById("edit-terms-table")
-        var tableArray = [];
-        for (var i = 1; i < element.rows.length - 1; i++) {
-          var row = [];
-          var tableCells = element.rows[i].children;
-        
-          row.push(tableCells[0].children[0].value);
-          row.push(tableCells[1].children[0].value);
-        
-          tableArray.push(row);
-        }
-        return tableArray;
-      },
-      tableFromArray: function (array) {
-        var table = document.getElementById("edit-terms-table");
-        for (var i = 0; i < array.length; i++) {
-          editTermsTable.insert(i + 1);
-          table.rows[i + 1].children[0].children[0].value = array[i][0];
-          var col1Textarea = table.rows[i + 1].children[1].children[0];
-          col1Textarea.value = array[i][1];
-          col1Textarea.style.height = (col1Textarea.scrollHeight + 10) + "px";
-        }
-      },
-    };
     if (data.authed && !(data.local)) {
       document.getElementById("edit-private-false").addEventListener("click",
         function () {
@@ -178,7 +52,7 @@
       )
     }
     if (data.new) {
-      termsRowsCount = 1;
+      addTerm();
       document.getElementById("create-button-local").addEventListener("click", function () {
         openIndexedDB(function (db) {
           var studysetsObjectStore = db.transaction("studysets", "readwrite").objectStore("studysets");
@@ -456,15 +330,7 @@
                               }>
                                   <IconArrowUp /> Move Up
                               </button>
-                              <button onclick={
-                                  function (event) {
-                                    var currentRow = event.target.parentElement.parentElement.parentElement.parentElement;
-                                      document.getElementById("edit-terms-rows").insertBefore(
-                                        currentRow,
-                                        (currentRow.nextElementSibling ?? currentRow).nextElementSibling
-                                      )
-                                  }
-                              }>
+                              <button onclick={function () { }}>
                                   <IconArrowDown /> Move Down
                               </button>
                               <button onclick={
