@@ -23,11 +23,11 @@
 
     var terms = $state([]);
     var termId = 0;
-    function addTerm() {
+    function addTerm(term, def) {
       terms.push({
         id: termId,
-        term: "",
-        def: ""
+        term: term ?? "",
+        def: def ?? ""
       })
       termId++;
     }
@@ -38,6 +38,18 @@
     }
     function deleteTerm(index) {
       terms.splice(index, 1);
+    }
+    function termsTo2DArray() {
+      var arr = [];
+      for (var index = 0; index < terms.length; index++) {
+        arr.push([terms[index].term, terms[index].def]);
+      }
+      return arr;
+    }
+    function addTermsFrom2DArray(arr) {
+      for (var row = 0; row < arr.length; row++) {
+        addTerm(arr[row][0], arr[row][1]);
+      }
     }
 
     onMount(function () {
@@ -77,7 +89,7 @@
           var dbAddReq = studysetsObjectStore.add({
             title: title,
             data: {
-              terms: editTermsTable.arrayFromTable()
+              terms: termsTo2DArray()
             },
             updated_at: (new Date()).toISOString()
           });
@@ -111,7 +123,7 @@
                 title: document.getElementById("edit-title").value,
                 private: document.getElementById("edit-private-true").classList.contains("selected"),
                 data: {
-                  terms: editTermsTable.arrayFromTable()
+                  terms: termsTo2DArray()
                 }
               }
             })
@@ -148,7 +160,7 @@
               alert("error, could not load studyset while trying to edit")
             } else {
               document.getElementById("edit-title").value = result.data.studyset.title;
-              editTermsTable.tableFromArray(result.data.studyset.data.terms);
+              addTermsFrom2DArray(result.data.studyset.data.terms);
               if (result.data.studyset.private) {
                 document.getElementById("edit-private-false").classList.remove("selected");
                 document.getElementById("edit-private-true").classList.add("selected");
@@ -171,7 +183,7 @@
                 title: document.getElementById("edit-title").value,
                 private: document.getElementById("edit-private-true").classList.contains("selected"),
                 data: {
-                  terms: editTermsTable.arrayFromTable()
+                  terms: termsTo2DArray()
                 }
               }
             })
@@ -196,7 +208,7 @@
           if (dbGetReq.result) {
             document.getElementById("edit-title").value = dbGetReq.result.title;
             if (dbGetReq.result.data && dbGetReq.result.data.terms) {
-              editTermsTable.tableFromArray(dbGetReq.result.data.terms);
+              addTermsFrom2DArray(dbGetReq.result.data.terms);
             }
 
             document.getElementById("save-button").addEventListener("click", function (_) {
@@ -218,7 +230,7 @@
                 id: data.localId,
                 title: title,
                 data: {
-                  terms: editTermsTable.arrayFromTable()
+                  terms: termsTo2DArray()
                 },
                 updated_at: (new Date()).toISOString()
               }
@@ -360,7 +372,7 @@
             </div>
             <div class="box">
               <div class="flex">
-                <button onclick={addTerm}>
+                <button onclick={function () { addTerm(); }}>
                   <IconPlus />
                   Add term
                 </button>
