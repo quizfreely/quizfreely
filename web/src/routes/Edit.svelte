@@ -16,10 +16,7 @@
     import { flip } from "svelte/animate";
     import { scale } from "svelte/transition";
 
-    function resizeTextarea(event) {
-        event.target.style.height = "auto";
-        event.target.style.height = (event.target.scrollHeight + 10) + "px";
-    }
+    import AutoResizeTextarea from "$lib/components/AutoResizeTextarea.svelte";
 
     var terms = $state([]);
     var termId = 0;
@@ -333,19 +330,21 @@
             <div id="edit-terms-rows">
               {#each terms as term, index (term.id)}
               <div class="grid box term-row-box" animate:flip={{ duration: 400 }} in:scale={{ duration: 400 }} out:scale={{ duration: 400 }}>
-                  <textarea
-                      class="term-row-box-term"
-                      rows="2"
-                      placeholder="Term"
-                      bind:value={term.term}
-                      oninput={resizeTextarea}
-                  ></textarea>
+                  <AutoResizeTextarea
+                    div={{
+                      class: "term-row-box-term"
+                    }}
+                    textarea={{
+                      placeholder: "Term",
+                      rows: "2"
+                    }}
+                    bind:value={term.term}
+                  />
                   <textarea
                       class="term-row-box-def"
                       rows="2"
                       placeholder="Definition"
                       bind:value={term.def}
-                      oninput={resizeTextarea}
                   ></textarea>
                   <div class="flex center term-row-box-actions">
                       <div class="dropdown">
