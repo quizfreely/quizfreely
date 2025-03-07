@@ -272,9 +272,11 @@
 
   .term-row-box-term {
     grid-area: term;
+    resize: none;
   }
   .term-row-box-def {
     grid-area: def;
+    resize: none;
   }
   .term-row-box-actions {
     grid-area: actions;
@@ -351,14 +353,14 @@
               {#each terms as term, index (term.id)}
               <div class="grid box term-row-box" animate:flip={{ duration: 400 }} in:scale={{ duration: 400 }} out:scale={{ duration: 400 }}>
                   <textarea
-                      class="vertical term-row-box-term"
+                      class="term-row-box-term"
                       rows="2"
                       placeholder="Term"
                       bind:value={term.term}
                       oninput={resizeTextarea}
                   ></textarea>
                   <textarea
-                      class="vertical term-row-box-def"
+                      class="term-row-box-def"
                       rows="2"
                       placeholder="Definition"
                       bind:value={term.def}
