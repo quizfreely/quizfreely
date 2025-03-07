@@ -329,25 +329,6 @@
               </div>
             </div>
             {/if}
-            <!--<table class="outer" id="edit-terms-table">
-              <thead>
-                <tr>
-                  <th class="center">Term</th>
-                  <th class="center">Definition</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>
-                    <div class="flex">
-                      
-                    </div>
-                  </td>
-                  <td></td>
-                  <td></td>
-                </tr>
-              </tbody>
-            </table>-->
 
             <div id="edit-terms-rows">
               {#each terms as term, index (term.id)}
