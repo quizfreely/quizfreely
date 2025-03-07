@@ -328,7 +328,7 @@
 
             <div id="edit-terms-rows">
               {#each terms as term, index (term.id)}
-              <div class="grid box term-row-box" animate:flip={{ duration: 400 }} in:scale={{ duration: 200 }} out:scale={{ duration: 200 }}>
+              <div class="grid box term-row-box" animate:flip={{ duration: 400 }} in:scale={{ duration: 400 }} out:scale={{ duration: 400 }}>
                   <textarea
                       class="vertical"
                       rows="2"
