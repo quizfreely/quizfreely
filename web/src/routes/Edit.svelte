@@ -359,17 +359,16 @@
               {/each}
             </div>
             <div class="box">
-              <button onclick={addTerm}>
-                <IconPlus />
-                Add term
-              </button>
-            </div>
-
-            <div class="flex">
-              <button class="alt" onclick={function () { document.getElementById("import-terms-modal").classList.remove("hide"); }}>
-                <IconPlus />
-                Import Terms
-              </button>
+              <div class="flex">
+                <button onclick={addTerm}>
+                  <IconPlus />
+                  Add term
+                </button>
+                <button class="alt" onclick={function () { document.getElementById("import-terms-modal").classList.remove("hide"); }}>
+                  <IconPlus />
+                  Import Terms
+                </button>
+              </div>
             </div>
             {#if (data.new && data.authed) }
             <button id="create-button-authed">
