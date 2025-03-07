@@ -35,6 +35,9 @@
       terms.splice(oldIndex, 1);
       terms.splice(newIndex, 0, term);
     }
+    function deleteTerm(index) {
+      terms.splice(index, 1);
+    }
 
     onMount(function () {
     if (data.authed && !(data.local)) {
@@ -303,7 +306,7 @@
             </table>-->
 
             <div id="edit-terms-rows">
-              {#each terms as term (term.id)}
+              {#each terms as term, index (term.id)}
               <div class="box" animate:flip>
                   <input type="text" placeholder="Term" bind:value={term.term} />
                   <textarea
@@ -319,25 +322,19 @@
                               <IconMoreDotsHorizontal />
                           </button>
                           <div class="content">
-                              <button onclick={
-                                  function (event) {
-                                    var currentRow = event.target.parentElement.parentElement.parentElement.parentElement;
-                                      document.getElementById("edit-terms-rows").insertBefore(
-                                          currentRow,
-                                          currentRow.previousElementSibling ?? currentRow /* if prev sibling is null, i amalready first, so insert before myself, which basically does nothing, cause there is no more elements to go up */
-                                      )
-                                  }
-                              }>
+                              <button onclick={function (event) {
+                                moveTerm(index, index - 1);
+                                event.target.blur();
+                              }}>
                                   <IconArrowUp /> Move Up
                               </button>
-                              <button onclick={function () { }}>
+                              <button onclick={function (event) {
+                                moveTerm(index, index + 1);
+                                event.target.blur();
+                              }}>
                                   <IconArrowDown /> Move Down
                               </button>
-                              <button onclick={
-                                  function (event) {
-                                      event.target.parentElement.parentElement.parentElement.parentElement.remove()
-                                  }
-                              }>
+                              <button onclick={function () { deleteTerm(index) }}>
                                   <IconTrash /> Delete
                               </button>
                           </div>
