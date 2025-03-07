@@ -265,8 +265,29 @@
 <style>
   .term-row-box {
     gap: 1rem;
-    grid-template-rows: 1fr;
+    grid-template-rows: auto;
     grid-template-columns: 1fr 1fr auto;
+    grid-template-areas: "term def actions";
+  }
+
+  .term-row-box-term {
+    grid-area: term;
+  }
+  .term-row-box-def {
+    grid-area: def;
+  }
+  .term-row-box-actions {
+    grid-area: actions;
+  }
+
+  @media only screen and (max-width: 800px) {
+    .term-row-box {
+      grid-template-rows: auto auto;
+      grid-template-columns: 1fr auto;
+      grid-template-areas:
+        "term actions"
+        "def actions";
+    }
   }
 </style>
 
@@ -330,20 +351,20 @@
               {#each terms as term, index (term.id)}
               <div class="grid box term-row-box" animate:flip={{ duration: 400 }} in:scale={{ duration: 400 }} out:scale={{ duration: 400 }}>
                   <textarea
-                      class="vertical"
+                      class="vertical term-row-box-term"
                       rows="2"
                       placeholder="Term"
                       bind:value={term.term}
                       oninput={resizeTextarea}
                   ></textarea>
                   <textarea
-                      class="vertical"
+                      class="vertical term-row-box-def"
                       rows="2"
                       placeholder="Definition"
                       bind:value={term.def}
                       oninput={resizeTextarea}
                   ></textarea>
-                  <div class="flex center">
+                  <div class="flex center term-row-box-actions">
                       <div class="dropdown">
                           <button class="dropdown-toggle" aria-label="Actions dropdown menu">
                               <IconMoreDotsHorizontal />
