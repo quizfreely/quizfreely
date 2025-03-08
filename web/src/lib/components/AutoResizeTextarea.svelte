@@ -1,5 +1,5 @@
 <script>
-    let {div, textarea, value = ""} = $props();
+    let {value = $bindable(), div, textarea} = $props();
     /*
         `textarea` and `div` are spread below
         like this: `{...textarea}` and `{...div}`,
@@ -16,9 +16,6 @@
         value is not under `textarea` so it can be used with bind easily:
         <AutoResizeTextarea bind:value={something} />
     */
-    function updateDatasetText(event) {
-        event.target.parentElement.dataset.autoresizetextvalue = event.target.value;
-    }
 </script>
 
 <style>
@@ -70,8 +67,10 @@
 
 <!-- notice class is AFTER `...div` because we're overwriting class from spread props -->
 <div {...div} class={["auto-resize-textarea-div", div.class]} data-autoresizetextvalue={value}>
-    <textarea {...textarea} value={value} oninput={updateDatasetText} onfocus={updateDatasetText}></textarea>
-    <!-- we update the data attribute on input and on focus -->
+    <textarea bind:value={value} {...textarea} ></textarea>
 </div>
 
-<!-- this is such a hacky solution 💀 -->
+<!--
+    this is such a hacky solution 💀
+    but it works really nicely
+-->
