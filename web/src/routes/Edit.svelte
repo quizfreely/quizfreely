@@ -293,6 +293,16 @@
         "def actions";
     }
   }
+
+  .import-terms-split {
+    display: grid;
+    gap: 1rem;
+    grid-template-rows: auto;
+    grid-template-columns: 1fr 1fr;
+  }
+  #import-terms-paste-textarea {
+    width: 100%;
+  }
 </style>
 
     <Noscript />
@@ -428,18 +438,53 @@
 
             <div class="modal hide" id="import-terms-modal">
               <div class="content">
-                <div class="radio">
-                  <label>
-                    <input type="radio" name="import-terms-term-delimiter" value="comma">
-                    <span>Commas</span>
-                  </label>
+                <div class="grid import-terms-split">
+                  <div>
+                    <p>Separating term & definition</p>
+                    <div class="radio">
+                      <label>
+                        <input type="radio" name="import-terms-term-delimiter" value="tab" checked>
+                        <span>tab</span>
+                      </label>
+                    </div>
+                    <div class="radio">
+                      <label>
+                        <input type="radio" name="import-terms-term-delimiter" value="comma">
+                        <span>comma <code>,</code></span>
+                      </label>
+                    </div>
+                    <div class="radio">
+                      <label>
+                        <input type="radio" name="import-terms-term-delimiter" value="comma">
+                        <span>custom</span>
+                      </label>
+                    </div>
+                    <input type="text" placeholder="Custom term/def delimiter">
+                  </div>
+                  <div>
+                    <p>Separating rows</p>
+                    <div class="radio">
+                      <label>
+                        <input type="radio" name="import-terms-row-delimiter" value="newline" checked>
+                        <span>new line (enter)</span>
+                      </label>
+                    </div>
+                    <div class="radio">
+                      <label>
+                        <input type="radio" name="import-terms-row-delimiter" value="semicolon">
+                        <span>semicolon <code>;</code></span>
+                      </label>
+                    </div>
+                    <div class="radio">
+                      <label>
+                        <input type="radio" name="import-terms-row-delimiter" value="comma">
+                        <span>custom</span>
+                      </label>
+                    </div>
+                    <input type="text" placeholder="Custom row delimiter">
+                  </div>
                 </div>
-                <div class="radio">
-                  <label>
-                    <input type="radio" name="import-terms-term-delimiter" value="tab">
-                    <span>Commas</span>
-                  </label>
-                </div>
+                <textarea id="import-terms-paste-textarea" class="vertical" rows="3" placeholder="Paste data here, then press the import button"></textarea>
                 <div class="flex">
                   <button>Import</button>
                   <button class="alt" onclick={function () { document.getElementById("import-terms-modal").classList.add("hide")}}>Cancel</button>
