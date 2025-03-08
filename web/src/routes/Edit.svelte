@@ -267,11 +267,11 @@
     grid-template-areas: "term def actions";
   }
 
-  .term-row-box-term {
+  .term-row-box > :global(.term-row-box-term) {
     grid-area: term;
     resize: none;
   }
-  .term-row-box-def {
+  .term-row-box > :global(.term-row-box-def) {
     grid-area: def;
     resize: none;
   }
@@ -340,12 +340,16 @@
                     }}
                     bind:value={term.term}
                   />
-                  <textarea
-                      class="term-row-box-def"
-                      rows="2"
-                      placeholder="Definition"
-                      bind:value={term.def}
-                  ></textarea>
+                  <AutoResizeTextarea
+                    div={{
+                      class: "term-row-box-def"
+                    }}
+                    textarea={{
+                      placeholder: "Definition",
+                      rows: "2"
+                    }}
+                    bind:value={term.def}
+                  />
                   <div class="flex center term-row-box-actions">
                       <div class="dropdown">
                           <button class="dropdown-toggle" aria-label="Actions dropdown menu">
