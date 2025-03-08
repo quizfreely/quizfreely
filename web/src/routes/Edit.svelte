@@ -356,7 +356,7 @@
                     bind:value={term.def}
                   />
                   <div class="flex center term-row-box-actions">
-                      <div class="dropdown">
+                      <div class="dropdown left">
                           <button class="dropdown-toggle" aria-label="Actions dropdown menu">
                               <IconMoreDotsHorizontal />
                           </button>
