@@ -29,9 +29,14 @@
       termId++;
     }
     function moveTerm(oldIndex, newIndex) {
-      var term = terms[oldIndex];
-      terms.splice(oldIndex, 1);
-      terms.splice(newIndex, 0, term);
+      if (
+        oldIndex >= 0 && oldIndex < terms.length &&
+        newIndex >= 0 && newIndex < terms.length
+      ) {
+        var term = terms[oldIndex];
+        terms.splice(oldIndex, 1);
+        terms.splice(newIndex, 0, term);
+      }
     }
     function deleteTerm(index) {
       terms.splice(index, 1);
