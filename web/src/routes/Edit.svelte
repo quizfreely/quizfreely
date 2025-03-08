@@ -390,7 +390,7 @@
                 </button>
                 <button class="alt" onclick={function () { document.getElementById("import-terms-modal").classList.remove("hide"); }}>
                   <IconPlus />
-                  Import Terms
+                  Import terms
                 </button>
               </div>
             </div>
@@ -424,6 +424,18 @@
 
             <div class="modal hide" id="import-terms-modal">
               <div class="content">
+                <div class="radio">
+                  <label>
+                    <input type="radio" name="import-terms-term-delimiter" value="comma">
+                    <span>Commas</span>
+                  </label>
+                </div>
+                <div class="radio">
+                  <label>
+                    <input type="radio" name="import-terms-term-delimiter" value="tab">
+                    <span>Commas</span>
+                  </label>
+                </div>
                 <div class="flex">
                   <button>Import</button>
                   <button class="alt" onclick={function () { document.getElementById("import-terms-modal").classList.add("hide")}}>Cancel</button>
