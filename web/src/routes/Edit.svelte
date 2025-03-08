@@ -379,7 +379,11 @@
                           </div>
                       </div>
                   </div>
-              </div>            
+              </div>
+              {:else}
+              <div class="box">
+                <p class="fg0">No terms?<br>Tap "add term" to create one or use "import terms" to transfer them from somewhere else.</p>
+              </div>
               {/each}
             </div>
             <div class="box">
