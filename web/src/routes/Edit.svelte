@@ -259,6 +259,9 @@
       })
     }
     })
+
+    let importTermsTermDefDelimiterRadioSelect = $state("tab");
+    let importTermsRowDelimiterRadioSelect = $state("newline");
 </script>
 <svelte:head>
     <title>Quizfreely</title>
@@ -302,6 +305,10 @@
   }
   #import-terms-paste-textarea {
     width: 100%;
+  }
+
+  .slightly-smaller-textbox {
+    width: 10rem;
   }
 </style>
 
@@ -443,50 +450,58 @@
                     <p>Separating term & definition</p>
                     <div class="radio">
                       <label>
-                        <input type="radio" name="import-terms-term-delimiter" value="tab" checked>
+                        <input type="radio" name="import-terms-termdef-delimiter" bind:group={importTermsTermDefDelimiterRadioSelect} value="tab" checked>
                         <span>tab</span>
                       </label>
                     </div>
                     <div class="radio">
                       <label>
-                        <input type="radio" name="import-terms-term-delimiter" value="comma">
+                        <input type="radio" name="import-terms-termdef-delimiter" bind:group={importTermsTermDefDelimiterRadioSelect} value="comma">
                         <span>comma <code>,</code></span>
                       </label>
                     </div>
                     <div class="radio">
                       <label>
-                        <input type="radio" name="import-terms-term-delimiter" value="comma">
+                        <input type="radio" name="import-terms-termdef-delimiter" bind:group={importTermsTermDefDelimiterRadioSelect} value="custom">
                         <span>custom</span>
                       </label>
                     </div>
-                    <input type="text" placeholder="Custom term/def delimiter">
+                    {#if importTermsTermDefDelimiterRadioSelect == "custom"}
+                    <input type="text" placeholder="Term/def delimiter" class="slightly-smaller-textbox" transition:scale={{duration:400}}>
+                    {/if}
                   </div>
                   <div>
                     <p>Separating rows</p>
                     <div class="radio">
                       <label>
-                        <input type="radio" name="import-terms-row-delimiter" value="newline" checked>
+                        <input type="radio" name="import-terms-row-delimiter" bind:group={importTermsRowDelimiterRadioSelect} value="newline" checked>
                         <span>new line (enter)</span>
                       </label>
                     </div>
                     <div class="radio">
                       <label>
-                        <input type="radio" name="import-terms-row-delimiter" value="semicolon">
+                        <input type="radio" name="import-terms-row-delimiter" bind:group={importTermsRowDelimiterRadioSelect} value="semicolon">
                         <span>semicolon <code>;</code></span>
                       </label>
                     </div>
                     <div class="radio">
                       <label>
-                        <input type="radio" name="import-terms-row-delimiter" value="comma">
+                        <input type="radio" name="import-terms-row-delimiter" bind:group={importTermsRowDelimiterRadioSelect} value="custom">
                         <span>custom</span>
                       </label>
                     </div>
-                    <input type="text" placeholder="Custom row delimiter">
+                    {#if importTermsRowDelimiterRadioSelect == "custom"}
+                    <input type="text" placeholder="Row delimiter" class="slightly-smaller-textbox" transition:scale={{duration:400}}>
+                    {/if}
                   </div>
                 </div>
                 <textarea id="import-terms-paste-textarea" class="vertical" rows="3" placeholder="Paste data here, then press the import button"></textarea>
                 <div class="flex">
-                  <button>Import</button>
+                  <button onclick={
+                    function () {
+                      var terms = document.getElementById("import-terms-paste-textarea").value
+                    }
+                  }>Import</button>
                   <button class="alt" onclick={function () { document.getElementById("import-terms-modal").classList.add("hide")}}>Cancel</button>
                 </div>
               </div>
