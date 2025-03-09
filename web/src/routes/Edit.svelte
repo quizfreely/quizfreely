@@ -467,7 +467,7 @@
                       </label>
                     </div>
                     {#if importTermsTermDefDelimiterRadioSelect == "custom"}
-                    <input type="text" placeholder="Term/def delimiter" class="slightly-smaller-textbox" transition:scale={{duration:400}}>
+                    <input type="text" placeholder="Term/def delimiter" id="import-terms-custom-termdef-delimiter-input" class="slightly-smaller-textbox" transition:scale={{duration:400}}>
                     {/if}
                   </div>
                   <div>
@@ -491,7 +491,7 @@
                       </label>
                     </div>
                     {#if importTermsRowDelimiterRadioSelect == "custom"}
-                    <input type="text" placeholder="Row delimiter" class="slightly-smaller-textbox" transition:scale={{duration:400}}>
+                    <input type="text" placeholder="Row delimiter" id="import-terms-custom-row-delimiter-input" class="slightly-smaller-textbox" transition:scale={{duration:400}}>
                     {/if}
                   </div>
                 </div>
@@ -499,7 +499,53 @@
                 <div class="flex">
                   <button onclick={
                     function () {
-                      var terms = document.getElementById("import-terms-paste-textarea").value
+                      var termDefDelimiter;
+                      var rowDelimiter;
+                      if (importTermsTermDefDelimiterRadioSelect == "tab") {
+                        termDefDelimiter = "\t";
+                      } else if (importTermsTermDefDelimiterRadioSelect == "comma") {
+                        termDefDelimiter = ","
+                      } else if (importTermsTermDefDelimiterRadioSelect == "custom") {
+                        termDefDelimiter = document.getElementById("import-terms-custom-row-delimiter-input").value;
+                        if (termDefDelimiter == "") {
+                          alert("Custom delimiter can't be blank >:(");
+                          return;
+                        }
+                      }
+                      if (importTermsRowDelimiterRadioSelect == "newline") {
+                        rowDelimiter = "\n";
+                      } else if (importTermsRowDelimiterRadioSelect == "semicolon") {
+                        rowDelimiter = ";"
+                      } else if (importTermsRowDelimiterRadioSelect == "custom") {
+                        rowDelimiter = document.getElementById("import-terms-custom-row-delimiter-input").value;
+                        if (rowDelimiter == "") {
+                          alert("Custom delimiter can't be blank >:(");
+                          return;
+                        }
+                      }
+
+                      /* we add a blank term when users create a studyset,
+                      so if a user imports terms without changing that blank term
+                      we probably don't want them to have a blank term right before their imported terms
+                      
+                      so we check if there's only one, blank, term, and delete it if so before importing terms */
+                      if (terms.length === 1 && terms[0].term === "" && terms[0].def === "") {
+                        terms.splice(0, 1);
+                      }
+
+                      var pastedData = document.getElementById("import-terms-paste-textarea").value
+                      addTermsFrom2DArray(
+                        pastedData.split(rowDelimiter).map(row => row ? row.split(termDefDelimiter) : ["",""])
+                      );
+
+                      /* after importing, if there was a delimiter at the end, it will create a blank last term,
+                      check the last term and remove it if it's blank */
+                      if (terms[terms.length - 1].term === "" && terms[terms.length - 1].def === "") {
+                        terms.splice(terms.length - 1, 1);
+                      }
+
+                      /* hide the modal after importing */
+                      document.getElementById("import-terms-modal").classList.add("hide");
                     }
                   }>Import</button>
                   <button class="alt" onclick={function () { document.getElementById("import-terms-modal").classList.add("hide")}}>Cancel</button>
