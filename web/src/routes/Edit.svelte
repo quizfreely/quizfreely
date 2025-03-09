@@ -506,7 +506,7 @@
                       } else if (importTermsTermDefDelimiterRadioSelect == "comma") {
                         termDefDelimiter = ","
                       } else if (importTermsTermDefDelimiterRadioSelect == "custom") {
-                        termDefDelimiter = document.getElementById("import-terms-custom-row-delimiter-input").value;
+                        termDefDelimiter = document.getElementById("import-terms-custom-termdef-delimiter-input").value;
                         if (termDefDelimiter == "") {
                           alert("Custom delimiter can't be blank >:(");
                           return;
