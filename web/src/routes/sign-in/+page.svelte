@@ -137,6 +137,8 @@
               class="fullWidth"
               id="signinUsernameInput"
               placeholder="Username"
+              name="username"
+              autocomplete="username"
             />
           </div>
           <div>
@@ -145,6 +147,8 @@
               class="fullWidth"
               id="signinPasswordInput"
               placeholder="Password"
+              name="password"
+              autocomplete="current-password"
             />
           </div>
           <div>

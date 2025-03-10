@@ -148,6 +148,8 @@
                 class="fullWidth"
                 id="signupUsernameInput"
                 placeholder="Username"
+                name="username"
+                autocomplete="username"
               />
             </div>
             <div>
@@ -156,6 +158,8 @@
                 class="fullWidth"
                 id="signupPasswordInput"
                 placeholder="Password"
+                name="password"
+                autocomplete="new-password"
               />
             </div>
             <div>
@@ -164,6 +168,8 @@
                 class="fullWidth"
                 id="signupPasswordConfirmInput"
                 placeholder="Retype Password"
+                name="confirm-password"
+                autocomplete="new-password"
               />
             </div>
             <div>
