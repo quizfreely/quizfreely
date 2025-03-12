@@ -2083,8 +2083,14 @@ fastify.listen({
     }
 })
 
-process.on("SIGTERM", function () {
+function exit() {
     fastify.close().then(function () {
         process.exit(0);
     })
-})
+    setTimeout(function () {
+        process.exit(1);
+    }, 10000);
+}
+
+process.on("SIGINT", exit);
+process.on("SIGTERM", exit);
