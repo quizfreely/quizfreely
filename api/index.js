@@ -2082,3 +2082,9 @@ fastify.listen({
         console.log("Quizfreely-API is running at " + address);
     }
 })
+
+process.on("SIGTERM", function () {
+    fastify.close().then(function () {
+        process.exit(0);
+    })
+})
