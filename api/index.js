@@ -32,10 +32,17 @@ let cronDeleteExpiredSessionsError = false;
 let cronClearLogsError = false;
 
 if (PORT == undefined || HOST == undefined) {
-    console.error(
-        "quizfreely/api/.env is missing or invalid \n" +
-        "copy .env.example to .env"
-    );
+    if (process.env.NODE_ENV === "production") {
+        console.error(
+            "env variables are missing or invalid \n" +
+            "check .env.prod.example and make sure container env vars/file are configured properly (if applicable)"
+        );
+    } else {
+        console.error(
+            "quizfreely/api/.env.dev is missing or invalid \n" +
+            "copy .env.dev.example to .env.dev"
+        );
+    }
     process.exit(1);
 }
 
