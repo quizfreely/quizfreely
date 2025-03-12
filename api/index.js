@@ -12,7 +12,11 @@ import { Cron } from "croner";
 
 const PORT = process.env.PORT;
 const HOST = process.env.HOST;
-const POSTGRES_URI = process.env.POSTGRES_URI;
+const POSTGRES_USER = process.env?.POSTGRES_USER ?? "quizfreely_api"
+const POSTGRES_PASSWORD = process.env?.POSTGRES_PASSWORD
+const POSTGRES_HOST = process.env?.POSTGRES_HOST ?? "localhost"
+const POSTGRES_PORT = process.env?.POSTGRES_PORT ?? 5432
+const POSTGRES_DB_NAME = process.env?.POSTGRES_DB_NAME ?? "quizfreely_db"
 const CORS_ORIGIN = process.env.CORS_ORIGIN;
 const LOG_LEVEL = process.env.LOG_LEVEL;
 const LOG_PRETTY = process.env.LOG_PRETTY || "false";
@@ -124,7 +128,11 @@ fastify.setNotFoundHandler(function (request, reply) {
 })
 
 const pool = new Pool({
-    connectionString: POSTGRES_URI
+    user: POSTGRES_USER,
+    password: POSTGRES_PASSWORD,
+    host: POSTGRES_HOST,
+    port: POSTGRES_PORT,
+    DATABASE: POSTGRES_DB_NAME
 });
 
 const schema = `
