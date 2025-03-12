@@ -44,7 +44,7 @@
     </div>
     <div style="text-align: start; padding: 0px 2rem">
       <p>
-        v0.30.1 · <a href="https://codeberg.org/quizfreely/quizfreely/releases">Changelog (on Codeberg)</a> or <a href="https://github.com/quizfreely/quizfreely/releases">on GitHub</a>
+        v0.31.0 · <a href="https://codeberg.org/quizfreely/quizfreely/releases">Changelog (on Codeberg)</a> or <a href="https://github.com/quizfreely/quizfreely/releases">on GitHub</a>
       </p>
       <p>
         Copyright © 2022-2025 Ehan Ahamed and contributors
