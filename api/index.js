@@ -2078,47 +2078,7 @@ fastify.listen({
         link = link.replace("://[::]:", "://localhost:")
         link = link.replace("://127.0.0.1:", "://localhost:")
         console.log("Quizfreely-API is running at " + link);
+    } else {
+        console.log("Quizfreely-API is running at " + address);
     }
 })
-
-if (CRON_CLEAR_LOGS == "true") {
-    new Cron(CRON_CLEAR_LOGS_INTERVAL, async function () {
-        try {
-            cronClearLogsError = false;
-            writeFile(
-                path.join(import.meta.dirname, "quizfreely-api.log"),
-                "",
-                function () {
-                    fastify.log.info("ran cron job to clear log file")
-                }
-            )
-        } catch (error) {
-            fastify.log.error(error, "error while trying to clear logs with cron job");
-            cronClearLogsError = true;
-        }
-    });
-}
-
-if (CRON_DELETE_EXPIRED_SESSIONS == "true") {
-    new Cron(CRON_DELETE_EXPIRED_SESSIONS_INTERVAL, async function () {
-        try {
-            cronDeleteExpiredSessionsError = false;
-            let client = await pool.connect();
-            try {
-                await client.query("BEGIN");
-                await client.query("call auth.delete_expired_sessions()");
-                await client.query("COMMIT");
-                fastify.log.info("ran cron job for auth.delete_expired_sessions()")
-            } catch (error2) {
-                await client.query("ROLLBACK");
-                fastify.log.error(error2, "error while running cron job for auth.delete_expired_sessions()")
-                cronDeleteExpiredSessionsError = true;
-            } finally {
-                client.release();
-            }
-        } catch (error) {
-            fastify.log.error(error, "error while connecting to pg pool client during cron job for auth.delete_expired_sessions()");
-            cronDeleteExpiredSessionsError = true;
-        }
-    });
-}
