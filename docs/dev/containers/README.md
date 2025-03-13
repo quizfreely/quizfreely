@@ -35,9 +35,9 @@ podman push ghcr.io/quizfreely/quizfreely-api:0.12.3
 
 ## Compose
 
-For the first time you run `compose.yaml` for quizfreely-api
+For the first time, to run `compose.yaml` for quizfreely-api, we need to set secrets before using podman-compose:
 ```sh
-# set secrets for first time
+# set secrets (only once, for the first time)
  printf 12345678 | podman secret create quizfreely_postgres_admin_password -
  printf 98765432 | podman secret create quizfreely_postgres_password -
 
@@ -45,7 +45,7 @@ cd api
 podman-compose --env-file=.env.compose up -d
 ```
 
-When you put a space before the command(s), it doesn't save it in terminal history (useful when adding secrets) on most shells/configurations by default
+When you put a space before command(s), it doesn't get saved in your/our terminal history (useful when adding secrets) on most shells/configurations by default
 
 After the secrets are already added, next time you can just use that `podman-compose` command:
 ```sh
