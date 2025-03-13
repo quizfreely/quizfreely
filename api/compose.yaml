@@ -1,0 +1,37 @@
+version: "3"
+services:
+  postgres:
+    image: docker.io/library/postgres:17.4-bookworm
+    secrets:
+      - quizfreely_postgres_admin_password
+    environment:
+      POSTGRES_PASSWORD_FILE: /run/secrets/quizfreely_postgres_admin_password
+  quizfreely_api:
+    image: codeberg.org/quizfreely/quizfreely-api:0.31.0
+    ports:
+      - "8008:8008"
+    links:
+      - postgres
+    secrets:
+      - quizfreely_postgres_password
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD_FILE: /run/secrets/quizfreely_postgres_password
+      POSTGRES_DB_NAME: ${POSTGRES_DB_NAME}
+      HOST: ${HOST}
+      PORT: ${PORT}
+      LOG_LEVEL: ${LOG_LEVEL}
+      LOG_PRETTY: false
+      CORS_ORIGIN: ${CORS_ORIGIN}
+      ENABLE_OAUTH_GOOGLE: ${ENABLE_OAUTH_GOOGLE}
+      OAUTH_GOOGLE_CLIENT_ID: ${OAUTH_GOOGLE_CLIENT_ID}
+      OAUTH_GOOGLE_CLIENT_SECRET: ${OAUTH_GOOGLE_CLIENT_SECRET}
+      OAUTH_GOOGLE_CALLBACK_URI: ${OAUTH_GOOGLE_CALLBACK_URI}
+      OAUTH_REDIRECT_URL: ${OAUTH_REDIRECT_URL}
+secrets:
+  quizfreely_postgres_admin_password:
+    external: true
+  quizfreely_postgres_password:
+    external: true
