@@ -35,12 +35,13 @@ if (PORT == undefined || HOST == undefined) {
     if (process.env.NODE_ENV === "production") {
         console.error(
             "env variables are missing or invalid \n" +
-            "check .env.prod.example and make sure container env vars/file are configured properly (if applicable)"
+            "check .env.compose.example (or .env.local.example) \n" +
+            "make sure you use `--env-file` with the container/compose file (if applicable)"
         );
     } else {
         console.error(
             "quizfreely/api/.env.dev is missing or invalid \n" +
-            "copy .env.dev.example to .env.dev"
+            "copy .env.local.example to .env.local"
         );
     }
     process.exit(1);
