@@ -30,6 +30,14 @@ services:
       OAUTH_GOOGLE_CLIENT_SECRET: ${API_OAUTH_GOOGLE_CLIENT_SECRET}
       OAUTH_GOOGLE_CALLBACK_URI: ${API_OAUTH_GOOGLE_CALLBACK_URI}
       OAUTH_REDIRECT_URL: ${API_OAUTH_REDIRECT_URL}
+  quizfreely_web:
+    image: quizfreely-web:0.31.0
+    ports:
+      - "8080:8080"
+    links:
+      - quizfreely_api
+    environment:
+      
   haproxy:
     image: docker.io/haproxytech/haproxy-debian:3.1.5
     configs:
