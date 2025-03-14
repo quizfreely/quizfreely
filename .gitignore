@@ -9,10 +9,8 @@ web/build
 Thumbs.db
 
 .env
-.env.*
-!.env.example
-!.env.*.example
-!.env.test
+.env.local
+.env.compose
 
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
