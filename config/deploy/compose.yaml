@@ -37,9 +37,9 @@ services:
     links:
       - quizfreely_api
     environment:
-      
   haproxy:
-    image: docker.io/haproxytech/haproxy-debian:3.1.5
+    build:
+      context: ./haproxy-w-certbot
     configs:
       - source: haproxy.cfg
         target: /usr/local/etc/haproxy/haproxy.cfg

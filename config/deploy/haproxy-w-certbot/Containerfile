@@ -1,0 +1,1 @@
+FROM docker.io/haproxytech/haproxy-debian:3.1.5
