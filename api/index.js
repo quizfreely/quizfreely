@@ -34,14 +34,15 @@ let cronClearLogsError = false;
 if (PORT == undefined || HOST == undefined) {
     if (process.env.NODE_ENV === "production") {
         console.error(
-            "env variables are missing or invalid \n" +
-            "check .env.compose.example (or .env.local.example) \n" +
-            "make sure you use `--env-file` with the container/compose file (if applicable)"
+            "quizfreely-api's env variables are missing or invalid \n" +
+            "check .env and see .env.example \n"
         );
     } else {
         console.error(
-            "quizfreely/api/.env.dev is missing or invalid \n" +
-            "copy .env.local.example to .env.local"
+            "env variables are missing or invalid \n" +
+            "check quizfreely/api/.env \n" +
+            " \n" +
+            "you/we can copy .env.example to .env"
         );
     }
     process.exit(1);
