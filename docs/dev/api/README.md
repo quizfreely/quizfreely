@@ -101,7 +101,7 @@ npm install
 
 Now, start quizfreely-api's server process:
 ```sh
-npm run start
+npm run dev
 ```
 
 quizfreely-api runs on http://localhost:8008 by default. You can change this in `.env`
