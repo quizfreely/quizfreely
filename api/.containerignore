@@ -1,10 +1,6 @@
 node_modules
 .env
 .env.example
-.env.local
-.env.local.example
-.env.compose
-.env.compose.example
 .containerignore
 Containerfile
 quizfreely-api.log
