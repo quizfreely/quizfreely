@@ -9,7 +9,7 @@ import path from "path";
 import { writeFile, readFileSync } from "node:fs";
 import { Cron } from "croner";
 
-const PORT = parseInt(process.env.PORT);
+const PORT = process.env.PORT;
 const HOST = process.env.HOST;
 const POSTGRES_USER = process.env?.POSTGRES_USER ?? "quizfreely_api"
 const POSTGRES_PASSWORD = process.env?.POSTGRES_PASSWORD
