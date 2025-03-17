@@ -2,12 +2,14 @@ version: "3"
 services:
   postgres:
     image: docker.io/library/postgres:17.4-bookworm
+    restart: unless-stopped
     secrets:
       - quizfreely_postgres_admin_password
     environment:
       POSTGRES_PASSWORD_FILE: /run/secrets/quizfreely_postgres_admin_password
-  quizfreely_api:
+  quizfreely-api:
     image: codeberg.org/quizfreely/quizfreely-api:0.31.0
+    restart: unless-stopped
     ports:
       - "8008:8008"
     links:
@@ -30,21 +32,34 @@ services:
       OAUTH_GOOGLE_CLIENT_SECRET: ${API_OAUTH_GOOGLE_CLIENT_SECRET}
       OAUTH_GOOGLE_CALLBACK_URI: ${API_OAUTH_GOOGLE_CALLBACK_URI}
       OAUTH_REDIRECT_URL: ${API_OAUTH_REDIRECT_URL}
-  quizfreely_web:
-    image: quizfreely-web:0.31.0
+  quizfreely-web:
+    image: codeberg.org/quizfreely/quizfreely-web:0.31.0
+    restart: unless-stopped
     ports:
       - "8080:8080"
     links:
-      - quizfreely_api
+      - quizfreely-api
     environment:
-  haproxy:
-    build:
-      context: ./haproxy-w-certbot
-    configs:
-      - source: haproxy.cfg
-        target: /usr/local/etc/haproxy/haproxy.cfg
+      API_URL: http://quizfreely-api:${API_PORT}
+  caddy:
+    image: docker.io/library/caddy:2.9.1-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    links:
+      - quizfreely-web
+      - quizfreely-api
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
 secrets:
   quizfreely_postgres_admin_password:
     external: true
   quizfreely_postgres_password:
     external: true
+volumes:
+  caddy_data:
+  caddy_config:
