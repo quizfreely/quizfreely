@@ -1,0 +1,11 @@
+quizfreely.org {
+        encode zstd gzip
+        reverse_proxy quizfreely-web:8080
+        handle_path /api/* {
+                reverse_proxy quizfreely-api:8008
+        }
+        redir /discord https://discord.gg/6qQrybf6kG
+}
+www.quizfreely.org, quizfreely.com, www.quizfreely.com {
+        redir https://quizfreely.org{uri} permanent
+}
