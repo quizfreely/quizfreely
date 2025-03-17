@@ -4,7 +4,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "dev": "node index.js --env-file=.env.local"
+    "dev": "node --env-file=.env index.js"
   },
   "author": "Ehan Ahamed",
   "license": "AGPL-3.0-or-later",
