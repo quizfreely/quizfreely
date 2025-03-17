@@ -6,13 +6,14 @@ import fastifyOauth2 from "@fastify/oauth2";
 import pg from "pg";
 const { Pool, Client } = pg;
 import path from "path";
-import { writeFile } from "node:fs";
+import { writeFile, readFileSync } from "node:fs";
 import { Cron } from "croner";
 
 const PORT = process.env.PORT;
 const HOST = process.env.HOST;
 const POSTGRES_USER = process.env?.POSTGRES_USER ?? "quizfreely_api"
 const POSTGRES_PASSWORD = process.env?.POSTGRES_PASSWORD
+const POSTGRES_PASSWORD_FILE = process.env?.POSTGRES_PASSWORD_FILE
 const POSTGRES_HOST = process.env?.POSTGRES_HOST ?? "localhost"
 const POSTGRES_PORT = process.env?.POSTGRES_PORT ?? 5432
 const POSTGRES_DB_NAME = process.env?.POSTGRES_DB_NAME ?? "quizfreely_db"
@@ -135,13 +136,37 @@ fastify.setNotFoundHandler(function (request, reply) {
   });
 })
 
-const pool = new Pool({
-    user: POSTGRES_USER,
-    password: POSTGRES_PASSWORD,
-    host: POSTGRES_HOST,
-    port: POSTGRES_PORT,
-    DATABASE: POSTGRES_DB_NAME
-});
+const pool = (function () {
+    if (POSTGRES_PASSWORD?.length >= 1) {
+        return new Pool({
+            user: POSTGRES_USER,
+            password: POSTGRES_PASSWORD,
+            host: POSTGRES_HOST,
+            port: POSTGRES_PORT,
+            DATABASE: POSTGRES_DB_NAME
+        });
+    } else if (POSTGRES_PASSWORD_FILE?.length >= 1) {
+        let passwd = readFileSync(
+            POSTGRES_PASSWORD_FILE,
+            {
+                encoding: "utf8"
+            }
+        );
+        return new Pool({
+            user: POSTGRES_USER,
+            password: passwd,
+            host: POSTGRES_HOST,
+            port: POSTGRES_PORT,
+            DATABASE: POSTGRES_DB_NAME
+        });
+    } else {
+        console.error(
+            "POSTGRES_PASSWORD or POSTGRES_PASSWORD_FILE are missing :( \n" +
+            "are they set in .env or the compose-file's/container's secrets? (if applicable)"
+        );
+        process.exit(1);
+    }
+})();
 
 const schema = `
     type Query {
