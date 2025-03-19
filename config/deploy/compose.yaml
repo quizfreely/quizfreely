@@ -44,25 +44,20 @@ services:
       PORT: ${WEB_PORT}
       ENABLE_OAUTH_GOOGLE: ${ENABLE_OAUTH_GOOGLE}
       API_URL: http://quizfreely-api:${API_PORT}
-  caddy:
-    image: docker.io/library/caddy:2.9.1-alpine
+  traefik:
+    image: docker.io/library/traefik:3.3
     restart: unless-stopped
     ports:
       - "80:80"
       - "443:443"
-      - "443:443/udp"
-    links:
-      - quizfreely-web
-      - quizfreely-api
     volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile
-      - caddy_data:/data
-      - caddy_config:/config
+      - "./traefik.yaml:/etc/traefik/traefik.yaml"
+      - "./traefik-dynamic.yaml:/etc/qzfr-traefik/config/traefik-dynamic.yaml"
+      - "traefik_certs:/etc/qzfr-traefik/certs"
 secrets:
   quizfreely_postgres_admin_password:
     external: true
   quizfreely_postgres_password:
     external: true
 volumes:
-  caddy_data:
-  caddy_config:
+  traefik_certs:
