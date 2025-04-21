@@ -143,7 +143,7 @@ const pool = (function () {
             password: POSTGRES_PASSWORD,
             host: POSTGRES_HOST,
             port: POSTGRES_PORT,
-            DATABASE: POSTGRES_DB_NAME
+            database: POSTGRES_DB_NAME
         });
     } else if (POSTGRES_PASSWORD_FILE?.length >= 1) {
         let passwd = readFileSync(
@@ -157,7 +157,7 @@ const pool = (function () {
             password: passwd,
             host: POSTGRES_HOST,
             port: POSTGRES_PORT,
-            DATABASE: POSTGRES_DB_NAME
+            database: POSTGRES_DB_NAME
         });
     } else {
         console.error(
