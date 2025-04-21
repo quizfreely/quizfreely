@@ -1,11 +1,18 @@
 <script>
     import Searchbar from "$lib/components/Searchbar.svelte";
     import { page } from '$app/state';
+    import { beforeNavigate } from "$app/navigation"
     import IconUser from "$lib/icons/User.svelte";
+    import IconMenu from "$lib/icons/Menu.svelte";
+    import IconCloseXMark from "$lib/icons/CloseXMark.svelte";
+
+    beforeNavigate(function (navigation) {
+      document.getElementById("nav-menu-toggle").checked = false
+    })
 </script>
 
 <style>
-.menu.nav > div {
+.nav-menu > div {
   transition-duration: 0.4s;
 }
 .current {
@@ -14,18 +21,27 @@
 </style>
 
 <header class="navbar with-search with-status">
-    <div class="menu nav">
-      <div class={
-        (page.data?.header?.activePage == "home") ? "current" : ""
-      }>
-        <a href="/home" class="clickable-effect">Home</a>
-      </div>
-      <div class={ page.data?.header?.activePage == "explore" ? "current" : "" }>
-        <a href="/explore" class="clickable-effect">Explore</a>
-      </div>
-      <div class={ page.data?.header?.activePage == "settings" ? "current" : "" }>
-        <a href="/settings" class="clickable-effect">Settings</a>
-      </div>
+    <div class="menu">
+        <input type="checkbox" id="nav-menu-toggle" class="nav-menu-toggle" />
+        <label for="nav-menu-toggle" class="nav-menu-open">
+            <IconMenu width="1.2rem" height="1.2rem" />
+        </label>
+        <label for="nav-menu-toggle" class="nav-menu-close">
+            <IconCloseXMark width="1.4rem" height="1.4rem" />
+        </label>
+        <div class="nav-menu">
+            <div class={
+              (page.data?.header?.activePage == "home") ? "current" : ""
+            }>
+              <a href="/home" class="clickable-effect">Home</a>
+            </div>
+            <div class={ page.data?.header?.activePage == "explore" ? "current" : "" }>
+              <a href="/explore" class="clickable-effect">Explore</a>
+            </div>
+            <div class={ page.data?.header?.activePage == "settings" ? "current" : "" }>
+              <a href="/settings" class="clickable-effect">Settings</a>
+            </div>
+        </div>
     </div>
     {#if page.data?.header?.hideSearchbar }
         <div class="search"></div>
@@ -71,7 +87,7 @@
           <a href="/sign-up" class="button alt">Sign up</a>
         </div>
         {:else}
-        <div class="flex" style="margin-top:0px;margin-bottom:0px;margin-left:1rem;margin-right:1rem">
+        <div class="flex" style="margin-top:0px;margin-bottom:0px;margin-left:0px;margin-right:1rem">
           <a href="/sign-in" class="button alt">Sign in</a>
         </div>
         {/if}
