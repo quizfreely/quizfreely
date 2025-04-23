@@ -148,7 +148,7 @@
 <div id="account-not-signedin-div" class="box">
   <p>
     You're not signed in.<br />
-    Do you want to <a href="./sign-in">sign in</a> or <a href="./sign-up">create an account</a>?
+    Do you want to <a href="/sign-in">sign in</a> or <a href="/sign-up">create an account</a>?
   </p>
 </div>
 {/if}
