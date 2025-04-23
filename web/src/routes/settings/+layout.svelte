@@ -1,0 +1,74 @@
+<script>
+    import { page } from "$app/state";
+    import Noscript from "$lib/components/Noscript.svelte";
+    let { children, data } = $props();
+</script>
+<style>
+    .settings-container {
+        display: grid;
+        gap: 1rem;
+        grid-template-columns: 1fr 4fr;
+        grid-template-rows: 1fr;
+    }
+    .settings-menu-link {
+        margin-top: 0px;
+        color: var(--fg1);
+        padding: 0.4rem 0.8rem;
+        border-radius: 0.8rem;
+    }
+    .settings-menu-link:hover {
+        background-color: var(--bg3);
+    }
+    .settings-menu-link.current {
+        color: var(--main);
+        background-color: var(--bg3);
+    }
+    .settings-menu-link.current:hover {
+        color: var(--main-alt);
+    }
+    .settings-menu-nav {
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+    }
+
+    @media only screen and (max-width: 800px) {
+        .settings-container {
+            grid-template-columns: 1fr;
+            grid-template-rows: auto 1fr;
+        }
+        .settings-menu-nav {
+            flex-direction: row;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+    }
+</style>
+
+<svelte:head>
+  <title>Quizfreely Settings</title>
+</svelte:head>
+
+<Noscript />
+
+<div class="grid page">
+    <div class="content">
+<div class="settings-container">
+    <div>
+        <div class="settings-menu-nav">
+        <a href="/settings" class="settings-menu-link {page.data.settingsSection == "general" ? "current" : ""}">
+            General
+        </a>
+        <a href="/settings/account" class="settings-menu-link {page.data.settingsSection == "account" ? "current" : ""}">
+            Account
+        </a>
+        <a href="/settings/review-mode" class="settings-menu-link {page.data.settingsSection == "review_mode" ? "current" : ""}">
+            Studying Algorithm
+        </a>
+    </div>
+    </div>
+    <div style="margin-top:0px">
+        {@render children()}
+    </div>
+</div>
+</div></div>
