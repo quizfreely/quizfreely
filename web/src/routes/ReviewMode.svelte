@@ -20,10 +20,10 @@
         (depending on the subject/context)
         so we record accuracy when answering with terms seperatly from accuracy when answering with definitions
       */
-      var termBadCount = 0;
-      var termGoodCount = 0;
-      var defBadCount = 0; /* "def" is short for "definition" for these variables */
-      var defGoodCount = 0;
+      var termsWTermBad = new Map();
+      var termsWTermGood = new Map();
+      var termsWDefBad = new Map(); /* "def" is short for "definition" here */
+      var termsWDefGood = new Map();
 
       /*
         in this context, "overall" means based on term-producing AND definition-producing accuracy
@@ -104,9 +104,15 @@
                   )
                 )
                 if (termAccuracy >= 0.9) {
-                  termGoodCount++;
+                  termGood.set(
+                    JSON.stringify([progressForThisTerm.term, progressForThisTerm.def]),
+                    progressForThisTerm
+                  );
                 } else if (termAccuracy < 0.8) {
-                  termBadCount++;
+                  termBad.set(
+                    JSON.stringify([progressForThisTerm.term, progressForThisTerm.def]),
+                    progressForThisTerm
+                  );
                 }
 
                 var defAccuracy = (
@@ -116,9 +122,15 @@
                   )
                 )
                 if (defAccuracy >= 0.9) {
-                  defGoodCount++;
+                  termsWDefGood.set(
+                    JSON.stringify([progressForThisTerm.term, progressForThisTerm.def]),
+                    progressForThisTerm
+                  );
                 } else if (defAccuracy < 0.8) {
-                  defBadCount++;
+                  termsWDefBad.set(
+                    JSON.stringify([progressForThisTerm.term, progressForThisTerm.def]),
+                    progressForThisTerm
+                  );
                 }
 
                 var daysAgo = (Date.now() - new Date(progressForThisTerm.lastReviewedAt)) / (1000 * 60 * 60 * 24)
