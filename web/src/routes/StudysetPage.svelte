@@ -193,10 +193,6 @@
             <IconPencil />
             Edit
           </a>
-          <a href="/studyset/edit/{ data.studyset.id }" class="button alt">
-            <IconSettingsGear />
-            Settings
-          </a>
           <div class="dropdown">
             <button class="dropdown-toggle" aria-label="More Options Dropdown">
               <IconMoreDotsHorizontal />
@@ -211,10 +207,6 @@
           <a href="/studyset/local/edit?id={ data.localId }" class="button">
             <IconPencil />
             Edit
-          </a>
-          <a href="/studyset/local/edit?id={ data.localId }" class="button alt">
-            <IconSettingsGear />
-            Settings
           </a>
           <div class="dropdown">
             <button class="dropdown-toggle" aria-label="More Options Dropdown">
