@@ -7,8 +7,22 @@
     import IconCheckmark from "$lib/icons/Checkmark.svelte";
     import IconBackArrow from "$lib/icons/BackArrow.svelte";
     import IconRepeat from "$lib/icons/Repeat.svelte";
+    var goodAcc = $state(90) /* w state cause they're used in calculation stuff AND ui */
+    var badAcc = $state(80)
 
     onMount(function() {
+      if (window.localStorage) {
+        var goodAccFromLocalStorage = localStorage.getItem("quizfreely:settings.reviewMode.goodAcc")
+        var badAccFromLocalStorage = localStorage.getItem("quizfreely:settings.reviewMode.badAcc")
+        /* if statements to avoid setting goodAcc or badAcc to null when setting is unset */
+        if (goodAccFromLocalStorage) {
+          goodAcc = goodAccFromLocalStorage
+        }
+        if (badAccFromLocalStorage) {
+          badAcc = badAccFromLocalStorage
+        }
+      }
+
       var studysetTermsArray;
       var progressTermsMap;
       var studysetTermsWithProgress = [];
@@ -83,7 +97,7 @@
               if (progressForThisTerm == null /* `undefined == null` is true, so this also checks for undefined */) {
                 newTerms.push(studysetTermsArray[i]);
               } else {
-                var overallAccuracy = (
+                var overallAccuracy = 100 * (
                   (progressForThisTerm.termCorrect + progressForThisTerm.defCorrect) / (
                     progressForThisTerm.termCorrect +
                     progressForThisTerm.termIncorrect +
@@ -91,9 +105,9 @@
                     progressForThisTerm.defIncorrect
                   )
                 );
-                if (overallAccuracy >= 0.9) {
+                if (overallAccuracy > goodAcc) {
                   overallGoodCount++;
-                } else if (overallAccuracy < 0.8) {
+                } else if (overallAccuracy < badAcc) {
                   overallBadCount++;
                 }
 
@@ -103,12 +117,12 @@
                     progressForThisTerm.termIncorrect
                   )
                 )
-                if (termAccuracy >= 0.9) {
+                if (termAccuracy > goodAcc) {
                   termGood.set(
                     JSON.stringify([progressForThisTerm.term, progressForThisTerm.def]),
                     progressForThisTerm
                   );
-                } else if (termAccuracy < 0.8) {
+                } else if (termAccuracy < badAcc) {
                   termBad.set(
                     JSON.stringify([progressForThisTerm.term, progressForThisTerm.def]),
                     progressForThisTerm
@@ -121,12 +135,12 @@
                     progressForThisTerm.defIncorrect
                   )
                 )
-                if (defAccuracy >= 0.9) {
+                if (defAccuracy > goodAcc) {
                   termsWDefGood.set(
                     JSON.stringify([progressForThisTerm.term, progressForThisTerm.def]),
                     progressForThisTerm
                   );
-                } else if (defAccuracy < 0.8) {
+                } else if (defAccuracy < badAcc) {
                   termsWDefBad.set(
                     JSON.stringify([progressForThisTerm.term, progressForThisTerm.def]),
                     progressForThisTerm
@@ -134,7 +148,7 @@
                 }
 
                 var daysAgo = (Date.now() - new Date(progressForThisTerm.lastReviewedAt)) / (1000 * 60 * 60 * 24)
-                if (daysAgo > 1 && overallAccuracy >= 0.8) {
+                if (daysAgo > 1 && overallAccuracy >= badAcc) {
                   termsThatAreNotOverallBadButHaveNotBeenReviewed1OrLessDaysAgoCount++;
                 }
                 studysetTermsWithProgress.push({
@@ -884,11 +898,11 @@
             <div class="flex" style="gap: 2rem;">
               <div>
                 <p id="preview-good-terms-count-parent" class="h4" style="margin-bottom: 0.2rem;"><span id="preview-good-terms-count">...</span> terms</p>
-                <p id="preview-good-terms-count-parent-label" style="margin-top: 0.2rem;">&ge; 90% accuracy</p>
+                <p id="preview-good-terms-count-parent-label" style="margin-top: 0.2rem;">&gt; {goodAcc}% accuracy</p>
               </div>
               <div>
                 <p id="preview-bad-terms-count-parent" class="h4" style="margin-bottom: 0.2rem;"><span id="preview-bad-terms-count">...</span> terms</p>
-                <p id="preview-bad-terms-count-parent-label" style="margin-top: 0.2rem;">&lt; 80% accuracy</p>
+                <p id="preview-bad-terms-count-parent-label" style="margin-top: 0.2rem;">&lt; {badAcc}% accuracy</p>
               </div>
               <div>
                 <p id="preview-new-terms-count-parent" class="h4" style="margin-bottom: 0.2rem;"><span id="preview-new-terms-count">...</span> terms</p>
