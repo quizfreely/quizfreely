@@ -1,5 +1,6 @@
 <script>
     import { page } from "$app/state";
+    import { fade } from "svelte/transition";
     import Noscript from "$lib/components/Noscript.svelte";
     let { children, data } = $props();
 </script>
@@ -68,7 +69,12 @@
     </div>
     </div>
     <div style="margin-top:0px">
-        {@render children()}
+        {#key data.settingsTransPageKey}
+            <div in:fade={{ duration: 140, delay: 140 }} out:fade={{ duration: 140 }}>
+                {@render children()}
+            </div>
+        {/key}
     </div>
 </div>
-</div></div>
+</div>
+</div>
