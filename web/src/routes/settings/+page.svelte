@@ -9,20 +9,20 @@
             document.getElementById("time-24h").classList.add("selected")
             document.getElementById("time-12h").classList.remove("selected")
             if (window.localStorage) {
-                localStorage.setItem("settingTimeHour", "24h")
+                localStorage.setItem("quizfreely:settings.hourFormat", "24h")
             }
         })
         document.getElementById("time-12h").addEventListener("click", function () {
             document.getElementById("time-24h").classList.remove("selected")
             document.getElementById("time-12h").classList.add("selected")
             if (window.localStorage) {
-                localStorage.setItem("settingTimeHour", "12h")
+                localStorage.setItem("quizfreely:settings.hourFormat", "12h")
             }
         })
-        if (window.localStorage && (localStorage.getItem("settingTimeHour") == "24h")) {
+        if (window.localStorage && (localStorage.getItem("quizfreely:settings.hourFormat") == "24h")) {
             document.getElementById("time-24h").classList.add("selected")
             document.getElementById("time-12h").classList.remove("selected")
-        } else if (window.localStorage && (localStorage.getItem("settingTimeHour") == "12h")) {
+        } else if (window.localStorage && (localStorage.getItem("quizfreely:settings.hourFormat") == "12h")) {
             document.getElementById("time-24h").classList.remove("selected")
             document.getElementById("time-12h").classList.add("selected")
         }
