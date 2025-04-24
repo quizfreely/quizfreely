@@ -6,7 +6,7 @@ let { children, data } = $props();
 </script>
 
 <Header />
-{#key data.urlPathname}
+{#key data.transPageKey}
 <div in:fade={{ duration: 140, delay: 140 }} out:fade={{ duration: 140 }}>
     <div style="min-height: 70vh">
         {@render children()}
