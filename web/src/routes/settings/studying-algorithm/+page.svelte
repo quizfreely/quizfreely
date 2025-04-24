@@ -5,15 +5,16 @@
     import IconPencil from "$lib/icons/Pencil.svelte";
     import IconCheckmark from "$lib/icons/Checkmark.svelte";
     import IconTrash from "$lib/icons/Trash.svelte";
+    var showInvalidReviewModeAcc = $state(false);
     
     onMount(function () {
         if (window.localStorage) {
-            var goodAcc = parseInt(localStorage.getItem("quizfreely:settings.reviewMode.goodAcc"));
-            var badAcc = parseInt(localStorage.getItem("quizfreely:settings.reviewMode.badAcc"));
-            if (goodAcc > 0 && goodAcc <= 100) {
+            var goodAcc = parseFloat(localStorage.getItem("quizfreely:settings.reviewMode.goodAcc"));
+            var badAcc = parseFloat(localStorage.getItem("quizfreely:settings.reviewMode.badAcc"));
+            if (goodAcc >= 1 && goodAcc <= 100) {
                 document.getElementById("good-acc").value = goodAcc;
             }
-            if (badAcc > 0 && badAcc < 100) {
+            if (badAcc >= 0 && badAcc <= 100) {
                 document.getElementById("bad-acc").value = badAcc;
             }
         }
@@ -55,17 +56,32 @@
     <div class="input-thingy-container">
         <input type="text" id="bad-acc" class="input-thingy" placeholder="80"><span class="input-thingy-percent">%</span>
     </div>
+    <div class="box ohno { showInvalidReviewModeAcc ? "" : "hide" }">
+        "Good" accuracy needs to be greater than "bad" accuracy.<br>
+        Both need to be between 1 and 100
+    </div>
     <div class="flex">
     <button onclick={function () {
         if (window.localStorage) {
-            localStorage.setItem(
-                "quizfreely:settings.reviewMode.goodAcc",
-                document.getElementById("good-acc").value
-            )
-            localStorage.setItem(
-                "quizfreely:settings.reviewMode.badAcc",
-                document.getElementById("bad-acc").value
-            )
+            var newGoodAcc = parseFloat(document.getElementById("good-acc").value)
+            var newBadAcc = parseFloat(document.getElementById("bad-acc").value)
+            if (
+                newGoodAcc >= 1 && newGoodAcc <= 100 &&
+                newBadAcc >= 1 && newBadAcc <= 100 &&
+                newGoodAcc > newBadAcc
+            ) {
+                showInvalidReviewModeAcc = false
+                localStorage.setItem(
+                    "quizfreely:settings.reviewMode.goodAcc",
+                    newGoodAcc
+                )
+                localStorage.setItem(
+                    "quizfreely:settings.reviewMode.badAcc",
+                    newBadAcc
+                )
+            } else {
+                showInvalidReviewModeAcc = true
+            }
         }
     }}><IconCheckmark /> Save</button>
     </div>
