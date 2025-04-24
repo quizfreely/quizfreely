@@ -62,7 +62,7 @@
         <a href="/settings/account" class="settings-menu-link {page.data.settingsSection == "account" ? "current" : ""}">
             Account
         </a>
-        <a href="/settings/review-mode" class="settings-menu-link {page.data.settingsSection == "review_mode" ? "current" : ""}">
+        <a href="/settings/studying-algorithm" class="settings-menu-link {page.data.settingsSection == "studying_algorithm" ? "current" : ""}">
             Studying Algorithm
         </a>
     </div>
