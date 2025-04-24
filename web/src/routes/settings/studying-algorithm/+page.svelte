@@ -85,5 +85,5 @@
         }
     }}><IconCheckmark /> Save</button>
     </div>
-    <p class="fg0">You can choose different settings for each studyset in Review Mode's starting screen.</p>
+    <p class="fg0">You can choose different settings for each studyset inside Review Mode for that studyset.</p>
 </div>
