@@ -48,14 +48,16 @@
         <span class="fg0">Default: &gt; 90%</span>
     </p>
     <div class="input-thingy-container">
-        <input type="text" id="good-acc" class="input-thingy" placeholder="90"><span class="input-thingy-percent">%</span>
+        <input type="text" id="good-acc" class="input-thingy" placeholder="90" oninput={() => reviewModeChangesSaved = false}>
+        <span class="input-thingy-percent">%</span>
     </div>
     <p class="label-thingy">
         "Bad" accuracy<br>
         <span class="fg0">Default: &lt; 80%</span>
     </p>
     <div class="input-thingy-container">
-        <input type="text" id="bad-acc" class="input-thingy" placeholder="80"><span class="input-thingy-percent">%</span>
+        <input type="text" id="bad-acc" class="input-thingy" placeholder="80" oninput={() => reviewModeChangesSaved = false}>
+        <span class="input-thingy-percent">%</span>
     </div>
     <div class="box ohno { showInvalidReviewModeAcc ? "" : "hide" }">
         "Good" accuracy needs to be greater than "bad" accuracy.<br>
@@ -84,6 +86,8 @@
                     newBadAcc
                 )
                 reviewModeChangesSaved = true
+                document.getElementById("good-acc").value = newGoodAcc;
+                document.getElementById("bad-acc").value = newBadAcc;
             } else {
                 showInvalidReviewModeAcc = true
             }
