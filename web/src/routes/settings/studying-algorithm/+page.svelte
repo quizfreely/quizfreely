@@ -6,6 +6,7 @@
     import IconCheckmark from "$lib/icons/Checkmark.svelte";
     import IconTrash from "$lib/icons/Trash.svelte";
     var showInvalidReviewModeAcc = $state(false);
+    var reviewModeChangesSaved = $state(false);
     
     onMount(function () {
         if (window.localStorage) {
@@ -60,6 +61,9 @@
         "Good" accuracy needs to be greater than "bad" accuracy.<br>
         Both need to be between 1 and 100
     </div>
+    {#if reviewModeChangesSaved}
+        <p class="fg0">Changes Saved</p>
+    {/if}
     <div class="flex">
     <button onclick={function () {
         if (window.localStorage) {
@@ -79,6 +83,7 @@
                     "quizfreely:settings.reviewMode.badAcc",
                     newBadAcc
                 )
+                reviewModeChangesSaved = true
             } else {
                 showInvalidReviewModeAcc = true
             }
