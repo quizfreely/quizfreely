@@ -34,10 +34,10 @@
         (depending on the subject/context)
         so we record accuracy when answering with terms seperatly from accuracy when answering with definitions
       */
-      var termsWTermBad = new Map();
-      var termsWTermGood = new Map();
-      var termsWDefBad = new Map(); /* "def" is short for "definition" here */
-      var termsWDefGood = new Map();
+      var termsWTermBad = [];
+      var termsWTermGood = [];
+      var termsWDefBad = []; /* "def" is short for "definition" here */
+      var termsWDefGood = [];
 
       /*
         in this context, "overall" means based on term-producing AND definition-producing accuracy
@@ -54,9 +54,6 @@
       based on how often existing terms have been reviewed,
       and minReviewSessionsCount is supposed to help us calculate */
       var minReviewSessionsCount = null;
-      /* weights for priority formula */
-      var timeWeight = 4;
-      var accuracyWeight = 5;
       /*
         setupStuff() is called right after the studyset (and/or studyset progress) is/are loaded
         to show the user their current progress and how many terms there are (or if there is no progress, just how many terms there are)
@@ -118,12 +115,12 @@
                   )
                 )
                 if (termAccuracy > goodAcc) {
-                  termGood.set(
+                  termGood.push(
                     JSON.stringify([progressForThisTerm.term, progressForThisTerm.def]),
                     progressForThisTerm
                   );
                 } else if (termAccuracy < badAcc) {
-                  termBad.set(
+                  termBad.push(
                     JSON.stringify([progressForThisTerm.term, progressForThisTerm.def]),
                     progressForThisTerm
                   );
@@ -136,12 +133,12 @@
                   )
                 )
                 if (defAccuracy > goodAcc) {
-                  termsWDefGood.set(
+                  termsWDefGood.push(
                     JSON.stringify([progressForThisTerm.term, progressForThisTerm.def]),
                     progressForThisTerm
                   );
                 } else if (defAccuracy < badAcc) {
-                  termsWDefBad.set(
+                  termsWDefBad.push(
                     JSON.stringify([progressForThisTerm.term, progressForThisTerm.def]),
                     progressForThisTerm
                   );
