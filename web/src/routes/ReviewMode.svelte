@@ -924,6 +924,14 @@
             <div class="flex">
               <button id="start-button"><IconCheckmark /> Start</button>
             </div>
+            <div>
+              <details>
+                <summary>Incorrect Terms</summary>
+                <div>
+                  sdfasdfasdfsdaf
+                </div>
+              </details>
+            </div>
           </div>
           <div id="review-mode-error-min-terms" class="hide" style="min-height:60vh">
             <p id="error-min-terms-count-text" class="h3 hide">There are <span id="error-min-terms-count">...</span> terms in this set</p>
