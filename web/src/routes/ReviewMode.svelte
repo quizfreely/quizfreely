@@ -10,6 +10,17 @@
     var goodAcc = $state(90) /* w state cause they're used in calculation stuff AND ui */
     var badAcc = $state(80)
 
+    /*
+      producing/answering-with the term given the definition and
+      producing the definition from the term require different logic/brain power
+      (depending on the subject/context)
+      so we record accuracy when answering with terms seperatly from accuracy when answering with definitions
+    */
+    var termsWTermBad = $state([]);
+    var termsWTermGood = $state([]);
+    var termsWDefBad = []; /* "def" is short for "definition" here */
+    var termsWDefGood = $state([]);
+
     onMount(function() {
       if (window.localStorage) {
         var goodAccFromLocalStorage = localStorage.getItem("quizfreely:settings.reviewMode.goodAcc")
@@ -27,17 +38,6 @@
       var progressTermsMap;
       var studysetTermsWithProgress = [];
       var howManyNewTermsAreWeGoingToStartReviewingBasedOnAccuracyOfTermsWithProgressAndHowManyTimesTheyWereReviewed = 0;
-
-      /*
-        producing/answering-with the term given the definition and
-        producing the definition from the term require different logic/brain power
-        (depending on the subject/context)
-        so we record accuracy when answering with terms seperatly from accuracy when answering with definitions
-      */
-      var termsWTermBad = [];
-      var termsWTermGood = [];
-      var termsWDefBad = []; /* "def" is short for "definition" here */
-      var termsWDefGood = [];
 
       /*
         in this context, "overall" means based on term-producing AND definition-producing accuracy
