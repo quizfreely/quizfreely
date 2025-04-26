@@ -938,7 +938,8 @@
                   <tbody>
                     {#each termsWDefBad as term}
                     <tr>
-                      <td>term</td>
+                      <td>{term.term}</td>
+                      <td>{term.def}</td>
                     </tr>
                     {/each}
                   </tbody>
