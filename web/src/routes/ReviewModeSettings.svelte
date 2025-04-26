@@ -67,9 +67,9 @@ and web/src/routes/studysets/[id]/review-mode/settings/+page.svelte
             }
         }
     }
-    function loadedStudysetSettings(studysetSettings) {
-        var goodAcc = parseFloat(studysetSettings.reviewMode.goodAcc);
-        var badAcc = parseFloat(studysetSettings.reviewMode.badAcc);
+    function loadedStudysetSettings(reviewModeSettings) {
+        var goodAcc = parseFloat(reviewModeSettings.goodAcc);
+        var badAcc = parseFloat(reviewModeSettings.badAcc);
         if (goodAcc >= 1 && goodAcc <= 100) {
             document.getElementById("good-acc").value = goodAcc;
         }
@@ -78,7 +78,36 @@ and web/src/routes/studysets/[id]/review-mode/settings/+page.svelte
         }
     }
     function updateReviewModeSettings(reviewModeSettings) {
-
+        if (data.local || !data.authed) {
+            openIndexedDB(function (db) {
+                var dbTransaction = db.transaction(["studysetsettings"]);
+                var studysetsObjectStore = dbTransaction.objectStore("studysets");
+                var studysetsettingsObjectStore = dbTransaction.objectStore("studysetsettings");
+                var dbStudysetGetReq = studysetsObjectStore.get(data.localId);
+                dbStudysetGetReq.onerror = function (event) {
+                    alert("oopsie woopsie, indexeddb error");
+                }
+                dbStudysetGetReq.onsuccess = function (event) {
+                    if (dbStudysetGetReq.result) {
+                        var dbSettingsGetReq = studysetsettingsObjectStore.get(data.localId);
+                        dbSettingsGetReq.onerror = function (event) {
+                          alert("indexeddb error while trying to get studyset settings");
+                        }
+                        dbSettingsGetReq.onsuccess = function (event) {
+                          if (dbStudysetGetReq.result === undefined) {
+                            /* use global settings if no per-studyset settings set (if undefined) */
+                            useGlobalSettings()
+                          } else {
+                            /* use loaded per-studyset settings */
+                            loadedStudysetSettings(dbSettingsGetReq.result);
+                          }
+                        }
+                    } else {
+                      alert("studyset not found :(")
+                    }
+                }
+            })
+        }
     }
 </script>
 <style>
