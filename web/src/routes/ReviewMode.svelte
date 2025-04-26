@@ -924,7 +924,7 @@
             <div class="flex">
               <button id="start-button"><IconCheckmark /> Start</button>
             </div>
-            <div>
+            <div style="margin-top:2rem;">
               <details>
                 <summary>Terms &lt; {badAcc}%</summary>
                 <table class="inner">
