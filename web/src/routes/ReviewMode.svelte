@@ -926,10 +926,22 @@
             </div>
             <div>
               <details>
-                <summary>Incorrect Terms</summary>
-                <div>
-                  sdfasdfasdfsdaf
-                </div>
+                <summary>Terms &lt; {badAcc}%</summary>
+                <table class="inner">
+                  <thead>
+                    <tr>
+                      <th>Term</th>
+                      <th>Def</th>
+                      <th>Accuracy</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {#for }
+                    <tr>
+                      <td></td>
+                    </tr>
+                  </tbody>
+                </table>
               </details>
             </div>
           </div>
