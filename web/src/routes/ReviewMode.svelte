@@ -7,6 +7,7 @@
     import IconCheckmark from "$lib/icons/Checkmark.svelte";
     import IconBackArrow from "$lib/icons/BackArrow.svelte";
     import IconRepeat from "$lib/icons/Repeat.svelte";
+    import IconSettingsGear from "$lib/icons/SettingsGear.svelte";
     var goodAcc = $state(90) /* w state cause they're used in calculation stuff AND ui */
     var badAcc = $state(80)
 
@@ -923,6 +924,11 @@
             </div>
             <div class="flex">
               <button id="start-button"><IconCheckmark /> Start</button>
+              <a class="button alt" href={
+                data.local ? "/studyset/local/review-mode/settings?id=" + data.localId : "/studysets/" + data.studysetId + "/review-mode/settings"
+              }>
+                <IconSettingsGear /> Settings
+              </a>
             </div>
             <div style="margin-top:2rem;">
               <details>
