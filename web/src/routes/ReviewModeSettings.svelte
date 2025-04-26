@@ -16,6 +16,7 @@ and web/src/routes/studysets/[id]/review-mode/settings/+page.svelte
     import IconBackArrow from "$lib/icons/BackArrow.svelte";
     import { page } from "$app/state";
     import Noscript from "$lib/components/Noscript.svelte";
+    import { openIndexedDB } from "$lib/indexedDB";
     var showInvalidReviewModeAcc = $state(false);
     var reviewModeChangesSaved = $state(false);
     
@@ -29,6 +30,42 @@ and web/src/routes/studysets/[id]/review-mode/settings/+page.svelte
             if (badAcc >= 0 && badAcc <= 100) {
                 document.getElementById("bad-acc").value = badAcc;
             }
+        }
+        /* settings stored locally w IndexedDB if studyset is local OR if user isn't logged in (even if the studyset isn't local) */
+        if (data.local || !data.authed) {
+            openIndexedDB(function (db) {
+                var dbTransaction = db.transaction(["studysetsettings"]);
+                var studysetsObjectStore = dbTransaction.objectStore("studysets");
+                var studysetsettingsObjectStore = dbTransaction.objectStore("studysetsettings");
+                var dbStudysetGetReq = studysetsObjectStore.get(data.localId);
+                dbStudysetGetReq.onerror = function (event) {
+                    alert("oopsie woopsie, indexeddb error");
+                }
+                dbStudysetGetReq.onsuccess = function (event) {
+                    if (dbStudysetGetReq.result) {
+                        if (dbStudysetGetReq.result.data) {
+                            var dbSettingsGetReq = studysetsettingsObjectStore.get(data.localId);
+                            dbSettingsGetReq.onerror = function (event) {
+                              alert("indexeddb error while trying to get studyset settings");
+                            }
+                            dbSettingsGetReq.onsuccess = function (event) {
+                              if (dbStudysetGetReq.result === undefined) {
+                                /* new settings */
+                              } else {
+                                /* settings already exist */
+                                setupStuff(dbProgressGetReq.result.data.terms, dbProgressGetReq.result.terms);
+                              }
+                            }
+                        } else {
+                          alert("oopsie woopsie no terms?")
+                        }
+                    } else {
+                      alert("studyset not found :(")
+                    }
+                }
+            })
+        } else {
+
         }
     })
 </script>
