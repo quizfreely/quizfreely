@@ -71,25 +71,45 @@
         if (window.localStorage) {
             var newGoodAcc = parseFloat(document.getElementById("good-acc").value)
             var newBadAcc = parseFloat(document.getElementById("bad-acc").value)
-            if (
-                newGoodAcc >= 1 && newGoodAcc <= 100 &&
-                newBadAcc >= 1 && newBadAcc <= 100 &&
-                newGoodAcc > newBadAcc
-            ) {
-                showInvalidReviewModeAcc = false
-                localStorage.setItem(
-                    "quizfreely:settings.reviewMode.goodAcc",
-                    newGoodAcc
-                )
+
+            showInvalidReviewModeAcc = false;
+
+            if (newBadAcc >= 1 && newBadAcc <= 100 && (
+                newGoodAcc > newBadAcc ||
+                document.getElementById("good-acc").value == ""
+            )) {
                 localStorage.setItem(
                     "quizfreely:settings.reviewMode.badAcc",
                     newBadAcc
                 )
-                reviewModeChangesSaved = true
-                document.getElementById("good-acc").value = newGoodAcc;
                 document.getElementById("bad-acc").value = newBadAcc;
+            } else if (document.getElementById("bad-acc").value == "") {
+                localStorage.removeItem(
+                    "quizfreely:settings.reviewMode.badAcc"
+                )
             } else {
-                showInvalidReviewModeAcc = true
+                showInvalidReviewModeAcc = true;
+            }
+
+            if (newGoodAcc >= 1 && newGoodAcc <= 100 && (
+                newGoodAcc > newBadAcc ||
+                document.getElementById("bad-acc").value == ""
+            )) {
+                localStorage.setItem(
+                    "quizfreely:settings.reviewMode.goodAcc",
+                    newGoodAcc
+                )
+                document.getElementById("good-acc").value = newGoodAcc;
+            } else if (document.getElementById("good-acc").value == "") {
+                localStorage.removeItem(
+                    "quizfreely:settings.reviewMode.goodAcc"
+                )
+            } else {
+                showInvalidReviewModeAcc = true;
+            }
+
+            if (!showInvalidReviewModeAcc) {
+                reviewModeChangesSaved = true;
             }
         }
     }}><IconCheckmark /> Save</button>
