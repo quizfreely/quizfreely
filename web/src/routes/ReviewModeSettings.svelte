@@ -21,16 +21,6 @@ and web/src/routes/studysets/[id]/review-mode/settings/+page.svelte
     var reviewModeChangesSaved = $state(false);
     
     onMount(function () {
-        if (window.localStorage) {
-            var goodAcc = parseFloat(localStorage.getItem("quizfreely:settings.reviewMode.goodAcc"));
-            var badAcc = parseFloat(localStorage.getItem("quizfreely:settings.reviewMode.badAcc"));
-            if (goodAcc >= 1 && goodAcc <= 100) {
-                document.getElementById("good-acc").value = goodAcc;
-            }
-            if (badAcc >= 0 && badAcc <= 100) {
-                document.getElementById("bad-acc").value = badAcc;
-            }
-        }
         /* settings stored locally w IndexedDB if studyset is local OR if user isn't logged in (even if the studyset isn't local) */
         if (data.local || !data.authed) {
             openIndexedDB(function (db) {
@@ -43,21 +33,18 @@ and web/src/routes/studysets/[id]/review-mode/settings/+page.svelte
                 }
                 dbStudysetGetReq.onsuccess = function (event) {
                     if (dbStudysetGetReq.result) {
-                        if (dbStudysetGetReq.result.data) {
-                            var dbSettingsGetReq = studysetsettingsObjectStore.get(data.localId);
-                            dbSettingsGetReq.onerror = function (event) {
-                              alert("indexeddb error while trying to get studyset settings");
-                            }
-                            dbSettingsGetReq.onsuccess = function (event) {
-                              if (dbStudysetGetReq.result === undefined) {
-                                /* new settings */
-                              } else {
-                                /* settings already exist */
-                                setupStuff(dbProgressGetReq.result.data.terms, dbProgressGetReq.result.terms);
-                              }
-                            }
-                        } else {
-                          alert("oopsie woopsie no terms?")
+                        var dbSettingsGetReq = studysetsettingsObjectStore.get(data.localId);
+                        dbSettingsGetReq.onerror = function (event) {
+                          alert("indexeddb error while trying to get studyset settings");
+                        }
+                        dbSettingsGetReq.onsuccess = function (event) {
+                          if (dbStudysetGetReq.result === undefined) {
+                            /* use global settings if no per-studyset settings set (if undefined) */
+                            useGlobalSettings()
+                          } else {
+                            /* use loaded per-studyset settings */
+                            loadedStudysetSettings(dbSettingsGetReq.result);
+                          }
                         }
                     } else {
                       alert("studyset not found :(")
@@ -68,6 +55,31 @@ and web/src/routes/studysets/[id]/review-mode/settings/+page.svelte
 
         }
     })
+    function useGlobalSettings() {
+        if (window.localStorage) {
+            var goodAcc = parseFloat(localStorage.getItem("quizfreely:settings.reviewMode.goodAcc"));
+            var badAcc = parseFloat(localStorage.getItem("quizfreely:settings.reviewMode.badAcc"));
+            if (goodAcc >= 1 && goodAcc <= 100) {
+                document.getElementById("good-acc").value = goodAcc;
+            }
+            if (badAcc >= 0 && badAcc <= 100) {
+                document.getElementById("bad-acc").value = badAcc;
+            }
+        }
+    }
+    function loadedStudysetSettings(studysetSettings) {
+        var goodAcc = parseFloat(studysetSettings.reviewMode.goodAcc);
+        var badAcc = parseFloat(studysetSettings.reviewMode.badAcc);
+        if (goodAcc >= 1 && goodAcc <= 100) {
+            document.getElementById("good-acc").value = goodAcc;
+        }
+        if (badAcc >= 0 && badAcc <= 100) {
+            document.getElementById("bad-acc").value = badAcc;
+        }
+    }
+    function updateReviewModeSettings(reviewModeSettings) {
+
+    }
 </script>
 <style>
     .label-thingy {
@@ -191,14 +203,10 @@ and web/src/routes/studysets/[id]/review-mode/settings/+page.svelte
                     newGoodAcc > newBadAcc
                 ) {
                     showInvalidReviewModeAcc = false
-                    localStorage.setItem(
-                        "quizfreely:settings.reviewMode.goodAcc",
-                        newGoodAcc
-                    )
-                    localStorage.setItem(
-                        "quizfreely:settings.reviewMode.badAcc",
-                        newBadAcc
-                    )
+                    updateReviewModeSettings({
+                        goodAcc: goodAcc,
+                        badAcc: badAcc
+                    })
                     reviewModeChangesSaved = true
                     document.getElementById("good-acc").value = newGoodAcc;
                     document.getElementById("bad-acc").value = newBadAcc;

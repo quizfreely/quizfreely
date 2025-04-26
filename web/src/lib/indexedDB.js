@@ -15,6 +15,9 @@ export function openIndexedDB(callback) {
             /* autoincrement is false, so we give the id for each record ourselves, because that id corresponds with the studyset id */
             var scoresObjectStore = db.createObjectStore("studysetprogress", { keyPath: "studyset_id", autoIncrement: false });
         }
+        if (db.objectStoreNames.contains("studysetsettings") == false) {
+            var settingsObjectStore = db.createObjectStore("studysetsettings", { keyPath: "studyset_id", autoIncrement: false })
+        }
         /*if (db.objectStoreNames.contains("scores") == false) {
             var scoresObjectStore = db.createObjectStore("scores", { keyPath: "id", autoIncrement: true });
             scoresObjectStore.createIndex("studyset_id_idx", "studyset_id")
