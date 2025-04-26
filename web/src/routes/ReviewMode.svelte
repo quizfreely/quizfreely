@@ -936,10 +936,11 @@
                     </tr>
                   </thead>
                   <tbody>
-                    {#for }
+                    {#each termsWDefBad as term}
                     <tr>
-                      <td></td>
+                      <td>term</td>
                     </tr>
+                    {/each}
                   </tbody>
                 </table>
               </details>
