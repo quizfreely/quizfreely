@@ -191,6 +191,7 @@ const schema = `
         updateUser(display_name: String): AuthedUser
         updateStudysetProgress(studysetId: ID!, progressChanges: [StudysetProgressTermInput!]!): StudysetProgress
         deleteStudysetProgress(studysetId: ID!): ID
+        updateStudysetSettings(studysetId: ID!, settings: StudysetSettingsInput!): ID
     }
     type User {
         id: ID
@@ -237,6 +238,13 @@ const schema = `
         reviewMode: ReviewModeSettings
     }
     type ReviewModeSettings {
+        goodAcc: Float
+        badAcc: Float
+    }
+    input StudysetSettingsInput {
+        reviewMode: ReviewModeSettingsInput
+    }
+    input ReviewModeSettingsInput {
         goodAcc: Float
         badAcc: Float
     }
