@@ -24,6 +24,7 @@
 
     onMount(function() {
       if (window.localStorage) {
+        /* first load from settings before per-studyset settings */
         var goodAccFromLocalStorage = localStorage.getItem("quizfreely:settings.reviewMode.goodAcc")
         var badAccFromLocalStorage = localStorage.getItem("quizfreely:settings.reviewMode.badAcc")
         /* if statements to avoid setting goodAcc or badAcc to null when setting is unset */
@@ -34,8 +35,16 @@
           badAcc = badAccFromLocalStorage
         }
       }
-      if (data.local || !data.authed) {
-        
+      function loadedStudysetSettings(studysetSettings) {
+        /* use stuff from per-studyset settings */
+        var loadedGoodAcc = parseFloat(studysetSettings?.reviewMode?.goodAcc);
+        var loadedBadAcc = parseFloat(studysetSettings?.reviewMode?.badAcc);
+        if (loadedGoodAcc >= 1 && loadedGoodAcc <= 100) {
+            goodAcc = loadedGoodAcc;
+        }
+        if (loadedBadAcc >= 0 && loadedBadAcc <= 100) {
+            badAcc = loadedBadAcc;
+        }
       }
 
       var studysetTermsArray;
@@ -608,9 +617,10 @@
       }
     if (data.local) {
       openIndexedDB(function (db) {
-        var dbTransaction = db.transaction(["studysets", "studysetprogress"]);
+        var dbTransaction = db.transaction(["studysets", "studysetprogress", "studysetsettings"]);
         var studysetsObjectStore = dbTransaction.objectStore("studysets");
         var studysetprogressObjectStore = dbTransaction.objectStore("studysetprogress");
+        var studysetsettingsObjectStore = dbTransaction.objectStore("studysetsettings")
         var dbStudysetGetReq = studysetsObjectStore.get(data.localId);
         dbStudysetGetReq.onerror = function (event) {
           alert("oopsie woopsie, indexeddb error");
@@ -627,6 +637,16 @@
                   setupStuff(dbStudysetGetReq.result.data.terms);
                 } else {
                   setupStuff(dbStudysetGetReq.result.data.terms, dbProgressGetReq.result.terms);
+                }
+              }
+              /* also load per-studyset settings (if they exist) */
+              var dbSettingsGetReq = studysetsettingsObjectStore.get(data.localId);
+              dbSettingsGetReq.onerror = function (event) {
+                alert("indexeddb error while trying to get studyset settings");
+              }
+              dbSettingsGetReq.onsuccess = function (event) {
+                if (dbSettingsGetReq.result !== undefined) {
+                  loadedStudysetSettings(dbSettingsGetReq.result)
                 }
               }
             } else {
@@ -662,6 +682,12 @@
                 reviewSessionsCount
               }
             }
+            studysetSettings(studysetId: $id) {
+              reviewMode {
+                goodAcc
+                badAcc
+              }
+            }
            }`,
           variables: {
             "id": data.studysetId
@@ -680,6 +706,9 @@
               setupStuff(apiResponse.data.studyset.data.terms, apiResponse.data.studysetProgress.terms)
             } else {
               setupStuff(apiResponse.data.studyset.data.terms)
+            }
+            if (apiResponse.data.studysetSettings) {
+              loadedStudysetSettings(apiResponse.data.studysetSettings)
             }
           } else if (apiResponse.data && apiResponse.data.studyset) {
             alert("oopsie woopsie, your studyset has zero terms?")
