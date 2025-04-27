@@ -52,7 +52,50 @@ and web/src/routes/studysets/[id]/review-mode/settings/+page.svelte
                 }
             })
         } else {
-
+            fetch("/api/graphql", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify({
+                query: `query getStudysetAndSettings($id: ID!) {
+                  studyset(id: $id) {
+                    user_id
+                  }
+                  studysetSettings(studysetId: $id) {
+                    reviewMode {
+                        goodAcc
+                        badAcc
+                    }
+                  }
+                 }`,
+                variables: {
+                  "id": data.studysetId
+                }
+              })
+            }).then(function (rawApiRes) {
+              rawApiRes.json().then(function (apiResponse) {
+                if (
+                  apiResponse.data &&
+                  apiResponse.data.studyset
+                ) {
+                  if (apiResponse.data.studysetSettings && apiResponse.data.studysetSettings.reviewMode) {
+                    loadedStudysetSettings(apiResponse.data.studysetSettings)
+                  } else {
+                    useGlobalSettings()
+                  }
+                } else {
+                  if (apiResponse.errors) {
+                    console.log(apiResponse.errors);
+                  }
+                  alert("oh no, studyset failed to load");
+                }
+              }).catch(function (error) {
+                console.error(error);
+              })
+            }).catch(function (error) {
+              console.error(error);
+            })
         }
     })
     function useGlobalSettings() {
@@ -78,48 +121,93 @@ and web/src/routes/studysets/[id]/review-mode/settings/+page.svelte
             document.getElementById("bad-acc").value = badAcc;
         }
     }
-    function updateReviewModeSettings(reviewModeSettings) {
+    /* example:
+    updateReviewModeSettings(
+        { goodAcc: 90, badAcc: 80 },
+        function (success) {
+            if (success) { console.log("yay") }
+        }
+    ) */
+    function updateReviewModeSettings(reviewModeSettings, callback) {
         if (data.local || !data.authed) {
             openIndexedDB(function (db) {
                 var dbTransaction = db.transaction(["studysets", "studysetsettings"], "readwrite");
                 var studysetsObjectStore = dbTransaction.objectStore("studysets");
                 var studysetsettingsObjectStore = dbTransaction.objectStore("studysetsettings");
-                var dbStudysetGetReq = studysetsObjectStore.get(data.localId ?? data.studysetId);
-                dbStudysetGetReq.onerror = function (event) {
-                    alert("oopsie woopsie, indexeddb error");
+                var dbSettingsGetReq = studysetsettingsObjectStore.get(data.localId ?? data.studysetId);
+                dbSettingsGetReq.onerror = function (event) {
+                  alert("indexeddb error while trying to get studyset settings");
+                  callback(false)
                 }
-                dbStudysetGetReq.onsuccess = function (event) {
-                    if (dbStudysetGetReq.result) {
-                        var dbSettingsGetReq = studysetsettingsObjectStore.get(data.localId ?? data.studysetId);
-                        dbSettingsGetReq.onerror = function (event) {
-                          alert("indexeddb error while trying to get studyset settings");
-                        }
-                        dbSettingsGetReq.onsuccess = function (event) {
-                            var studysetSettings;
-                            if (dbSettingsGetReq.result == null) {
-                                /* new, no existing settings */
-                                var dbSettingsAddReq = studysetsettingsObjectStore.add({
-                                    studyset_id: data.localId ?? data.studysetId,
-                                    reviewMode: reviewModeSettings
-                                })
-                                dbSettingsAddReq.onsuccess = function () {
-                                    console.log("Sucessfully added studyset settings")
-                                }
-                            } else {
-                                /* w existing settings */
-                                var dbSettingsPutReq = studysetsettingsObjectStore.put({
-                                    ...dbSettingsGetReq.result,
-                                    reviewMode: reviewModeSettings
-                                }) 
-                                dbSettingsPutReq.onsuccess = function () {
-                                    console.log("Sucessfully updated studyset settings")
-                                }
-                            }
+                dbSettingsGetReq.onsuccess = function (event) {
+                    var studysetSettings;
+                    if (dbSettingsGetReq.result == null) {
+                        /* new, no existing settings */
+                        var dbSettingsAddReq = studysetsettingsObjectStore.add({
+                            studyset_id: data.localId ?? data.studysetId,
+                            reviewMode: reviewModeSettings
+                        })
+                        dbSettingsAddReq.onsuccess = function () {
+                            console.log("Sucessfully added studyset settings")
+                            callback(true)
                         }
                     } else {
-                      alert("studyset not found :(")
+                        /* w existing settings */
+                        var dbSettingsPutReq = studysetsettingsObjectStore.put({
+                            ...dbSettingsGetReq.result,
+                            reviewMode: reviewModeSettings
+                        }) 
+                        dbSettingsPutReq.onsuccess = function () {
+                            console.log("Sucessfully updated studyset settings")
+                            callback(true)
+                        }
                     }
                 }
+            })
+        } else {
+                        fetch("/api/graphql", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify({
+                query: `mutation updateStudysetSettings($id: ID!, $reviewModeSettings: ReviewModeSettingsInput) {
+                  updateStudysetSettings(
+                    studysetId: $id
+                    changedSettings: {
+                        reviewMode: $reviewModeSettings
+                    }
+                  ) {
+                    reviewMode {
+                        goodAcc
+                        badAcc
+                    }
+                  }
+                 }`,
+                variables: {
+                  "id": data.studysetId,
+                  "reviewModeSettings": reviewModeSettings
+                }
+              })
+            }).then(function (rawApiRes) {
+              rawApiRes.json().then(function (apiResponse) {
+                if (
+                  apiResponse.data?.updateStudysetSettings?.reviewMode
+                ) {
+                  callback(true)
+                } else {
+                  if (apiResponse.errors) {
+                    console.log(apiResponse.errors);
+                  }
+                  callback(false)
+                }
+              }).catch(function (error) {
+                console.error(error);
+                callback(false)
+              })
+            }).catch(function (error) {
+              console.error(error);
+              callback(false)
             })
         }
     }
@@ -242,7 +330,10 @@ and web/src/routes/studysets/[id]/review-mode/settings/+page.svelte
             var newBadAcc = parseFloat(document.getElementById("bad-acc").value)
 
             showInvalidReviewModeAcc = false;
-            var newReviewModeSettings = {}
+            var newReviewModeSettings = {
+                goodAcc: 90,
+                badAcc: 80
+            }
             
             if (newBadAcc >= 1 && newBadAcc <= 100 && (
                 newGoodAcc > newBadAcc ||
@@ -265,8 +356,15 @@ and web/src/routes/studysets/[id]/review-mode/settings/+page.svelte
             }
 
             if (!showInvalidReviewModeAcc) {
-                updateReviewModeSettings(newReviewModeSettings)
-                reviewModeChangesSaved = true;
+                updateReviewModeSettings(newReviewModeSettings,
+                    function(sucessfullyUpdated) {
+                        if (sucessfullyUpdated) {
+                            reviewModeChangesSaved = true;
+                        } else {
+                            alert("oops failed to save setttings?")
+                        }
+                    }
+                )
             }
         }
         }}><IconCheckmark /> Save</button>
