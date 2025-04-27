@@ -68,6 +68,7 @@ and web/src/routes/studysets/[id]/review-mode/settings/+page.svelte
         }
     }
     function loadedStudysetSettings(studysetSettings) {
+        useGlobalSettings()
         var goodAcc = parseFloat(studysetSettings?.reviewMode?.goodAcc);
         var badAcc = parseFloat(studysetSettings?.reviewMode?.badAcc);
         if (goodAcc >= 1 && goodAcc <= 100) {
