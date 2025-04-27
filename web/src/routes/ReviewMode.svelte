@@ -870,6 +870,23 @@
     }
     })
 </script>
+<style>
+  .review-mode-answer-choices {
+    display: grid;
+    gap: 1rem;
+    grid-template-rows: auto auto;
+    grid-template-columns: 1fr 1fr;
+  }
+  .review-mode-answer-choice {
+    margin-top: 0px;
+  }
+  @media only screen and (max-width: 800px) {
+    .review-mode-answer-choices {
+      grid-template-rows: auto auto auto auto;
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
 
 <svelte:head>
     {#if (data.studyset) }
@@ -962,7 +979,7 @@
                         term.overallAcc > goodAcc ? "yay" :
                         term.overallAcc < badAcc ? "ohno" : ""
                       }">
-                        {term.overallAcc}%
+                        {Math.round(term.overallAcc)}%
                       </td>
                       {/if}
                       {#if isNaN(term.termAcc)}
@@ -972,7 +989,7 @@
                         term.termAcc > goodAcc ? "yay" :
                         term.termAcc < badAcc ? "ohno" : ""
                       }">
-                        {term.termAcc}%
+                        {Math.round(term.termAcc)}%
                       </td>
                       {/if}
                       {#if isNaN(term.defAcc)}
@@ -982,7 +999,7 @@
                         term.defAcc > goodAcc ? "yay" :
                         term.defAcc < badAcc ? "ohno" : ""
                       }">
-                        {term.defAcc}%
+                        {Math.round(term.defAcc)}%
                       </td>
                       {/if}
                     </tr>
@@ -1016,7 +1033,7 @@
                         term.overallAcc > goodAcc ? "yay" :
                         term.overallAcc < badAcc ? "ohno" : ""
                       }">
-                        {term.overallAcc}%
+                        {Math.round(term.overallAcc)}%
                       </td>
                       {/if}
                       {#if isNaN(term.termAcc)}
@@ -1026,7 +1043,7 @@
                         term.termAcc > goodAcc ? "yay" :
                         term.termAcc < badAcc ? "ohno" : ""
                       }">
-                        {term.termAcc}%
+                        {Math.round(term.termAcc)}%
                       </td>
                       {/if}
                       {#if isNaN(term.defAcc)}
@@ -1036,7 +1053,7 @@
                         term.defAcc > goodAcc ? "yay" :
                         term.defAcc < badAcc ? "ohno" : ""
                       }">
-                        {term.defAcc}%
+                        {Math.round(term.defAcc)}%
                       </td>
                       {/if}
                     </tr>
@@ -1077,11 +1094,11 @@
             <p class="h4 hide" id="answer-with-term">Select the matching term</p>
             <p class="h4 hide" id="answer-with-def">Select the matching definition</p>
             <p id="question" style="white-space:pre-wrap">...</p>
-            <div class="flex">
-              <button id="answer-1" data-answer="incorrect" class="button-box no-clickable-effect" style="white-space:pre-wrap">...</button>
-              <button id="answer-2" data-answer="incorrect" class="button-box no-clickable-effect" style="white-space:pre-wrap">...</button>
-              <button id="answer-3" data-answer="incorrect" class="button-box no-clickable-effect" style="white-space:pre-wrap">...</button>
-              <button id="answer-4" data-answer="incorrect" class="button-box no-clickable-effect" style="white-space:pre-wrap">...</button>
+            <div class="review-mode-answer-choices">
+              <button id="answer-1" data-answer="incorrect" class="button-box no-clickable-effect review-mode-answer-choice" style="white-space:pre-wrap">...</button>
+              <button id="answer-2" data-answer="incorrect" class="button-box no-clickable-effect review-mode-answer-choice" style="white-space:pre-wrap">...</button>
+              <button id="answer-3" data-answer="incorrect" class="button-box no-clickable-effect review-mode-answer-choice" style="white-space:pre-wrap">...</button>
+              <button id="answer-4" data-answer="incorrect" class="button-box no-clickable-effect review-mode-answer-choice" style="white-space:pre-wrap">...</button>
             </div>
             <button id="next-button" class="hide">Next</button>
           </div>
