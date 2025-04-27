@@ -191,7 +191,7 @@ const schema = `
         updateUser(display_name: String): AuthedUser
         updateStudysetProgress(studysetId: ID!, progressChanges: [StudysetProgressTermInput!]!): StudysetProgress
         deleteStudysetProgress(studysetId: ID!): ID
-        updateStudysetSettings(studysetId: ID!, settings: StudysetSettingsInput!): ID
+        updateStudysetSettings(studysetId: ID!, settings: StudysetSettingsInput!): StudysetSettings
     }
     type User {
         id: ID
@@ -546,6 +546,22 @@ const resolvers = {
                 }
             } else /* auth is false (not signed in) */ {
                 throw new mercurius.ErrorWithProps("Not signed in while trying to update studyset progress", { code: "NOT_AUTHED" });
+            }
+        },
+        updateStudysetSettings: async function (_, args, context) {
+            if (context.authed) {
+                let result = await updateSettingsByStudysetId(args.studysetId, args.settings, context.authedUser.id);
+                if (result.error) {
+                    context.reply.request.log.error(result.error);
+                    throw new mercurius.ErrorWithProps(
+                        result.error.message,
+                        result.error
+                    )
+                } else {
+                    return result.data;
+                }
+            } else /* auth is false (not signed in) */ {
+                throw new mercurius.ErrorWithProps("Not signed in while trying to update studyset settings", { code: "NOT_AUTHED" });
             }
         },
         deleteStudysetProgress: async function (_, args, context) {
@@ -1284,6 +1300,60 @@ async function updateProgressByStudysetId(studysetId, progressChanges, authedUse
                     terms: progress,
                     updated_at: newRecord.rows[0].updated_at
                 }
+            }
+        }
+    } catch (error) {
+        await client.query("ROLLBACK");
+        result = {
+            error: error
+        }
+    } finally {
+        client.release()
+        return result;
+    }
+}
+
+async function updateSettingsByStudysetId(studysetId, settings, authedUserId) {
+    let result;
+    let client = await pool.connect();
+    try {
+        await client.query("BEGIN");
+        await client.query("select set_config('qzfr_api.scope', 'user', true)");
+        await client.query("select set_config('qzfr_api.user_id', $1, true)", [
+            authedUserId
+        ]);
+        let existingSettings = await client.query(
+            "select id, studyset_id, user_id, settings " +
+            "from public.studyset_settings where user_id = $1 and studyset_id = $2",
+            [ authedUserId, studysetId ]
+        );
+        if (existingSettings.rows.length == 1) {
+            let updatedRecord = await client.query(
+                "update public.studyset_settings set settings = $2, updated_at = clock_timestamp() " +
+                "where id = $1 returning id, studyset_id, user_id, to_char(updated_at, 'YYYY-MM-DD\"T\"HH24:MI:SS.MSTZH:TZM') as updated_at",
+                [
+                    existingProgress.rows[0].id,
+                    JSON.stringify(settings)
+                ]
+            );
+            await client.query("COMMIT")
+            result = {
+                data: settings
+            }
+        } else {
+            /* if studyset progress doesn't already exist, add/insert a new record. */
+            let newRecord = await client.query(
+                "insert into public.studyset_settings (studyset_id, user_id, settings, updated_at) " +
+                "values ($1, $2, $3, clock_timestamp()) returning id, studyset_id, user_id, to_char(updated_at, 'YYYY-MM-DD\"T\"HH24:MI:SS.MSTZH:TZM') as updated_at",
+                [
+                    studysetId,
+                    authedUserId,
+                    JSON.stringify(settings)
+                ]
+            )
+            await client.query("COMMIT");
+            result = {
+                data: settings
             }
         }
     } catch (error) {
