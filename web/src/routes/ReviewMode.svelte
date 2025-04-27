@@ -34,6 +34,9 @@
           badAcc = badAccFromLocalStorage
         }
       }
+      if (data.local || !data.authed) {
+        
+      }
 
       var studysetTermsArray;
       var progressTermsMap;
