@@ -223,26 +223,38 @@ and web/src/routes/studysets/[id]/review-mode/settings/+page.svelte
         {/if}
         <div class="flex">
         <button onclick={function () {
-            if (window.localStorage) {
-                var newGoodAcc = parseFloat(document.getElementById("good-acc").value)
-                var newBadAcc = parseFloat(document.getElementById("bad-acc").value)
-                if (
-                    newGoodAcc >= 1 && newGoodAcc <= 100 &&
-                    newBadAcc >= 1 && newBadAcc <= 100 &&
-                    newGoodAcc > newBadAcc
-                ) {
-                    showInvalidReviewModeAcc = false
-                    updateReviewModeSettings({
-                        goodAcc: goodAcc,
-                        badAcc: badAcc
-                    })
-                    reviewModeChangesSaved = true
-                    document.getElementById("good-acc").value = newGoodAcc;
-                    document.getElementById("bad-acc").value = newBadAcc;
-                } else {
-                    showInvalidReviewModeAcc = true
-                }
+        if (window.localStorage) {
+            var newGoodAcc = parseFloat(document.getElementById("good-acc").value)
+            var newBadAcc = parseFloat(document.getElementById("bad-acc").value)
+
+            showInvalidReviewModeAcc = false;
+            var newReviewModeSettings = {}
+            
+            if (newBadAcc >= 1 && newBadAcc <= 100 && (
+                newGoodAcc > newBadAcc ||
+                document.getElementById("good-acc").value == ""
+            )) {
+                newReviewModeSettings.badAcc = newBadAcc;
+                document.getElementById("bad-acc").value = newBadAcc;
+            } else if (document.getElementById("bad-acc").value != "") {
+                showInvalidReviewModeAcc = true;
             }
+
+            if (newGoodAcc >= 1 && newGoodAcc <= 100 && (
+                newGoodAcc > newBadAcc ||
+                document.getElementById("bad-acc").value == ""
+            )) {
+                newReviewModeSettings.goodAcc = newGoodAcc;
+                document.getElementById("good-acc").value = newGoodAcc;
+            } else if (document.getElementById("good-acc").value != "") {
+                showInvalidReviewModeAcc = true;
+            }
+
+            if (!showInvalidReviewModeAcc) {
+                updateReviewModeSettings(newReviewModeSettings)
+                reviewModeChangesSaved = true;
+            }
+        }
         }}><IconCheckmark /> Save</button>
         </div>
     </div>
