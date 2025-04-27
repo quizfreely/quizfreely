@@ -26,9 +26,10 @@
       in this context, "overall" means based on term-producing AND definition-producing accuracy
       `(termCorrect + defCorrect) / (termCorrect + termIncorrect + defCorrect + defIncorrect)`
     */
-    var termsOverallBad = [];
-    var termsOverallGood = [];
-
+    var termsOverallBad = $state([]);
+    var termsOverallGood = $state([]);
+    var newTerms = $state([]); /* unreviewed terms, as an array */
+      
     onMount(function() {
       if (window.localStorage) {
         /* first load from settings before per-studyset settings */
@@ -59,7 +60,6 @@
       var studysetTermsWithProgress = [];
       var howManyNewTermsAreWeGoingToStartReviewingBasedOnAccuracyOfTermsWithProgressAndHowManyTimesTheyWereReviewed = 0;
 
-      var newTerms = []; /* unreviewed terms, as an array */
       var termsThatAreNotOverallBadButHaveNotBeenReviewed1OrLessDaysAgoCount = 0;
 
       var maxReviewSessionsCount = 0;
@@ -108,7 +108,9 @@
               if (progressForThisTerm == null /* `undefined == null` is true, so this also checks for undefined */) {
                 newTerms.push(studysetTermsArray[i]);
               } else {
-                var overallAccuracy = 100 * (
+                progressForThisTerm.daysAgo = (Date.now() - new Date(progressForThisTerm.lastReviewedAt)) / (1000 * 60 * 60 * 24)
+
+                progressForThisTerm.overallAcc = 100 * (
                   (progressForThisTerm.termCorrect + progressForThisTerm.defCorrect) / (
                     progressForThisTerm.termCorrect +
                     progressForThisTerm.termIncorrect +
@@ -116,52 +118,35 @@
                     progressForThisTerm.defIncorrect
                   )
                 );
-                if (overallAccuracy > goodAcc) {
-                  termsOverallGood.push(progressForThisTerm);
-                } else if (overallAccuracy < badAcc) {
-                  termsOverallBad.push(progressForThisTerm);
-                }
-
-                var termAccuracy = 100 * (
+                progressForThisTerm.termAcc = 100 * (
                   progressForThisTerm.termCorrect / (
                     progressForThisTerm.termCorrect +
                     progressForThisTerm.termIncorrect
                   )
                 )
-                if (termAccuracy > goodAcc) {
-                  termGood.push(progressForThisTerm);
-                } else if (termAccuracy < badAcc) {
-                  termBad.push(progressForThisTerm);
-                }
-
-                var defAccuracy = 100 * (
+                progressForThisTerm.defAcc = 100 * (
                   progressForThisTerm.defCorrect / (
                     progressForThisTerm.defCorrect +
                     progressForThisTerm.defIncorrect
                   )
                 )
-                if (defAccuracy > goodAcc) {
+                if (progressForThisTerm.overallAcc > goodAcc) {
+                  termsOverallGood.push(progressForThisTerm);
+                } else if (progressForThisTerm.overallAcc < badAcc) {
+                  termsOverallBad.push(progressForThisTerm);
+                }
+                if (progressForThisTerm.termAcc > goodAcc) {
+                  termsWTermGood.push(progressForThisTerm);
+                } else if (progressForThisTerm.termAcc < badAcc) {
+                  termsWTermBad.push(progressForThisTerm);
+                }
+                if (progressForThisTerm.defAcc > goodAcc) {
                   termsWDefGood.push(progressForThisTerm);
-                } else if (defAccuracy < badAcc) {
+                } else if (progressForThisTerm.defAcc < badAcc) {
                   termsWDefBad.push(progressForThisTerm);
                 }
-
-                var daysAgo = (Date.now() - new Date(progressForThisTerm.lastReviewedAt)) / (1000 * 60 * 60 * 24)
-                if (daysAgo > 1 && overallAccuracy >= badAcc) {
-                  termsThatAreNotOverallBadButHaveNotBeenReviewed1OrLessDaysAgoCount++;
-                }
-                studysetTermsWithProgress.push({
-                  term: progressForThisTerm.term,
-                  def: progressForThisTerm.def,
-                  termCorrect: progressForThisTerm.termCorrect,
-                  termIncorrect: progressForThisTerm.termIncorrect,
-                  defCorrect: progressForThisTerm.defCorrect,
-                  defIncorrect: progressForThisTerm.defIncorrect,
-                  lastReviewedAt: progressForThisTerm.lastReviewedAt,
-                  reviewSessionsCount: progressForThisTerm.reviewSessionsCount,
-                  daysAgo: daysAgo,
-                  priority: (daysAgo * timeWeight) * (1 - (overallAccuracy * accuracyWeight))
-                });
+                
+                studysetTermsWithProgress.push(progressForThisTerm);
 
                 if (progressForThisTerm.reviewSessionsCount > maxReviewSessionsCount) {
                   maxReviewSessionsCount = progressForThisTerm.reviewSessionsCount;
@@ -187,7 +172,7 @@
               we subtract them from 10 so that we have a max of 10 new terms if there are no other higher-priority terms */
               howManyNewTermsAreWeGoingToStartReviewingBasedOnAccuracyOfTermsWithProgressAndHowManyTimesTheyWereReviewed = (
                 /* we use Math.min with newTerms to make sure we don't try to review new terms that don't exist */
-                Math.min(10, newTerms.length) - overallBadCount - termsThatAreNotOverallBadButHaveNotBeenReviewed1OrLessDaysAgoCount
+                Math.min(10, newTerms.length) - 0 - termsThatAreNotOverallBadButHaveNotBeenReviewed1OrLessDaysAgoCount
               );
             }
 
@@ -204,7 +189,7 @@
               document.getElementById("preview-good-terms-count-parent").classList.add("yay");
             }
 
-            document.getElementById("preview-bad-terms-count").innerText = termsOverallBad;
+            document.getElementById("preview-bad-terms-count").innerText = termsOverallBad.length;
             if (termsOverallBad.length == 0) {
               /* make the text and label text underneath it greyed out when its 0 */
               document.getElementById("preview-bad-terms-count-parent").classList.add("fg0");
@@ -952,14 +937,17 @@
               </a>
             </div>
             <div style="margin-top:2rem;">
+              {#if termsOverallBad.length >= 1}
               <details>
-                <summary>{termsOverallBad.length} Terms &lt; {badAcc}%</summary>
+                <summary>{termsOverallBad.length} terms &lt; {badAcc}%</summary>
                 <table class="inner">
                   <thead>
                     <tr>
                       <th>Term</th>
                       <th>Definition</th>
                       <th>Accuracy</th>
+                      <th>Term Accuracy</th>
+                      <th>Definition Accuracy</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -967,14 +955,117 @@
                     <tr>
                       <td>{term.term}</td>
                       <td>{term.def}</td>
-                      <td>{term.overallAcc}</td>
-                      <td>{term.termAcc}</td>
-                      <td>{term.defAcc}</td>
+                      {#if isNaN(term.overallAcc)}
+                      <td class="text fg0">N/A</td>
+                      {:else}
+                      <td class="text {
+                        term.overallAcc > goodAcc ? "yay" :
+                        term.overallAcc < badAcc ? "ohno" : ""
+                      }">
+                        {term.overallAcc}%
+                      </td>
+                      {/if}
+                      {#if isNaN(term.termAcc)}
+                      <td class="text fg0">N/A</td>
+                      {:else}
+                      <td class="text {
+                        term.termAcc > goodAcc ? "yay" :
+                        term.termAcc < badAcc ? "ohno" : ""
+                      }">
+                        {term.termAcc}%
+                      </td>
+                      {/if}
+                      {#if isNaN(term.defAcc)}
+                      <td class="text fg0">N/A</td>
+                      {:else}
+                      <td class="text {
+                        term.defAcc > goodAcc ? "yay" :
+                        term.defAcc < badAcc ? "ohno" : ""
+                      }">
+                        {term.defAcc}%
+                      </td>
+                      {/if}
                     </tr>
                     {/each}
                   </tbody>
                 </table>
               </details>
+              {/if}
+              {#if termsOverallGood.length >= 1}
+              <details>
+                <summary>{termsOverallGood.length} terms &gt; {goodAcc}%</summary>
+                <table class="inner">
+                  <thead>
+                    <tr>
+                      <th>Term</th>
+                      <th>Definition</th>
+                      <th>Accuracy</th>
+                      <th>Term Accuracy</th>
+                      <th>Definition Accuracy</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {#each termsOverallGood as term}
+                    <tr>
+                      <td>{term.term}</td>
+                      <td>{term.def}</td>
+                      {#if isNaN(term.overallAcc)}
+                      <td class="text fg0">N/A</td>
+                      {:else}
+                      <td class="text {
+                        term.overallAcc > goodAcc ? "yay" :
+                        term.overallAcc < badAcc ? "ohno" : ""
+                      }">
+                        {term.overallAcc}%
+                      </td>
+                      {/if}
+                      {#if isNaN(term.termAcc)}
+                      <td class="text fg0">N/A</td>
+                      {:else}
+                      <td class="text {
+                        term.termAcc > goodAcc ? "yay" :
+                        term.termAcc < badAcc ? "ohno" : ""
+                      }">
+                        {term.termAcc}%
+                      </td>
+                      {/if}
+                      {#if isNaN(term.defAcc)}
+                      <td class="text fg0">N/A</td>
+                      {:else}
+                      <td class="text {
+                        term.defAcc > goodAcc ? "yay" :
+                        term.defAcc < badAcc ? "ohno" : ""
+                      }">
+                        {term.defAcc}%
+                      </td>
+                      {/if}
+                    </tr>
+                    {/each}
+                  </tbody>
+                </table>
+              </details>
+              {/if}
+              {#if newTerms.length >= 1}
+              <details>
+                <summary>{newTerms.length} new/unreviewed terms</summary>
+                <table class="inner">
+                  <thead>
+                    <tr>
+                      <th>Term</th>
+                      <th>Definition</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {#each termsOverallGood as term}
+                    <tr>
+                      <td>{term[0]}</td>
+                      <td>{term[1]}</td>
+                    </tr>
+                    {/each}
+                  </tbody>
+                </table>
+              </details>
+              {/if}
             </div>
           </div>
           <div id="review-mode-error-min-terms" class="hide" style="min-height:60vh">
