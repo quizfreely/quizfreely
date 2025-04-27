@@ -1,5 +1,5 @@
 export function openIndexedDB(callback) {
-    var dbReq = window.indexedDB.open("quizfreelydata", 3);
+    var dbReq = window.indexedDB.open("quizfreelydata", 4);
     dbReq.onerror = function (event) {
         console.error("IndexedDB no worky");
         alert("IndexedDB no worky :(");
