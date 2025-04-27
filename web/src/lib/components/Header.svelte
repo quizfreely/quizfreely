@@ -79,12 +79,12 @@
             </div>-->
             <div style="margin-top:0px;margin-bottom:0px;margin-left:0px;margin-right:1rem">
               {#if page.data.authedUser.display_name.length < 10 }
-                  <a href="/settings" class="button faint">
+                  <a href="/settings/account" class="button faint">
                     <IconUser />
                     <span class="hide-on-mobile-for-compactness">{ page.data.authedUser.display_name }</span>
                   </a>
               {:else}
-                  <a href="/settings" class="button faint">
+                  <a href="/settings/account" class="button faint">
                     <IconUser />
                     <span class="hide-on-mobile-for-compactness">Signed in</span>
                   </a>
