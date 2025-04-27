@@ -180,6 +180,7 @@ const schema = `
         searchQueries(q: String!, limit: Int, offset: Int): [SearchQuery]
         myStudysets(limit: Int, offset: Int): [Studyset]
         studysetProgress(studysetId: ID!): StudysetProgress
+        studysetSettings(studysetId: ID!): StudysetSettings
         dbConnectionStatus: DBConnectionStatus
         cronStatus: CronStatus
     }
@@ -233,7 +234,6 @@ const schema = `
         subject: String
     }
     type StudysetSettings {
-        studyset_id: ID!
         reviewMode: ReviewModeSettings
     }
     type ReviewModeSettings {
@@ -395,6 +395,22 @@ const resolvers = {
                 }
             } else {
                 throw new mercurius.ErrorWithProps("Not signed in while trying to get studyset progress", { code: "NOT_AUTHED" });
+            }
+        },
+        studysetSettings: async function (_, args, context) {
+            if (context.authed) {
+                let result = await getSettingsByStudysetId(args.studysetId, context.authedUser.id);
+                if (result.error) {
+                    context.reply.request.log.error(result.error);
+                    throw new mercurius.ErrorWithProps(
+                        result.error.message,
+                        result.error
+                    )
+                } else {
+                    return result.data;
+                }
+            } else {
+                throw new mercurius.ErrorWithProps("Not signed in while trying to get studyset settings", { code: "NOT_AUTHED" });
             }
         },
         dbConnectionStatus: async function (_, _args, context) {
@@ -1111,6 +1127,43 @@ async function getProgressByStudysetId(studysetId, authedUserId) {
             await client.query("COMMIT")
             result = {
                 data: selectedStudysetProgress.rows[0]
+            }
+        } else {
+            await client.query("ROLLBACK");
+            result = {
+                data: null
+            };
+        }
+    } catch (error) {
+        await client.query("ROLLBACK");
+        result = {
+            error: error
+        }
+    } finally {
+        client.release()
+        return result;
+    }
+}
+
+async function getSettingsByStudysetId(studysetId, authedUserId) {
+    let result;
+    let client = await pool.connect();
+    try {
+        await client.query("BEGIN");
+        await client.query("select set_config('qzfr_api.scope', 'user', true)");
+        await client.query(
+            "select set_config('qzfr_api.user_id', $1, true)",
+            [ authedUserId ]
+        );
+        let selectedStudysetProgress = await client.query(
+            "select id, studyset_id, user_id, settings " +
+            "from public.studyset_settings where user_id = $1 and studyset_id = $2",
+            [ authedUserId, studysetId ]
+        );
+        if (selectedStudysetProgress.rows.length == 1) {
+            await client.query("COMMIT")
+            result = {
+                data: selectedStudysetProgress.rows[0].settings
             }
         } else {
             await client.query("ROLLBACK");
