@@ -17,10 +17,17 @@
       (depending on the subject/context)
       so we record accuracy when answering with terms seperatly from accuracy when answering with definitions
     */
-    var termsWTermBad = $state([]);
-    var termsWTermGood = $state([]);
+    var termsWTermBad = [];
+    var termsWTermGood = [];
     var termsWDefBad = []; /* "def" is short for "definition" here */
-    var termsWDefGood = $state([]);
+    var termsWDefGood = [];
+
+    /*
+      in this context, "overall" means based on term-producing AND definition-producing accuracy
+      `(termCorrect + defCorrect) / (termCorrect + termIncorrect + defCorrect + defIncorrect)`
+    */
+    var termsOverallBad = [];
+    var termsOverallGood = [];
 
     onMount(function() {
       if (window.localStorage) {
@@ -52,12 +59,6 @@
       var studysetTermsWithProgress = [];
       var howManyNewTermsAreWeGoingToStartReviewingBasedOnAccuracyOfTermsWithProgressAndHowManyTimesTheyWereReviewed = 0;
 
-      /*
-        in this context, "overall" means based on term-producing AND definition-producing accuracy
-        `(termCorrect + defCorrect) / (termCorrect + termIncorrect + defCorrect + defIncorrect)`
-      */
-      var overallBadCount = 0;
-      var overallGoodCount = 0;
       var newTerms = []; /* unreviewed terms, as an array */
       var termsThatAreNotOverallBadButHaveNotBeenReviewed1OrLessDaysAgoCount = 0;
 
@@ -116,45 +117,33 @@
                   )
                 );
                 if (overallAccuracy > goodAcc) {
-                  overallGoodCount++;
+                  termsOverallGood.push(progressForThisTerm);
                 } else if (overallAccuracy < badAcc) {
-                  overallBadCount++;
+                  termsOverallBad.push(progressForThisTerm);
                 }
 
-                var termAccuracy = (
+                var termAccuracy = 100 * (
                   progressForThisTerm.termCorrect / (
                     progressForThisTerm.termCorrect +
                     progressForThisTerm.termIncorrect
                   )
                 )
                 if (termAccuracy > goodAcc) {
-                  termGood.push(
-                    JSON.stringify([progressForThisTerm.term, progressForThisTerm.def]),
-                    progressForThisTerm
-                  );
+                  termGood.push(progressForThisTerm);
                 } else if (termAccuracy < badAcc) {
-                  termBad.push(
-                    JSON.stringify([progressForThisTerm.term, progressForThisTerm.def]),
-                    progressForThisTerm
-                  );
+                  termBad.push(progressForThisTerm);
                 }
 
-                var defAccuracy = (
+                var defAccuracy = 100 * (
                   progressForThisTerm.defCorrect / (
                     progressForThisTerm.defCorrect +
                     progressForThisTerm.defIncorrect
                   )
                 )
                 if (defAccuracy > goodAcc) {
-                  termsWDefGood.push(
-                    JSON.stringify([progressForThisTerm.term, progressForThisTerm.def]),
-                    progressForThisTerm
-                  );
+                  termsWDefGood.push(progressForThisTerm);
                 } else if (defAccuracy < badAcc) {
-                  termsWDefBad.push(
-                    JSON.stringify([progressForThisTerm.term, progressForThisTerm.def]),
-                    progressForThisTerm
-                  );
+                  termsWDefBad.push(progressForThisTerm);
                 }
 
                 var daysAgo = (Date.now() - new Date(progressForThisTerm.lastReviewedAt)) / (1000 * 60 * 60 * 24)
@@ -202,10 +191,10 @@
               );
             }
 
-            /* after we finish adding to overallGoodCount and overallBadCount,
-            display those numbers in these text elements. (notice this is outside of the for-loop above) */
-            document.getElementById("preview-good-terms-count").innerText = overallGoodCount;
-            if (overallGoodCount == 0) {
+            /* after we finish adding to termsOverallGood and termsOverallBad,
+            display their count in these text elements. (notice this is outside of the for-loop above) */
+            document.getElementById("preview-good-terms-count").innerText =  termsOverallGood.length;
+            if (termsOverallGood.length == 0) {
               /* make the text and label text underneath it greyed out when its 0
               these css classes are added to and removed from the parent element, and the label visually under the parent element, but under the same div */
               document.getElementById("preview-good-terms-count-parent").classList.add("fg0");
@@ -215,8 +204,8 @@
               document.getElementById("preview-good-terms-count-parent").classList.add("yay");
             }
 
-            document.getElementById("preview-bad-terms-count").innerText = overallBadCount;
-            if (overallBadCount == 0) {
+            document.getElementById("preview-bad-terms-count").innerText = termsOverallBad;
+            if (termsOverallBad.length == 0) {
               /* make the text and label text underneath it greyed out when its 0 */
               document.getElementById("preview-bad-terms-count-parent").classList.add("fg0");
               document.getElementById("preview-bad-terms-count-parent-label").classList.add("fg0");
@@ -964,20 +953,23 @@
             </div>
             <div style="margin-top:2rem;">
               <details>
-                <summary>Terms &lt; {badAcc}%</summary>
+                <summary>{termsOverallBad.length} Terms &lt; {badAcc}%</summary>
                 <table class="inner">
                   <thead>
                     <tr>
                       <th>Term</th>
-                      <th>Def</th>
+                      <th>Definition</th>
                       <th>Accuracy</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {#each termsWDefBad as term}
+                    {#each termsOverallBad as term}
                     <tr>
                       <td>{term.term}</td>
                       <td>{term.def}</td>
+                      <td>{term.overallAcc}</td>
+                      <td>{term.termAcc}</td>
+                      <td>{term.defAcc}</td>
                     </tr>
                     {/each}
                   </tbody>
