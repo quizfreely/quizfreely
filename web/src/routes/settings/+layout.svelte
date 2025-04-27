@@ -31,6 +31,7 @@
         display: flex;
         flex-direction: column;
         gap: 0.4rem;
+        align-items: stretch;
     }
 
     @media only screen and (max-width: 800px) {
@@ -42,6 +43,7 @@
             flex-direction: row;
             gap: 1rem;
             margin-bottom: 1rem;
+            align-items: center;
         }
     }
 </style>

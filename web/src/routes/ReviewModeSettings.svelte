@@ -247,6 +247,7 @@ and web/src/routes/studysets/[id]/review-mode/settings/+page.svelte
         display: flex;
         flex-direction: column;
         gap: 0.4rem;
+        align-items: stretch;
     }
 
     @media only screen and (max-width: 800px) {
@@ -258,6 +259,7 @@ and web/src/routes/studysets/[id]/review-mode/settings/+page.svelte
             flex-direction: row;
             gap: 1rem;
             margin-bottom: 1rem;
+            align-items: center;
         }
     }
 </style>
