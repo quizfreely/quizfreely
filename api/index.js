@@ -232,6 +232,14 @@ const schema = `
         query: String
         subject: String
     }
+    type StudysetSettings {
+        studyset_id: ID!
+        reviewMode: ReviewModeSettings
+    }
+    type ReviewModeSettings {
+        goodAcc: Float
+        badAcc: Float
+    }
     type StudysetProgress {
         id: ID!
         user_id: ID!
