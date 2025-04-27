@@ -2,6 +2,7 @@
     import { page } from "$app/state";
     import { fade } from "svelte/transition";
     import Noscript from "$lib/components/Noscript.svelte";
+    import IconBackArrow from "$lib/icons/BackArrow.svelte";
     let { children, data } = $props();
 </script>
 <style>
@@ -56,6 +57,13 @@
 
 <div class="grid page">
     <div class="content">
+<div>
+    {#if data.backLink?.length >= 1}
+    <a href={data.backLink} class="button faint">
+      <IconBackArrow /> Back
+    </a>
+    {/if}
+</div>
 <div class="settings-container">
     <div>
         <div class="settings-menu-nav">
