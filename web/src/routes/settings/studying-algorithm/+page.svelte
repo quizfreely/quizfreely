@@ -13,10 +13,10 @@
             var goodAcc = parseFloat(localStorage.getItem("quizfreely:settings.reviewMode.goodAcc"));
             var badAcc = parseFloat(localStorage.getItem("quizfreely:settings.reviewMode.badAcc"));
             if (goodAcc >= 1 && goodAcc <= 100) {
-                document.getElementById("good-acc").value = goodAcc;
+                document.getElementById("review-mode-good-acc").value = goodAcc;
             }
             if (badAcc >= 0 && badAcc <= 100) {
-                document.getElementById("bad-acc").value = badAcc;
+                document.getElementById("review-mode-bad-acc").value = badAcc;
             }
         }
     })
@@ -48,7 +48,7 @@
         <span class="fg0">Default: &gt; 90%</span>
     </p>
     <div class="input-thingy-container">
-        <input type="text" id="good-acc" class="input-thingy" placeholder="90" oninput={() => reviewModeChangesSaved = false}>
+        <input type="text" id="review-mode-good-acc" class="input-thingy" placeholder="90" oninput={() => reviewModeChangesSaved = false}>
         <span class="input-thingy-percent">%</span>
     </div>
     <p class="label-thingy">
@@ -56,7 +56,7 @@
         <span class="fg0">Default: &lt; 80%</span>
     </p>
     <div class="input-thingy-container">
-        <input type="text" id="bad-acc" class="input-thingy" placeholder="80" oninput={() => reviewModeChangesSaved = false}>
+        <input type="text" id="review-mode-bad-acc" class="input-thingy" placeholder="80" oninput={() => reviewModeChangesSaved = false}>
         <span class="input-thingy-percent">%</span>
     </div>
     <div class="box ohno { showInvalidReviewModeAcc ? "" : "hide" }">
@@ -69,21 +69,21 @@
     <div class="flex">
     <button onclick={function () {
         if (window.localStorage) {
-            var newGoodAcc = parseFloat(document.getElementById("good-acc").value)
-            var newBadAcc = parseFloat(document.getElementById("bad-acc").value)
+            var newGoodAcc = parseFloat(document.getElementById("review-mode-good-acc").value)
+            var newBadAcc = parseFloat(document.getElementById("review-mode-bad-acc").value)
 
             showInvalidReviewModeAcc = false;
 
             if (newBadAcc >= 1 && newBadAcc <= 100 && (
                 newGoodAcc > newBadAcc ||
-                document.getElementById("good-acc").value == ""
+                document.getElementById("review-mode-good-acc").value == ""
             )) {
                 localStorage.setItem(
                     "quizfreely:settings.reviewMode.badAcc",
                     newBadAcc
                 )
-                document.getElementById("bad-acc").value = newBadAcc;
-            } else if (document.getElementById("bad-acc").value == "") {
+                document.getElementById("review-mode-bad-acc").value = newBadAcc;
+            } else if (document.getElementById("review-mode-bad-acc").value == "") {
                 localStorage.removeItem(
                     "quizfreely:settings.reviewMode.badAcc"
                 )
@@ -93,14 +93,14 @@
 
             if (newGoodAcc >= 1 && newGoodAcc <= 100 && (
                 newGoodAcc > newBadAcc ||
-                document.getElementById("bad-acc").value == ""
+                document.getElementById("review-mode-bad-acc").value == ""
             )) {
                 localStorage.setItem(
                     "quizfreely:settings.reviewMode.goodAcc",
                     newGoodAcc
                 )
-                document.getElementById("good-acc").value = newGoodAcc;
-            } else if (document.getElementById("good-acc").value == "") {
+                document.getElementById("review-mode-good-acc").value = newGoodAcc;
+            } else if (document.getElementById("review-mode-good-acc").value == "") {
                 localStorage.removeItem(
                     "quizfreely:settings.reviewMode.goodAcc"
                 )
