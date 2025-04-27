@@ -415,34 +415,35 @@
                 </button>
               </div>
             </div>
-            {#if (data.new && data.authed) }
-            <button id="create-button-authed">
-              <IconCheckmark />
-              Create
-            </button>
-            <div class="dropdown">
-              <button class="dropdown-toggle" aria-label="saving options dropdown">
-                <IconMoreDotsHorizontal />
+            <div class="flex" style="align-items:center;">
+              {#if (data.new && data.authed) }
+              <button id="create-button-authed">
+                <IconCheckmark />
+                Create
               </button>
-              <div class="content">
-                <button id="create-button-local">
-                  <IconLocal />
-                  Save Locally
+              <div class="dropdown">
+                <button class="dropdown-toggle" aria-label="saving options dropdown">
+                  <IconMoreDotsHorizontal />
                 </button>
+                <div class="content">
+                  <button id="create-button-local">
+                    <IconLocal />
+                    Save Locally
+                  </button>
+                </div>
               </div>
+              {:else if (data.new) }
+              <button id="create-button-local">
+                <IconCheckmark />
+                Create
+              </button>
+              {:else}
+              <button id="save-button">
+                <IconCheckmark />
+                Save Changes
+              </button>
+              {/if}
             </div>
-            {:else if (data.new) }
-            <button id="create-button-local">
-              <IconCheckmark />
-              Create
-            </button>
-            {:else}
-            <button id="save-button">
-              <IconCheckmark />
-              Save Changes
-            </button>
-            {/if}
-
             <div class="modal hide" id="import-terms-modal">
               <div class="content">
                 <div class="grid import-terms-split">
