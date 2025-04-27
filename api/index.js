@@ -191,7 +191,7 @@ const schema = `
         updateUser(display_name: String): AuthedUser
         updateStudysetProgress(studysetId: ID!, progressChanges: [StudysetProgressTermInput!]!): StudysetProgress
         deleteStudysetProgress(studysetId: ID!): ID
-        updateStudysetSettings(studysetId: ID!, settings: StudysetSettingsInput!): StudysetSettings
+        updateStudysetSettings(studysetId: ID!, changedSettings: StudysetSettingsInput!): StudysetSettings
     }
     type User {
         id: ID
@@ -550,7 +550,7 @@ const resolvers = {
         },
         updateStudysetSettings: async function (_, args, context) {
             if (context.authed) {
-                let result = await updateSettingsByStudysetId(args.studysetId, args.settings, context.authedUser.id);
+                let result = await updateSettingsByStudysetId(args.studysetId, args.changedSettings, context.authedUser.id);
                 if (result.error) {
                     context.reply.request.log.error(result.error);
                     throw new mercurius.ErrorWithProps(
@@ -1313,7 +1313,7 @@ async function updateProgressByStudysetId(studysetId, progressChanges, authedUse
     }
 }
 
-async function updateSettingsByStudysetId(studysetId, settings, authedUserId) {
+async function updateSettingsByStudysetId(studysetId, changedSettings, authedUserId) {
     let result;
     let client = await pool.connect();
     try {
@@ -1328,21 +1328,24 @@ async function updateSettingsByStudysetId(studysetId, settings, authedUserId) {
             [ authedUserId, studysetId ]
         );
         if (existingSettings.rows.length == 1) {
-            let updatedRecord = await client.query(
+            await client.query(
                 "update public.studyset_settings set settings = $2, updated_at = clock_timestamp() " +
                 "where id = $1 returning id, studyset_id, user_id, to_char(updated_at, 'YYYY-MM-DD\"T\"HH24:MI:SS.MSTZH:TZM') as updated_at",
                 [
-                    existingProgress.rows[0].id,
-                    JSON.stringify(settings)
+                    existingSettings.rows[0].id,
+                    JSON.stringify({
+                        ...existingSettings.rows[0].settings,
+                        ...changedSettings
+                    })
                 ]
             );
             await client.query("COMMIT")
             result = {
-                data: settings
+                data: changedSettings
             }
         } else {
             /* if studyset progress doesn't already exist, add/insert a new record. */
-            let newRecord = await client.query(
+            await client.query(
                 "insert into public.studyset_settings (studyset_id, user_id, settings, updated_at) " +
                 "values ($1, $2, $3, clock_timestamp()) returning id, studyset_id, user_id, to_char(updated_at, 'YYYY-MM-DD\"T\"HH24:MI:SS.MSTZH:TZM') as updated_at",
                 [
@@ -1353,7 +1356,7 @@ async function updateSettingsByStudysetId(studysetId, settings, authedUserId) {
             )
             await client.query("COMMIT");
             result = {
-                data: settings
+                data: changedSettings
             }
         }
     } catch (error) {
