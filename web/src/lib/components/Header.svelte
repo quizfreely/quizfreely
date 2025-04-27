@@ -18,6 +18,14 @@
 .current {
   transition-duration: 0.4s;
 }
+.hide-on-mobile-for-compactness {
+  margin-top: 0px;
+}
+@media only screen and (max-width: 800px) {
+  .hide-on-mobile-for-compactness {
+    display: none;
+  }
+}
 </style>
 
 <header class="navbar with-search with-status">
@@ -69,16 +77,16 @@
                   <a href="/settings" class="button">Settings</a>
                 </div>
             </div>-->
-            <div style="margin-top:0px;margin-bottom:0px;margin-left:1rem;margin-right:1rem">
+            <div style="margin-top:0px;margin-bottom:0px;margin-left:0px;margin-right:1rem">
               {#if page.data.authedUser.display_name.length < 10 }
                   <a href="/settings" class="button faint">
                     <IconUser />
-                    { page.data.authedUser.display_name }
+                    <span class="hide-on-mobile-for-compactness">{ page.data.authedUser.display_name }</span>
                   </a>
               {:else}
                   <a href="/settings" class="button faint">
                     <IconUser />
-                    Signed in
+                    <span class="hide-on-mobile-for-compactness">Signed in</span>
                   </a>
               {/if}
             </div>
