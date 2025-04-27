@@ -24,31 +24,20 @@ and web/src/routes/studysets/[id]/review-mode/settings/+page.svelte
         /* settings stored locally w IndexedDB if studyset is local OR if user isn't logged in (even if the studyset isn't local) */
         if (data.local || !data.authed) {
             openIndexedDB(function (db) {
-                var dbTransaction = db.transaction(["studysets", "studysetsettings"]);
-                var studysetsObjectStore = dbTransaction.objectStore("studysets");
+                var dbTransaction = db.transaction(["studysetsettings"]);
                 var studysetsettingsObjectStore = dbTransaction.objectStore("studysetsettings");
-                var dbStudysetGetReq = studysetsObjectStore.get(data.localId);
-                dbStudysetGetReq.onerror = function (event) {
-                    alert("oopsie woopsie, indexeddb error");
+                var dbSettingsGetReq = studysetsettingsObjectStore.get(data.localId);
+                dbSettingsGetReq.onerror = function (event) {
+                  alert("indexeddb error while trying to get studyset settings");
                 }
-                dbStudysetGetReq.onsuccess = function (event) {
-                    if (dbStudysetGetReq.result) {
-                        var dbSettingsGetReq = studysetsettingsObjectStore.get(data.localId);
-                        dbSettingsGetReq.onerror = function (event) {
-                          alert("indexeddb error while trying to get studyset settings");
-                        }
-                        dbSettingsGetReq.onsuccess = function (event) {
-                          if (dbSettingsGetReq.result == null) {
-                            /* use global settings if no per-studyset settings set (if undefined) */
-                            useGlobalSettings()
-                          } else {
-                            /* use loaded per-studyset settings */
-                            loadedStudysetSettings(dbSettingsGetReq.result);
-                          }
-                        }
-                    } else {
-                      alert("studyset not found :(")
-                    }
+                dbSettingsGetReq.onsuccess = function (event) {
+                  if (dbSettingsGetReq.result == null) {
+                    /* use global settings if no per-studyset settings set (if undefined) */
+                    useGlobalSettings()
+                  } else {
+                    /* use loaded per-studyset settings */
+                    loadedStudysetSettings(dbSettingsGetReq.result);
+                  }
                 }
             })
         } else {
@@ -131,8 +120,7 @@ and web/src/routes/studysets/[id]/review-mode/settings/+page.svelte
     function updateReviewModeSettings(reviewModeSettings, callback) {
         if (data.local || !data.authed) {
             openIndexedDB(function (db) {
-                var dbTransaction = db.transaction(["studysets", "studysetsettings"], "readwrite");
-                var studysetsObjectStore = dbTransaction.objectStore("studysets");
+                var dbTransaction = db.transaction(["studysetsettings"], "readwrite");
                 var studysetsettingsObjectStore = dbTransaction.objectStore("studysetsettings");
                 var dbSettingsGetReq = studysetsettingsObjectStore.get(data.localId ?? data.studysetId);
                 dbSettingsGetReq.onerror = function (event) {
