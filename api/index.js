@@ -265,6 +265,8 @@ const schema = `
         firstReviewedAt: String!
         lastReviewedAt: String!
         reviewSessionsCount: Int!
+        confusedTerms: [[String]]
+        confusedDefs: [[String]]
     }
     input StudysetProgressTermInput {
         term: String!
@@ -273,6 +275,9 @@ const schema = `
         termIncorrect: Int
         defCorrect: Int
         defIncorrect: Int
+        lastReviewedAt: String!
+        confusedTerms: [[String]]
+        confusedDefs: [[String]]
     }
     type DBConnectionStatus {
         connectionUp: Boolean
