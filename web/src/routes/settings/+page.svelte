@@ -28,9 +28,19 @@
         }
     })
 </script>
-
+<style>
+  .a-little-different-grid-list {
+    display: grid;
+    grid-template-rows: auto;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1rem;
+  }
+  .a-little-different-grid-list > a {
+    margin-top: 0px;
+  }
+</style>
 <p>Theme</p>
-<div class="grid list">
+<div class="a-little-different-grid-list">
   <a href="/settings/themes/auto" class="button button-box no-clickable-effect {data.theme == 'auto' ? 'selected' : ''}">
     <img src="/img/themes/theme-preview-auto.png" style="width:100%;border-radius:0.8rem" alt="Auto Dark/Light Theme Preview">
     <p>Auto</p>
