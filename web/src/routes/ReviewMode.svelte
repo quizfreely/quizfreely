@@ -525,10 +525,6 @@
           document.getElementById("next-button").classList.remove("hide");
         }
       }
-      document.getElementById("answer-1").addEventListener("click", checkAnswer);
-      document.getElementById("answer-2").addEventListener("click", checkAnswer);
-      document.getElementById("answer-3").addEventListener("click", checkAnswer);
-      document.getElementById("answer-4").addEventListener("click", checkAnswer);
 
       function updateSessionProgressMap(term, def, answerWith, correct) {
         var mapKey = JSON.stringify([term, def]);
@@ -1168,10 +1164,10 @@
             <p class="h4 hide" id="answer-with-def">Select the matching definition</p>
             <p id="question" style="white-space:pre-wrap">...</p>
             <div class="review-mode-answer-choices">
-              <button id="answer-1" data-answer="incorrect" class="button-box no-clickable-effect review-mode-answer-choice" style="white-space:pre-wrap">...</button>
-              <button id="answer-2" data-answer="incorrect" class="button-box no-clickable-effect review-mode-answer-choice" style="white-space:pre-wrap">...</button>
-              <button id="answer-3" data-answer="incorrect" class="button-box no-clickable-effect review-mode-answer-choice" style="white-space:pre-wrap">...</button>
-              <button id="answer-4" data-answer="incorrect" class="button-box no-clickable-effect review-mode-answer-choice" style="white-space:pre-wrap">...</button>
+              <button id="answer-choice-0" class="button-box no-clickable-effect review-mode-answer-choice" style="white-space:pre-wrap" onclick={checkAnswer}>{answerChoices[0]}</button>
+              <button id="answer-choice-1" class="button-box no-clickable-effect review-mode-answer-choice" style="white-space:pre-wrap" onclick={checkAnswer}>{answerChoices[1]}</button>
+              <button id="answer-choice-2" class="button-box no-clickable-effect review-mode-answer-choice" style="white-space:pre-wrap" onclick={checkAnswer}>{answerChoices[2]}</button>
+              <button id="answer-choice-3" class="button-box no-clickable-effect review-mode-answer-choice" style="white-space:pre-wrap" onclick={checkAnswer}>{answerChoices[3]}</button>
             </div>
             <button id="next-button" class="hide">Next</button>
           </div>
