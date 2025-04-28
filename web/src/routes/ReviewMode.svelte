@@ -972,6 +972,7 @@
               {#if termsOverallBad.length >= 1}
               <details>
                 <summary>{termsOverallBad.length} terms &lt; {badAcc}%</summary>
+                <p class="fg0">"Term accuracy" and "definition accuracy" record accuracy when answering with a term & answering with a definition separately.</p>
                 <table class="inner">
                   <thead>
                     <tr>
@@ -1026,6 +1027,7 @@
               {#if termsOverallBetween.length >= 1}
               <details>
                 <summary>{badAcc} &lt; {termsOverallBetween.length} terms &lt; {goodAcc}%</summary>
+                <p class="fg0">"Term accuracy" and "definition accuracy" record accuracy when answering with a term & answering with a definition separately.</p>
                 <table class="inner">
                   <thead>
                     <tr>
@@ -1080,6 +1082,7 @@
               {#if termsOverallGood.length >= 1}
               <details>
                 <summary>{termsOverallGood.length} terms &gt; {goodAcc}%</summary>
+                <p class="fg0">"Term accuracy" and "definition accuracy" record accuracy when answering with a term & answering with a definition separately.</p>
                 <table class="inner">
                   <thead>
                     <tr>
@@ -1134,6 +1137,7 @@
               {#if newTerms.length >= 1}
               <details>
                 <summary>{newTerms.length} new/unreviewed terms</summary>
+                <p class="fg0">"Term accuracy" and "definition accuracy" record accuracy when answering with a term & answering with a definition separately.</p>
                 <table class="inner">
                   <thead>
                     <tr>
