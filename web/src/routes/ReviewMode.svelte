@@ -33,6 +33,7 @@
     var termsOverallBetween = $state([]);
     var newTerms = $state([]); /* unreviewed terms, as an array */
       
+    var answerChoices = $state([]);
     onMount(function() {
       if (window.localStorage) {
         /* first load from settings before per-studyset settings */
@@ -314,13 +315,12 @@
       var currentNewTerm = 0;
       var currentTermWithProgress = 0;
       var newTermsStartedThisSessionCount = 0;
-      var answerChoices = []
       function nextQuestion() {
         /* remove selected class and incorrect/correct styles cause we're going to the next question */
-        document.getElementById("answer-1").classList.remove("selected", "yay", "ohno");
-        document.getElementById("answer-2").classList.remove("selected", "yay", "ohno");
-        document.getElementById("answer-3").classList.remove("selected", "yay", "ohno");
-        document.getElementById("answer-4").classList.remove("selected", "yay", "ohno");
+        document.getElementById("answer-choice-1").classList.remove("selected", "yay", "ohno");
+        document.getElementById("answer-choice-2").classList.remove("selected", "yay", "ohno");
+        document.getElementById("answer-choice-3").classList.remove("selected", "yay", "ohno");
+        document.getElementById("answer-choice-4").classList.remove("selected", "yay", "ohno");
         /* hide the next button again (its shown again after the user picks an answer) */
         document.getElementById("next-button").classList.add("hide");
 
@@ -465,10 +465,10 @@
       function checkAnswer(event) {
         if (
           /* we use this if-statement to make sure nothing is already selected so that users can only select one answer choice */
-          document.getElementById("answer-1").classList.contains("selected") == false &&
-          document.getElementById("answer-2").classList.contains("selected") == false &&
-          document.getElementById("answer-3").classList.contains("selected") == false &&
-          document.getElementById("answer-4").classList.contains("selected") == false
+          document.getElementById("answer-choice-1").classList.contains("selected") == false &&
+          document.getElementById("answer-choice-2").classList.contains("selected") == false &&
+          document.getElementById("answer-choice-3").classList.contains("selected") == false &&
+          document.getElementById("answer-choice-4").classList.contains("selected") == false
         ) {
           event.target.classList.add("selected");
 
