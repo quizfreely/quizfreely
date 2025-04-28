@@ -30,6 +30,7 @@
     */
     var termsOverallBad = $state([]);
     var termsOverallGood = $state([]);
+    var termsOverallBetween = $state([]);
     var newTerms = $state([]); /* unreviewed terms, as an array */
       
     onMount(function() {
@@ -136,6 +137,8 @@
                   termsOverallGood.push(progressForThisTerm);
                 } else if (progressForThisTerm.overallAcc < badAcc) {
                   termsOverallBad.push(progressForThisTerm);
+                } else {
+                  termsOverallBetween.push(progressForThisTerm);
                 }
 
                 if (progressForThisTerm.termAcc > goodAcc) {
@@ -321,8 +324,9 @@
         /* hide the next button again (its shown again after the user picks an answer) */
         document.getElementById("next-button").classList.add("hide");
 
-        /* random answer with term or def */
-        if (Math.random() < 0.5) {
+        /* pick randomly to answer with term or def */
+        var answerWithTerm = Math.random() < 0.5;
+        if (answerWithTerm) {
           document.getElementById("answer-with-term").classList.remove("hide");
           document.getElementById("answer-with-def").classList.add("hide");
         } else {
@@ -351,29 +355,29 @@
             
             so the body of this if-statement will show a question from our newTerms array */
           ) {
-            if (currentNewTerm >= newTerms.length) {
-              currentNewTerm = 0;
-            }
+          //  if (currentNewTerm >= newTerms.length) {
+          //    currentNewTerm = 0;
+          //  }
 
-            /* put the term/def from newTerms into the actual element(s) */
-            if (answerWithTermOrDef == 0) {
-              /* answerWithTermOrDef is 0 for term and 1 for def,
-              we ask the question with the opposite of what we want to answer with */
-              document.getElementById("question").innerText = newTerms[currentNewTerm][1]
-              document.getElementById("question").dataset.answerwith = "term";
-              document.getElementById("question").dataset.array = "newTerms";
-              document.getElementById("question").dataset.index = currentNewTerm;
-            } else {
-              document.getElementById("question").innerText = newTerms[currentNewTerm][0]
-              document.getElementById("question").dataset.answerwith = "def";
-              document.getElementById("question").dataset.array = "newTerms";
-              document.getElementById("question").dataset.index = currentNewTerm;
-            }
-            correctAnswerContent = newTerms[currentNewTerm][answerWithTermOrDef]; /* answerWithTermOrDef is 0 for term and 1 for def, that's why we can use it as the index */
-            document.getElementById("answer-" + correctAnswerPosition).innerText = correctAnswerContent;
-            document.getElementById("answer-" + correctAnswerPosition).dataset.answer = "correct"; /* this data-answer="..." attribute is used by function checkAnswer() later */
-            currentNewTerm++ /* increment currentNewTerm to keep a seperate question count just for new terms for use as the array index */
-            newTermsStartedThisSessionCount++ /* increment newTermsStartedThisSessionCount to later calculate how many new terms left to introduce this session */
+          //  /* put the term/def from newTerms into the actual element(s) */
+          //  if (answerWithTermOrDef == 0) {
+          //    /* answerWithTermOrDef is 0 for term and 1 for def,
+          //    we ask the question with the opposite of what we want to answer with */
+          //    document.getElementById("question").innerText = newTerms[currentNewTerm][1]
+          //    document.getElementById("question").dataset.answerwith = "term";
+          //    document.getElementById("question").dataset.array = "newTerms";
+          //    document.getElementById("question").dataset.index = currentNewTerm;
+          //  } else {
+          //    document.getElementById("question").innerText = newTerms[currentNewTerm][0]
+          //    document.getElementById("question").dataset.answerwith = "def";
+          //    document.getElementById("question").dataset.array = "newTerms";
+          //    document.getElementById("question").dataset.index = currentNewTerm;
+          //  }
+          //  correctAnswerContent = newTerms[currentNewTerm][answerWithTermOrDef]; /* answerWithTermOrDef is 0 for term and 1 for def, that's why we can use it as the index */
+          //  document.getElementById("answer-" + correctAnswerPosition).innerText = correctAnswerContent;
+          //  document.getElementById("answer-" + correctAnswerPosition).dataset.answer = "correct"; /* this data-answer="..." attribute is used by function checkAnswer() later */
+          //  currentNewTerm++ /* increment currentNewTerm to keep a seperate question count just for new terms for use as the array index */
+          //  newTermsStartedThisSessionCount++ /* increment newTermsStartedThisSessionCount to later calculate how many new terms left to introduce this session */
           } else { /* this else statement is for showing terms with progress (instead of new terms)*/
             if (currentTermWithProgress >= studysetTermsWithProgress.length) {
               currentTermWithProgress = 0;
@@ -980,6 +984,60 @@
                   </thead>
                   <tbody>
                     {#each termsOverallBad as term}
+                    <tr>
+                      <td>{term.term}</td>
+                      <td>{term.def}</td>
+                      {#if isNaN(term.overallAcc)}
+                      <td class="text fg0">N/A</td>
+                      {:else}
+                      <td class="text {
+                        term.overallAcc > goodAcc ? "yay" :
+                        term.overallAcc < badAcc ? "ohno" : ""
+                      }">
+                        {Math.round(term.overallAcc)}%
+                      </td>
+                      {/if}
+                      {#if isNaN(term.termAcc)}
+                      <td class="text fg0">N/A</td>
+                      {:else}
+                      <td class="text {
+                        term.termAcc > goodAcc ? "yay" :
+                        term.termAcc < badAcc ? "ohno" : ""
+                      }">
+                        {Math.round(term.termAcc)}%
+                      </td>
+                      {/if}
+                      {#if isNaN(term.defAcc)}
+                      <td class="text fg0">N/A</td>
+                      {:else}
+                      <td class="text {
+                        term.defAcc > goodAcc ? "yay" :
+                        term.defAcc < badAcc ? "ohno" : ""
+                      }">
+                        {Math.round(term.defAcc)}%
+                      </td>
+                      {/if}
+                    </tr>
+                    {/each}
+                  </tbody>
+                </table>
+              </details>
+              {/if}
+              {#if termsOverallBetween.length >= 1}
+              <details>
+                <summary>{badAcc} &lt; {termsOverallBetween.length} terms &lt; {goodAcc}%</summary>
+                <table class="inner">
+                  <thead>
+                    <tr>
+                      <th>Term</th>
+                      <th>Definition</th>
+                      <th>Accuracy</th>
+                      <th>Term Accuracy</th>
+                      <th>Definition Accuracy</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {#each termsOverallBetween as term}
                     <tr>
                       <td>{term.term}</td>
                       <td>{term.def}</td>
