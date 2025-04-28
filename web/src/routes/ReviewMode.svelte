@@ -109,7 +109,7 @@
                 newTerms.push(studysetTermsArray[i]);
               } else {
                 progressForThisTerm.daysAgo = (Date.now() - new Date(progressForThisTerm.lastReviewedAt)) / (1000 * 60 * 60 * 24)
-
+                progressForThisTerm.msAgo = (Date.now() - new Date(progressForThisTerm.lastReviewedAt))
                 progressForThisTerm.overallAcc = 100 * (
                   (progressForThisTerm.termCorrect + progressForThisTerm.defCorrect) / (
                     progressForThisTerm.termCorrect +
@@ -145,8 +145,6 @@
                 } else if (progressForThisTerm.defAcc < badAcc) {
                   termsWDefBad.push(progressForThisTerm);
                 }
-                
-                studysetTermsWithProgress.push(progressForThisTerm);
 
                 if (progressForThisTerm.reviewSessionsCount > maxReviewSessionsCount) {
                   maxReviewSessionsCount = progressForThisTerm.reviewSessionsCount;
@@ -159,22 +157,8 @@
                 }
               }
             }
+            /* sort arrays so that oldest/least-frequently-seen terms are first */
 
-            /* use minReviewSessionsCount to calculate how many new terms to add
-            this updates howManyNewTermsAreWeGoingToStartReviewingBasedOnAccuracyOfTermsWithProgressAndHowManyTimesTheyWereReviewed,
-            that variable is used later to show users a combination of existing terms and a specific count of new terms
-            but it wont show users new terms if they need to work on old or low-accuracy terms
-            
-            notice that this is outside the for-loop */
-            if (minReviewSessionsCount > 5 || studysetTermsWithProgress.length < 10) {
-              /* we need to review bad terms and old terms before introducing new terms
-              so if there's a few bad terms and/or old terms, we can do both new terms and old/bad terms in the same session 
-              we subtract them from 10 so that we have a max of 10 new terms if there are no other higher-priority terms */
-              howManyNewTermsAreWeGoingToStartReviewingBasedOnAccuracyOfTermsWithProgressAndHowManyTimesTheyWereReviewed = (
-                /* we use Math.min with newTerms to make sure we don't try to review new terms that don't exist */
-                Math.min(10, newTerms.length) - 0 - termsThatAreNotOverallBadButHaveNotBeenReviewed1OrLessDaysAgoCount
-              );
-            }
 
             /* after we finish adding to termsOverallGood and termsOverallBad,
             display their count in these text elements. (notice this is outside of the for-loop above) */
@@ -1073,7 +1057,7 @@
                     </tr>
                   </thead>
                   <tbody>
-                    {#each termsOverallGood as term}
+                    {#each newTerms as term}
                     <tr>
                       <td>{term[0]}</td>
                       <td>{term[1]}</td>
