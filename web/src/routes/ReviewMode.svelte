@@ -21,6 +21,8 @@
     var termsWTermGood = [];
     var termsWDefBad = []; /* "def" is short for "definition" here */
     var termsWDefGood = [];
+    var termsWTermBetween = []; /* for stuff between goodAcc and badAcc */
+    var termsWDefBetween = [];
 
     /*
       in this context, "overall" means based on term-producing AND definition-producing accuracy
@@ -135,15 +137,20 @@
                 } else if (progressForThisTerm.overallAcc < badAcc) {
                   termsOverallBad.push(progressForThisTerm);
                 }
+
                 if (progressForThisTerm.termAcc > goodAcc) {
                   termsWTermGood.push(progressForThisTerm);
                 } else if (progressForThisTerm.termAcc < badAcc) {
                   termsWTermBad.push(progressForThisTerm);
+                } else {
+                  termsWTermBetween.push(progressForThisTerm);
                 }
                 if (progressForThisTerm.defAcc > goodAcc) {
                   termsWDefGood.push(progressForThisTerm);
                 } else if (progressForThisTerm.defAcc < badAcc) {
                   termsWDefBad.push(progressForThisTerm);
+                } else {
+                  termsWDefBetween.push(progressForThisTerm);
                 }
 
                 if (progressForThisTerm.reviewSessionsCount > maxReviewSessionsCount) {
@@ -158,7 +165,24 @@
               }
             }
             /* sort arrays so that oldest/least-frequently-seen terms are first */
-
+            termsWTermGood.sort(function (a, b) {
+              return b.msAgo - a.msAgo;
+            })
+            termsWTermBad.sort(function (a, b) {
+              return b.msAgo - a.msAgo;
+            })
+            termsWTermBetween.sort(function (a, b) {
+              return b.msAgo - a.msAgo;
+            })
+            termsWDefGood.sort(function (a, b) {
+              return b.msAgo - a.msAgo;
+            })
+            termsWDefBad.sort(function (a, b) {
+              return b.msAgo - a.msAgo;
+            })
+            termsWDefBetween.sort(function (a, b) {
+              return b.msAgo - a.msAgo;
+            })
 
             /* after we finish adding to termsOverallGood and termsOverallBad,
             display their count in these text elements. (notice this is outside of the for-loop above) */
@@ -277,13 +301,17 @@
 
       var sessionIncorrectCount = 0;
       var sessionCorrectCount = 0;
+      var sectionIncorrectCount = 0;
+      var sectionCorrectCount = 0;
 
       var currentQuestionNum = 1;
       var sessionIncorrectTerms = [];
-      var sessionProgressMap = new Map();
+      /* array of terms this session */
+      var sessionProgress = [];
       var currentNewTerm = 0;
       var currentTermWithProgress = 0;
       var newTermsStartedThisSessionCount = 0;
+      var answerChoices = []
       function nextQuestion() {
         /* remove selected class and incorrect/correct styles cause we're going to the next question */
         document.getElementById("answer-1").classList.remove("selected", "yay", "ohno");
@@ -293,10 +321,8 @@
         /* hide the next button again (its shown again after the user picks an answer) */
         document.getElementById("next-button").classList.add("hide");
 
-        /* random number 0 or 1 to answer with term or def (0 for term, 1 for def) */
-        var answerWithTermOrDef = Math.floor(Math.random() * 2);
-
-        if (answerWithTermOrDef == 0) {
+        /* random answer with term or def */
+        if (Math.random() < 0.5) {
           document.getElementById("answer-with-term").classList.remove("hide");
           document.getElementById("answer-with-def").classList.add("hide");
         } else {
@@ -305,8 +331,9 @@
         }
 
         /* pick random number from 1 to 4 */
-        var correctAnswerPosition = Math.floor(Math.random() * 4) + 1;
+        var correctAnswerIndex = Math.floor(Math.random() * 4);
 
+        /* what? */
         //if (currentQuestionNum > 10 && sessionIncorrectTerms.length >= 1) {
         //  /* after the first 10 questions, we repeat questions users got wrong this session */
         //  alert("congrats, i didn't implement this yet")
