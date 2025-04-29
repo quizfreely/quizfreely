@@ -16,7 +16,7 @@ Term states are seperate for each terms' term and definition.
 Quizfreely stores studysets' terms in a (rectangular) 2D array:
 ```json
 {
-    terms: [
+    "terms": [
         ["term 1", "definition 1"],
         ["term 2", "def 2"],
         ["term 3", "def 3"]
