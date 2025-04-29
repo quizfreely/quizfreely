@@ -1017,7 +1017,7 @@
             <div class="flex">
               <button id="start-button"><IconCheckmark /> Start</button>
               <a class="button alt" href={
-                data.local ? "/studyset/local/review-mode/settings?id=" + data.localId : "/studysets/" + data.studysetId + "/review-mode/settings"
+                data.local ? "/studyset/local/settings?id=" + data.localId : "/studysets/" + data.studysetId + "/settings"
               }>
                 <IconSettingsGear /> Settings
               </a>
