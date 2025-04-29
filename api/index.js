@@ -275,9 +275,17 @@ const schema = `
         termIncorrect: Int
         defCorrect: Int
         defIncorrect: Int
+        termState: ProgressTermState
+        defState: ProgressTermState
         lastReviewedAt: String!
         confusedTerms: [[String]]
         confusedDefs: [[String]]
+    }
+    enum ProgressTermState {
+        new
+        learning
+        review
+        relearning
     }
     type DBConnectionStatus {
         connectionUp: Boolean
