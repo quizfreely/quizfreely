@@ -34,6 +34,69 @@
     var newTerms = $state([]); /* unreviewed terms, as an array */
       
     var answerChoices = $state([]);
+    function checkAnswer(event) {
+      if (
+        /* we use this if-statement to make sure nothing is already selected so that users can only select one answer choice */
+        document.getElementById("answer-choice-1").classList.contains("selected") == false &&
+        document.getElementById("answer-choice-2").classList.contains("selected") == false &&
+        document.getElementById("answer-choice-3").classList.contains("selected") == false &&
+        document.getElementById("answer-choice-4").classList.contains("selected") == false
+      ) {
+        event.target.classList.add("selected");
+
+        /* the question element has attributes data-answerwith, data-array, and data-index
+        we use those attributes to find the question's data from arrays studysetTermsWithProgress or newTerms
+        those arrays are populated/modified by setupStuff() and `start-button`'s onclick event,
+        and then the indexes of those arrays are used by nextQuestion() and checkAnswer() */
+        var question = document.getElementById("question")
+        if (event.target.dataset.answer == "correct") {
+          event.target.classList.add("yay");
+          sessionCorrectCount++;
+          
+          if (question.dataset.array == "studysetTermsWithProgress") {
+            updateSessionProgressMap(
+              studysetTermsWithProgress[question.dataset.index].term,
+              studysetTermsWithProgress[question.dataset.index].def,
+              question.dataset.answerwith,
+              true /* true for correct */
+            )
+          } else if (question.dataset.array == "newTerms") {
+            updateSessionProgressMap(
+              newTerms[question.dataset.index][0],
+              newTerms[question.dataset.index][1],
+              question.dataset.answerwith,
+              true /* true for correct */
+            )
+          } else {
+            alert("this question's data-array attribute is wrong? 💀")
+          }
+        } else if (event.target.dataset.answer == "incorrect") {
+          event.target.classList.add("ohno");
+          sessionIncorrectCount++
+
+          if (question.dataset.array == "studysetTermsWithProgress") {
+            updateSessionProgressMap(
+              studysetTermsWithProgress[question.dataset.index].term,
+              studysetTermsWithProgress[question.dataset.index].def,
+              question.dataset.answerwith,
+              false /* false for incorrect */
+            )
+          } else if (question.dataset.array == "newTerms") {
+            updateSessionProgressMap(
+              newTerms[question.dataset.index][0],
+              newTerms[question.dataset.index][1],
+              question.dataset.answerwith,
+              false /* false for incorrect */
+            )
+          } else {
+            alert("invalid data-array attribute i think 💀")
+          }
+        } else {
+          alert("impossible error?")
+        }
+        document.getElementById("next-button").classList.remove("hide");
+      }
+    }
     onMount(function() {
       if (window.localStorage) {
         /* first load from settings before per-studyset settings */
@@ -170,22 +233,70 @@
             }
             /* sort arrays so that oldest/least-frequently-seen terms are first */
             termsWTermGood.sort(function (a, b) {
-              return b.msAgo - a.msAgo;
+              if (Math.abs(b.reviewSessionsCount - a.reviewSessionsCount) < 5) {
+                if (Math.abs(b.termAcc - a.termAcc) < 20) {
+                  return b.msAgo - a.msAgo;
+                } else {
+                  return b.termAcc - a.termAcc;
+                }
+              } else {
+                return b.reviewSessionsCount - a.reviewSessionsCount;
+              }
             })
             termsWTermBad.sort(function (a, b) {
-              return b.msAgo - a.msAgo;
+              if (Math.abs(b.reviewSessionsCount - a.reviewSessionsCount) < 5) {
+                if (Math.abs(b.termAcc - a.termAcc) < 20) {
+                  return b.msAgo - a.msAgo;
+                } else {
+                  return b.termAcc - a.termAcc;
+                }
+              } else {
+                return b.reviewSessionsCount - a.reviewSessionsCount;
+              }
             })
             termsWTermBetween.sort(function (a, b) {
-              return b.msAgo - a.msAgo;
+              if (Math.abs(b.reviewSessionsCount - a.reviewSessionsCount) < 5) {
+                if (Math.abs(b.termAcc - a.termAcc) < 20) {
+                  return b.msAgo - a.msAgo;
+                } else {
+                  return b.termAcc - a.termAcc;
+                }
+              } else {
+                return b.reviewSessionsCount - a.reviewSessionsCount;
+              }
             })
             termsWDefGood.sort(function (a, b) {
-              return b.msAgo - a.msAgo;
+              if (Math.abs(b.reviewSessionsCount - a.reviewSessionsCount) < 5) {
+                if (Math.abs(b.defAcc - a.defAcc) < 20) {
+                  return b.msAgo - a.msAgo;
+                } else {
+                  return b.defAcc - a.defAcc;
+                }
+              } else {
+                return b.reviewSessionsCount - a.reviewSessionsCount;
+              }
             })
             termsWDefBad.sort(function (a, b) {
-              return b.msAgo - a.msAgo;
+              if (Math.abs(b.reviewSessionsCount - a.reviewSessionsCount) < 5) {
+                if (Math.abs(b.defAcc - a.defAcc) < 20) {
+                  return b.msAgo - a.msAgo;
+                } else {
+                  return b.defAcc - a.defAcc;
+                }
+              } else {
+                return b.reviewSessionsCount - a.reviewSessionsCount;
+              }
             })
             termsWDefBetween.sort(function (a, b) {
-              return b.msAgo - a.msAgo;
+              if (Math.abs(b.reviewSessionsCount - a.reviewSessionsCount) < 5) {
+                if (Math.abs(b.defAcc - a.defAcc) < 20) {
+                  return b.msAgo - a.msAgo;
+                } else {
+                  return b.defAcc - a.defAcc;
+                }
+              } else {
+                return b.reviewSessionsCount - a.reviewSessionsCount;
+              }
             })
 
             /* after we finish adding to termsOverallGood and termsOverallBad,
@@ -461,70 +572,6 @@
         currentQuestionNum++;
       }
       document.getElementById("next-button").addEventListener("click", nextQuestion);
-
-      function checkAnswer(event) {
-        if (
-          /* we use this if-statement to make sure nothing is already selected so that users can only select one answer choice */
-          document.getElementById("answer-choice-1").classList.contains("selected") == false &&
-          document.getElementById("answer-choice-2").classList.contains("selected") == false &&
-          document.getElementById("answer-choice-3").classList.contains("selected") == false &&
-          document.getElementById("answer-choice-4").classList.contains("selected") == false
-        ) {
-          event.target.classList.add("selected");
-
-          /* the question element has attributes data-answerwith, data-array, and data-index
-          we use those attributes to find the question's data from arrays studysetTermsWithProgress or newTerms
-          those arrays are populated/modified by setupStuff() and `start-button`'s onclick event,
-          and then the indexes of those arrays are used by nextQuestion() and checkAnswer() */
-          var question = document.getElementById("question")
-          if (event.target.dataset.answer == "correct") {
-            event.target.classList.add("yay");
-            sessionCorrectCount++;
-            
-            if (question.dataset.array == "studysetTermsWithProgress") {
-              updateSessionProgressMap(
-                studysetTermsWithProgress[question.dataset.index].term,
-                studysetTermsWithProgress[question.dataset.index].def,
-                question.dataset.answerwith,
-                true /* true for correct */
-              )
-            } else if (question.dataset.array == "newTerms") {
-              updateSessionProgressMap(
-                newTerms[question.dataset.index][0],
-                newTerms[question.dataset.index][1],
-                question.dataset.answerwith,
-                true /* true for correct */
-              )
-            } else {
-              alert("this question's data-array attribute is wrong? 💀")
-            }
-          } else if (event.target.dataset.answer == "incorrect") {
-            event.target.classList.add("ohno");
-            sessionIncorrectCount++
-
-            if (question.dataset.array == "studysetTermsWithProgress") {
-              updateSessionProgressMap(
-                studysetTermsWithProgress[question.dataset.index].term,
-                studysetTermsWithProgress[question.dataset.index].def,
-                question.dataset.answerwith,
-                false /* false for incorrect */
-              )
-            } else if (question.dataset.array == "newTerms") {
-              updateSessionProgressMap(
-                newTerms[question.dataset.index][0],
-                newTerms[question.dataset.index][1],
-                question.dataset.answerwith,
-                false /* false for incorrect */
-              )
-            } else {
-              alert("invalid data-array attribute i think 💀")
-            }
-          } else {
-            alert("impossible error?")
-          }
-          document.getElementById("next-button").classList.remove("hide");
-        }
-      }
 
       function updateSessionProgressMap(term, def, answerWith, correct) {
         var mapKey = JSON.stringify([term, def]);
