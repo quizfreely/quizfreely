@@ -16,13 +16,14 @@
       producing the definition from the term require different logic/brain power
       (depending on the subject/context)
       so we record accuracy when answering with terms seperatly from accuracy when answering with definitions
+      and we have seperate states for each terms' term and definition based on those seperate accuracys
     */
-    var termsWTermBad = [];
-    var termsWTermGood = [];
-    var termsWDefBad = []; /* "def" is short for "definition" here */
-    var termsWDefGood = [];
-    var termsWTermBetween = []; /* for stuff between goodAcc and badAcc */
-    var termsWDefBetween = [];
+    var termsWTermStateLearning = [];
+    var termsWTermStateReview = [];
+    var termsWTermStateRelearning = [];
+    var termsWDefStateLearning = []; /* def means definition here */
+    var termsWDefStateReview = [];
+    var termsWDefStateRelearning = [];
 
     /*
       in this context, "overall" means based on term-producing AND definition-producing accuracy
@@ -205,19 +206,23 @@
                   termsOverallBetween.push(progressForThisTerm);
                 }
 
-                if (progressForThisTerm.termAcc > goodAcc) {
-                  termsWTermGood.push(progressForThisTerm);
-                } else if (progressForThisTerm.termAcc < badAcc) {
-                  termsWTermBad.push(progressForThisTerm);
-                } else {
-                  termsWTermBetween.push(progressForThisTerm);
+                if (progressForThisTerm.termState == "learning") {
+                  termsWTermStateLearning.push(progressForThisTerm);
+                } else if (progressForThisTerm.termState == "review") {
+                  termsWTermStateReview.push(progressForThisTerm);
+                } else if (progressForThisTerm.termState == "relearning") {
+                  termsWTermStateRelearning.push(progressForThisTerm);
+                } else { /* v0.32.1 and older didn't have term states, so default to learning state */
+                  termsWTermStateLearning.push(progressForThisTerm);
                 }
-                if (progressForThisTerm.defAcc > goodAcc) {
-                  termsWDefGood.push(progressForThisTerm);
-                } else if (progressForThisTerm.defAcc < badAcc) {
-                  termsWDefBad.push(progressForThisTerm);
-                } else {
-                  termsWDefBetween.push(progressForThisTerm);
+                if (progressForThisTerm.defState == "learning") {
+                  termsWDefStateLearning.push(progressForThisTerm);
+                } else if (progressForThisTerm.defState == "review") {
+                  termsWDefStateReview.push(progressForThisTerm);
+                } else if (progressForThisTerm.defState == "relearning") {
+                  termsWDefStateRelearning.push(progressForThisTerm);
+                } else { /* v0.32.1 and older didn't have term states, so default to learning state */
+                  termsWDefStateLearning.push(progressForThisTerm);
                 }
 
                 if (progressForThisTerm.reviewSessionsCount > maxReviewSessionsCount) {
