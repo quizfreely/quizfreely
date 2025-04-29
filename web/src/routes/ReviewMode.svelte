@@ -447,13 +447,13 @@
         document.getElementById("next-button").classList.add("hide");
 
         /* pick randomly to answer with term or def */
-        var answerWithTerm = Math.random() < 0.5;
-        if (answerWithTerm) {
-          document.getElementById("answer-with-term").classList.remove("hide");
-          document.getElementById("answer-with-def").classList.add("hide");
-        } else {
+        var answerWithDef = Math.random() < 0.5;
+        if (answerWithDef) {
           document.getElementById("answer-with-term").classList.add("hide");
           document.getElementById("answer-with-def").classList.remove("hide");
+        } else {
+          document.getElementById("answer-with-term").classList.remove("hide");
+          document.getElementById("answer-with-def").classList.add("hide");
         }
 
         /* pick random number from 1 to 4 */
