@@ -237,7 +237,7 @@
               }
             }
             /* sort arrays so that oldest/least-frequently-seen terms are first */
-            termsWTermGood.sort(function (a, b) {
+            termsWTermStateLearning.sort(function (a, b) {
               if (Math.abs(b.reviewSessionsCount - a.reviewSessionsCount) < 5) {
                 if (Math.abs(b.termAcc - a.termAcc) < 20) {
                   return b.msAgo - a.msAgo;
@@ -248,7 +248,7 @@
                 return b.reviewSessionsCount - a.reviewSessionsCount;
               }
             })
-            termsWTermBad.sort(function (a, b) {
+            termsWTermStateReview.sort(function (a, b) {
               if (Math.abs(b.reviewSessionsCount - a.reviewSessionsCount) < 5) {
                 if (Math.abs(b.termAcc - a.termAcc) < 20) {
                   return b.msAgo - a.msAgo;
@@ -259,7 +259,7 @@
                 return b.reviewSessionsCount - a.reviewSessionsCount;
               }
             })
-            termsWTermBetween.sort(function (a, b) {
+            termsWTermStateRelearning.sort(function (a, b) {
               if (Math.abs(b.reviewSessionsCount - a.reviewSessionsCount) < 5) {
                 if (Math.abs(b.termAcc - a.termAcc) < 20) {
                   return b.msAgo - a.msAgo;
@@ -270,7 +270,7 @@
                 return b.reviewSessionsCount - a.reviewSessionsCount;
               }
             })
-            termsWDefGood.sort(function (a, b) {
+            termsWDefStateLearning.sort(function (a, b) {
               if (Math.abs(b.reviewSessionsCount - a.reviewSessionsCount) < 5) {
                 if (Math.abs(b.defAcc - a.defAcc) < 20) {
                   return b.msAgo - a.msAgo;
@@ -281,7 +281,7 @@
                 return b.reviewSessionsCount - a.reviewSessionsCount;
               }
             })
-            termsWDefBad.sort(function (a, b) {
+            termsWDefStateReview.sort(function (a, b) {
               if (Math.abs(b.reviewSessionsCount - a.reviewSessionsCount) < 5) {
                 if (Math.abs(b.defAcc - a.defAcc) < 20) {
                   return b.msAgo - a.msAgo;
@@ -292,7 +292,7 @@
                 return b.reviewSessionsCount - a.reviewSessionsCount;
               }
             })
-            termsWDefBetween.sort(function (a, b) {
+            termsWDefStateRelearning.sort(function (a, b) {
               if (Math.abs(b.reviewSessionsCount - a.reviewSessionsCount) < 5) {
                 if (Math.abs(b.defAcc - a.defAcc) < 20) {
                   return b.msAgo - a.msAgo;
@@ -303,6 +303,12 @@
                 return b.reviewSessionsCount - a.reviewSessionsCount;
               }
             })
+            console.log(termsWTermStateLearning)
+            console.log(termsWTermStateReview)
+            console.log(termsWTermStateRelearning)
+            console.log(termsWDefStateLearning)
+            console.log(termsWDefStateReview)
+            console.log(termsWDefStateRelearning)
 
             /* after we finish adding to termsOverallGood and termsOverallBad,
             display their count in these text elements. (notice this is outside of the for-loop above) */
