@@ -2,8 +2,8 @@
 See web/src/routes/settings/studying-algorithm/+page.svelte
 (same UI, different functionality)
 
-This is used by web/src/routes/studyset/local/review-mode/settings/+page.svelte
-and web/src/routes/studysets/[id]/review-mode/settings/+page.svelte
+This is used by web/src/routes/studyset/local/settings/+page.svelte
+and web/src/routes/studysets/[id]/settings/+page.svelte
 -->
 
 <script>
@@ -285,9 +285,9 @@ and web/src/routes/studysets/[id]/review-mode/settings/+page.svelte
         </a>
         <a href="/settings/studying-algorithm?back={
             data.local ? encodeURIComponent(
-                "/studyset/local/review-mode/settings?id=" + data.localId
+                "/studyset/local/settings?id=" + data.localId
             ) : encodeURIComponent(
-                "/studysets/" + data.studysetId + "/review-mode/settings"
+                "/studysets/" + data.studysetId + "/settings"
             )
         }" class="settings-menu-link">
             For all studysets
@@ -295,7 +295,7 @@ and web/src/routes/studysets/[id]/review-mode/settings/+page.svelte
         </div>
     </div>
     <div class="box" style="margin-top:0px">
-        <h4>Review Mode Settings</h4>
+        <h4>Studying Algorithm Settings</h4>
         <p class="label-thingy">
             "Good" accuracy<br>
             <span class="fg0">Default: &gt; 90%</span>
