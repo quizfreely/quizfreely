@@ -36,6 +36,7 @@
       
     var answerChoices = $state([]);
     var answerWithDef = $state(false);
+    var question = $state("");
     function nextQuestion() {
       /* remove selected class and incorrect/correct styles cause we're going to the next question */
       document.getElementById("answer-choice-1").classList.remove("selected", "yay", "ohno");
@@ -174,7 +175,6 @@
       }
       currentQuestionNum++;
     }
-    document.getElementById("next-button").addEventListener("click", nextQuestion);
     function checkAnswer(event) {
       if (
         /* we use this if-statement to make sure nothing is already selected so that users can only select one answer choice */
@@ -1228,7 +1228,7 @@
               <button id="answer-choice-2" class="button-box no-clickable-effect review-mode-answer-choice" style="white-space:pre-wrap" onclick={checkAnswer}>{answerChoices[2]}</button>
               <button id="answer-choice-3" class="button-box no-clickable-effect review-mode-answer-choice" style="white-space:pre-wrap" onclick={checkAnswer}>{answerChoices[3]}</button>
             </div>
-            <button id="next-button" class="hide">Next</button>
+            <button id="next-button" class="hide" onclick={nextQuestion}>Next</button>
           </div>
           <div id="review-mode-summary" class="hide" style="min-height:60vh">
             <div class="flex" style="gap: 2rem;">
