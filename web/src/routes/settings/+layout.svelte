@@ -3,7 +3,18 @@
     import { fade } from "svelte/transition";
     import Noscript from "$lib/components/Noscript.svelte";
     import IconBackArrow from "$lib/icons/BackArrow.svelte";
+    import { onMount } from "svelte";
     let { children, data } = $props();
+
+    let thisPagesBackLink = $state(null);
+    onMount(function () {
+        if (window.sessionStorage) {
+            thisPagesBackLink = sessionStorage.getItem("quizfreely:backLink.forSettings");
+            if (thisPagesBackLink) {
+                sessionStorage.removeItem("quizfreely:backLink.forSettings");
+            }
+        }
+    })
 </script>
 <style>
     .settings-container {
@@ -58,8 +69,8 @@
 <div class="grid page">
     <div class="content">
 <div>
-    {#if data.backLink?.length >= 1}
-    <a href={data.backLink} class="button faint">
+    {#if thisPagesBackLink}
+    <a href={thisPagesBackLink} class="button faint">
       <IconBackArrow /> Back
     </a>
     {/if}
