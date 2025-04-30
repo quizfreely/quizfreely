@@ -239,6 +239,14 @@
       }
     }
     onMount(function() {
+      if (window.sessionStorage) {
+        sessionStorage.setItem(
+          "quizfreely:backLink.forStudysetSettings",
+          data.local ?
+            "/studyset/local/review-mode?id=" + data.localId :
+            "/studysets/" + data.studysetId + "/review-mode"
+        )
+      }
       if (window.localStorage) {
         /* first load from settings before per-studyset settings */
         var goodAccFromLocalStorage = localStorage.getItem("quizfreely:settings.reviewMode.goodAcc")
@@ -1012,8 +1020,8 @@
               <button id="start-button"><IconCheckmark /> Start</button>
               <a class="button alt" href={
                 data.local ?
-                  "/studyset/local/settings?id=" + data.localId + "&back=" + encodeURIComponent("/studyset/local/review-mode?id=" + data.localId):
-                  "/studysets/" + data.studysetId + "/settings?back=" + encodeURIComponent("/studysets/" + data.studysetId + "/review-mode")
+                  "/studyset/local/settings?id=" + data.localId :
+                  "/studysets/" + data.studysetId + "/settings"
               }>
                 <IconSettingsGear /> Settings
               </a>

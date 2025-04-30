@@ -294,11 +294,7 @@ and web/src/routes/studysets/[id]/settings/+page.svelte
         <a href="#top" class="settings-menu-link current">
             For this studyset
         </a>
-        <a href="/settings/studying-algorithm?back={
-            data.local ?
-              encodeURIComponent("/studyset/local/settings?id=" + data.localId + "&back=" + data.backLink ) :
-              encodeURIComponent("/studysets/" + data.studysetId + "/settings?back=" + data.backLink)
-        }" class="settings-menu-link">
+        <a href="/settings/studying-algorithm" class="settings-menu-link">
             For all studysets
         </a>
         </div>
