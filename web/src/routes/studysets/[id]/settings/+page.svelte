@@ -1,6 +1,6 @@
 <script>
-    import ReviewModeSettings from "../../../StudysetSettings.svelte";
+    import StudysetSettings from "../../../StudysetSettings.svelte";
     let { data } = $props();
 </script>
 
-<ReviewModeSettings data={{ ...data, local: false }} />
+<StudysetSettings data={{ ...data, local: false }} />

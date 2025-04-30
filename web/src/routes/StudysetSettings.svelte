@@ -267,12 +267,8 @@ and web/src/routes/studysets/[id]/settings/+page.svelte
 <div class="grid page">
 <div class="content">
 <div>
-    {#if (data.local) }
-    <a href="/studyset/local/review-mode?id={ data.localId }" class="button faint">
-      <IconBackArrow /> Back
-    </a>
-    {:else}
-    <a href="/studysets/{ data.studysetId }/review-mode" class="button faint">
+    {#if (data.backLink) }
+    <a href={data.backLink} class="button faint">
       <IconBackArrow /> Back
     </a>
     {/if}
