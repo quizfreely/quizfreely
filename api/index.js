@@ -235,18 +235,14 @@ const schema = `
         subject: String
     }
     type StudysetSettings {
-        reviewMode: ReviewModeSettings
-    }
-    type ReviewModeSettings {
         goodAcc: Float
         badAcc: Float
+        learningMinSessionsCount: Int
     }
     input StudysetSettingsInput {
-        reviewMode: ReviewModeSettingsInput
-    }
-    input ReviewModeSettingsInput {
         goodAcc: Float
         badAcc: Float
+        learningMinSessionsCount: Int
     }
     type StudysetProgress {
         id: ID!
