@@ -42,7 +42,6 @@
     }
 </style>
 <div class="box">
-    <h4>Review Mode</h4>
     <p class="label-thingy">
         "Good" accuracy<br>
         <span class="fg0">Default: &gt; 90%</span>
@@ -114,5 +113,5 @@
         }
     }}><IconCheckmark /> Save</button>
     </div>
-    <p class="fg0">You can choose different settings for each studyset inside Review Mode for that studyset.</p>
+    <p class="fg0">You can choose different settings for each studyset inside Review Mode or a Practice Test for that studyset.</p>
 </div>
