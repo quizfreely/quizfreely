@@ -18,12 +18,16 @@
       so we record accuracy when answering with terms seperatly from accuracy when answering with definitions
       and we have seperate states for each terms' term and definition based on those seperate accuracys
     */
-    var termsWTermStateLearning = [];
-    var termsWTermStateReview = [];
-    var termsWTermStateRelearning = [];
-    var termsWDefStateLearning = []; /* def means definition here */
-    var termsWDefStateReview = [];
-    var termsWDefStateRelearning = [];
+    let termsByTermStates = {
+      learning: [],
+      review: [],
+      relearning: []
+    }
+    let termsByDefStates = { /* "def" means definition here */
+      learning: [],
+      review: [],
+      relearning: []
+    }
 
     /*
       in this context, "overall" means based on term-producing AND definition-producing accuracy
