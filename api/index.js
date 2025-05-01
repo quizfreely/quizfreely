@@ -258,6 +258,10 @@ const schema = `
         termIncorrect: Int!
         defCorrect: Int!
         defIncorrect: Int!
+        termState: ProgressTermState
+        defState: ProgressTermState
+        sessionsSinceTermStateChange: Int
+        sessionsSinceDefStateChange: Int
         firstReviewedAt: String!
         lastReviewedAt: String!
         reviewSessionsCount: Int!
