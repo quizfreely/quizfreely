@@ -39,6 +39,8 @@ Answering with a term and answering with a definition might require a different 
             "defIncorrect": 0,
             "termState": "learning",
             "defState": "review",
+            "sessionsSinceTermStateChange": null,
+            "sessionsSinceDefStateChange": 2,
             "confusedTerms": [{
                 "term": "term 2",
                 "count": 4
@@ -46,7 +48,8 @@ Answering with a term and answering with a definition might require a different 
                 "term": "term 3",
                 "count": 2
             }],
-            "confusedDefs": []
+            "confusedDefs": [],
+            "reviewSessionsCount": 7,
             "firstReviewedAt": "2009-01-19 Jan W4-1 Mon 00:59 GMT-5 EST",
             "lastReviewedAt": "2025-01-19 Jan W3-1 Mon 00:59 GMT-5 EST"
         },
@@ -59,6 +62,8 @@ Answering with a term and answering with a definition might require a different 
             "defIncorrect": 2,
             "termState": "relearning",
             "defState": "review",
+            "sessionsSinceTermStateChange": 9,
+            "sessionsSinceDefStateChange": 20,
             "confusedTerms": [{
                 "term": "term 1",
                 "count": 4
@@ -66,8 +71,9 @@ Answering with a term and answering with a definition might require a different 
             "confusedDefs": [{
                 "def": "definition 1",
                 "count": 2
-            }]
-            "firstReviewedAt": "2022-12-13 Dec W50-2 Tue 16:23 GMT-5 EST"
+            }],
+            "reviewSessionsCount": 161,
+            "firstReviewedAt": "2022-12-13 Dec W50-2 Tue 16:23 GMT-5 EST",
             "lastReviewedAt": "2025-04-24 Apr W17-4 Thu 22:12 GMT-4 EDT"
         }
     ]
