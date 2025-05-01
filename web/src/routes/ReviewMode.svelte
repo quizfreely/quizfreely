@@ -344,24 +344,8 @@
                   termsOverallBetween.push(progressForThisTerm);
                 }
 
-                if (progressForThisTerm.termState == "learning") {
-                  termsWTermStateLearning.push(progressForThisTerm);
-                } else if (progressForThisTerm.termState == "review") {
-                  termsWTermStateReview.push(progressForThisTerm);
-                } else if (progressForThisTerm.termState == "relearning") {
-                  termsWTermStateRelearning.push(progressForThisTerm);
-                } else { /* v0.32.1 and older didn't have term states, so default to learning state */
-                  termsWTermStateLearning.push(progressForThisTerm);
-                }
-                if (progressForThisTerm.defState == "learning") {
-                  termsWDefStateLearning.push(progressForThisTerm);
-                } else if (progressForThisTerm.defState == "review") {
-                  termsWDefStateReview.push(progressForThisTerm);
-                } else if (progressForThisTerm.defState == "relearning") {
-                  termsWDefStateRelearning.push(progressForThisTerm);
-                } else { /* v0.32.1 and older didn't have term states, so default to learning state */
-                  termsWDefStateLearning.push(progressForThisTerm);
-                }
+                termsByTermStates[progressForThisTerm.termState].push(progressForThisTerm);
+                termsByDefStates[progressForThisTerm.defState].push(progressForThisTerm);
 
                 if (progressForThisTerm.reviewSessionsCount > maxReviewSessionsCount) {
                   maxReviewSessionsCount = progressForThisTerm.reviewSessionsCount;
