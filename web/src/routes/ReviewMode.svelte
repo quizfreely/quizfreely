@@ -101,16 +101,10 @@
           /* put the term/def from newTerms into the actual element(s) */
           if (answerWithTermOrDef == 0) {
             /* answerWithTermOrDef is 0 for term and 1 for def, if it's term then we ask the definition */
-            document.getElementById("question").innerText = studysetTermsWithProgress[currentTermWithProgress].def
-            document.getElementById("question").dataset.answerwith = "term";
-            document.getElementById("question").dataset.array = "studysetTermsWithProgress";
-            document.getElementById("question").dataset.index = currentTermWithProgress;
+            question = studysetTermsWithProgress[currentTermWithProgress].def
           } else {
             /* 0 for term, 1 for def. If it's 1 (not 0), then we need to ask with the temr */
-            document.getElementById("question").innerText = studysetTermsWithProgress[currentTermWithProgress].term
-            document.getElementById("question").dataset.answerwith = "def";
-            document.getElementById("question").dataset.array = "studysetTermsWithProgress";
-            document.getElementById("question").dataset.index = currentTermWithProgress;
+            question = studysetTermsWithProgress[currentTermWithProgress].term
           }
           if (answerWithTermOrDef == 0) {
             correctAnswerContent = studysetTermsWithProgress[currentTermWithProgress].term;
