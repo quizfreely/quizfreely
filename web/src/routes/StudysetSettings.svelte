@@ -20,22 +20,7 @@ and web/src/routes/studysets/[id]/settings/+page.svelte
     var showInvalidReviewModeAcc = $state(false);
     var reviewModeChangesSaved = $state(false);
     
-    var thisPagesBackLink = $state(null);
-
     onMount(function () {
-      if (window.sessionStorage) {
-        thisPagesBackLink = sessionStorage.getItem("quizfreely:backLink.forStudysetSettings");
-        if (thisPagesBackLink) {
-          /* unset it after showing the back link, so that on renavigation it doesnt point to an old link */
-          sessionStorage.removeItem("quizfreely:backLink.forStudysetSettings")
-        }
-        sessionStorage.setItem(
-          "quizfreely:backLink.forSettings",
-          data.local ?
-            "/studyset/local/settings?id=" + data.localId :
-            "/studysets/" + data.studysetId + "/settings"
-        )
-      }
         /* settings stored locally w IndexedDB if studyset is local OR if user isn't logged in (even if the studyset isn't local) */
         if (data.local || !data.authed) {
             openIndexedDB(function (db) {
@@ -282,11 +267,13 @@ and web/src/routes/studysets/[id]/settings/+page.svelte
 <div class="grid page">
 <div class="content">
 <div>
-    {#if (thisPagesBackLink) }
-    <a href={thisPagesBackLink} class="button faint">
+    <a href={
+      data.local ?
+        "/studyset/local?id=" + data.localId :
+        "/studysets/" + data.studysetId
+    } class="button faint">
       <IconBackArrow /> Back
     </a>
-    {/if}
 </div>
 <div class="settings-container">
     <div>

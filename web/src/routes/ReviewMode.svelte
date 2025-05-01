@@ -239,14 +239,6 @@
       }
     }
     onMount(function() {
-      if (window.sessionStorage) {
-        sessionStorage.setItem(
-          "quizfreely:backLink.forStudysetSettings",
-          data.local ?
-            "/studyset/local/review-mode?id=" + data.localId :
-            "/studysets/" + data.studysetId + "/review-mode"
-        )
-      }
       if (window.localStorage) {
         /* first load from settings before per-studyset settings */
         var goodAccFromLocalStorage = localStorage.getItem("quizfreely:settings.reviewMode.goodAcc")
