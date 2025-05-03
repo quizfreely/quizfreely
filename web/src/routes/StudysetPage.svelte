@@ -52,19 +52,6 @@
           }
         }
       })
-      document.getElementById("delete-confirm-button").addEventListener("click", function () {
-        openIndexedDB(function (db) {
-          var studysetsObjectStore = db.transaction(["studysets"], "readwrite").objectStore("studysets");
-          var dbDeleteReq = studysetsObjectStore.delete(data.localId);
-          dbDeleteReq.onsuccess = function (event) {
-            goto("/dashboard");
-          }
-          dbDeleteReq.onerror = function (error) {
-            console.error(error);
-            alert("indexeddb error while trying to delete local studyset")
-          }
-        })
-      })
         }
 
         var flashcardsIndex = 0;
@@ -121,33 +108,46 @@
       }
       document.getElementById("flashcards-maximize").addEventListener("click", maximizeFlashcards);
       document.getElementById("flashcards-unmaximize").addEventListener("click", unmaximizeFlashcards);
-
-    if (data?.studyset?.id) {
-        document.getElementById("delete-confirm-button").addEventListener("click", function () {
-        fetch("/api/v0/studysets/" + data.studyset.id, {
-          method: "DELETE",
-          credentials: "same-origin"
-        }).then(function (rawResponse) {
-          rawResponse.json().then(function (response) {
-            if (response.error) {
-              console.log(response)
-              alert(response.error)
-            } else {
-              goto("/dashboard");
-            }
+    })
+    function deleteConfirmButtonClicked() {
+      if (data.local) {
+        openIndexedDB(function (db) {
+          var studysetsObjectStore = db.transaction(["studysets"], "readwrite").objectStore("studysets");
+          var dbDeleteReq = studysetsObjectStore.delete(data.localId);
+          dbDeleteReq.onsuccess = function (event) {
+            goto("/dashboard");
+          }
+          dbDeleteReq.onerror = function (error) {
+            console.error(error);
+            alert("indexeddb error while trying to delete local studyset")
+          }
+        })
+      } else {
+          document.getElementById("delete-confirm-button").addEventListener("click", function () {
+          fetch("/api/v0/studysets/" + data.studyset.id, {
+            method: "DELETE",
+            credentials: "same-origin"
+          }).then(function (rawResponse) {
+            rawResponse.json().then(function (response) {
+              if (response.error) {
+                console.log(response)
+                alert(response.error)
+              } else {
+                goto("/dashboard");
+              }
+            }).catch(function (error) {
+              console.error(error);
+              alert("json parsing fetch error");
+              /* work in progress error msgs */
+            })
           }).catch(function (error) {
             console.error(error);
-            alert("json parsing fetch error");
-            /* work in progress error msgs */
+            alert("fetch error")
+            /* work in progress error messages? */
           })
-        }).catch(function (error) {
-          console.error(error);
-          alert("fetch error")
-          /* work in progress error messages? */
         })
-      })
+      }
     }
-    })
 </script>
 
 <svelte:head>
@@ -329,7 +329,7 @@
         <div class="content">
           <p>Are you sure you want to delete this studyset?</p>
           <div class="flex">
-            <button id="delete-confirm-button" class="ohno">
+            <button class="ohno" onclick={deleteConfirmButtonClicked}>
               <IconTrash />
               Delete
             </button>
