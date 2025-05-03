@@ -34,7 +34,9 @@
         gap: 0.4rem;
         align-items: stretch;
     }
-
+    .settings-title-show-on-mobile-only {
+        display: none;
+    }
     @media only screen and (max-width: 800px) {
         .settings-container {
             grid-template-columns: 1fr;
@@ -45,6 +47,9 @@
             gap: 1rem;
             margin-bottom: 1rem;
             align-items: center;
+        }
+        .settings-title-show-on-mobile-only {
+            display: block;
         }
     }
 </style>
@@ -61,17 +66,18 @@
 </div>
 <div class="settings-container">
     <div>
+        <h4 class="center settings-title-show-on-mobile-only">Settings</h4>
         <div class="settings-menu-nav">
-        <a href="/settings" class="settings-menu-link {page.data.settingsSection == "general" ? "current" : ""}">
-            General
-        </a>
-        <a href="/settings/account" class="settings-menu-link {page.data.settingsSection == "account" ? "current" : ""}">
-            Account
-        </a>
-        <a href="/settings/studying-algorithm" class="settings-menu-link {page.data.settingsSection == "studying_algorithm" ? "current" : ""}">
-            Studying Algorithm
-        </a>
-    </div>
+            <a href="/settings" class="settings-menu-link {page.data.settingsSection == "general" ? "current" : ""}">
+                General
+            </a>
+            <a href="/settings/account" class="settings-menu-link {page.data.settingsSection == "account" ? "current" : ""}">
+                Account
+            </a>
+            <a href="/settings/studying-algorithm" class="settings-menu-link {page.data.settingsSection == "studying_algorithm" ? "current" : ""}">
+                Studying Algorithm
+            </a>
+        </div>
     </div>
     <div style="margin-top:0px">
         {#key data.settingsTransPageKey}
