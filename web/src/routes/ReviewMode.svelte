@@ -8,8 +8,12 @@
     import IconBackArrow from "$lib/icons/BackArrow.svelte";
     import IconRepeat from "$lib/icons/Repeat.svelte";
     import IconSettingsGear from "$lib/icons/SettingsGear.svelte";
+    import { fade } from 'svelte/transition';
     var goodAcc = $state(90) /* w state cause they're used in calculation stuff AND ui */
     var badAcc = $state(80)
+
+    var reviewStarted = $state(false);
+    var showExitConfirmationPrompt = $state(false);
 
     /*
       producing/answering-with the term given the definition and
@@ -115,8 +119,6 @@
           } else {
             correctAnswerContent = studysetTermsWithProgress[currentTermWithProgress].def;
           }
-          document.getElementById("answer-" + correctAnswerPosition).innerText = correctAnswerContent;
-          document.getElementById("answer-" + correctAnswerPosition).dataset.answer = "correct"; /* this data-answer="..." attribute is used by function checkAnswer() later */
           currentTermWithProgress++ /* increment currentTermWithProgress to keep track of what index we are at */
         }
         var alreadyUsedRandomIndexes = [];
@@ -527,6 +529,7 @@
       });
 
       document.getElementById("start-button").addEventListener("click", function () {
+        reviewStarted = true;
         if (
           document.getElementById("setup-split").classList.contains("hide") === false &&
           document.getElementById("split-true-button").classList.contains("selected")
@@ -941,22 +944,49 @@
     {/if}
 </svelte:head>
 
-
-    {#if (data.local)}
     <Noscript />
+    {#if showExitConfirmationPrompt}
+    <div transition:fade={{ duration: 200 }} class="modal">
+      <div class="content">
+        <h4>
+          Exit Review Mode?
+        </h4>
+        <p>
+          Are you sure you want to exit without finishing your session?
+        </p>
+        <div class="flex">
+          {#if data.local}
+            <a href="/studyset/local?id={data.localId}" class="button ohno">Exit</a>
+          {:else}
+            <a href="/studysets/{data.studysetId}" class="button ohno">Exit</a>
+          {/if}
+          <button class="alt" onclick={function () {
+            showExitConfirmationPrompt = false;
+          }}>Continue</button>
+        </div>
+      </div>
+    </div>
     {/if}
     <main>
       <div class="grid page">
         <div class="content">
           <div>
-            {#if (data.local) }
-            <a href="/studyset/local?id={ data.localId }" class="button faint">
+            {#if reviewStarted}
+            <button class="button faint" onclick={function () {
+              showExitConfirmationPrompt = true;
+            }}>
               <IconBackArrow /> Back
-            </a>
+            </button>
             {:else}
-            <a href="/studysets/{ data.studysetId }" class="button faint">
-              <IconBackArrow /> Back
-            </a>
+              {#if (data.local) }
+              <a href="/studyset/local?id={ data.localId }" class="button faint">
+                <IconBackArrow /> Back
+              </a>
+              {:else}
+              <a href="/studysets/{ data.studysetId }" class="button faint">
+                <IconBackArrow /> Back
+              </a>
+              {/if}
             {/if}
           </div>
           <div id="review-mode-setup" style="min-height:60vh">
