@@ -14,9 +14,11 @@
     import IconPlus from "$lib/icons/Plus.svelte";
 
     import { flip } from "svelte/animate";
-    import { scale } from "svelte/transition";
+    import { scale, fade } from "svelte/transition";
 
     import AutoResizeTextarea from "$lib/components/AutoResizeTextarea.svelte";
+
+    var showImportTermsModal = $state(false);
 
     var terms = $state([]);
     var termId = 0;
@@ -409,7 +411,7 @@
                   <IconPlus />
                   Add term
                 </button>
-                <button class="alt" onclick={function () { document.getElementById("import-terms-modal").classList.remove("hide"); }}>
+                <button class="alt" onclick={function () { showImportTermsModal = true }}>
                   <IconPlus />
                   Import terms
                 </button>
@@ -444,7 +446,8 @@
               </button>
               {/if}
             </div>
-            <div class="modal hide" id="import-terms-modal">
+            {#if showImportTermsModal}
+            <div class="modal" transition:fade={{ duration: 200 }}>
               <div class="content">
                 <div class="grid import-terms-split">
                   <div>
@@ -546,13 +549,14 @@
                       }
 
                       /* hide the modal after importing */
-                      document.getElementById("import-terms-modal").classList.add("hide");
+                      showImportTermsModal = false;
                     }
                   }>Import</button>
-                  <button class="alt" onclick={function () { document.getElementById("import-terms-modal").classList.add("hide")}}>Cancel</button>
+                  <button class="alt" onclick={function () { showImportTermsModal = false }}>Cancel</button>
                 </div>
               </div>
             </div>
+            {/if}
         </div>
       </div>
     </main>
