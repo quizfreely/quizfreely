@@ -62,8 +62,6 @@
 
 <div class="grid page">
     <div class="content">
-<div>
-</div>
 <div class="settings-container">
     <div>
         <h4 class="center settings-title-show-on-mobile-only">Settings</h4>
