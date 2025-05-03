@@ -13,7 +13,7 @@
     import IconBackArrow from "$lib/icons/BackArrow.svelte";
     import IconArrowLeft from "$lib/icons/ArrowLeft.svelte";
     import IconArrowRight from "$lib/icons/ArrowRight.svelte";
-    import IconMoreDotsHorizontal from "$lib/icons/MoreDotsHorizontal.svelte";
+    import IconMoreDotsV from "$lib/icons/MoreDotsVertical.svelte";
     import IconReviewModeBook from "$lib/icons/ReviewModeBook.svelte";
     import IconFlashcards from "$lib/icons/Flashcards.svelte";
     import IconSettingsGear from "$lib/icons/SettingsGear.svelte";
@@ -194,7 +194,7 @@
           </a>
           <div class="dropdown">
             <button class="dropdown-toggle" aria-label="More Options Dropdown">
-              <IconMoreDotsHorizontal />
+              <IconMoreDotsV />
             </button>
             <div class="content">
               <button class="ohno" id="delete-button"><IconTrash /> Delete </button>
@@ -209,7 +209,7 @@
           </a>
           <div class="dropdown">
             <button class="dropdown-toggle" aria-label="More Options Dropdown">
-              <IconMoreDotsHorizontal />
+              <IconMoreDotsV />
             </button>
             <div class="content">
               <button class="ohno" id="delete-button"><IconTrash /> Delete </button>
