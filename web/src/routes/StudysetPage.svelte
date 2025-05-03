@@ -97,11 +97,7 @@
       /* the modal's html is the same for local and authed */
       if (document.getElementById("delete-button")) {
         document.getElementById("delete-button").addEventListener("click", function () {
-          document.getElementById("delete-modal").classList.remove("hide");
-        })
-        
-        document.getElementById("delete-cancel-button").addEventListener("click", function () {
-          document.getElementById("delete-modal").classList.add("hide");
+          showDeleteConfirmationModal = true
         })
       }
       function maximizeFlashcards() {
@@ -325,15 +321,20 @@
           </tbody>
         </table>
       </div>
-      <div class="modal hide" id="delete-modal">
+      {#if showDeleteConfirmationModal }
+      <div class="modal" transition:fade={{ duration: 200 }}>
         <div class="content">
           <p>Are you sure you want to delete this studyset?</p>
           <div class="flex">
-            <button id="delete-confirm-button" class="ohno">Delete</button>
-            <button id="delete-cancel-button" class="alt">Cancel</button>
+            <button id="delete-confirm-button" class="ohno">
+              <IconTrash />
+              Delete
+            </button>
+            <button class="alt" onclick={function () { showDeleteConfirmationModal = false }}>Cancel</button>
           </div>
         </div>
       </div>
+      {/if}
     </div>
   </div>
 </main>
