@@ -8,7 +8,7 @@
     import IconLocal from "$lib/icons/Local.svelte";
     import IconCheckmark from "$lib/icons/Checkmark.svelte";
     import IconTrash from "$lib/icons/Trash.svelte";
-    import IconMoreDotsHorizontal from "$lib/icons/MoreDotsHorizontal.svelte";
+    import IconMoreDotsV from "$lib/icons/MoreDotsVertical.svelte";
     import IconArrowUp from "$lib/icons/ArrowUp.svelte";
     import IconArrowDown from "$lib/icons/ArrowDown.svelte";
     import IconPlus from "$lib/icons/Plus.svelte";
@@ -377,7 +377,7 @@
                   <div class="flex center term-row-box-actions">
                       <div class="dropdown left">
                           <button class="dropdown-toggle" aria-label="Actions dropdown menu">
-                              <IconMoreDotsHorizontal />
+                              <IconMoreDotsV />
                           </button>
                           <div class="content">
                               <button onclick={function (event) {
@@ -425,7 +425,7 @@
               </button>
               <div class="dropdown">
                 <button class="dropdown-toggle" aria-label="saving options dropdown">
-                  <IconMoreDotsHorizontal />
+                  <IconMoreDotsV />
                 </button>
                 <div class="content">
                   <button id="create-button-local">
