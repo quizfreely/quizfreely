@@ -3,6 +3,7 @@
     import { onMount } from "svelte";
     import { openIndexedDB } from "$lib/indexedDB";
     import { goto } from "$app/navigation";
+    import { fade } from "svelte/transition";
     let { data } = $props();
 
     import IconLocal from "$lib/icons/Local.svelte";
@@ -16,6 +17,8 @@
     import IconReviewModeBook from "$lib/icons/ReviewModeBook.svelte";
     import IconFlashcards from "$lib/icons/Flashcards.svelte";
     import IconSettingsGear from "$lib/icons/SettingsGear.svelte";
+
+    var showDeleteConfirmationModal = $state(false);
 
     onMount(function () {
         if (data.local) {
