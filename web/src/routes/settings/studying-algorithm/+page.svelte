@@ -14,7 +14,7 @@
         if (window.localStorage) {
             var goodAcc = parseFloat(localStorage.getItem("quizfreely:settings.studyingAlgorithm.goodAcc"));
             var badAcc = parseFloat(localStorage.getItem("quizfreely:settings.studyingAlgorithm.badAcc"));
-            var learningMinSessionsCount = parseFloat(localStorage.getItem("quizfreely:settings.studyingAlgorithm.learningMinSessionsCount"));
+            var learningMinSessionsCount = parseInt(localStorage.getItem("quizfreely:settings.studyingAlgorithm.learningMinSessionsCount"));
             if (goodAcc >= 1 && goodAcc <= 100) {
                 document.getElementById("studying-algorithm-good-acc").value = goodAcc;
             }
@@ -93,7 +93,7 @@
         if (window.localStorage) {
             var newGoodAcc = parseFloat(document.getElementById("studying-algorithm-good-acc").value)
             var newBadAcc = parseFloat(document.getElementById("studying-algorithm-bad-acc").value)
-            var newLearningMinSessionsCount = parseFloat(document.getElementById("studying-algorithm-learning-min-sessions-count").value)
+            var newLearningMinSessionsCount = parseInt(document.getElementById("studying-algorithm-learning-min-sessions-count").value)
 
             showInvalidAcc = false;
 
