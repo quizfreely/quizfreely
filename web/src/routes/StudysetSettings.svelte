@@ -52,10 +52,9 @@ and web/src/routes/studysets/[id]/settings/+page.svelte
                     user_id
                   }
                   studysetSettings(studysetId: $id) {
-                    reviewMode {
-                        goodAcc
-                        badAcc
-                    }
+                    goodAcc
+                    badAcc
+                    learningMinSessionsCount
                   }
                  }`,
                 variables: {
@@ -101,8 +100,8 @@ and web/src/routes/studysets/[id]/settings/+page.svelte
     }
     function loadedStudysetSettings(studysetSettings) {
         useGlobalSettings()
-        var goodAcc = parseFloat(studysetSettings?.reviewMode?.goodAcc);
-        var badAcc = parseFloat(studysetSettings?.reviewMode?.badAcc);
+        var goodAcc = parseFloat(studysetSettings?.goodAcc);
+        var badAcc = parseFloat(studysetSettings?.badAcc);
         if (goodAcc >= 1 && goodAcc <= 100) {
             document.getElementById("good-acc").value = goodAcc;
         }
@@ -117,7 +116,7 @@ and web/src/routes/studysets/[id]/settings/+page.svelte
             if (success) { console.log("yay") }
         }
     ) */
-    function updateReviewModeSettings(reviewModeSettings, callback) {
+    function updateReviewModeSettings(studysetSettingsParam, callback) {
         if (data.local || !data.authed) {
             openIndexedDB(function (db) {
                 var dbTransaction = db.transaction(["studysetsettings"], "readwrite");
@@ -128,12 +127,11 @@ and web/src/routes/studysets/[id]/settings/+page.svelte
                   callback(false)
                 }
                 dbSettingsGetReq.onsuccess = function (event) {
-                    var studysetSettings;
                     if (dbSettingsGetReq.result == null) {
                         /* new, no existing settings */
                         var dbSettingsAddReq = studysetsettingsObjectStore.add({
                             studyset_id: data.localId ?? data.studysetId,
-                            reviewMode: reviewModeSettings
+                            settings: studysetSettingsParam
                         })
                         dbSettingsAddReq.onsuccess = function () {
                             console.log("Sucessfully added studyset settings")
@@ -143,7 +141,7 @@ and web/src/routes/studysets/[id]/settings/+page.svelte
                         /* w existing settings */
                         var dbSettingsPutReq = studysetsettingsObjectStore.put({
                             ...dbSettingsGetReq.result,
-                            reviewMode: reviewModeSettings
+                            settings: studysetSettingsParam
                         }) 
                         dbSettingsPutReq.onsuccess = function () {
                             console.log("Sucessfully updated studyset settings")
@@ -153,34 +151,30 @@ and web/src/routes/studysets/[id]/settings/+page.svelte
                 }
             })
         } else {
-                        fetch("/api/graphql", {
+            fetch("/api/graphql", {
               method: "POST",
               headers: {
                 "Content-Type": "application/json"
               },
               body: JSON.stringify({
-                query: `mutation updateStudysetSettings($id: ID!, $reviewModeSettings: ReviewModeSettingsInput) {
+                query: `mutation updateStudysetSettings($id: ID!, $settings: StudysetSettingsInput!) {
                   updateStudysetSettings(
                     studysetId: $id
-                    changedSettings: {
-                        reviewMode: $reviewModeSettings
-                    }
+                    changedSettings: $settings
                   ) {
-                    reviewMode {
-                        goodAcc
-                        badAcc
-                    }
+                    goodAcc
+                    badAcc
                   }
                  }`,
                 variables: {
                   "id": data.studysetId,
-                  "reviewModeSettings": reviewModeSettings
+                  "settings": studysetSettingsParam
                 }
               })
             }).then(function (rawApiRes) {
               rawApiRes.json().then(function (apiResponse) {
                 if (
-                  apiResponse.data?.updateStudysetSettings?.reviewMode
+                  apiResponse.data?.updateStudysetSettings
                 ) {
                   callback(true)
                 } else {

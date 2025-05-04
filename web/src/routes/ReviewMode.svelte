@@ -241,8 +241,8 @@
     onMount(function() {
       if (window.localStorage) {
         /* first load from settings before per-studyset settings */
-        var goodAccFromLocalStorage = localStorage.getItem("quizfreely:settings.reviewMode.goodAcc")
-        var badAccFromLocalStorage = localStorage.getItem("quizfreely:settings.reviewMode.badAcc")
+        var goodAccFromLocalStorage = localStorage.getItem("quizfreely:settings.goodAcc")
+        var badAccFromLocalStorage = localStorage.getItem("quizfreely:settings.badAcc")
         /* if statements to avoid setting goodAcc or badAcc to null when setting is unset */
         if (goodAccFromLocalStorage) {
           goodAcc = goodAccFromLocalStorage
@@ -253,8 +253,8 @@
       }
       function loadedStudysetSettings(studysetSettings) {
         /* use stuff from per-studyset settings */
-        var loadedGoodAcc = parseFloat(studysetSettings?.reviewMode?.goodAcc);
-        var loadedBadAcc = parseFloat(studysetSettings?.reviewMode?.badAcc);
+        var loadedGoodAcc = parseFloat(studysetSettings?.goodAcc);
+        var loadedBadAcc = parseFloat(studysetSettings?.badAcc);
         if (loadedGoodAcc >= 1 && loadedGoodAcc <= 100) {
             goodAcc = loadedGoodAcc;
         }
@@ -705,10 +705,9 @@
               }
             }
             studysetSettings(studysetId: $id) {
-              reviewMode {
-                goodAcc
-                badAcc
-              }
+              goodAcc
+              badAcc
+              learningMinSessionsCount
             }
            }`,
           variables: {
