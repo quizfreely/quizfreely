@@ -307,7 +307,6 @@ and web/src/routes/studysets/[id]/settings/+page.svelte
         {/if}
         <div class="flex">
         <button onclick={function () {
-        if (window.localStorage) {
             var newGoodAcc = parseFloat(document.getElementById("good-acc").value)
             var newBadAcc = parseFloat(document.getElementById("bad-acc").value)
 
@@ -348,7 +347,6 @@ and web/src/routes/studysets/[id]/settings/+page.svelte
                     }
                 )
             }
-        }
         }}><IconCheckmark /> Save</button>
         </div>
     </div>
