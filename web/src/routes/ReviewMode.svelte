@@ -45,6 +45,7 @@
     var answerChoices = $state([]);
     var answerWithDef = $state(false);
     var question = $state("");
+    var correctAnswerIndex = 0;
     function nextQuestion() {
       /* remove selected class and incorrect/correct styles cause we're going to the next question */
       document.getElementById("answer-choice-1").classList.remove("selected", "yay", "ohno");
@@ -58,7 +59,7 @@
       answerWithDef = Math.random() < 0.5;
 
       /* pick random number from 1 to 4 */
-      var correctAnswerIndex = Math.floor(Math.random() * 4);
+      correctAnswerIndex = Math.floor(Math.random() * 4);
 
       /* what? */
       //if (currentQuestionNum > 10 && sessionIncorrectTerms.length >= 1) {
