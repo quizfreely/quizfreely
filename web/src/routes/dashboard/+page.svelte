@@ -33,6 +33,9 @@
               localListTitleElement.classList.remove("hide");
             }
             document.getElementById("local-list").classList.remove("hide");
+            studysets.sort(function (a, b) {
+              return Date.parse(b.updated_at) - Date.parse(a.updated_at)
+            })
             for (var i = 0; i < studysets.length; i++) {
               var div = document.createElement("div");
               div.classList.add("box");
