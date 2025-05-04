@@ -18,6 +18,7 @@ and web/src/routes/studysets/[id]/settings/+page.svelte
     import Noscript from "$lib/components/Noscript.svelte";
     import { openIndexedDB } from "$lib/indexedDB";
     var showInvalidAcc = $state(false);
+    var showInvalidLearningMinSessionsCount = $state(false);
     var changesSaved = $state(false);
     
     onMount(function () {
@@ -90,11 +91,15 @@ and web/src/routes/studysets/[id]/settings/+page.svelte
         if (window.localStorage) {
             var goodAcc = parseFloat(localStorage.getItem("quizfreely:settings.studyingAlgorithm.goodAcc"));
             var badAcc = parseFloat(localStorage.getItem("quizfreely:settings.studyingAlgorithm.badAcc"));
+            var learningMinSessionsCount = parseFloat(localStorage.getItem("quizfreely:settings.studyingAlgorithm.learningMinSessionsCount"));
             if (goodAcc >= 1 && goodAcc <= 100) {
                 document.getElementById("good-acc").value = goodAcc;
             }
             if (badAcc >= 0 && badAcc <= 100) {
                 document.getElementById("bad-acc").value = badAcc;
+            }
+            if (learningMinSessionsCount >= 1) {
+              document.getElementById("learning-min-sessions-count").value = learningMinSessionsCount;
             }
         }
     }
@@ -164,6 +169,7 @@ and web/src/routes/studysets/[id]/settings/+page.svelte
                   ) {
                     goodAcc
                     badAcc
+                    learningMinSessionsCount
                   }
                  }`,
                 variables: {
@@ -282,6 +288,8 @@ and web/src/routes/studysets/[id]/settings/+page.svelte
     </div>
     <div class="box" style="margin-top:0px">
         <h4>Studying Algorithm Settings</h4>
+        <div class="flex" style="gap: 2rem;">
+          <div>
         <p class="label-thingy">
             "Good" accuracy<br>
             <span class="fg0">Default: &gt; 90%</span>
@@ -290,6 +298,8 @@ and web/src/routes/studysets/[id]/settings/+page.svelte
             <input type="text" id="good-acc" class="input-thingy" placeholder="90" oninput={() => changesSaved = false}>
             <span class="input-thingy-percent">%</span>
         </div>
+        </div>
+        <div>
         <p class="label-thingy">
             "Bad" accuracy<br>
             <span class="fg0">Default: &lt; 80%</span>
@@ -298,9 +308,21 @@ and web/src/routes/studysets/[id]/settings/+page.svelte
             <input type="text" id="bad-acc" class="input-thingy" placeholder="80" oninput={() => changesSaved = false}>
             <span class="input-thingy-percent">%</span>
         </div>
+        </div>
+        </div>
+        <p class="label-thingy">
+            Minimum review count for new(ish) terms<br>
+            <span class="fg0">Default: 5</span>
+        </p>
+        <div class="input-thingy-container">
+            <input type="text" id="learning-min-sessions-count" class="input-thingy" placeholder="5" oninput={() => changesSaved = false}>
+        </div>
         <div class="box ohno { showInvalidAcc ? "" : "hide" }">
             "Good" accuracy needs to be greater than "bad" accuracy.<br>
             Both need to be between 1 and 100
+        </div>
+        <div class="box ohno { showInvalidLearningMinSessionsCount ? "" : "hide" }">
+            Min review count needs to be a number greater than or equal to 1
         </div>
         {#if changesSaved}
             <p class="fg0">Changes Saved</p>
@@ -309,11 +331,12 @@ and web/src/routes/studysets/[id]/settings/+page.svelte
         <button onclick={function () {
             var newGoodAcc = parseFloat(document.getElementById("good-acc").value)
             var newBadAcc = parseFloat(document.getElementById("bad-acc").value)
-
+            var newLearningMinSessionsCount = parseFloat(document.getElementById("learning-min-sessions-count").value)
             showInvalidAcc = false;
             var newSettings = {
                 goodAcc: 90,
-                badAcc: 80
+                badAcc: 80,
+                learningMinSessionsCount: 5
             }
             
             if (newBadAcc >= 1 && newBadAcc <= 100 && (
@@ -336,7 +359,13 @@ and web/src/routes/studysets/[id]/settings/+page.svelte
                 showInvalidAcc = true;
             }
 
-            if (!showInvalidAcc) {
+            if (newLearningMinSessionsCount >= 1) {
+              newSettings.learningMinSessionsCount = newLearningMinSessionsCount;
+            } else if (document.getElementById("learning-min-sessions-count").value != "") {
+              showInvalidLearningMinSessionsCount = true;
+            }
+
+            if ((!showInvalidAcc) && !(showInvalidLearningMinSessionsCount)) {
                 updateSettings(newSettings,
                     function(sucessfullyUpdated) {
                         if (sucessfullyUpdated) {
