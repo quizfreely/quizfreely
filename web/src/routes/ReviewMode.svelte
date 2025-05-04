@@ -362,79 +362,33 @@
                 }
               }
             }
-            /* sort arrays so that oldest/least-frequently-seen terms are first */
-            termsWTermStateLearning.sort(function (a, b) {
-              if (Math.abs(b.reviewSessionsCount - a.reviewSessionsCount) < 5) {
-                if (Math.abs(b.termAcc - a.termAcc) < 20) {
+            /* sort arrays so that oldest/least-frequently-seen and worst/most-incorrect terms are first */
+            function sortTerms(a, b) {
+              /* a - b means increasing (and b - a is decreasing) */
+              if (Math.abs(a.reviewSessionsCount - b.reviewSessionsCount) < 10) {
+                if (Math.abs(a.termAcc - b.termAcc) < 20) {
+                  /* b - a = decreasing = first is more */
                   return b.msAgo - a.msAgo;
                 } else {
-                  return b.termAcc - a.termAcc;
+                  /* a - b = increasing = first is less */
+                  return a.termAcc - b.termAcc;
                 }
               } else {
-                return b.reviewSessionsCount - a.reviewSessionsCount;
+                /* a - b = increasing = first is less */
+                return a.reviewSessionsCount - b.reviewSessionsCount;
               }
-            })
-            termsWTermStateReview.sort(function (a, b) {
-              if (Math.abs(b.reviewSessionsCount - a.reviewSessionsCount) < 5) {
-                if (Math.abs(b.termAcc - a.termAcc) < 20) {
-                  return b.msAgo - a.msAgo;
-                } else {
-                  return b.termAcc - a.termAcc;
-                }
-              } else {
-                return b.reviewSessionsCount - a.reviewSessionsCount;
-              }
-            })
-            termsWTermStateRelearning.sort(function (a, b) {
-              if (Math.abs(b.reviewSessionsCount - a.reviewSessionsCount) < 5) {
-                if (Math.abs(b.termAcc - a.termAcc) < 20) {
-                  return b.msAgo - a.msAgo;
-                } else {
-                  return b.termAcc - a.termAcc;
-                }
-              } else {
-                return b.reviewSessionsCount - a.reviewSessionsCount;
-              }
-            })
-            termsWDefStateLearning.sort(function (a, b) {
-              if (Math.abs(b.reviewSessionsCount - a.reviewSessionsCount) < 5) {
-                if (Math.abs(b.defAcc - a.defAcc) < 20) {
-                  return b.msAgo - a.msAgo;
-                } else {
-                  return b.defAcc - a.defAcc;
-                }
-              } else {
-                return b.reviewSessionsCount - a.reviewSessionsCount;
-              }
-            })
-            termsWDefStateReview.sort(function (a, b) {
-              if (Math.abs(b.reviewSessionsCount - a.reviewSessionsCount) < 5) {
-                if (Math.abs(b.defAcc - a.defAcc) < 20) {
-                  return b.msAgo - a.msAgo;
-                } else {
-                  return b.defAcc - a.defAcc;
-                }
-              } else {
-                return b.reviewSessionsCount - a.reviewSessionsCount;
-              }
-            })
-            termsWDefStateRelearning.sort(function (a, b) {
-              if (Math.abs(b.reviewSessionsCount - a.reviewSessionsCount) < 5) {
-                if (Math.abs(b.defAcc - a.defAcc) < 20) {
-                  return b.msAgo - a.msAgo;
-                } else {
-                  return b.defAcc - a.defAcc;
-                }
-              } else {
-                return b.reviewSessionsCount - a.reviewSessionsCount;
-              }
-            })
-            console.log(termsWTermStateLearning)
-            console.log(termsWTermStateReview)
-            console.log(termsWTermStateRelearning)
-            console.log(termsWDefStateLearning)
-            console.log(termsWDefStateReview)
-            console.log(termsWDefStateRelearning)
+            }
+            termsByTermStates.learning.sort(sortTerms);
+            termsByTermStates.review.sort(sortTerms);
+            termsByTermStates.relearning.sort(sortTerms);
+            termsByDefStates.learning.sort(sortTerms);
+            termsByDefStates.review.sort(sortTerms);
+            termsByDefStates.relearning.sort(sortTerms);
+            console.log(termsByTermStates);
+            console.log(termsByTermStates);
+            console.log(termsByDefStates);
+            console.log(termsByDefStates);
+            console.log(termsByDefStates);
 
             /* after we finish adding to termsOverallGood and termsOverallBad,
             display their count in these text elements. (notice this is outside of the for-loop above) */
