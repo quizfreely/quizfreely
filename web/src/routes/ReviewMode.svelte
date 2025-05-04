@@ -347,7 +347,7 @@
                 }
 
                 /* nullish coalescing operator, `??`, makes it default to "learning" if termState/defState is null(ish)
-                because term states didn't exist before v0.31.0 */
+                because term states were added after v0.32.1 */
                 termsByTermStates[progressForThisTerm.termState ?? "learning"].push(progressForThisTerm);
                 termsByDefStates[progressForThisTerm.defState ?? "learning"].push(progressForThisTerm);
 
