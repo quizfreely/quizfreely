@@ -365,7 +365,7 @@ and web/src/routes/studysets/[id]/settings/+page.svelte
               showInvalidLearningMinSessionsCount = true;
             }
 
-            if ((!showInvalidAcc) && !(showInvalidLearningMinSessionsCount)) {
+            if ((!showInvalidAcc) && (!showInvalidLearningMinSessionsCount)) {
                 updateSettings(newSettings,
                     function(sucessfullyUpdated) {
                         if (sucessfullyUpdated) {
