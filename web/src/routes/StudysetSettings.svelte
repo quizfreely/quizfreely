@@ -91,7 +91,7 @@ and web/src/routes/studysets/[id]/settings/+page.svelte
         if (window.localStorage) {
             var goodAcc = parseFloat(localStorage.getItem("quizfreely:settings.studyingAlgorithm.goodAcc"));
             var badAcc = parseFloat(localStorage.getItem("quizfreely:settings.studyingAlgorithm.badAcc"));
-            var learningMinSessionsCount = parseFloat(localStorage.getItem("quizfreely:settings.studyingAlgorithm.learningMinSessionsCount"));
+            var learningMinSessionsCount = parseInt(localStorage.getItem("quizfreely:settings.studyingAlgorithm.learningMinSessionsCount"));
             if (goodAcc >= 1 && goodAcc <= 100) {
                 document.getElementById("good-acc").value = goodAcc;
             }
@@ -107,11 +107,15 @@ and web/src/routes/studysets/[id]/settings/+page.svelte
         useGlobalSettings()
         var goodAcc = parseFloat(studysetSettings?.goodAcc);
         var badAcc = parseFloat(studysetSettings?.badAcc);
+        var learningMinSessionsCount = parseInt(studysetSettings?.learningMinSessionsCount)
         if (goodAcc >= 1 && goodAcc <= 100) {
             document.getElementById("good-acc").value = goodAcc;
         }
         if (badAcc >= 0 && badAcc <= 100) {
             document.getElementById("bad-acc").value = badAcc;
+        }
+        if (learningMinSessionsCount >= 1) {
+            document.getElementById("learning-min-sessions-count").value = learningMinSessionsCount;
         }
     }
     /* example:
@@ -331,7 +335,7 @@ and web/src/routes/studysets/[id]/settings/+page.svelte
         <button onclick={function () {
             var newGoodAcc = parseFloat(document.getElementById("good-acc").value)
             var newBadAcc = parseFloat(document.getElementById("bad-acc").value)
-            var newLearningMinSessionsCount = parseFloat(document.getElementById("learning-min-sessions-count").value)
+            var newLearningMinSessionsCount = parseInt(document.getElementById("learning-min-sessions-count").value)
             showInvalidAcc = false;
             var newSettings = {
                 goodAcc: 90,
