@@ -36,7 +36,7 @@ and web/src/routes/studysets/[id]/settings/+page.svelte
                     useGlobalSettings()
                   } else {
                     /* use loaded per-studyset settings */
-                    loadedStudysetSettings(dbSettingsGetReq.result);
+                    loadedStudysetSettings(dbSettingsGetReq.result.settings);
                   }
                 }
             })
