@@ -123,7 +123,6 @@
           }
         })
       } else {
-          document.getElementById("delete-confirm-button").addEventListener("click", function () {
           fetch("/api/v0/studysets/" + data.studyset.id, {
             method: "DELETE",
             credentials: "same-origin"
@@ -145,7 +144,6 @@
             alert("fetch error")
             /* work in progress error messages? */
           })
-        })
       }
     }
 </script>
