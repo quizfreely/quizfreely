@@ -22,7 +22,7 @@
                 document.getElementById("studying-algorithm-bad-acc").value = badAcc;
             }
             if (learningMinSessionsCount >= 1) {
-              document.getElementById("learning-min-sessions-count").value = learningMinSessionsCount;
+              document.getElementById("studying-algorithm-learning-min-sessions-count").value = learningMinSessionsCount;
             }
         }
     })
@@ -135,7 +135,7 @@
                 localStorage.setItem("quizfreely:settings.studyingAlgorithm.learningMinSessionsCount",
                     newLearningMinSessionsCount
                 )
-            } else if (document.getElementById("studying-algorithm-learning-min-sessions-count").value) {
+            } else if (document.getElementById("studying-algorithm-learning-min-sessions-count").value == "") {
                 localStorage.removeItem("quizfreely:settings.studyingAlgorithm.learningMinSessionsCount")
             } else {
                 showInvalidLearningMinSessionsCount = true;

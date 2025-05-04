@@ -1364,7 +1364,7 @@ async function updateSettingsByStudysetId(studysetId, changedSettings, authedUse
                 [
                     studysetId,
                     authedUserId,
-                    JSON.stringify(settings)
+                    JSON.stringify(changedSettings)
                 ]
             )
             await client.query("COMMIT");
