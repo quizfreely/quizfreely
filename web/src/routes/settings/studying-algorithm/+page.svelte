@@ -5,18 +5,18 @@
     import IconPencil from "$lib/icons/Pencil.svelte";
     import IconCheckmark from "$lib/icons/Checkmark.svelte";
     import IconTrash from "$lib/icons/Trash.svelte";
-    var showInvalidReviewModeAcc = $state(false);
-    var reviewModeChangesSaved = $state(false);
+    var showInvalidAcc = $state(false);
+    var changesSaved = $state(false);
     
     onMount(function () {
         if (window.localStorage) {
-            var goodAcc = parseFloat(localStorage.getItem("quizfreely:settings.reviewMode.goodAcc"));
-            var badAcc = parseFloat(localStorage.getItem("quizfreely:settings.reviewMode.badAcc"));
+            var goodAcc = parseFloat(localStorage.getItem("quizfreely:settings.studyingAlgorithm.goodAcc"));
+            var badAcc = parseFloat(localStorage.getItem("quizfreely:settings.studyingAlgorithm.badAcc"));
             if (goodAcc >= 1 && goodAcc <= 100) {
-                document.getElementById("review-mode-good-acc").value = goodAcc;
+                document.getElementById("studying-algorithm-good-acc").value = goodAcc;
             }
             if (badAcc >= 0 && badAcc <= 100) {
-                document.getElementById("review-mode-bad-acc").value = badAcc;
+                document.getElementById("studying-algorithm-bad-acc").value = badAcc;
             }
         }
     })
@@ -47,7 +47,7 @@
         <span class="fg0">Default: &gt; 90%</span>
     </p>
     <div class="input-thingy-container">
-        <input type="text" id="review-mode-good-acc" class="input-thingy" placeholder="90" oninput={() => reviewModeChangesSaved = false}>
+        <input type="text" id="studying-algorithm-good-acc" class="input-thingy" placeholder="90" oninput={() => changesSaved = false}>
         <span class="input-thingy-percent">%</span>
     </div>
     <p class="label-thingy">
@@ -55,60 +55,60 @@
         <span class="fg0">Default: &lt; 80%</span>
     </p>
     <div class="input-thingy-container">
-        <input type="text" id="review-mode-bad-acc" class="input-thingy" placeholder="80" oninput={() => reviewModeChangesSaved = false}>
+        <input type="text" id="studying-algorithm-bad-acc" class="input-thingy" placeholder="80" oninput={() => changesSaved = false}>
         <span class="input-thingy-percent">%</span>
     </div>
-    <div class="box ohno { showInvalidReviewModeAcc ? "" : "hide" }">
+    <div class="box ohno { showInvalidAcc ? "" : "hide" }">
         "Good" accuracy needs to be greater than "bad" accuracy.<br>
         Both need to be between 1 and 100
     </div>
-    {#if reviewModeChangesSaved}
+    {#if changesSaved}
         <p class="fg0">Changes Saved</p>
     {/if}
     <div class="flex">
     <button onclick={function () {
         if (window.localStorage) {
-            var newGoodAcc = parseFloat(document.getElementById("review-mode-good-acc").value)
-            var newBadAcc = parseFloat(document.getElementById("review-mode-bad-acc").value)
+            var newGoodAcc = parseFloat(document.getElementById("studying-algorithm-good-acc").value)
+            var newBadAcc = parseFloat(document.getElementById("studying-algorithm-bad-acc").value)
 
-            showInvalidReviewModeAcc = false;
+            showInvalidAcc = false;
 
             if (newBadAcc >= 1 && newBadAcc <= 100 && (
                 newGoodAcc > newBadAcc ||
-                document.getElementById("review-mode-good-acc").value == ""
+                document.getElementById("studying-algorithm-good-acc").value == ""
             )) {
                 localStorage.setItem(
-                    "quizfreely:settings.reviewMode.badAcc",
+                    "quizfreely:settings.studyingAlgorithm.badAcc",
                     newBadAcc
                 )
-                document.getElementById("review-mode-bad-acc").value = newBadAcc;
-            } else if (document.getElementById("review-mode-bad-acc").value == "") {
+                document.getElementById("studying-algorithm-bad-acc").value = newBadAcc;
+            } else if (document.getElementById("studying-algorithm-bad-acc").value == "") {
                 localStorage.removeItem(
-                    "quizfreely:settings.reviewMode.badAcc"
+                    "quizfreely:settings.studyingAlgorithm.badAcc"
                 )
             } else {
-                showInvalidReviewModeAcc = true;
+                showInvalidAcc = true;
             }
 
             if (newGoodAcc >= 1 && newGoodAcc <= 100 && (
                 newGoodAcc > newBadAcc ||
-                document.getElementById("review-mode-bad-acc").value == ""
+                document.getElementById("studying-algorithm-bad-acc").value == ""
             )) {
                 localStorage.setItem(
-                    "quizfreely:settings.reviewMode.goodAcc",
+                    "quizfreely:settings.studyingAlgorithm.goodAcc",
                     newGoodAcc
                 )
-                document.getElementById("review-mode-good-acc").value = newGoodAcc;
-            } else if (document.getElementById("review-mode-good-acc").value == "") {
+                document.getElementById("studying-algorithm-good-acc").value = newGoodAcc;
+            } else if (document.getElementById("studying-algorithm-good-acc").value == "") {
                 localStorage.removeItem(
-                    "quizfreely:settings.reviewMode.goodAcc"
+                    "quizfreely:settings.studyingAlgorithm.goodAcc"
                 )
             } else {
-                showInvalidReviewModeAcc = true;
+                showInvalidAcc = true;
             }
 
-            if (!showInvalidReviewModeAcc) {
-                reviewModeChangesSaved = true;
+            if (!showInvalidAcc) {
+                changesSaved = true;
             }
         }
     }}><IconCheckmark /> Save</button>
