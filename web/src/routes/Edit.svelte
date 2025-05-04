@@ -8,6 +8,7 @@
     import IconLocal from "$lib/icons/Local.svelte";
     import IconCheckmark from "$lib/icons/Checkmark.svelte";
     import IconTrash from "$lib/icons/Trash.svelte";
+    import IconArrowLeft from "$lib/icons/ArrowLeft.svelte"
     import IconMoreDotsV from "$lib/icons/MoreDotsVertical.svelte";
     import IconArrowUp from "$lib/icons/ArrowUp.svelte";
     import IconArrowDown from "$lib/icons/ArrowDown.svelte";
@@ -19,6 +20,7 @@
     import AutoResizeTextarea from "$lib/components/AutoResizeTextarea.svelte";
 
     var showImportTermsModal = $state(false);
+    var showExitConfirmationModal = $state(false);
 
     var terms = $state([]);
     var termId = 0;
@@ -73,7 +75,93 @@
     }
     if (data.new) {
       addTerm();
-      document.getElementById("create-button-local").addEventListener("click", function () {
+      if (data.authed) {
+      /* and data.new is true (creating a new studyset, not updating one) */
+      }
+    } else if (data.studysetId) {
+    /* data.new is false (updating an existing studyset, not creating one) */
+    if (data.authed) {
+        fetch("/api/v0/studysets/" + data.studysetId, {
+          method: "GET",
+          credentials: "same-origin"
+        }).then(function (rawResponse) {
+          rawResponse.json().then(function (result) {
+              if (result.error) {
+              alert("error, could not load studyset while trying to edit")
+            } else {
+              document.getElementById("edit-title").value = result.data.studyset.title;
+              addTermsFrom2DArray(result.data.studyset.data.terms);
+              if (result.data.studyset.private) {
+                document.getElementById("edit-private-false").classList.remove("selected");
+                document.getElementById("edit-private-true").classList.add("selected");
+              } else {
+                document.getElementById("edit-private-false").classList.add("selected");
+                document.getElementById("edit-private-true").classList.remove("selected");
+              }
+            }
+          })
+        })
+      }
+    }
+    if (data.local && !data.new) {
+      var studysetIDBRecord;
+      openIndexedDB(function (db) {
+        var studysetsObjectStore = db.transaction(["studysets"], "readonly").objectStore("studysets");
+        var dbGetReq = studysetsObjectStore.get(data.localId);
+        dbGetReq.onsuccess = function (event) {
+          if (dbGetReq.result) {
+            document.getElementById("edit-title").value = dbGetReq.result.title;
+            if (dbGetReq.result.data && dbGetReq.result.data.terms) {
+              addTermsFrom2DArray(dbGetReq.result.data.terms);
+            }
+          } else {
+            alert("couldn't load local studyset, mabye it doesn't exist?")
+          }
+        }
+        dbGetReq.onerror = function (error) {
+          console.error(error);
+          alert("indexeddb error while trying to load local studyset")
+        }
+      })
+    }
+    })
+
+    function updateLocalStudyset() {
+                    var title = "Untitled Studyset";
+              var newTitle = document.getElementById("edit-title").value;
+              if (
+                newTitle.length > 0 &&
+                newTitle.length < 9000 &&
+                /*
+                    use regex to make sure title is not just a bunch of spaces
+                    (if removing all spaces makes it equal to an empty string, it's all spaces)
+                    notice the exclamation mark for negation
+                */
+                !(newTitle.replace(/[\s\p{C}]+/gu, "") == "")
+              ) {
+                  title = newTitle;
+              }
+              var updatedStudyset = {
+                id: data.localId,
+                title: title,
+                data: {
+                  terms: termsTo2DArray()
+                },
+                updated_at: (new Date()).toISOString()
+              }
+              openIndexedDB(function (db) {
+                var studysetsObjectStore = db.transaction(["studysets"], "readwrite").objectStore("studysets");
+                var dbPutReq = studysetsObjectStore.put(updatedStudyset);
+                dbPutReq.onsuccess = function (event) {
+                  goto("/studyset/local?id=" + data.localId);
+                }
+                dbPutReq.onerror = function (error) {
+                  console.error(error);
+                  alert("indexeddb error while trying to update studyset")
+                }
+              })
+    }
+    function createLocalStudyset() {
         openIndexedDB(function (db) {
           var studysetsObjectStore = db.transaction("studysets", "readwrite").objectStore("studysets");
           var title = "Untitled Studyset";
@@ -110,13 +198,43 @@
             alert("indexeddb error while trying to add studyset")
           }
         })
-      })
-      if (data.authed) {
-      /* and data.new is true (creating a new studyset, not updating one) */
-      var doubleReq = false;
-      document.getElementById("create-button-authed").addEventListener("click", function () {
-        if (doubleReq == false) {
-          doubleReq = true;
+    }
+    var updateCloudStudysetCooldown = false;
+    function updateCloudStudyset() {
+      if (!updateCloudStudysetCooldown) {
+          updateCloudStudysetCooldown = true;
+          setTimeout(function () { updateCloudStudysetCooldown = false}, 2000)
+                fetch("/api/v0/studysets/" + data.studysetId, {
+            method: "PUT",
+            credentials: "same-origin",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              studyset: {
+                title: document.getElementById("edit-title").value,
+                private: document.getElementById("edit-private-true").classList.contains("selected"),
+                data: {
+                  terms: termsTo2DArray()
+                }
+              }
+            })
+          }).then(function (rawResponse) {
+            rawResponse.json().then(function (result) {
+              if (result.error) {
+                alert("error while trying to update studyset")
+              } else {
+                goto("/studysets/" + result.data.studyset.id)
+              }
+            })
+          })
+      }
+    }
+    var createCloudStudysetCooldown = false;
+    function createCloudStudyset() {
+              if (createCloudStudysetCooldown == false) {
+          createCloudStudysetCooldown = true;
+          setTimeout(function () { createCloudStudysetCooldown = false}, 2000)
           fetch("/api/v0/studysets", {
             method: "POST",
             headers: {
@@ -150,117 +268,22 @@
             console.error(error);
           })
         }
-      })
-      }
-    } else if (data.studysetId) {
-    /* data.new is false (updating an existing studyset, not creating one) */
-    if (data.authed) {
-        fetch("/api/v0/studysets/" + data.studysetId, {
-          method: "GET",
-          credentials: "same-origin"
-        }).then(function (rawResponse) {
-          rawResponse.json().then(function (result) {
-              if (result.error) {
-              alert("error, could not load studyset while trying to edit")
-            } else {
-              document.getElementById("edit-title").value = result.data.studyset.title;
-              addTermsFrom2DArray(result.data.studyset.data.terms);
-              if (result.data.studyset.private) {
-                document.getElementById("edit-private-false").classList.remove("selected");
-                document.getElementById("edit-private-true").classList.add("selected");
-              } else {
-                document.getElementById("edit-private-false").classList.add("selected");
-                document.getElementById("edit-private-true").classList.remove("selected");
-              }
-            }
-          })
-        })
-        document.getElementById("save-button").addEventListener("click", function () {
-          fetch("/api/v0/studysets/" + data.studysetId, {
-            method: "PUT",
-            credentials: "same-origin",
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-              studyset: {
-                title: document.getElementById("edit-title").value,
-                private: document.getElementById("edit-private-true").classList.contains("selected"),
-                data: {
-                  terms: termsTo2DArray()
-                }
-              }
-            })
-          }).then(function (rawResponse) {
-            rawResponse.json().then(function (result) {
-              if (result.error) {
-                alert("error while trying to update studyset")
-              } else {
-                goto("/studysets/" + result.data.studyset.id)
-              }
-            })
-          })
-        })
+    }
+    function saveButtonOrCreateButton() {
+      if (data.new) {
+        if (data.authed) {
+          createCloudStudyset();
+        } else {
+          createLocalStudyset();
+        }
+      } else {
+        if (data.local) {
+          updateLocalStudyset();
+        } else {
+          updateCloudStudyset();
+        }
       }
     }
-    if (data.local && !data.new) {
-      var studysetIDBRecord;
-      openIndexedDB(function (db) {
-        var studysetsObjectStore = db.transaction(["studysets"], "readonly").objectStore("studysets");
-        var dbGetReq = studysetsObjectStore.get(data.localId);
-        dbGetReq.onsuccess = function (event) {
-          if (dbGetReq.result) {
-            document.getElementById("edit-title").value = dbGetReq.result.title;
-            if (dbGetReq.result.data && dbGetReq.result.data.terms) {
-              addTermsFrom2DArray(dbGetReq.result.data.terms);
-            }
-
-            document.getElementById("save-button").addEventListener("click", function (_) {
-              var title = "Untitled Studyset";
-              var newTitle = document.getElementById("edit-title").value;
-              if (
-                newTitle.length > 0 &&
-                newTitle.length < 9000 &&
-                /*
-                    use regex to make sure title is not just a bunch of spaces
-                    (if removing all spaces makes it equal to an empty string, it's all spaces)
-                    notice the exclamation mark for negation
-                */
-                !(newTitle.replace(/[\s\p{C}]+/gu, "") == "")
-              ) {
-                  title = newTitle;
-              }
-              var updatedStudyset = {
-                id: data.localId,
-                title: title,
-                data: {
-                  terms: termsTo2DArray()
-                },
-                updated_at: (new Date()).toISOString()
-              }
-              openIndexedDB(function (db) {
-                var studysetsObjectStore = db.transaction(["studysets"], "readwrite").objectStore("studysets");
-                var dbPutReq = studysetsObjectStore.put(updatedStudyset);
-                dbPutReq.onsuccess = function (event) {
-                  goto("/studyset/local?id=" + data.localId);
-                }
-                dbPutReq.onerror = function (error) {
-                  console.error(error);
-                  alert("indexeddb error while trying to update studyset")
-                }
-              })
-            })
-          } else {
-            alert("couldn't load local studyset, mabye it doesn't exist?")
-          }
-        }
-        dbGetReq.onerror = function (error) {
-          console.error(error);
-          alert("indexeddb error while trying to load local studyset")
-        }
-      })
-    }
-    })
 
     let importTermsTermDefDelimiterRadioSelect = $state("tab");
     let importTermsRowDelimiterRadioSelect = $state("newline");
@@ -334,6 +357,12 @@
                   <button id="mainEditStudySetIsCopyBack">Go back</button>
                 </div>
               </div>
+            </div>
+            <div>
+              <button class="faint" onclick={() => showExitConfirmationModal = true}>
+                <IconArrowLeft />
+                Back
+              </button>
             </div>
             <input id="edit-title" type="text" placeholder="Title" />
             {#if (data.authed && !data.local) }
@@ -418,32 +447,29 @@
               </div>
             </div>
             <div class="flex" style="align-items:center;">
-              {#if (data.new && data.authed) }
-              <button id="create-button-authed">
+              <button onclick={saveButtonOrCreateButton}>
                 <IconCheckmark />
+                {#if data.new}
                 Create
+                {:else}
+                Save
+                {/if}
               </button>
+              <button class="alt">
+                Cancel
+              </button>
+              {#if data.new && data.authed}
               <div class="dropdown">
                 <button class="dropdown-toggle" aria-label="saving options dropdown">
                   <IconMoreDotsV />
                 </button>
                 <div class="content">
-                  <button id="create-button-local">
+                  <button onclick={createLocalStudyset}>
                     <IconLocal />
                     Save Locally
                   </button>
                 </div>
               </div>
-              {:else if (data.new) }
-              <button id="create-button-local">
-                <IconCheckmark />
-                Create
-              </button>
-              {:else}
-              <button id="save-button">
-                <IconCheckmark />
-                Save Changes
-              </button>
               {/if}
             </div>
             {#if showImportTermsModal}
@@ -553,6 +579,27 @@
                     }
                   }>Import</button>
                   <button class="alt" onclick={function () { showImportTermsModal = false }}>Cancel</button>
+                </div>
+              </div>
+            </div>
+            {/if}
+            {#if showExitConfirmationModal}
+            <div class="modal" transition:fade={{ duration: 200 }}>
+              <div class="content">
+                <h4>Save changes?</h4>
+                <div class="flex">
+                  <a class="button ohno" href={ data.local ?
+                    "/studyset/local?id=" + data.localId :
+                    "/studysets/" + data.studysetId
+                  }>
+                    <IconTrash />
+                    Discard
+                  </a>
+                  <button>
+                    <IconCheckmark />
+                    Save
+                  </button>
+                  <button onclick={function () { showExitConfirmationModal = false; }}>Keep Editing</button>
                 </div>
               </div>
             </div>
