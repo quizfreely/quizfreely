@@ -455,7 +455,7 @@
                 Save
                 {/if}
               </button>
-              <button class="alt">
+              <button class="alt" onclick={() => showExitConfirmationModal = true}>
                 Cancel
               </button>
               {#if data.new && data.authed}
@@ -588,18 +588,22 @@
               <div class="content">
                 <h4>Save changes?</h4>
                 <div class="flex">
-                  <a class="button ohno" href={ data.local ?
-                    "/studyset/local?id=" + data.localId :
-                    "/studysets/" + data.studysetId
-                  }>
-                    <IconTrash />
-                    Discard
-                  </a>
-                  <button>
+                  <button onclick={saveButtonOrCreateButton}>
                     <IconCheckmark />
                     Save
                   </button>
                   <button onclick={function () { showExitConfirmationModal = false; }}>Keep Editing</button>
+                  <a class="button ohno" href={ 
+                    data.new ?
+                      "/dashboard" :
+                      (data.local ?
+                        "/studyset/local?id=" + data.localId :
+                        "/studysets/" + data.studysetId
+                      )
+                  }>
+                    <IconTrash />
+                    Discard
+                  </a>
                 </div>
               </div>
             </div>
