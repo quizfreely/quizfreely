@@ -17,8 +17,8 @@ and web/src/routes/studysets/[id]/settings/+page.svelte
     import { page } from "$app/state";
     import Noscript from "$lib/components/Noscript.svelte";
     import { openIndexedDB } from "$lib/indexedDB";
-    var showInvalidReviewModeAcc = $state(false);
-    var reviewModeChangesSaved = $state(false);
+    var showInvalidAcc = $state(false);
+    var changesSaved = $state(false);
     
     onMount(function () {
         /* settings stored locally w IndexedDB if studyset is local OR if user isn't logged in (even if the studyset isn't local) */
@@ -67,7 +67,7 @@ and web/src/routes/studysets/[id]/settings/+page.svelte
                   apiResponse.data &&
                   apiResponse.data.studyset
                 ) {
-                  if (apiResponse.data.studysetSettings && apiResponse.data.studysetSettings.reviewMode) {
+                  if (apiResponse.data.studysetSettings && apiResponse.data.studysetSettings) {
                     loadedStudysetSettings(apiResponse.data.studysetSettings)
                   } else {
                     useGlobalSettings()
@@ -88,8 +88,8 @@ and web/src/routes/studysets/[id]/settings/+page.svelte
     })
     function useGlobalSettings() {
         if (window.localStorage) {
-            var goodAcc = parseFloat(localStorage.getItem("quizfreely:settings.reviewMode.goodAcc"));
-            var badAcc = parseFloat(localStorage.getItem("quizfreely:settings.reviewMode.badAcc"));
+            var goodAcc = parseFloat(localStorage.getItem("quizfreely:settings.studyingAlgorithm.goodAcc"));
+            var badAcc = parseFloat(localStorage.getItem("quizfreely:settings.studyingAlgorithm.badAcc"));
             if (goodAcc >= 1 && goodAcc <= 100) {
                 document.getElementById("good-acc").value = goodAcc;
             }
@@ -110,13 +110,13 @@ and web/src/routes/studysets/[id]/settings/+page.svelte
         }
     }
     /* example:
-    updateReviewModeSettings(
+    updateSettings(
         { goodAcc: 90, badAcc: 80 },
         function (success) {
             if (success) { console.log("yay") }
         }
     ) */
-    function updateReviewModeSettings(studysetSettingsParam, callback) {
+    function updateSettings(studysetSettingsParam, callback) {
         if (data.local || !data.authed) {
             openIndexedDB(function (db) {
                 var dbTransaction = db.transaction(["studysetsettings"], "readwrite");
@@ -287,7 +287,7 @@ and web/src/routes/studysets/[id]/settings/+page.svelte
             <span class="fg0">Default: &gt; 90%</span>
         </p>
         <div class="input-thingy-container">
-            <input type="text" id="good-acc" class="input-thingy" placeholder="90" oninput={() => reviewModeChangesSaved = false}>
+            <input type="text" id="good-acc" class="input-thingy" placeholder="90" oninput={() => changesSaved = false}>
             <span class="input-thingy-percent">%</span>
         </div>
         <p class="label-thingy">
@@ -295,14 +295,14 @@ and web/src/routes/studysets/[id]/settings/+page.svelte
             <span class="fg0">Default: &lt; 80%</span>
         </p>
         <div class="input-thingy-container">
-            <input type="text" id="bad-acc" class="input-thingy" placeholder="80" oninput={() => reviewModeChangesSaved = false}>
+            <input type="text" id="bad-acc" class="input-thingy" placeholder="80" oninput={() => changesSaved = false}>
             <span class="input-thingy-percent">%</span>
         </div>
-        <div class="box ohno { showInvalidReviewModeAcc ? "" : "hide" }">
+        <div class="box ohno { showInvalidAcc ? "" : "hide" }">
             "Good" accuracy needs to be greater than "bad" accuracy.<br>
             Both need to be between 1 and 100
         </div>
-        {#if reviewModeChangesSaved}
+        {#if changesSaved}
             <p class="fg0">Changes Saved</p>
         {/if}
         <div class="flex">
@@ -311,8 +311,8 @@ and web/src/routes/studysets/[id]/settings/+page.svelte
             var newGoodAcc = parseFloat(document.getElementById("good-acc").value)
             var newBadAcc = parseFloat(document.getElementById("bad-acc").value)
 
-            showInvalidReviewModeAcc = false;
-            var newReviewModeSettings = {
+            showInvalidAcc = false;
+            var newSettings = {
                 goodAcc: 90,
                 badAcc: 80
             }
@@ -321,27 +321,27 @@ and web/src/routes/studysets/[id]/settings/+page.svelte
                 newGoodAcc > newBadAcc ||
                 document.getElementById("good-acc").value == ""
             )) {
-                newReviewModeSettings.badAcc = newBadAcc;
+                newSettings.badAcc = newBadAcc;
                 document.getElementById("bad-acc").value = newBadAcc;
             } else if (document.getElementById("bad-acc").value != "") {
-                showInvalidReviewModeAcc = true;
+                showInvalidAcc = true;
             }
 
             if (newGoodAcc >= 1 && newGoodAcc <= 100 && (
                 newGoodAcc > newBadAcc ||
                 document.getElementById("bad-acc").value == ""
             )) {
-                newReviewModeSettings.goodAcc = newGoodAcc;
+                newSettings.goodAcc = newGoodAcc;
                 document.getElementById("good-acc").value = newGoodAcc;
             } else if (document.getElementById("good-acc").value != "") {
-                showInvalidReviewModeAcc = true;
+                showInvalidAcc = true;
             }
 
-            if (!showInvalidReviewModeAcc) {
-                updateReviewModeSettings(newReviewModeSettings,
+            if (!showInvalidAcc) {
+                updateSettings(newSettings,
                     function(sucessfullyUpdated) {
                         if (sucessfullyUpdated) {
-                            reviewModeChangesSaved = true;
+                            changesSaved = true;
                         } else {
                             alert("oops failed to save setttings?")
                         }
