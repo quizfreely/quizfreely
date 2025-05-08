@@ -22,6 +22,8 @@
     var showImportTermsModal = $state(false);
     var showExitConfirmationModal = $state(false);
 
+    var unsavedChanges = $state(false);
+
     var terms = $state([]);
     var termId = 0;
     function addTerm(term, def) {
@@ -359,10 +361,24 @@
               </div>
             </div>
             <div>
+              {#if unsavedChanges}
               <button class="faint" onclick={() => showExitConfirmationModal = true}>
                 <IconArrowLeft />
                 Back
               </button>
+              {:else}
+              <a class="button faint" href={ 
+                data.new ?
+                  "/dashboard" :
+                  (data.local ?
+                    "/studyset/local?id=" + data.localId :
+                    "/studysets/" + data.studysetId
+                  )
+              }>
+                <IconArrowLeft />
+                Back
+              </a>
+              {/if}
             </div>
             <input id="edit-title" type="text" placeholder="Title" />
             {#if (data.authed && !data.local) }
@@ -389,7 +405,10 @@
                     }}
                     textarea={{
                       placeholder: "Term",
-                      rows: "2"
+                      rows: "2",
+                      oninput: () => {if (!unsavedChanges) {
+                        unsavedChanges = true;
+                      }}
                     }}
                     bind:value={term.term}
                   />
@@ -399,7 +418,10 @@
                     }}
                     textarea={{
                       placeholder: "Definition",
-                      rows: "2"
+                      rows: "2",
+                      oninput: () => {if (!unsavedChanges) {
+                        unsavedChanges = true;
+                      }}
                     }}
                     bind:value={term.def}
                   />
@@ -436,7 +458,10 @@
             </div>
             <div class="box">
               <div class="flex">
-                <button onclick={function () { addTerm(); }}>
+                <button onclick={function () {
+                  addTerm();
+                  unsavedChanges = true;
+                }}>
                   <IconPlus />
                   Add term
                 </button>
@@ -573,6 +598,8 @@
                       if (terms[terms.length - 1].term === "" && terms[terms.length - 1].def === "") {
                         terms.splice(terms.length - 1, 1);
                       }
+
+                      unsavedChanges = true;
 
                       /* hide the modal after importing */
                       showImportTermsModal = false;
