@@ -480,9 +480,23 @@
                 Save
                 {/if}
               </button>
+              {#if unsavedChanges}
               <button class="alt" onclick={() => showExitConfirmationModal = true}>
                 Cancel
               </button>
+              {:else}
+              <a class="button alt" href={ 
+                data.new ?
+                  "/dashboard" :
+                  (data.local ?
+                    "/studyset/local?id=" + data.localId :
+                    "/studysets/" + data.studysetId
+                  )
+              }>
+                <IconArrowLeft />
+                Back
+              </a>
+              {/if}
               {#if data.new && data.authed}
               <div class="dropdown">
                 <button class="dropdown-toggle" aria-label="saving options dropdown">
