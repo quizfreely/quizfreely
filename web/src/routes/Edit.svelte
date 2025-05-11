@@ -3,6 +3,7 @@
     import { onMount, mount } from "svelte";
     import { openIndexedDB } from "$lib/indexedDB";
     import { goto, beforeNavigate } from "$app/navigation";
+    import NProgress from "nprogress";
     let { data } = $props();
 
     import IconLocal from "$lib/icons/Local.svelte";
@@ -294,9 +295,21 @@
     beforeNavigate(function (navigation) {
         if (unsavedChanges && !discardingUnsavedChanges) {
             if (navigation.type !== "leave") {
+                /* when navigation.type is NOT "leave",
+                it's controlled by SvelteKit, so we can
+                show our js confirmation modal */
                 showExitConfirmationModal = true;
             }
+            /* if navigation.type is "leave",
+            then its controlled by the browser &
+            the browser shows it's own native modal
+            when we use `.cancel()` */
             navigation.cancel();
+            /* beforeNavigate calls NProgress.start() in +layout.svelte,
+            so we need to cancel/finish it after cancelling navigation
+            this makes the bar go away after showing our modal w js
+            or after the browser shows its native modal */
+            NProgress.done();
         }
     })
 </script>
@@ -643,7 +656,7 @@
                         "/studyset/local?id=" + data.localId :
                         "/studysets/" + data.studysetId
                       )
-                    )
+                    );
                   }}>
                     <IconTrash />
                     Discard
