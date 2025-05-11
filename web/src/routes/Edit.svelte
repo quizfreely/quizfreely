@@ -2,7 +2,7 @@
     import Noscript from "$lib/components/Noscript.svelte";
     import { onMount, mount } from "svelte";
     import { openIndexedDB } from "$lib/indexedDB";
-    import { goto } from "$app/navigation";
+    import { goto, beforeNavigate } from "$app/navigation";
     let { data } = $props();
 
     import IconLocal from "$lib/icons/Local.svelte";
@@ -23,6 +23,7 @@
     var showExitConfirmationModal = $state(false);
 
     var unsavedChanges = $state(false);
+    var discardingUnsavedChanges = false;
 
     var terms = $state([]);
     var termId = 0;
@@ -289,6 +290,15 @@
 
     let importTermsTermDefDelimiterRadioSelect = $state("tab");
     let importTermsRowDelimiterRadioSelect = $state("newline");
+
+    beforeNavigate(function (navigation) {
+        if (unsavedChanges && !discardingUnsavedChanges) {
+            navigation.cancel();
+            if (!navigation.type !== "leave") {
+                showExitConfirmationModal = true;
+            }
+        }
+    })
 </script>
 <svelte:head>
     <title>Quizfreely</title>
@@ -384,11 +394,11 @@
             {#if (data.authed && !data.local) }
             <div id="edit-private-div">
               <div class="combo-select">
-                <button class="left selected" id="edit-private-false">
+                <button class="left selected" id="edit-private-false" onclick={() => unsavedChanges = true}>
                   <IconCheckmark class="combo-selected-icon" />
                   Public
                 </button>
-                <button class="right" id="edit-private-true">
+                <button class="right" id="edit-private-true" onclick={() => unsavedChanges = true}>
                   <IconCheckmark class="combo-selected-icon" />
                   Private
                 </button>
@@ -433,17 +443,22 @@
                           <div class="content">
                               <button onclick={function (event) {
                                 moveTerm(index, index - 1);
+                                unsavedChanges = true;
                                 event.target.blur();
                               }}>
                                   <IconArrowUp /> Move up
                               </button>
                               <button onclick={function (event) {
                                 moveTerm(index, index + 1);
+                                unsavedChanges = true;
                                 event.target.blur();
                               }}>
                                   <IconArrowDown /> Move down
                               </button>
-                              <button class="ohno" onclick={function () { deleteTerm(index) }}>
+                              <button class="ohno" onclick={function () {
+                                  deleteTerm(index);
+                                  unsavedChanges = true;
+                              }}>
                                   <IconTrash /> Delete
                               </button>
                           </div>
@@ -493,8 +508,7 @@
                     "/studysets/" + data.studysetId
                   )
               }>
-                <IconArrowLeft />
-                Back
+                Cancel
               </a>
               {/if}
               {#if data.new && data.authed}
@@ -634,17 +648,19 @@
                     Save
                   </button>
                   <button onclick={function () { showExitConfirmationModal = false; }}>Keep Editing</button>
-                  <a class="button ohno" href={ 
-                    data.new ?
+                  <button class="button ohno" onclick={function () {
+                    discardingUnsavedChanges = true;
+                    goto(data.new ?
                       "/dashboard" :
                       (data.local ?
                         "/studyset/local?id=" + data.localId :
                         "/studysets/" + data.studysetId
                       )
-                  }>
+                    )
+                  }}>
                     <IconTrash />
                     Discard
-                  </a>
+                  </button>
                 </div>
               </div>
             </div>
