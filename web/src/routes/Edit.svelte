@@ -22,7 +22,7 @@
     var showImportTermsModal = $state(false);
     var showExitConfirmationModal = $state(false);
 
-    var unsavedChanges = $state(false);
+    var unsavedChanges = false;
     var discardingUnsavedChanges = false;
 
     var terms = $state([]);
