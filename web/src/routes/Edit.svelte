@@ -293,10 +293,10 @@
 
     beforeNavigate(function (navigation) {
         if (unsavedChanges && !discardingUnsavedChanges) {
-            navigation.cancel();
-            if (!navigation.type !== "leave") {
+            if (navigation.type !== "leave") {
                 showExitConfirmationModal = true;
             }
+            navigation.cancel();
         }
     })
 </script>
@@ -371,12 +371,6 @@
               </div>
             </div>
             <div>
-              {#if unsavedChanges}
-              <button class="faint" onclick={() => showExitConfirmationModal = true}>
-                <IconArrowLeft />
-                Back
-              </button>
-              {:else}
               <a class="button faint" href={ 
                 data.new ?
                   "/dashboard" :
@@ -388,7 +382,6 @@
                 <IconArrowLeft />
                 Back
               </a>
-              {/if}
             </div>
             <input id="edit-title" type="text" placeholder="Title" />
             {#if (data.authed && !data.local) }
@@ -495,11 +488,6 @@
                 Save
                 {/if}
               </button>
-              {#if unsavedChanges}
-              <button class="alt" onclick={() => showExitConfirmationModal = true}>
-                Cancel
-              </button>
-              {:else}
               <a class="button alt" href={ 
                 data.new ?
                   "/dashboard" :
@@ -510,7 +498,6 @@
               }>
                 Cancel
               </a>
-              {/if}
               {#if data.new && data.authed}
               <div class="dropdown">
                 <button class="dropdown-toggle" aria-label="saving options dropdown">
