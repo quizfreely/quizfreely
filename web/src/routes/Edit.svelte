@@ -385,7 +385,7 @@
               </div>
             </div>
             <div>
-              <a class="button faint" href={ 
+              <a class="button faint" data-sveltekit-preload-data="false" href={ 
                 data.new ?
                   "/dashboard" :
                   (data.local ?
@@ -494,7 +494,7 @@
               </div>
             </div>
             <div class="flex" style="align-items:center;">
-              <button onclick={saveButtonOrCreateButton}>
+              <button data-sveltekit-preload-data="false" onclick={saveButtonOrCreateButton}>
                 <IconCheckmark />
                 {#if data.new}
                 Create
@@ -502,7 +502,7 @@
                 Save
                 {/if}
               </button>
-              <a class="button alt" href={ 
+              <a class="button alt" data-sveltekit-preload-data="false" href={ 
                 data.new ?
                   "/dashboard" :
                   (data.local ?
@@ -518,7 +518,7 @@
                   <IconMoreDotsV />
                 </button>
                 <div class="content">
-                  <button onclick={createLocalStudyset}>
+                  <button data-sveltekit-preload-data="false" onclick={createLocalStudyset}>
                     <IconLocal />
                     Save Locally
                   </button>
@@ -644,12 +644,12 @@
               <div class="content">
                 <h4>Save changes?</h4>
                 <div class="flex">
-                  <button onclick={saveButtonOrCreateButton}>
+                  <button data-sveltekit-preload-data="false" onclick={saveButtonOrCreateButton}>
                     <IconCheckmark />
                     Save
                   </button>
                   <button onclick={function () { showExitConfirmationModal = false; }}>Keep Editing</button>
-                  <button class="button ohno" onclick={function () {
+                  <button class="button ohno" data-sveltekit-preload-data="false" onclick={function () {
                     bypassUnsavedChangesConfirmation = true;
                     goto(data.new ?
                       "/dashboard" :
