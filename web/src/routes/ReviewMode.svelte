@@ -47,6 +47,25 @@
     var question = $state("");
     var correctAnswerIndex = 0;
     function nextQuestion() {
+        let randomSize = 0;
+        if (termsByTermStates.learning.length >= 1) {
+            randomSize++
+        }
+        if (termsByTermStates.review.length >= 1) {
+            randomSize++
+        }
+        if (termsByTermStates.relearning.length >= 1) {
+            randomSize++
+        }
+        if (termsByTermStates.learning.length >= 1) {
+            randomSize++
+        }
+        if (termsByTermStates.review.length >= 1) {
+            randomSize++
+        }
+        if (termsByTermStates.relearning.length >= 1) {
+            randomSize++
+        }
     }
     function checkAnswer(event) {
     }
