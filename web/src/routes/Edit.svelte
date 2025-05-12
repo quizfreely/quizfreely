@@ -24,7 +24,7 @@
     var showExitConfirmationModal = $state(false);
 
     var unsavedChanges = false;
-    var discardingUnsavedChanges = false;
+    var bypassUnsavedChangesConfirmation = false;
 
     var terms = $state([]);
     var termId = 0;
@@ -274,6 +274,7 @@
         }
     }
     function saveButtonOrCreateButton() {
+      bypassUnsavedChangesConfirmation = true;
       if (data.new) {
         if (data.authed) {
           createCloudStudyset();
@@ -293,7 +294,7 @@
     let importTermsRowDelimiterRadioSelect = $state("newline");
 
     beforeNavigate(function (navigation) {
-        if (unsavedChanges && !discardingUnsavedChanges) {
+        if (unsavedChanges && !bypassUnsavedChangesConfirmation) {
             if (navigation.type !== "leave") {
                 /* when navigation.type is NOT "leave",
                 it's controlled by SvelteKit, so we can
@@ -649,7 +650,7 @@
                   </button>
                   <button onclick={function () { showExitConfirmationModal = false; }}>Keep Editing</button>
                   <button class="button ohno" onclick={function () {
-                    discardingUnsavedChanges = true;
+                    bypassUnsavedChangesConfirmation = true;
                     goto(data.new ?
                       "/dashboard" :
                       (data.local ?
