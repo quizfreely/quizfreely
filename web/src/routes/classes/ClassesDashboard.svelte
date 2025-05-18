@@ -42,9 +42,13 @@
                     {/each}
                 </div>
             {/if}
+            <p style="white-space: pre">
             {JSON.stringify(
-                data.classesData
+                data.classesData,
+                null,
+                4
             )}
+            </p>
         </div>
     </div>
 </main>
