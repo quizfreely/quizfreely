@@ -9,6 +9,8 @@
     <link rel="canonical" href="https://quizfreely.org" />
 </svelte:head>
 
+<p>feature</p>
+
 <main>
 <div class="grid intro" style="margin-bottom: 0px; padding-bottom: 0px; border:none">
     <div class="logotype">

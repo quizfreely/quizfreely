@@ -1,7 +1,10 @@
+import fetchAuthData from "$lib/fetchAuthData.server";
 import { env } from '$env/dynamic/private';
 
-export async function load() {
+export async function load({ cookies }) {
     return {
-      header: { activePage: "classes" }
+        ...await fetchAuthData({ cookies }),
+        header: { activePage: "classes" }
     }
 }
+
