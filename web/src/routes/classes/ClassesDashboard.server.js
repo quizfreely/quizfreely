@@ -20,17 +20,25 @@ export async function load({ cookies }) {
                         classesAsStudent {
                             id
                             name
+                            color
                             course {
                                 id
                                 name
+                            }
+                            userSettings {
+                                color
                             }
                         }
                         classesAsTeacher {
                             id
                             name
+                            color
                             course {
                                 id
                                 name
+                            }
+                            userSettings {
+                                color
                             }
                         }
                     }`
