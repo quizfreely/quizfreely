@@ -2,6 +2,19 @@
     import Noscript from "$lib/components/Noscript.svelte";
     let { data } = $props();
 </script>
+<style>
+.class-box {
+    display: flex;
+    gap: 0px;
+    border-radius: 0.8rem;
+}
+.class-link {
+    color: var(--fg1);
+}
+.class-link:hover {
+    color: var(--fg0);
+}
+</style>
 
 <svelte:head>
     <title>Quizfreely Classes</title>
@@ -15,7 +28,7 @@
                 <div class="grid list">
                     {#each data.classesData.classesAsTeacher as classobj}
                         <div class="box">
-                            <p>{classobj.name}</p>
+                            <a class="class-link" href="/classes/c/{classobj.id}">{classobj.name}</a>
                         </div>
                     {/each}
                 </div>
@@ -24,7 +37,7 @@
                 <div class="grid list">
                     {#each data.classesData.classesAsStudent as classobj}
                         <div class="box">
-                            <p>{classobj.name}</p>
+                            <a class="class-link" href="/classes/c/{classobj.id}">{classobj.name}</a>
                         </div>
                     {/each}
                 </div>
