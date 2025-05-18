@@ -6,9 +6,9 @@
 </script>
 
 {#if data?.classesPage == "dashboard"}
-<ClassesDashboard data={ data }
+<ClassesDashboard data={ data } />
 {:else if data?.classesPage == "feature"}
 <ClassesFeature data={ data } />
-{:else} /* data?.classesPage == "landing" */
+{:else} <!-- data?.classesPage == "landing" -->
 <ClassesLandingPage data={ data } />
 {/if}

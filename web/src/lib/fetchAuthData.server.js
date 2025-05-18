@@ -4,12 +4,12 @@ export default async function ({ cookies }) {
   let authed = false;
   let authedUser;
   let apiError = false;
-  if (cookies.get("auth")) {
+  if (cookies?.get("auth")) {
     try {
       let rawAuthedRes = await fetch(env.API_URL + "/graphql", {
         method: "POST",
         headers: {
-          "Authorization": "Bearer " + cookies.get("auth"),
+          "Authorization": "Bearer " + cookies?.get("auth"),
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
