@@ -10,10 +10,19 @@ let { children, data } = $props();
 NProgress.configure({
     showSpinner: false
 });
+let timeout;
 beforeNavigate(function () {
-    NProgress.start();
+    if (timeout) {
+        clearTimeout(timeout);
+    }
+    timeout = setTimeout(function () {
+        NProgress.start();
+    }, 200)
 })
 afterNavigate(function () {
+    if (timeout) {
+        clearTimeout(timeout);
+    }
     NProgress.done();
 })
 </script>
