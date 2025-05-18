@@ -17,7 +17,7 @@ beforeNavigate(function () {
     }
     timeout = setTimeout(function () {
         NProgress.start();
-    }, 200)
+    }, 200);
 })
 afterNavigate(function () {
     if (timeout) {
