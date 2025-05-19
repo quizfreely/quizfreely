@@ -42,6 +42,9 @@
                     {/each}
                 </div>
             {/if}
+            {#if !(data?.classesData?.classesAsStudent?.length > 0)}
+                a
+            {/if}
             <p style="white-space: pre">
             {JSON.stringify(
                 data.classesData,
