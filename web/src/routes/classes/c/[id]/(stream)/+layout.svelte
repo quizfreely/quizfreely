@@ -1,6 +1,7 @@
 <script>
     import Noscript from "$lib/components/Noscript.svelte";
     import { page } from "$app/state";
+    import ProseMirrorEditor from "$lib/proseMirrorEditor.svelte";
     let { children, data } = $props();
 
     let amIATeacher = page.data?.classData?.classById?.teachers?.some(
@@ -75,6 +76,7 @@
 <main>
     <div class="grid page">
         <div class="content">
+            <ProseMirrorEditor />
             <h1 class="h3">{page.data?.classData?.classById?.name}</h1>
         <div class="layout-container">
             <div>
