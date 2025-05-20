@@ -1,6 +1,7 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
   import { createEditor } from '$lib/proseMirrorEditor.js';
+  import 'prosemirror-view/style/prosemirror.css';
 
   let editorDiv;
   let view;
@@ -38,16 +39,28 @@ function toggleBlockType(nodeType, attrs = {}) {
 </script>
 
 <style>
-  .ProseMirror {
-    border: 1px solid #ccc;
-    padding: 8px;
-    min-height: 100px;
-  }
+    :global {
+        .ProseMirror > div {
+            border: 0.2rem solid var(--main);
+            padding: 8px;
+        }
+        .ProseMirror > div {
+            min-height: 4rem;
+        }
+        .ProseMirror:focus-visible {
+            outline: none;
+        }
+    }
 </style>
 
-<button on:click={() => toggle('bold')}>Bold</button>
-<button on:click={() => toggle('italic')}>Italic</button>
-<button on:click={() => toggleHeading(1)}>H1</button>
+<div class="flex compact-gap" style="margin-bottom: 0px;">
+<button class="faint" on:click={() => toggle('bold')}><b>B<b></button>
+<button class="faint" on:click={() => toggle('italic')}><i>I</i></button>
+<button class="faint" on:click={() => toggle('underline')}><u>U</u></button>
+<button class="faint" on:click={() => toggle('strike')}><strike>Strike</strike></button>
+<button class="faint" on:click={() => toggle('superscript')}>^</button>
+<button class="faint" on:click={() => toggle('subscript')}><span>a<sub>x</sub></span></button>
+</div>
 
 <div bind:this={editorDiv} class="ProseMirror" />
 
