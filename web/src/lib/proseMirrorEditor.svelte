@@ -40,11 +40,13 @@ function toggleBlockType(nodeType, attrs = {}) {
 
 <style>
     :global {
-        .ProseMirror > div {
-            border: 0.2rem solid var(--main);
-            padding: 8px;
+        .ProseMirror {
+            margin-top: 0.2rem;
         }
         .ProseMirror > div {
+            border-radius: 0.8rem;
+            border: 0.2rem solid var(--main);
+            padding: 8px;
             min-height: 4rem;
         }
         .ProseMirror:focus-visible {
