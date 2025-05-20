@@ -1,10 +1,12 @@
 <script>
     import Noscript from "$lib/components/Noscript.svelte";
+    import { onMount } from "svelte";
     let { data } = $props();
 
     let amIATeacher = data?.classData?.classById?.teachers?.some(
         teacher => data?.authedUser?.id == teacher?.id
     );
+
 </script>
 <style>
 .class-box {
@@ -27,9 +29,6 @@
 <main>
     <div class="grid page">
         <div class="content">
-            {#if amIATeacher}
-                
-            {/if}
             <p style="white-space: pre">
             {JSON.stringify(
                 data.classData,
