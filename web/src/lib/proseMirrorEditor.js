@@ -1,6 +1,5 @@
-// $lib/editor.ts
-import {EditorState} from 'prosemirror-state';
-import {EditorView} from 'prosemirror-view';
+import {EditorState, Plugin} from 'prosemirror-state';
+import {EditorView, Decoration, DecorationSet} from 'prosemirror-view';
 import {Schema} from 'prosemirror-model';
 import {keymap} from 'prosemirror-keymap';
 import {baseKeymap, toggleMark} from 'prosemirror-commands';
@@ -59,7 +58,6 @@ export const schema = new Schema({
 });
 
 function buildKeymap(schema) {
-  const mac = typeof navigator !== 'undefined' && /Mac/.test(navigator.platform);
   const keys = {};
 
   keys["Mod-b"] = toggleMark(schema.marks.bold);
@@ -67,18 +65,78 @@ function buildKeymap(schema) {
   keys["Mod-u"] = toggleMark(schema.marks.underline);
   keys["Mod-d"] = toggleMark(schema.marks.strike);
   keys["Mod-z"] = undo;
-  keys[mac ? "Mod-Shift-z" : "Mod-y"] = redo;
+  keys["Mod-y"] = redo;
+  keys["Mod-Shift-z"] = redo;
 
   return keymap(keys);
 }
 
-export function createEditor(dom) {
+function placeholderPlugin(text) {
+  return new Plugin({
+    props: {
+      decorations(state) {
+        const docEmpty = state.doc.childCount === 1 && state.doc.firstChild?.isTextblock && state.doc.firstChild.content.size === 0;
+
+        if (!docEmpty) return null;
+
+        const placeholder = DecorationSet.create(state.doc, [
+          Decoration.widget(1, () => {
+            const span = document.createElement('span');
+            span.className = 'placeholder';
+            span.textContent = text;
+            return span;
+          }, { side: -1 }) // show before first real text
+        ]);
+
+        return placeholder;
+      }
+    }
+  });
+}
+
+function markTrackingPlugin(updateMarks) {
+  return new Plugin({
+    view(view) {
+      updateMarks(getActiveMarks(view.state));
+      return {
+        update(view) {
+          updateMarks(getActiveMarks(view.state));
+        }
+      };
+    }
+  });
+}
+
+function getActiveMarks(state) {
+  const { from, $from, to, empty } = state.selection;
+  let active = {};
+
+  if (empty) {
+    state.schema.marks && Object.keys(state.schema.marks).forEach(markName => {
+      active[markName] = !!state.storedMarks?.some(m => m.type.name === markName) ||
+                         !!$from.marks().some(m => m.type.name === markName);
+    });
+  } else {
+    state.doc.nodesBetween(from, to, node => {
+      if (!node.isText) return;
+      node.marks.forEach(mark => {
+        active[mark.type.name] = true;
+      });
+    });
+  }
+
+  return active;
+}
+
+export function createEditor(dom, placeholder, updateActiveMarksFunc) {
   const state = EditorState.create({
     schema,
     plugins: [
       history(),
       buildKeymap(schema),
-      keymap(baseKeymap)
+      keymap(baseKeymap),
+      placeholderPlugin(placeholder),
+      markTrackingPlugin(updateActiveMarksFunc)
     ]
   });
 
