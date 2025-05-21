@@ -1,19 +1,16 @@
 <script>
-    import {
-        onMount,
-        onDestroy,
-        createEventDispatcher
-    } from 'svelte';
+    import { onMount, onDestroy } from 'svelte';
     import { createEditor } from '$lib/proseMirrorEditor.js';
     import 'prosemirror-view/style/prosemirror.css';
+    import { schema } from '$lib/proseMirrorEditor.js';
+    import { toggleMark, setBlockType } from 'prosemirror-commands';
     import BoldIcon from "$lib/icons/Bold.svelte";
     import ItalicIcon from "$lib/icons/Italic.svelte";
     import UnderlineIcon from "$lib/icons/Underline.svelte";
     import StrikethroughIcon from "$lib/icons/Strikethrough.svelte";
     import SuperscriptIcon from "$lib/icons/Superscript.svelte";
     import SubscriptIcon from "$lib/icons/Subscript.svelte";
-    let { placeholder, value = $bindable() } = $props();
-    const dispatch = createEventDispatcher();
+    let { placeholder, value = $bindable(), oninputcallback } = $props();
 
     let editorDiv;
     let view;
@@ -22,8 +19,23 @@
         activeMarks = marks;
     }
 
+    const getContent = function () {
+        return view.state.doc.toJSON();
+    };
+
     onMount(() => {
-        view = createEditor(editorDiv, placeholder, updateActiveMarksFunc);
+        view = createEditor(
+            editorDiv,
+            placeholder,
+            updateActiveMarksFunc,
+            function (tr) {
+                const newState = view.state.apply(tr);
+                view.updateState(newState);
+                value = getContent();
+                oninputcallback();
+            },
+            // value
+        );
 
         return () => {
             view.destroy();
@@ -33,9 +45,7 @@
     onDestroy(() => {
         view?.destroy();
     });
-    import { schema } from '$lib/proseMirrorEditor.js';
-    import { toggleMark, setBlockType } from 'prosemirror-commands';
-fu  nction toggleBlockType(nodeType, attrs = {}) {
+    function toggleBlockType(nodeType, attrs = {}) {
     return function (state, dispatch) {
         const isActive = state.selection.$from.parent.hasMarkup(nodeType, attrs);
         return isActive
