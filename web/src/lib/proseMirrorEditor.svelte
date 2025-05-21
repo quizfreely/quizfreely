@@ -82,8 +82,6 @@ function toggleBlockType(nodeType, attrs = {}) {
             min-height: 4rem;
             white-space: pre-wrap;
             overflow: hidden;
-        }
-        .ProseMirror:focus-visible {
             outline: none;
         }
         .ProseMirror .placeholder {
