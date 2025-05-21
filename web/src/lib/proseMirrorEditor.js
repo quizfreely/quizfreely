@@ -128,7 +128,13 @@ function getActiveMarks(state) {
   return active;
 }
 
-export function createEditor(dom, placeholder, updateActiveMarksFunc, dispatchTransactionFunc) {
+export function createEditor(
+    dom,
+    placeholder,
+    updateActiveMarksFunc,
+    dispatchTransactionFunc,
+) {
+  let doc;
   const state = EditorState.create({
     schema,
     plugins: [
