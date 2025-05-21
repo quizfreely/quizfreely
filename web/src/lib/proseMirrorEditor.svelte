@@ -1,7 +1,13 @@
 <script>
-  import { onMount, onDestroy } from 'svelte';
-  import { createEditor } from '$lib/proseMirrorEditor.js';
-  import 'prosemirror-view/style/prosemirror.css';
+    import { onMount, onDestroy } from 'svelte';
+    import { createEditor } from '$lib/proseMirrorEditor.js';
+    import 'prosemirror-view/style/prosemirror.css';
+    import BoldIcon from "$lib/icons/Bold.svelte";
+    import ItalicIcon from "$lib/icons/Italic.svelte";
+    import UnderlineIcon from "$lib/icons/Underline.svelte";
+    import StrikethroughIcon from "$lib/icons/Strikethrough.svelte";
+    import SuperscriptIcon from "$lib/icons/Superscript.svelte";
+    import SubscriptIcon from "$lib/icons/Subscript.svelte";
 
   let editorDiv;
   let view;
@@ -52,16 +58,31 @@ function toggleBlockType(nodeType, attrs = {}) {
         .ProseMirror:focus-visible {
             outline: none;
         }
+        .editor-toolbar-button {
+            border-radius: 0.8rem;
+        }
     }
 </style>
 
 <div class="flex compact-gap" style="margin-bottom: 0px;">
-<button class="faint" on:click={() => toggle('bold')}><b>B<b></button>
-<button class="faint" on:click={() => toggle('italic')}><i>I</i></button>
-<button class="faint" on:click={() => toggle('underline')}><u>U</u></button>
-<button class="faint" on:click={() => toggle('strike')}><strike>Strike</strike></button>
-<button class="faint" on:click={() => toggle('superscript')}>^</button>
-<button class="faint" on:click={() => toggle('subscript')}><span>a<sub>x</sub></span></button>
+    <button class="faint editor-toolbar-button" on:click={() => toggle('bold')} aria-label="Bold">
+        <BoldIcon></BoldIcon>
+    </button>
+    <button class="faint editor-toolbar-button" on:click={() => toggle('italic')} aria-label="Italic">
+        <ItalicIcon></ItalicIcon>
+    </button>
+    <button class="faint editor-toolbar-button" on:click={() => toggle('underline')} aria-label="Underline">
+        <UnderlineIcon></UnderlineIcon>
+    </button>
+    <button class="faint editor-toolbar-button" on:click={() => toggle('strike')}>
+        <StrikethroughIcon></StrikethroughIcon>
+    </button>
+    <button class="faint editor-toolbar-button" on:click={() => toggle('superscript')}>
+        <SuperscriptIcon></SuperscriptIcon>
+    </button>
+    <button class="faint editor-toolbar-button" on:click={() => toggle('subscript')}>
+        <SubscriptIcon></SubscriptIcon>
+    </button>
 </div>
 
 <div bind:this={editorDiv} class="ProseMirror" />
