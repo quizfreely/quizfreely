@@ -30,7 +30,7 @@
 <main>
     <div class="grid page">
         <div class="content">
-            <ProseMirrorEditor placeholder="adsf"></ProseMirrorEditor>
+            <ProseMirrorEditor placeholder="Post an announcement"></ProseMirrorEditor>
             <p style="white-space: pre">
             {JSON.stringify(
                 data.classData,

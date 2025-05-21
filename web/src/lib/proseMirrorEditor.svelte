@@ -103,7 +103,6 @@ function toggleBlockType(nodeType, attrs = {}) {
     }
 </style>
 
-{JSON.stringify(activeMarks, null, 4)}
 <div class="flex compact-gap" style="margin-bottom: 0px;">
     <button class="faint editor-toolbar-button {
         activeMarks?.bold ?
