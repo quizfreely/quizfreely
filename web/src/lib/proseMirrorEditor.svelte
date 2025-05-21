@@ -12,65 +12,69 @@
     import StrikethroughIcon from "$lib/icons/Strikethrough.svelte";
     import SuperscriptIcon from "$lib/icons/Superscript.svelte";
     import SubscriptIcon from "$lib/icons/Subscript.svelte";
-  let { placeholder, value = $bindable() } = $props();
-  const dispatch = createEventDispatcher();
+    let { placeholder, value = $bindable() } = $props();
+    const dispatch = createEventDispatcher();
 
-  let editorDiv;
-  let view;
-  let activeMarks = $state({});
-  function updateActiveMarksFunc(marks) {
-    activeMarks = marks;
-  }
+    let editorDiv;
+    let view;
+    let activeMarks = $state({});
+    function updateActiveMarksFunc(marks) {
+        activeMarks = marks;
+    }
 
-  onMount(() => {
-    view = createEditor(editorDiv, placeholder, updateActiveMarksFunc);
+    onMount(() => {
+        view = createEditor(editorDiv, placeholder, updateActiveMarksFunc);
 
-    return () => {
-      view.destroy();
+        return () => {
+            view.destroy();
+        };
+    });
+
+    onDestroy(() => {
+        view?.destroy();
+    });
+    import { schema } from '$lib/proseMirrorEditor.js';
+    import { toggleMark, setBlockType } from 'prosemirror-commands';
+fu  nction toggleBlockType(nodeType, attrs = {}) {
+    return function (state, dispatch) {
+        const isActive = state.selection.$from.parent.hasMarkup(nodeType, attrs);
+        return isActive
+            ? setBlockType(
+                state.schema.nodes.paragraph
+            )(state, dispatch)
+            : setBlockType(
+                nodeType, attrs
+            )(state, dispatch);
     };
-  });
-
-  onDestroy(() => {
-    view?.destroy();
-  });
-  import { schema } from '$lib/proseMirrorEditor.js';
-  import { toggleMark, setBlockType } from 'prosemirror-commands';
-function toggleBlockType(nodeType, attrs = {}) {
-  return function (state, dispatch) {
-    const isActive = state.selection.$from.parent.hasMarkup(nodeType, attrs);
-    return isActive
-      ? setBlockType(state.schema.nodes.paragraph)(state, dispatch)
-      : setBlockType(nodeType, attrs)(state, dispatch);
-  };
 }
-  function toggle(mark) {
-    let untoggle = false;
-    if (activeMarks[mark]) {
-      /* check state before calling toggleMark
-      but use that check after calling toggleMark
-      so that other marks are updated by prosemirror
-      but this mark being unadded/untoggled is manually
-      shown by this function */
-      untoggle = true;
-    }
+    function toggle(mark) {
+      let untoggle = false;
+      if (activeMarks[mark]) {
+        /* check state before calling toggleMark
+        but use that check after calling toggleMark
+        so that other marks are updated by prosemirror
+        but this mark being unadded/untoggled is manually
+        shown by this function */
+        untoggle = true;
+      }
 
-    toggleMark(schema.marks[mark])(view.state, view.dispatch);
+      toggleMark(schema.marks[mark])(view.state, view.dispatch);
 
-    if (untoggle) {
-        /* "manually" change state to false when unselecting,
-        for selecting, prosemirror already figures it out,
-        but when removing marks the state doesnt immediately update */
+      if (untoggle) {
+          /* "manually" change state to false when unselecting,
+          for selecting, prosemirror already figures it out,
+          but when removing marks the state doesnt immediately update */
+          activeMarks[mark] = false;
         activeMarks[mark] = false;
-      activeMarks[mark] = false;
+      }
+      
+      view.focus();
     }
-    
-    view.focus();
-  }
 
-  function toggleHeading(level) {
-    toggleBlockType(schema.nodes.heading, { level })(view.state, view.dispatch);
-    view.focus();
-  }
+    function toggleHeading(level) {
+      toggleBlockType(schema.nodes.heading, { level })(view.state, view.dispatch);
+      view.focus();
+    }
 </script>
 
 <style>
