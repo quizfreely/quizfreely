@@ -126,7 +126,7 @@ function toggleBlockType(nodeType, attrs = {}) {
         <UnderlineIcon></UnderlineIcon>
     </button>
     <button class="faint editor-toolbar-button {
-        activeMarks?.strikethrough ?
+        activeMarks?.strike ?
             "editor-toolbar-button-active" :
             ""
     }" on:click={() => toggle('strike')}>
