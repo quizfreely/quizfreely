@@ -1,5 +1,9 @@
 <script>
-    import { onMount, onDestroy } from 'svelte';
+    import {
+        onMount,
+        onDestroy,
+        createEventDispatcher
+    } from 'svelte';
     import { createEditor } from '$lib/proseMirrorEditor.js';
     import 'prosemirror-view/style/prosemirror.css';
     import BoldIcon from "$lib/icons/Bold.svelte";
@@ -8,7 +12,8 @@
     import StrikethroughIcon from "$lib/icons/Strikethrough.svelte";
     import SuperscriptIcon from "$lib/icons/Superscript.svelte";
     import SubscriptIcon from "$lib/icons/Subscript.svelte";
-  let { placeholder } = $props();
+  let { placeholder, value = $bindable() } = $props();
+  const dispatch = createEventDispatcher();
 
   let editorDiv;
   let view;

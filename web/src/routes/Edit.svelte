@@ -19,6 +19,7 @@
     import { scale, fade } from "svelte/transition";
 
     import AutoResizeTextarea from "$lib/components/AutoResizeTextarea.svelte";
+    import ProseMirrorEditor from "$lib/proseMirrorEditor.svelte";
 
     var showImportTermsModal = $state(false);
     var showExitConfirmationModal = $state(false);
@@ -416,32 +417,32 @@
             <div id="edit-terms-rows">
               {#each terms as term, index (term.id)}
               <div class="grid box term-row-box" animate:flip={{ duration: 400 }} in:scale={{ duration: 400 }} out:scale={{ duration: 400 }}>
-                  <AutoResizeTextarea
-                    div={{
-                      class: "term-row-box-term"
-                    }}
-                    textarea={{
-                      placeholder: "Term",
-                      rows: "2",
-                      oninput: () => {if (!unsavedChanges) {
-                        unsavedChanges = true;
-                      }}
-                    }}
-                    bind:value={term.term}
-                  />
-                  <AutoResizeTextarea
-                    div={{
-                      class: "term-row-box-def"
-                    }}
-                    textarea={{
-                      placeholder: "Definition",
-                      rows: "2",
-                      oninput: () => {if (!unsavedChanges) {
-                        unsavedChanges = true;
-                      }}
-                    }}
-                    bind:value={term.def}
-                  />
+                  <div class="term-row-box-term">
+                      <ProseMirrorEditor
+                        placeholder="Term"
+                        textarea={{
+                          placeholder: "Term",
+                          rows: "2",
+                          oninput: () => {if (!unsavedChanges) {
+                            unsavedChanges = true;
+                          }}
+                        }}
+                        bind:value={term.term}
+                      />
+                  </div>
+                  <div class="term-row-box-def">
+                      <ProseMirrorEditor
+                        placeholder="Definition"
+                        textarea={{
+                          placeholder: "Definition",
+                          rows: "2",
+                          oninput: () => {if (!unsavedChanges) {
+                            unsavedChanges = true;
+                          }}
+                        }}
+                        bind:value={term.def}
+                      />
+                  </div>
                   <div class="flex center term-row-box-actions">
                       <div class="dropdown left">
                           <button class="dropdown-toggle" aria-label="Actions dropdown menu">
