@@ -27,7 +27,7 @@
 </svelte:head>
 
 <Noscript />
-<main>
+<main style="margin-top: 0px;">
     <div class="grid page">
         <div class="content">
             <ProseMirrorEditor placeholder="Post an announcement"></ProseMirrorEditor>
