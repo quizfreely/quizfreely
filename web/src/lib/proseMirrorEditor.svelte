@@ -69,24 +69,28 @@ function toggleBlockType(nodeType, attrs = {}) {
 </script>
 
 <style>
+    .container {
+        overflow: hidden;
+        margin-top: 0.4rem;
+    }
     :global {
         .ProseMirror {
-            margin-top: 0.4rem;
+            margin-top: 0px;
+            border-radius: 0.8rem;
+            border: 0.2rem solid var(--bg4);
+            padding: 0.8rem;
+            min-height: 4rem;
+            white-space: pre-wrap;
+            overflow: hidden;
+        }
+        .ProseMirror:focus-visible {
+            outline: none;
         }
         .ProseMirror .placeholder {
           position: absolute;
           color: var(--fg0);
           pointer-events: none;
           user-select: none;
-        }
-        .ProseMirror > div {
-            border-radius: 0.8rem;
-            border: 0.2rem solid var(--bg4);
-            padding: 0.8rem;
-            min-height: 4rem;
-        }
-        .ProseMirror:focus-visible {
-            outline: none;
         }
         .ProseMirror > p {
             margin-top: 0px;
@@ -148,5 +152,5 @@ function toggleBlockType(nodeType, attrs = {}) {
     </button>
 </div>
 
-<div bind:this={editorDiv} class="ProseMirror" />
+<div bind:this={editorDiv} class="container" />
 

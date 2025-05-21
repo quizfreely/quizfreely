@@ -1,5 +1,6 @@
 <script>
     import Noscript from "$lib/components/Noscript.svelte";
+    import IconBackArrow from "$lib/icons/BackArrow.svelte";
     import { page } from "$app/state";
     let { children, data } = $props();
 
@@ -75,10 +76,14 @@
 <main>
     <div class="grid page">
         <div class="content">
-            <h1 class="h3">{page.data?.classData?.classById?.name}</h1>
+            <div>
+                <a href="/classes" class="button faint">
+                  <IconBackArrow /> All classes
+                </a>
+            </div>
+            <h1 class="h3" style="margin-top: 1rem;">{page.data?.classData?.classById?.name}</h1>
         <div class="layout-container">
             <div>
-                <h4 class="center layout-title-show-on-mobile-only">Settings</h4>
                 <div class="layout-menu-nav">
                     <a href="/classes/c/{ page.data?.classData?.classById?.id }" class="layout-menu-link {page.data?.streamPage == "stream" ? "current" : ""}">
                         Stream
