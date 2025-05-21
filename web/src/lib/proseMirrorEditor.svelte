@@ -8,12 +8,17 @@
     import StrikethroughIcon from "$lib/icons/Strikethrough.svelte";
     import SuperscriptIcon from "$lib/icons/Superscript.svelte";
     import SubscriptIcon from "$lib/icons/Subscript.svelte";
+  let { placeholder } = $props();
 
   let editorDiv;
   let view;
+  let activeMarks = $state({});
+  function updateActiveMarksFunc(marks) {
+    activeMarks = marks;
+  }
 
   onMount(() => {
-    view = createEditor(editorDiv);
+    view = createEditor(editorDiv, placeholder, updateActiveMarksFunc);
 
     return () => {
       view.destroy();
@@ -34,7 +39,25 @@ function toggleBlockType(nodeType, attrs = {}) {
   };
 }
   function toggle(mark) {
+    let untoggle = false;
+    if (activeMarks[mark]) {
+      /* check state before calling toggleMark
+      but use that check after calling toggleMark
+      so that other marks are updated by prosemirror
+      but this mark being unadded/untoggled is manually
+      shown by this function */
+      untoggle = true;
+    }
+
     toggleMark(schema.marks[mark])(view.state, view.dispatch);
+
+    if (untoggle) {
+        /* "manually" change state to false when unselecting,
+        for selecting, prosemirror already figures it out,
+        but when removing marks the state doesnt immediately update */
+        activeMarks[mark] = false;
+      activeMarks[mark] = false;
+    }
     view.focus();
   }
 
@@ -47,40 +70,80 @@ function toggleBlockType(nodeType, attrs = {}) {
 <style>
     :global {
         .ProseMirror {
-            margin-top: 0.2rem;
+            margin-top: 0.4rem;
+        }
+        .ProseMirror .placeholder {
+          position: absolute;
+          color: var(--fg0);
+          pointer-events: none;
+          user-select: none;
         }
         .ProseMirror > div {
             border-radius: 0.8rem;
-            border: 0.2rem solid var(--main);
-            padding: 8px;
+            border: 0.2rem solid var(--bg4);
+            padding: 0.8rem;
             min-height: 4rem;
         }
         .ProseMirror:focus-visible {
             outline: none;
         }
+        .ProseMirror > p {
+            margin-top: 0px;
+        }
+
         .editor-toolbar-button {
             border-radius: 0.8rem;
+        }
+        .editor-toolbar-button-active,
+        button.editor-toolbar-button-active {
+            color: var(--main);
+            background-color: var(--bg3);
         }
     }
 </style>
 
+{JSON.stringify(activeMarks, null, 4)}
 <div class="flex compact-gap" style="margin-bottom: 0px;">
-    <button class="faint editor-toolbar-button" on:click={() => toggle('bold')} aria-label="Bold">
+    <button class="faint editor-toolbar-button {
+        activeMarks?.bold ?
+            "editor-toolbar-button-active" :
+            ""
+    }" on:click={() => toggle('bold')} aria-label="Bold">
         <BoldIcon></BoldIcon>
     </button>
-    <button class="faint editor-toolbar-button" on:click={() => toggle('italic')} aria-label="Italic">
+    <button class="faint editor-toolbar-button {
+        activeMarks?.italic ?
+            "editor-toolbar-button-active" :
+            ""
+    }" on:click={() => toggle('italic')} aria-label="Italic">
         <ItalicIcon></ItalicIcon>
     </button>
-    <button class="faint editor-toolbar-button" on:click={() => toggle('underline')} aria-label="Underline">
+    <button class="faint editor-toolbar-button {
+        activeMarks?.underline ?
+            "editor-toolbar-button-active" :
+            ""
+    }" on:click={() => toggle('underline')} aria-label="Underline">
         <UnderlineIcon></UnderlineIcon>
     </button>
-    <button class="faint editor-toolbar-button" on:click={() => toggle('strike')}>
+    <button class="faint editor-toolbar-button {
+        activeMarks?.strikethrough ?
+            "editor-toolbar-button-active" :
+            ""
+    }" on:click={() => toggle('strike')}>
         <StrikethroughIcon></StrikethroughIcon>
     </button>
-    <button class="faint editor-toolbar-button" on:click={() => toggle('superscript')}>
+    <button class="faint editor-toolbar-button {
+        activeMarks?.superscript ?
+            "editor-toolbar-button-active" :
+            ""
+    }" on:click={() => toggle('superscript')}>
         <SuperscriptIcon></SuperscriptIcon>
     </button>
-    <button class="faint editor-toolbar-button" on:click={() => toggle('subscript')}>
+    <button class="faint editor-toolbar-button {
+        activeMarks?.subscript ?
+            "editor-toolbar-button-active" :
+            ""
+    }" on:click={() => toggle('subscript')}>
         <SubscriptIcon></SubscriptIcon>
     </button>
 </div>

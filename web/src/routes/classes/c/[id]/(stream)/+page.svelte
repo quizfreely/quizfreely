@@ -1,6 +1,7 @@
 <script>
     import Noscript from "$lib/components/Noscript.svelte";
     import { onMount } from "svelte";
+    import ProseMirrorEditor from "$lib/proseMirrorEditor.svelte";
     let { data } = $props();
 
     let amIATeacher = data?.classData?.classById?.teachers?.some(
@@ -29,6 +30,7 @@
 <main>
     <div class="grid page">
         <div class="content">
+            <ProseMirrorEditor placeholder="adsf"></ProseMirrorEditor>
             <p style="white-space: pre">
             {JSON.stringify(
                 data.classData,
