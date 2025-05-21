@@ -128,7 +128,7 @@ function getActiveMarks(state) {
   return active;
 }
 
-export function createEditor(dom, placeholder, updateActiveMarksFunc) {
+export function createEditor(dom, placeholder, updateActiveMarksFunc, dispatchTransactionFunc) {
   const state = EditorState.create({
     schema,
     plugins: [
@@ -140,6 +140,9 @@ export function createEditor(dom, placeholder, updateActiveMarksFunc) {
     ]
   });
 
-  return new EditorView(dom, { state });
+    return new EditorView(dom, {
+        state,
+        dispatchTransactionFunc
+    });
 }
 
