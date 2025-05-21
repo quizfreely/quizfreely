@@ -58,6 +58,7 @@ function toggleBlockType(nodeType, attrs = {}) {
         activeMarks[mark] = false;
       activeMarks[mark] = false;
     }
+    
     view.focus();
   }
 
