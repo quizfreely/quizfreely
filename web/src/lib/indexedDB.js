@@ -37,17 +37,18 @@ export function openIndexedDB(callback) {
                     const studysetRecord = cursor.value;
 
                     if (studysetRecord && studysetRecord?.data?.terms?.length > 0) {
-                        studysetRecord.terms_json = [];
+                        studysetRecord.data.terms_json = [];
                         for (
                             let term = 0;
                             term < studysetRecord.data.terms.length;
                             term++
                         ) {
-                            studysetRecord.terms_json[0][0] = plaintextToProseMirrorJson(
-                                studysetRecord.terms[0][0]
+                            studysetRecord.data.terms_json[term] = [];
+                            studysetRecord.data.terms_json[term][0] = plaintextToProseMirrorJson(
+                                studysetRecord.data.terms[term][0]
                             );
-                            studysetRecord.terms_json[0][1] = plaintextToProseMirrorJson(
-                                studysetRecord.terms[0][1]
+                            studysetRecord.data.terms_json[term][1] = plaintextToProseMirrorJson(
+                                studysetRecord.data.terms[term][1]
                             );
                         }
 
