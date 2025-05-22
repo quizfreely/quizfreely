@@ -5,24 +5,26 @@ import { fade } from "svelte/transition";
 import NProgress from "nprogress";
 import "$lib/nprogress/modified-nprogress.css";
 import { beforeNavigate, afterNavigate } from "$app/navigation";
+import { nprogressTimeout, cancelNprogressTimeout } from "$lib/stores/nprogressTimeout.js";
+import { get } from "svelte/store";
 let { children, data } = $props();
 
 NProgress.configure({
     showSpinner: false
 });
-let timeout;
 beforeNavigate(function () {
-    if (timeout) {
-        clearTimeout(timeout);
+    const currentTimeout = get(nprogressTimeout);
+    if (currentTimeout) {
+        clearTimeout(currentTimeout);
     }
-    timeout = setTimeout(function () {
-        NProgress.start();
-    }, 200);
+    nprogressTimeout.set(
+        setTimeout(function () {
+            NProgress.start();
+        }, 200)
+    );
 })
 afterNavigate(function () {
-    if (timeout) {
-        clearTimeout(timeout);
-    }
+    cancelNprogressTimeout();
     NProgress.done();
 })
 </script>
