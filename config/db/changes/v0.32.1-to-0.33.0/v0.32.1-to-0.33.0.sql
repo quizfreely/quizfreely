@@ -49,3 +49,7 @@ using (
   (select current_setting('qzfr_api.scope', true)) = 'user' and
   (select current_setting('qzfr_api.user_id', true))::uuid = user_id
 );
+
+alter table public.studysets
+
+

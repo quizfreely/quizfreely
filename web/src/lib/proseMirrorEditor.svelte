@@ -91,6 +91,8 @@
     .container {
         overflow: hidden;
         margin-top: 0.4rem;
+        background-color: var(--bg1);
+        border-radius: 0.8rem;
     }
     :global {
         .ProseMirror {
