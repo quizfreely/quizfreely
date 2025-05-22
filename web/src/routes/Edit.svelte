@@ -3,7 +3,7 @@
     import { onMount, mount } from "svelte";
     import { openIndexedDB } from "$lib/indexedDB";
     import { goto, beforeNavigate } from "$app/navigation";
-    import NProgress from "nprogress";
+    import { cancelNprogressTimeout } from "$lib/stores/nprogressTimeout.js";
     let { data } = $props();
 
     import IconLocal from "$lib/icons/Local.svelte";
@@ -307,11 +307,11 @@
             the browser shows it's own native modal
             when we use `.cancel()` */
             navigation.cancel();
-            /* beforeNavigate calls NProgress.start() in +layout.svelte,
-            so we need to cancel/finish it after cancelling navigation
-            this makes the bar go away after showing our modal w js
-            or after the browser shows its native modal */
-            NProgress.done();
+
+            /* our routes/+layout.svelte shows a progress bar
+            if navigation takes too long, so we cancel the timer
+            when we cancel navigation, so that it doesn't show */
+            cancelNprogressTimeout();
         }
     })
 </script>
