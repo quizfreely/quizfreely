@@ -131,45 +131,45 @@
         activeMarks?.bold ?
             "editor-toolbar-button-active" :
             ""
-    }" on:click={() => toggle('bold')} aria-label="Bold">
+    }" onclick={() => toggle('bold')} aria-label="Bold">
         <BoldIcon></BoldIcon>
     </button>
     <button class="faint editor-toolbar-button {
         activeMarks?.italic ?
             "editor-toolbar-button-active" :
             ""
-    }" on:click={() => toggle('italic')} aria-label="Italic">
+    }" onclick={() => toggle('italic')} aria-label="Italic">
         <ItalicIcon></ItalicIcon>
     </button>
     <button class="faint editor-toolbar-button {
         activeMarks?.underline ?
             "editor-toolbar-button-active" :
             ""
-    }" on:click={() => toggle('underline')} aria-label="Underline">
+    }" onclick={() => toggle('underline')} aria-label="Underline">
         <UnderlineIcon></UnderlineIcon>
     </button>
     <button class="faint editor-toolbar-button {
         activeMarks?.strike ?
             "editor-toolbar-button-active" :
             ""
-    }" on:click={() => toggle('strike')}>
+    }" onclick={() => toggle('strike')}>
         <StrikethroughIcon></StrikethroughIcon>
     </button>
     <button class="faint editor-toolbar-button {
         activeMarks?.superscript ?
             "editor-toolbar-button-active" :
             ""
-    }" on:click={() => toggle('superscript')}>
+    }" onclick={() => toggle('superscript')}>
         <SuperscriptIcon></SuperscriptIcon>
     </button>
     <button class="faint editor-toolbar-button {
         activeMarks?.subscript ?
             "editor-toolbar-button-active" :
             ""
-    }" on:click={() => toggle('subscript')}>
+    }" onclick={() => toggle('subscript')}>
         <SubscriptIcon></SubscriptIcon>
     </button>
 </div>
 
-<div bind:this={editorDiv} class="container" />
+<div bind:this={editorDiv} class="container"></div>
 
