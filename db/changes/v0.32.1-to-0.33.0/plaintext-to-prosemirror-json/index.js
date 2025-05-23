@@ -3,6 +3,12 @@ import pgCursor from "pg-cursor";
 import { JSDOM } from "jsdom";
 import { DOMParser as PMDOMParser } from "prosemirror-model";
 import { schema as basicSchema } from "prosemirror-schema-basic";
+import sanitizeHtml from "sanitize-html";
+const sanitizeHtmlOptions = {
+    allowedTags: [],
+    allowedAttributes: {},
+    disallowedTagsMode: "escape"
+}
 
 if (!process?.env?.DB_CONNECTION_URL) {
     console.error(
@@ -16,24 +22,25 @@ const client = new Client({
     connectionString: process.env.DB_CONNECTION_URL
 });
 
-function convertPlaintextToProsemirrorJson(plaintext) {
-  const dom = new JSDOM("<div></div>");
-  const div = dom.window.document.querySelector("div");
-  div.innerHTML = plaintext.split(/\n+/).map(
-    line => `<p>${line}</p>`
-  ).join("");
-
-  const doc = PMDOMParser.fromSchema(basicSchema).parse(div);
-  return doc.toJSON();
+function convertPlaintextToSafeHtml(plaintext) {
+    return plaintext.split(/\n+/).map(
+        line => `<p>${sanitizeHtml(line, sanitizeHtmlOptions)}</p>`
+    ).join("");
+}
+function convertSafeHtmlToProsemirrorJson(safeHtml) {
+    const dom = new JSDOM("<div></div>");
+    const div = dom.window.document.querySelector("div");
+    div.innerHTML = safeHtml;
+    const doc = PMDOMParser.fromSchema(basicSchema).parse(div);
+    return doc.toJSON();
 }
 
 await client.connect();
 try {
-    await client.query('BEGIN'); // Start transaction
+    await client.query('BEGIN');
 
     const cursor = client.query(
-        new Cursor(
-            'SELECT id, some_column FROM your_table WHERE needs_update = true')
+        new Cursor('SELECT id, data FROM public.studysets')
     );
 
     function readNextBatch() {
@@ -49,12 +56,30 @@ try {
             }
 
             for (const row of rows) {
-                const updatedValue = yourUpdateLogic(row);
-
-                await client.query(
-                    'UPDATE public.studysets SET terms_json = $1, needs_update = false WHERE id = $2',
-                    [updatedValue, row.id]
-                );
+                if (row?.data?.terms) {
+                    row.data.terms.forEach(function (term) {
+                        const termSafeHtml = convertPlaintextToSafeHtml(term[0]);
+                        const termProseMirrorJson = convertSafeHtmlToProsemirrorJson(
+                            termSafeHtml
+                        );
+                        const defSafeHtml = convertPlaintextToSafeHtml(term[1]);
+                        const defProseMirrorJson = convertSafeHtmlToProsemirrorJson(
+                            defSafeHtml
+                        );
+                        await client.query(
+                            "INSERT INTO public.terms (" +
+                            "studyset_id, term_prosemirror_json, term_safe_html, def_prosemirror_json, def_safe_html" + 
+                            ") VALUES ($1, $2, $3, $4, $5)",
+                            [
+                                row.id,
+                                termProseMirrorJson,
+                                termSafeHtml,
+                                defProseMirrorJson,
+                                defSafeHtml
+                            ]
+                        );
+                    })
+                }
             }
 
           readNextBatch();
