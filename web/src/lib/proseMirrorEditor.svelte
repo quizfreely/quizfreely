@@ -32,7 +32,9 @@
                 const newState = view.state.apply(tr);
                 view.updateState(newState);
                 value = getContent();
-                oninputcallback();
+                if (oninputcallback) {
+                    oninputcallback();
+                }
             },
             // value
         );

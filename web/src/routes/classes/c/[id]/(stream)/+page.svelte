@@ -3,11 +3,7 @@
     import { onMount } from "svelte";
     import ProseMirrorEditor from "$lib/proseMirrorEditor.svelte";
     let { data } = $props();
-
-    let amIATeacher = data?.classData?.classById?.teachers?.some(
-        teacher => data?.authedUser?.id == teacher?.id
-    );
-
+    let newAnnouncementContent;
 </script>
 <style>
 .class-box {
@@ -21,6 +17,11 @@
 .class-link:hover {
     color: var(--fg0);
 }
+.flexbox-to-the-end {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
 </style>
 <svelte:head>
     <title>Quizfreely Classes</title>
@@ -30,7 +31,12 @@
 <main style="margin-top: 0px;">
     <div class="grid page">
         <div class="content">
-            <ProseMirrorEditor placeholder="Post an announcement"></ProseMirrorEditor>
+            <ProseMirrorEditor placeholder="Post an announcement" bind:value={newAnnouncementContent} ></ProseMirrorEditor>
+            <div class="flexbox-to-the-end">
+                <button onclick={function () {
+                    console.log(newAnnouncementContent);
+                }}>Post</button>
+            </div>
             <p style="white-space: pre">
             {JSON.stringify(
                 data.classData,

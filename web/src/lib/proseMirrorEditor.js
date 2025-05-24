@@ -148,7 +148,7 @@ export function createEditor(
 
     return new EditorView(dom, {
         state,
-        dispatchTransactionFunc
+        dispatchTransaction: dispatchTransactionFunc
     });
 }
 
