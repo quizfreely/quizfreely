@@ -84,7 +84,6 @@ export function createEditor(
     updateActiveMarksFunc,
     dispatchTransactionFunc,
 ) {
-  let doc;
   const state = EditorState.create({
     schema,
     plugins: [
