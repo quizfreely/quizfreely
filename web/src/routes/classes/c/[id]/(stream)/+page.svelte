@@ -35,6 +35,7 @@
     let announcements = $derived(renderAnnouncements(
         data?.classData?.classById?.announcements
     ));
+    let announcementProseMirrorEditor;
 </script>
 <style>
 .class-box {
@@ -65,7 +66,11 @@
 
 <Noscript />
 <div style="margin-top: 0px;">
-    <ProseMirrorEditor placeholder="Post an announcement" bind:value={newAnnouncementContent} ></ProseMirrorEditor>
+    <ProseMirrorEditor
+        placeholder="Post an announcement"
+        bind:this={announcementProseMirrorEditor}
+        bind:value={newAnnouncementContent}
+    ></ProseMirrorEditor>
     <div class="flexbox-to-the-end">
         <button onclick={function () {
             var request = fetch("/classes/api/graphql", {
@@ -99,7 +104,7 @@
                     alert("oops it couldn't parse as json?")
                 })
                 requestJson.then(function (resultJson) {
-                    newAnnouncementContent = null
+                    announcementProseMirrorEditor.clearValue();
                 })
                 invalidateAll();
             });
