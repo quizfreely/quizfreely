@@ -10,6 +10,8 @@
     import StrikethroughIcon from "$lib/icons/Strikethrough.svelte";
     import SuperscriptIcon from "$lib/icons/Superscript.svelte";
     import SubscriptIcon from "$lib/icons/Subscript.svelte";
+    import UndoIcon from "$lib/icons/Undo.svelte";
+    import RedoIcon from "$lib/icons/Redo.svelte";
     let { placeholder, value = $bindable(), oninputcallback } = $props();
 
     let editorDiv;
@@ -172,14 +174,14 @@
         <SubscriptIcon></SubscriptIcon>
     </button>
     <button class="faint editor-toolbar-button" onclick={
-        undo(view.state, view.dispatch)
+        () => undo(view.state, view.dispatch)
     } aria-label="Undo">
-        <SubscriptIcon></SubscriptIcon>
+        <UndoIcon></UndoIcon>
     </button>
     <button class="faint editor-toolbar-button" onclick={
-        redo(view.state, view.dispatch)
+        () => redo(view.state, view.dispatch)
     } aria-label="Redo">
-        <SubscriptIcon></SubscriptIcon>
+        <RedoIcon></RedoIcon>
     </button>
 </div>
 
