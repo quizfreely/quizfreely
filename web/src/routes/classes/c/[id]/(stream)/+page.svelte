@@ -4,9 +4,18 @@
     import { invalidateAll } from '$app/navigation';
     import ProseMirrorEditor from "$lib/proseMirrorEditor.svelte";
     import { DOMSerializer, Node } from "prosemirror-model";
+    import sanitizeHtml from "sanitize-html";
     import { schema } from "$lib/proseMirrorSchema.js";
     let { data } = $props();
     let newAnnouncementContent = $state({});
+    const sanitizeHtmlOptions = {
+        allowedTags: [
+            "p", "strong", "em", "u", "s", "sup", "sub"
+        ],
+        disallowedTagsMode: "escape",
+        allowedAttributes: {},
+        parseStyleAttributes: false
+    };
     function renderAnnouncements(announcementsArray) {
         let result = [];
         if (announcementsArray) {
@@ -23,7 +32,13 @@
                     div.appendChild(DOMSerializer.fromSchema(schema).serializeFragment(
                         Node.fromJSON(schema, contentJson)
                     ));
-                    result.push(div.innerHTML);
+                    result.push({
+                        ...announcementsArray[index],
+                        safeHtml: sanitizeHtml(
+                            div.innerHTML,
+                            sanitizeHtmlOptions
+                        )
+                    });
                 } catch (error) {
                     console.log("Error rendering announcement prosemirror content:")
                     console.log(error);
@@ -112,7 +127,8 @@
     </div>
     {#each announcements as announcement}
         <div class="box announcement">
-            {@html announcement}
+            {announcement.user.displayName}
+            {@html announcement.safeHtml}
         </div>
     {/each}
     <p style="white-space: pre-wrap;">
