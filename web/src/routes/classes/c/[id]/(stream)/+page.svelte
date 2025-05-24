@@ -7,22 +7,34 @@
     import { schema } from "$lib/proseMirrorSchema.js";
     let { data } = $props();
     let newAnnouncementContent = $state({});
-    let announcements = $state([]);
-    if (data.classData?.classById?.announcements) {
-        data.classData.classById.announcements.forEach((announcement) => {
-            try {
-                const contentJson = JSON.parse(announcement.contentProseMirrorJson)
-                let div = document.createElement("div");
-                div.appendChild(DOMSerializer.fromSchema(schema).serializeFragment(
-                    Node.fromJSON(schema, contentJson)
-                ));
-                announcements.push(div.innerHTML);
-            } catch (error) {
-                console.log("Error rendering announcement prosemirror content:")
-                console.log(error);
+    function renderAnnouncements(announcementsArray) {
+        let result = [];
+        if (announcementsArray) {
+            for (
+                let index = announcementsArray.length - 1;
+                index >= 0;
+                index--
+            ) {
+                try {
+                    const contentJson = JSON.parse(
+                        announcementsArray[index].contentProseMirrorJson
+                    )
+                    let div = document.createElement("div");
+                    div.appendChild(DOMSerializer.fromSchema(schema).serializeFragment(
+                        Node.fromJSON(schema, contentJson)
+                    ));
+                    result.push(div.innerHTML);
+                } catch (error) {
+                    console.log("Error rendering announcement prosemirror content:")
+                    console.log(error);
+                }
             }
-        })
+        }
+        return result;
     }
+    let announcements = $derived(renderAnnouncements(
+        data?.classData?.classById?.announcements
+    ));
 </script>
 <style>
 .class-box {
@@ -40,6 +52,11 @@
     display: flex;
     flex-direction: column;
     align-items: flex-end;
+}
+:global {
+    .announcement p {
+        margin-top: 0px;
+    }
 }
 </style>
 <svelte:head>
@@ -82,15 +99,16 @@
                     alert("oops it couldn't parse as json?")
                 })
                 requestJson.then(function (resultJson) {
-                    console.log("yay, it works")
+                    newAnnouncementContent = null
                 })
                 invalidateAll();
             });
         }}>Post</button>
     </div>
     {#each announcements as announcement}
-        announcement:
-        {@html announcement}
+        <div class="box announcement">
+            {@html announcement}
+        </div>
     {/each}
     <p style="white-space: pre-wrap;">
     {JSON.stringify(
