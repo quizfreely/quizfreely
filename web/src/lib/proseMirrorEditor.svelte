@@ -2,7 +2,7 @@
     import { onMount, onDestroy } from 'svelte';
     import { createEditor, undo, redo } from '$lib/proseMirrorEditor.js';
     import 'prosemirror-view/style/prosemirror.css';
-    import { schema } from '$lib/proseMirrorEditor.js';
+    import { schema } from '$lib/proseMirrorSchema.js';
     import { toggleMark, setBlockType } from 'prosemirror-commands';
     import BoldIcon from "$lib/icons/Bold.svelte";
     import ItalicIcon from "$lib/icons/Italic.svelte";

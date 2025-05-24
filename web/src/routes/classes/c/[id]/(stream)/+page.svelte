@@ -2,8 +2,23 @@
     import Noscript from "$lib/components/Noscript.svelte";
     import { onMount } from "svelte";
     import ProseMirrorEditor from "$lib/proseMirrorEditor.svelte";
+    import { DOMSerializer } from "prosemirror-model";
+    import { schema } from "$lib/proseMirrorSchema.js";
     let { data } = $props();
-    let newAnnouncementContent;
+    let newAnnouncementContent = $state({});
+    let announcements = [];
+    if (data.classData?.classById?.announcements) {
+        data.classData.classById.announcements.forEach((announcement) => {
+            try {
+                let domTree = DOMSerializer.fromSchema(schema).serializeFragment(announcement.proseMirrorJson.doc.content);
+                announcements.push(domTree.innerHTML);
+            } catch (error) {
+                console.log("Error rendering announcement prosemirror:")
+                console.error(error);
+            }
+        })
+    }
+    console.log(announcements);
 </script>
 <style>
 .class-box {
@@ -37,6 +52,9 @@
                     console.log(newAnnouncementContent);
                 }}>Post</button>
             </div>
+            {#each announcements as announcement}
+                {announcement}
+            {/each}
             <p style="white-space: pre">
             {JSON.stringify(
                 data.classData,
