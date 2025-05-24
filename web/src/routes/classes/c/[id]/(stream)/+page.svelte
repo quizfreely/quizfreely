@@ -1,24 +1,28 @@
 <script>
     import Noscript from "$lib/components/Noscript.svelte";
     import { onMount } from "svelte";
+    import { invalidateAll } from '$app/navigation';
     import ProseMirrorEditor from "$lib/proseMirrorEditor.svelte";
-    import { DOMSerializer } from "prosemirror-model";
+    import { DOMSerializer, Node } from "prosemirror-model";
     import { schema } from "$lib/proseMirrorSchema.js";
     let { data } = $props();
     let newAnnouncementContent = $state({});
-    let announcements = [];
+    let announcements = $state([]);
     if (data.classData?.classById?.announcements) {
         data.classData.classById.announcements.forEach((announcement) => {
             try {
-                let domTree = DOMSerializer.fromSchema(schema).serializeFragment(announcement.proseMirrorJson.doc.content);
-                announcements.push(domTree.innerHTML);
+                const contentJson = JSON.parse(announcement.contentProseMirrorJson)
+                let div = document.createElement("div");
+                div.appendChild(DOMSerializer.fromSchema(schema).serializeFragment(
+                    Node.fromJSON(schema, contentJson)
+                ));
+                announcements.push(div.innerHTML);
             } catch (error) {
                 console.log("Error rendering announcement prosemirror content:")
                 console.log(error);
             }
         })
     }
-    console.log(announcements);
 </script>
 <style>
 .class-box {
@@ -43,28 +47,57 @@
 </svelte:head>
 
 <Noscript />
-<main style="margin-top: 0px;">
-    <div class="grid page">
-        <div class="content">
-            <ProseMirrorEditor placeholder="Post an announcement" bind:value={newAnnouncementContent} ></ProseMirrorEditor>
-            <div class="flexbox-to-the-end">
-                <button onclick={function () {
-                    console.log(newAnnouncementContent);
-                    fetch("")
-                }}>Post</button>
-            </div>
-            {#each announcements as announcement}
-                announcement:
-                {@html announcement}
-            {/each}
-            <p style="white-space: pre">
-            {JSON.stringify(
-                data.classData,
-                null,
-                4
-            )}
-            </p>
-        </div>
+<div style="margin-top: 0px;">
+    <ProseMirrorEditor placeholder="Post an announcement" bind:value={newAnnouncementContent} ></ProseMirrorEditor>
+    <div class="flexbox-to-the-end">
+        <button onclick={function () {
+            var request = fetch("/classes/api/graphql", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    query: `mutation postAnnouncement($classId: ID!, $content: String!) {
+                        createAnnouncement(
+                            classId: $classId,
+                            contentProseMirrorJson: $content
+                        ) {
+                            id
+                        }
+                    }`,
+                    variables: {
+                        "classId": data.classData?.classById?.id,
+                        "content": JSON.stringify(newAnnouncementContent)
+                    }
+                })
+            });
+            request.catch(function (error) {
+                console.error(error);
+                alert("oops it like didnt work :(");
+            });
+            request.then(function (result) {
+                var requestJson = result.json()
+                requestJson.catch(function (error) {
+                    console.error(error);
+                    alert("oops it couldn't parse as json?")
+                })
+                requestJson.then(function (resultJson) {
+                    console.log("yay, it works")
+                })
+                invalidateAll();
+            });
+        }}>Post</button>
     </div>
-</main>
+    {#each announcements as announcement}
+        announcement:
+        {@html announcement}
+    {/each}
+    <p style="white-space: pre-wrap;">
+    {JSON.stringify(
+        data.classData,
+        null,
+        4
+    )}
+    </p>
+</div>
 
