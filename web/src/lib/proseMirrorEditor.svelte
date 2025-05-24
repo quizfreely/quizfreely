@@ -26,23 +26,29 @@
         return view.state.doc.toJSON();
     };
 
-    let oldValue = value;
-    $effect(function () {
-        if (value && oldValue != value) {
-            try {
-                const newDoc = schema.nodeFromJSON(value);
-                const newState = EditorState.create({
-                  doc: newDoc,
-                  schema,
-                  plugins: view.state.plugins,
-                });
-                view.updateState(newState);
-                oldValue = value;
-            } catch (e) {
-                console.error("Failed to update prosemirror editor state from value:", e);
-            }
+    export function updateValueFromJson(newValue) {
+        try {
+            const newDoc = schema.nodeFromJSON(newValue);
+            const newState = EditorState.create({
+              doc: newDoc,
+              schema,
+              plugins: view.state.plugins
+            });
+            view.updateState(newState);
+        } catch (e) {
+            console.error("Failed to update ProseMirror editor w updateValueFromJson:", e);
         }
-    })
+    }
+    export function clearValue() {
+        try {
+            view.updateState(EditorState.create({
+                schema,
+                plugins: view.state.plugins
+            }));
+        } catch (e) {
+            console.error("Failed to clear ProseMirror editor w clearValue:", e);
+        }
+    }
 
     onMount(() => {
         view = createEditor(
