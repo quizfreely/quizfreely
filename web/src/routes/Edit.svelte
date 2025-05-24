@@ -420,26 +420,18 @@
                   <div class="term-row-box-term">
                       <ProseMirrorEditor
                         placeholder="Term"
-                        textarea={{
-                          placeholder: "Term",
-                          rows: "2",
-                          oninput: () => {if (!unsavedChanges) {
+                        oninputcallback={() => {if (!unsavedChanges) {
                             unsavedChanges = true;
-                          }}
-                        }}
+                        }}}
                         bind:value={term.term}
                       />
                   </div>
                   <div class="term-row-box-def">
                       <ProseMirrorEditor
                         placeholder="Definition"
-                        textarea={{
-                          placeholder: "Definition",
-                          rows: "2",
-                          oninput: () => {if (!unsavedChanges) {
+                        oninputcallback={() => {if (!unsavedChanges) {
                             unsavedChanges = true;
-                          }}
-                        }}
+                        }}}
                         bind:value={term.def}
                       />
                   </div>
