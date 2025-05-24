@@ -1,6 +1,6 @@
 <script>
     import { onMount, onDestroy } from 'svelte';
-    import { createEditor } from '$lib/proseMirrorEditor.js';
+    import { createEditor, undo, redo } from '$lib/proseMirrorEditor.js';
     import 'prosemirror-view/style/prosemirror.css';
     import { schema } from '$lib/proseMirrorEditor.js';
     import { toggleMark, setBlockType } from 'prosemirror-commands';
@@ -154,21 +154,31 @@
         activeMarks?.strike ?
             "editor-toolbar-button-active" :
             ""
-    }" onclick={() => toggle('strike')}>
+    }" onclick={() => toggle('strike')} aria-label="Strikethrough">
         <StrikethroughIcon></StrikethroughIcon>
     </button>
     <button class="faint editor-toolbar-button {
         activeMarks?.superscript ?
             "editor-toolbar-button-active" :
             ""
-    }" onclick={() => toggle('superscript')}>
+    }" onclick={() => toggle('superscript')} aria-label="Superscript">
         <SuperscriptIcon></SuperscriptIcon>
     </button>
     <button class="faint editor-toolbar-button {
         activeMarks?.subscript ?
             "editor-toolbar-button-active" :
             ""
-    }" onclick={() => toggle('subscript')}>
+    }" onclick={() => toggle('subscript')} aria-label="Subscript">
+        <SubscriptIcon></SubscriptIcon>
+    </button>
+    <button class="faint editor-toolbar-button" onclick={
+        undo(view.state, view.dispatch)
+    } aria-label="Undo">
+        <SubscriptIcon></SubscriptIcon>
+    </button>
+    <button class="faint editor-toolbar-button" onclick={
+        redo(view.state, view.dispatch)
+    } aria-label="Redo">
         <SubscriptIcon></SubscriptIcon>
     </button>
 </div>

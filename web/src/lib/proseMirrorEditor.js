@@ -57,6 +57,8 @@ export const schema = new Schema({
   }
 });
 
+export { undo, redo };
+
 function buildKeymap(schema) {
   const keys = {};
 
