@@ -1,4 +1,5 @@
 <script>
+    import { fade } from "svelte/transition";
     import Noscript from "$lib/components/Noscript.svelte";
     import IconBackArrow from "$lib/icons/BackArrow.svelte";
     import { page } from "$app/state";
@@ -121,7 +122,7 @@
                 {/if}
             </div>
             <div style="margin-top:0px" class="container-main-content">
-                {#key data.classesStreamPageTransKey}
+                {#key data.classesStreamTransPageKey}
                     <div class="container-main-content-child" in:fade={{ duration: 140, delay: 140 }} out:fade={{ duration: 140 }}>
                         {@render children()}
                     </div>
