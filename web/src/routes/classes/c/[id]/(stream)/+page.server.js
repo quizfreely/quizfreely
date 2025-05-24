@@ -33,6 +33,14 @@ export async function load({ cookies, params }) {
                             userSettings {
                                 color
                             }
+                            announcements {
+                                id
+                                user {
+                                    id
+                                    displayName
+                                }
+                                contentProseMirrorJson
+                            }
                         }
                     }`,
                     variables: {
