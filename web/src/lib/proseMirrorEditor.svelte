@@ -4,6 +4,7 @@
     import 'prosemirror-view/style/prosemirror.css';
     import { schema } from '$lib/proseMirrorSchema.js';
     import { toggleMark, setBlockType } from 'prosemirror-commands';
+    import { EditorState } from "prosemirror-state";
     import BoldIcon from "$lib/icons/Bold.svelte";
     import ItalicIcon from "$lib/icons/Italic.svelte";
     import UnderlineIcon from "$lib/icons/Underline.svelte";
@@ -24,6 +25,24 @@
     const getContent = function () {
         return view.state.doc.toJSON();
     };
+
+    let oldValue = value;
+    $effect(function () {
+        if (value && oldValue != value) {
+            try {
+                const newDoc = schema.nodeFromJSON(value);
+                const newState = EditorState.create({
+                  doc: newDoc,
+                  schema,
+                  plugins: view.state.plugins,
+                });
+                view.updateState(newState);
+                oldValue = value;
+            } catch (e) {
+                console.error("Failed to update prosemirror editor state from value:", e);
+            }
+        }
+    })
 
     onMount(() => {
         view = createEditor(
