@@ -67,6 +67,21 @@
             display: block;
         }
     }
+
+    .container-main-content,
+    .container-main-content-child {
+        max-width: 100%;
+        overflow-wrap: break-word;
+        word-break: break-word;
+    }
+    .container-main-content {
+        padding-right: 16vw;
+    }
+    @media only screen and (max-width: 1400px) {
+        .container-main-content {
+            padding-right: 0px;
+        }
+    }
 </style>
 <svelte:head>
     <title>Quizfreely Classes</title>
@@ -105,9 +120,9 @@
                 </div>
                 {/if}
             </div>
-            <div style="margin-top:0px">
-                {#key data.settingsTransPageKey}
-                    <div in:fade={{ duration: 140, delay: 140 }} out:fade={{ duration: 140 }}>
+            <div style="margin-top:0px" class="container-main-content">
+                {#key data.classesStreamPageTransKey}
+                    <div class="container-main-content-child" in:fade={{ duration: 140, delay: 140 }} out:fade={{ duration: 140 }}>
                         {@render children()}
                     </div>
                 {/key}

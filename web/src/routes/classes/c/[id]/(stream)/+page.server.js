@@ -18,6 +18,7 @@ export async function load({ cookies, params }) {
                 body: JSON.stringify({
                     query: `query classPage($id: ID!) {
                         classById(id: $id) {
+                            id
                             name
                             course {
                                 id
