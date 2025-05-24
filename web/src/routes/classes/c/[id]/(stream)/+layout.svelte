@@ -100,8 +100,10 @@
                     </a>
                     {/if}
                 </div>
+                {#if !amIATeacher}
                 <div class="box">
                 </div>
+                {/if}
             </div>
             <div style="margin-top:0px">
                 {#key data.settingsTransPageKey}
@@ -111,9 +113,6 @@
                 {/key}
             </div>
         </div>
-            {#if amIATeacher}
-                
-            {/if}
             <p style="white-space: pre">
             {JSON.stringify(
                 data.classData,
