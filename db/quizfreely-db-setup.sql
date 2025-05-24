@@ -196,8 +196,10 @@ as permissive
 for insert
 to quizfreely_api
 with check (
-  (select current_setting('qzfr_api.scope', true)) = 'user' and
-  (select current_setting('qzfr_api.user_id', true))::uuid = user_id
+  (select current_setting('qzfr-api.admin', true)) = true or (
+    (select current_setting('qzfr_api.scope', true)) = 'user' and
+    (select current_setting('qzfr_api.user_id', true))::uuid = user_id
+  )
 );
 
 create policy update_studysets on public.studysets
@@ -205,8 +207,10 @@ as permissive
 for update
 to quizfreely_api
 using (
-  (select current_setting('qzfr_api.scope', true)) = 'user' and
-  (select current_setting('qzfr_api.user_id', true))::uuid = user_id
+  (select current_setting('qzfr-api.admin', true)) = true or (
+    (select current_setting('qzfr_api.scope', true)) = 'user' and
+    (select current_setting('qzfr_api.user_id', true))::uuid = user_id
+  )
 )
 with check (true);
 
@@ -215,9 +219,25 @@ as permissive
 for delete
 to quizfreely_api
 using (
-  (select current_setting('qzfr_api.scope', true)) = 'user' and
-  (select current_setting('qzfr_api.user_id', true))::uuid = user_id
+  (select current_setting('qzfr-api.admin', true)) = true or (
+    (select current_setting('qzfr_api.scope', true)) = 'user' and
+    (select current_setting('qzfr_api.user_id', true))::uuid = user_id
+  )
 );
+
+create table public.terms (
+  id uuid primary key default gen_random_uuid(),
+  studyset_id uuid references public.studysets (id) on delete cascade,
+  term_prosemirror_json jsonb,
+  term_safe_html text,
+  def_prosemirror_json jsonb,
+  def_safe_html text,
+);
+
+grant select on public.terms to quizfreely_api;
+grant insert on public.terms to quizfreely_api;
+grant update on public.terms to quizfreely_api;
+grant delete on public.terms to quizfreely_api;
 
 create table public.studyset_progress (
   id uuid primary key default gen_random_uuid(),
@@ -330,3 +350,4 @@ using (
   (select current_setting('qzfr_api.scope', true)) = 'user' and
   (select current_setting('qzfr_api.user_id', true))::uuid = user_id
 );
+
