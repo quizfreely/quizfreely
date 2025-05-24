@@ -13,8 +13,8 @@
                 let domTree = DOMSerializer.fromSchema(schema).serializeFragment(announcement.proseMirrorJson.doc.content);
                 announcements.push(domTree.innerHTML);
             } catch (error) {
-                console.log("Error rendering announcement prosemirror:")
-                console.error(error);
+                console.log("Error rendering announcement prosemirror content:")
+                console.log(error);
             }
         })
     }
@@ -50,10 +50,12 @@
             <div class="flexbox-to-the-end">
                 <button onclick={function () {
                     console.log(newAnnouncementContent);
+                    fetch("")
                 }}>Post</button>
             </div>
             {#each announcements as announcement}
-                {announcement}
+                announcement:
+                {@html announcement}
             {/each}
             <p style="white-space: pre">
             {JSON.stringify(

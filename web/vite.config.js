@@ -14,6 +14,13 @@ export default defineConfig({
 				rewrite: function (path) {
 					return path.replace(/^\/api/, "");
 				}
+			},
+			"/classes/api/": {
+				target: process?.env?.CLASSES_API_URL ?? "http://localhost:3000",
+				changeOrigin: true,
+				rewrite: function (path) {
+					return path.replace(/^\/classes\/api/, "");
+				}
 			}
 		}
 	},
@@ -25,6 +32,13 @@ export default defineConfig({
 				changeOrigin: true,
 				rewrite: function (path) {
 					return path.replace(/^\/api/, "");
+				}
+			},
+			"/classes/api/": {
+				target: process?.env?.CLASSES_API_URL ?? "http://localhost:8008",
+				changeOrigin: true,
+				rewrite: function (path) {
+					return path.replace(/^\/classes\/api/, "");
 				}
 			}
 		}
