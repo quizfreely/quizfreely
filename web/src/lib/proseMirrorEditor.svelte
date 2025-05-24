@@ -35,6 +35,7 @@
               plugins: view.state.plugins
             });
             view.updateState(newState);
+            value = view.state.doc.toJSON();
         } catch (e) {
             console.error("Failed to update ProseMirror editor w updateValueFromJson:", e);
         }
@@ -45,6 +46,7 @@
                 schema,
                 plugins: view.state.plugins
             }));
+            value = view.state.doc.toJSON();
         } catch (e) {
             console.error("Failed to clear ProseMirror editor w clearValue:", e);
         }
