@@ -66,6 +66,18 @@
     grid-template-rows: auto;
     grid-template-columns: 1fr 1fr;
 }
+.reasonable-title-size {
+    font-size: 1.2rem;
+    width: 40vw;
+}
+.reasonable-title-size::placeholder {
+    font-size: 1.2rem;
+}
+@media only screen and (max-width: 1000px) {
+    .reasonable-title-size {
+        width: 100%;
+    }
+}
 </style>
 <svelte:head>
     <title>Quizfreely Classes</title>
@@ -85,7 +97,7 @@
         </div>
         <Noscript />
         <div>
-            <input type="text" placeholder="Title">
+            <input type="text" class="reasonable-title-size" placeholder="Title">
             <ProseMirrorEditor placeholder="Description"></ProseMirrorEditor>
             <div style="display: flex; gap: 1rem; flex-direction: row; justify-items: flex-end; justify-content: flex-end;">
                 <button class="alt" style="margin-top: 0px;">Cancel</button>
