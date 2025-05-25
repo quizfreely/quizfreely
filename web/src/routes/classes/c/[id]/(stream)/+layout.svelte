@@ -1,6 +1,7 @@
 <script>
     import { fade } from "svelte/transition";
     import Noscript from "$lib/components/Noscript.svelte";
+    import IconPlus from "$lib/icons/Plus.svelte";
     import IconBackArrow from "$lib/icons/BackArrow.svelte";
     import { page } from "$app/state";
     let { children, data } = $props();
@@ -123,7 +124,7 @@
             </div>
             <div style="margin-top:0px" class="container-main-content">
                 <div class="flex">
-                    <a href="/classes/c/{ page?.data?.classId }/post" class="button"></a>
+                    <a href="/classes/c/{ page?.data?.classId }/create-assignment" class="button alt"><IconPlus></IconPlus> Create assignment</a>
                 </div>
                 {#key data.classesStreamTransPageKey}
                     <div class="container-main-content-child" in:fade={{ duration: 140, delay: 140 }} out:fade={{ duration: 140 }}>
