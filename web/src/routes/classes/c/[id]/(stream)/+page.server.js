@@ -1,7 +1,21 @@
 import fetchAuthData from "$lib/fetchAuthData.server";
 import { env } from '$env/dynamic/private';
+import sanitizeHtml from "sanitize-html";
+import { JSDOM } from "jsdom";
+import { DOMSerializer, Node } from "prosemirror-model";
+import { schema } from "$lib/proseMirrorSchema.js";
 
+const sanitizeHtmlOptions = {
+    allowedTags: [
+        "p", "strong", "em", "u", "s", "sup", "sub"
+    ],
+    disallowedTagsMode: "escape",
+    allowedAttributes: {},
+    parseStyleAttributes: false
+};
 export async function load({ cookies, params }) {
+const { window } = new JSDOM("<div></div>");
+const document = window.document;
     let result = {
         ...await fetchAuthData({ cookies }),
         streamPage: "stream",
@@ -53,6 +67,37 @@ export async function load({ cookies, params }) {
                 let responseJson = await response.json();
                 if (responseJson?.data) {
                     result.classData = responseJson.data;
+                    if (result.classData?.classById?.announcements) {
+                        for (
+                            let index = result.classData.classById.announcements.length - 1;
+                            index >= 0;
+                            index--
+                        ) {
+                            try {
+                                const contentJson = JSON.parse(
+                                    result.classData.classById.announcements[
+                                        index
+                                    ].contentProseMirrorJson
+                                )
+                                let div = document.createElement("div");
+                                div.appendChild(DOMSerializer.fromSchema(schema).serializeFragment(
+                                    Node.fromJSON(schema, contentJson),
+                                    document
+                                ));
+                                result.classData.classById.announcements[
+                                    index
+                                ].safeHtml = sanitizeHtml(
+                                    div.innerHTML,
+                                    sanitizeHtmlOptions
+                                );
+                            } catch (error) {
+                                console.error(
+                                    "Error rendering announcement prosemirror content:",
+                                    error
+                                );
+                            }
+                        }
+                    }
                     return result;
                 } else {
                     console.error(responseJson);

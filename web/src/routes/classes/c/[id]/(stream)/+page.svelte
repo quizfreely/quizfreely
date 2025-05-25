@@ -1,55 +1,10 @@
 <script>
     import Noscript from "$lib/components/Noscript.svelte";
-    import { onMount } from "svelte";
+    // import { onMount } from "svelte";
     import { invalidateAll } from '$app/navigation';
     import ProseMirrorEditor from "$lib/proseMirrorEditor.svelte";
-    import { DOMSerializer, Node } from "prosemirror-model";
-    import sanitizeHtml from "sanitize-html";
-    import { schema } from "$lib/proseMirrorSchema.js";
     let { data } = $props();
     let newAnnouncementContent = $state({});
-    const sanitizeHtmlOptions = {
-        allowedTags: [
-            "p", "strong", "em", "u", "s", "sup", "sub"
-        ],
-        disallowedTagsMode: "escape",
-        allowedAttributes: {},
-        parseStyleAttributes: false
-    };
-    function renderAnnouncements(announcementsArray) {
-        let result = [];
-        if (announcementsArray) {
-            for (
-                let index = announcementsArray.length - 1;
-                index >= 0;
-                index--
-            ) {
-                try {
-                    const contentJson = JSON.parse(
-                        announcementsArray[index].contentProseMirrorJson
-                    )
-                    let div = document.createElement("div");
-                    div.appendChild(DOMSerializer.fromSchema(schema).serializeFragment(
-                        Node.fromJSON(schema, contentJson)
-                    ));
-                    result.push({
-                        ...announcementsArray[index],
-                        safeHtml: sanitizeHtml(
-                            div.innerHTML,
-                            sanitizeHtmlOptions
-                        )
-                    });
-                } catch (error) {
-                    console.log("Error rendering announcement prosemirror content:")
-                    console.log(error);
-                }
-            }
-        }
-        return result;
-    }
-    let announcements = $derived(renderAnnouncements(
-        data?.classData?.classById?.announcements
-    ));
     let announcementProseMirrorEditor;
 </script>
 <style>
@@ -125,7 +80,7 @@
             });
         }}>Post</button>
     </div>
-    {#each announcements as announcement}
+    {#each data?.announcements as announcement}
         <div class="box announcement">
             {announcement.user.displayName}
             {@html announcement.safeHtml}
