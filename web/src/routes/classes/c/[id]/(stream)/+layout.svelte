@@ -102,13 +102,13 @@
         <div class="layout-container">
             <div>
                 <div class="layout-menu-nav">
-                    <a href="/classes/c/{ page.data?.classData?.classById?.id }" class="layout-menu-link {page.data?.streamPage == "stream" ? "current" : ""}">
+                    <a href="/classes/c/{ page.data?.classId }" class="layout-menu-link {page.data?.streamPage == "stream" ? "current" : ""}">
                         Stream
                     </a>
-                    <a href="/classes/c/{ page.data?.classData?.classById?.id }/classwork" class="layout-menu-link {page.data?.streamPage == "classwork" ? "current" : ""}">
+                    <a href="/classes/c/{ page.data?.classId }/classwork" class="layout-menu-link {page.data?.streamPage == "classwork" ? "current" : ""}">
                         Classwork
                     </a>
-                    <a href="/classes/c/{ page.data?.classData?.classById?.id }/people" class="layout-menu-link {page.data?.streamPage == "people" ? "current" : ""}">
+                    <a href="/classes/c/{ page.data?.classId }/people" class="layout-menu-link {page.data?.streamPage == "people" ? "current" : ""}">
                         People
                     </a>
                     {#if amIATeacher}
