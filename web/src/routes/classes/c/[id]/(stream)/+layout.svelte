@@ -111,7 +111,7 @@
                         People
                     </a>
                     {#if amIATeacher}
-                    <a href="/classes/c/{ page.data?.classData?.classById?.id }/settings" class="layout-menu-link {page.data?.streamPage == "settings" ? "current" : ""}">
+                    <a href="/classes/c/{ page.data?.classId }/settings" class="layout-menu-link {page.data?.streamPage == "settings" ? "current" : ""}">
                         Settings
                     </a>
                     {/if}
@@ -122,6 +122,9 @@
                 {/if}
             </div>
             <div style="margin-top:0px" class="container-main-content">
+                <div class="flex">
+                    <a href="/classes/c/{ page?.data?.classId }/post" class="button"></a>
+                </div>
                 {#key data.classesStreamTransPageKey}
                     <div class="container-main-content-child" in:fade={{ duration: 140, delay: 140 }} out:fade={{ duration: 140 }}>
                         {@render children()}
