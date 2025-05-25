@@ -2,8 +2,6 @@ import fetchAuthData from "$lib/fetchAuthData.server";
 import { env } from '$env/dynamic/private';
 import sanitizeHtml from "sanitize-html";
 import { JSDOM } from "jsdom";
-import { DOMSerializer, Node } from "prosemirror-model";
-import { schema } from "$lib/proseMirrorSchema.js";
 
 const sanitizeHtmlOptions = {
     allowedTags: [
@@ -14,8 +12,10 @@ const sanitizeHtmlOptions = {
     parseStyleAttributes: false
 };
 export async function load({ cookies, params }) {
-const { window } = new JSDOM("<div></div>");
-const document = window.document;
+    const { window } = new JSDOM("<div></div>");
+    const document = window.document;
+    const { DOMSerializer, Node } = await import("prosemirror-model");
+    const { schema } = await import("$lib/proseMirrorSchema.js");
     let result = {
         ...await fetchAuthData({ cookies }),
         streamPage: "stream",
@@ -82,7 +82,7 @@ const document = window.document;
                                 let div = document.createElement("div");
                                 div.appendChild(DOMSerializer.fromSchema(schema).serializeFragment(
                                     Node.fromJSON(schema, contentJson),
-                                    document
+                                    { document }
                                 ));
                                 result.classData.classById.announcements[
                                     index

@@ -80,7 +80,7 @@
             });
         }}>Post</button>
     </div>
-    {#each data?.announcements as announcement}
+    {#each data?.classData?.classById?.announcements.reverse() as announcement}
         <div class="box announcement">
             {announcement.user.displayName}
             {@html announcement.safeHtml}
