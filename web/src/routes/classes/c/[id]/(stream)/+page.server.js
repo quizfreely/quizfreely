@@ -19,7 +19,8 @@ export async function load({ cookies, params }) {
     let result = {
         ...await fetchAuthData({ cookies }),
         streamPage: "stream",
-        header: { activePage: "classes" }
+        header: { activePage: "classes" },
+        classId: params?.id
     };
     if (env?.ENABLE_CLASSES == "true") {
         try {
@@ -55,6 +56,8 @@ export async function load({ cookies, params }) {
                                     displayName
                                 }
                                 contentProseMirrorJson
+                                createdAt
+                                updatedAt
                             }
                         }
                     }`,
@@ -69,9 +72,9 @@ export async function load({ cookies, params }) {
                     result.classData = responseJson.data;
                     if (result.classData?.classById?.announcements) {
                         for (
-                            let index = result.classData.classById.announcements.length - 1;
-                            index >= 0;
-                            index--
+                            let index = 0;
+                            index < result.classData.classById.announcements.length;
+                            index++
                         ) {
                             try {
                                 const contentJson = JSON.parse(
