@@ -35,7 +35,24 @@ export async function load({ cookies, locals }) {
       secure: true,
       sameSite: "lax"
     }
-  )
+  );
+    if (cookies.get("settingsdatetimeformathours")) {
+        cookies.set(
+          "settingsdatetimeformathours",
+          cookies.get("settingsdatetimeformathours"),
+          {
+            /* 30 days * 24h * 60m * 60s = 2592000 sec for 30 days */
+            maxAge: 2592000,
+            path: "/",
+            httpOnly: true,
+            /* when secure is true,
+            browsers only send the cookie through https,
+            on localhost, browsers send it even if localhost isn't using https */
+            secure: true,
+            sameSite: "lax"
+          }
+        );
+    }
   if (cookies.get("auth")) {
     try {
     let rawApiRes = await fetch(env.API_URL + "/graphql", {

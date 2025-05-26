@@ -1,32 +1,11 @@
 <script>
-    import { onMount } from "svelte";
+    // import { onMount } from "svelte";
     let { data } = $props();
 
     import IconCheckmark from "$lib/icons/Checkmark.svelte";
 
-    onMount(function () {
-        document.getElementById("time-24h").addEventListener("click", function () {
-            document.getElementById("time-24h").classList.add("selected")
-            document.getElementById("time-12h").classList.remove("selected")
-            if (window.localStorage) {
-                localStorage.setItem("quizfreely:settings.hourFormat", "24h")
-            }
-        })
-        document.getElementById("time-12h").addEventListener("click", function () {
-            document.getElementById("time-24h").classList.remove("selected")
-            document.getElementById("time-12h").classList.add("selected")
-            if (window.localStorage) {
-                localStorage.setItem("quizfreely:settings.hourFormat", "12h")
-            }
-        })
-        if (window.localStorage && (localStorage.getItem("quizfreely:settings.hourFormat") == "24h")) {
-            document.getElementById("time-24h").classList.add("selected")
-            document.getElementById("time-12h").classList.remove("selected")
-        } else if (window.localStorage && (localStorage.getItem("quizfreely:settings.hourFormat") == "12h")) {
-            document.getElementById("time-24h").classList.remove("selected")
-            document.getElementById("time-12h").classList.add("selected")
-        }
-    })
+    // onMount(function () {
+    // })
 </script>
 <style>
   .a-little-different-grid-list {
@@ -57,18 +36,31 @@
 <p>Date & Time</p>
 <div>
   <div class="combo-select">
-    <button id="time-24h" class="left">
+    <a href="/settings/date-time-format?clear=true" class="button left {
+        data?.dateTimeFormatHours != "24" &&
+        data?.dateTimeFormatHours != "12" ?
+            "selected" :
+            ""
+    }">
+        <IconCheckmark class="combo-selected-icon" />
+        Auto
+    </a>
+    <a href="/settings/date-time-format?h=24" class="button mid {
+        data?.dateTimeFormatHours == "24" ?
+            "selected" :
+            ""
+    }">
       <IconCheckmark class="combo-selected-icon" />
       24 Hour
-    </button>
-    <!--
-      12h has selected class by default before being modified by js with localStorage
-      because everywhere else also defaults to 12h if the setting isn't set in localStorage
-    -->
-    <button id="time-12h" class="right selected">
+    </a>
+    <a href="/settings/date-time-format?h=12" class="button right {
+        data?.dateTimeFormatHours == "12" ?
+            "selected" :
+            ""
+    }">
       <IconCheckmark class="combo-selected-icon" />
       12 Hour (AM/PM)
-    </button>
+    </a>
   </div>
 </div>
 <!--<h3>Data & Privacy</h3>
