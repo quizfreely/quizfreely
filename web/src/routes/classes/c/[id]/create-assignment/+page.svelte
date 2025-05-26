@@ -9,8 +9,10 @@
     import IconBackArrow from "$lib/icons/BackArrow.svelte";
     import IconCheckmark from "$lib/icons/Checkmark.svelte";
     import IconClock from "$lib/icons/Clock.svelte";
+    import IconTrash from "$lib/icons/Trash.svelte";
     import 'vanillajs-datepicker/css/datepicker.css';
     import "$lib/vanillajsDatepickerCustomEhui.css";
+    import { fade } from "svelte/transition";
     let { data } = $props();
     let description = $state({});
     let unsavedChanges = $state(false);
@@ -191,10 +193,6 @@
               <div class="content">
                 <h4>Save changes?</h4>
                 <div class="flex">
-                  <button data-sveltekit-preload-data="false" onclick={saveButtonOrCreateButton}>
-                    <IconCheckmark />
-                    Save draft
-                  </button>
                   <button onclick={function () { showExitConfirmationModal = false; }}>Keep Editing</button>
                   <button class="button ohno" data-sveltekit-preload-data="false" onclick={function () {
                     bypassUnsavedChangesConfirmation = true;
