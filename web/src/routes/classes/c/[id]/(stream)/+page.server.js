@@ -89,7 +89,7 @@ export async function load({ cookies, params }) {
                                 ));
                                 result.classData.classById.announcements[
                                     index
-                                ].safeHtml = sanitizeHtml(
+                                ].safeRenderedHtml = sanitizeHtml(
                                     div.innerHTML,
                                     sanitizeHtmlOptions
                                 );

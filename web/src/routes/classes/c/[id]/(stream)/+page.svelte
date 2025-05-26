@@ -1,11 +1,47 @@
 <script>
     import Noscript from "$lib/components/Noscript.svelte";
-    // import { onMount } from "svelte";
+    import { onMount } from "svelte";
     import { invalidateAll } from '$app/navigation';
     import ProseMirrorEditor from "$lib/proseMirrorEditor.svelte";
+    import { fancyTimestamp } from "$lib/fancyTimestamp.js";
     let { data } = $props();
     let newAnnouncementContent = $state({});
     let announcementProseMirrorEditor;
+    onMount(function () {
+        if (window.localStorage) {
+            const hourFormat = localStorage.getItem("quizfreely:settings.hourFormat");
+            if (hourFormat == "24h") {
+                fancyTimestamp.hours = 24;
+            } else if (hourFormat == "12h") {
+                fancyTimestamp.hours = 12;
+            }
+        }
+        for (
+            let index = 0;
+            index < data?.classData?.classById?.announcements?.length;
+            index++
+        ) {
+            console.log("?")
+            console.log("?")
+            console.log("?")
+            if (
+                data.classData.classById.announcements[index].createdAt ==
+                    data.classData.classById.announcements[index].updatedAt
+            ) {
+                data.classData.classById.announcements[index].renderedTimestamp =
+                    fancyTimestamp.format(
+                        data.classData.classById.announcements[index].createdAt
+                    );
+            } else {
+                data.classData.classById.announcements[index].renderedTimestamp =
+                    fancyTimestamp.format(
+                        data.classData.classById.announcements[index].createdAt
+                    ) + " · updated " + fancyTimestamp.format(
+                        data.classData.classById.announcements[index].updatedAt
+                    )
+            }
+        }
+    })
 </script>
 <style>
 .class-box {
@@ -80,11 +116,13 @@
             });
         }}>Post</button>
     </div>
-    {#each data?.classData?.classById?.announcements.reverse() as announcement}
+    {#each data?.classData?.classById?.announcements as announcement}
+        {#if announcement.safeRenderedHtml}
         <div class="box announcement">
-            {announcement.user.displayName}
-            {@html announcement.safeHtml}
+            <p>{announcement.user.displayName} · {announcement.renderedTimestamp}</p>
+            {@html announcement.safeRenderedHtml}
         </div>
+        {/if}
     {/each}
     <p style="white-space: pre-wrap;">
     {JSON.stringify(

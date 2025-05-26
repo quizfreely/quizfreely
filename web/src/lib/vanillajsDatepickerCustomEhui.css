@@ -1,6 +1,10 @@
 .eh-datepicker-container span {
     margin-top: 0px;
 }
+.eh-datepicker-container .datepicker,
+.eh-datepicker-container .datepicker-dropdown {
+    margin-top: 0px;
+}
 .eh-datepicker-container .datepicker-picker {
     background-color: var(--bg2);
     border-radius: 0.8rem;
