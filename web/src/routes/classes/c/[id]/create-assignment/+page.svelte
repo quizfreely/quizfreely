@@ -163,7 +163,7 @@
         <Noscript />
         <div>
             <input type="text" class="reasonable-title-size" placeholder="Title">
-            <div class="datepicker-container-div">
+            <div class="eh-datepicker-container">
             <input type="text" name="due-date" bind:this={datePickerInput} placeholder="Due date">
             </div>
             <ProseMirrorEditor placeholder="Description" bind:value={description} oninputcallback={() => unsavedChanges = true}></ProseMirrorEditor>
