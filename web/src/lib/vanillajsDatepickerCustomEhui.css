@@ -1,4 +1,39 @@
-.datepicker-container-div span {
+.eh-datepicker-container span {
     margin-top: 0px;
+}
+.eh-datepicker-container .datepicker-picker {
+    background-color: var(--bg2);
+    border-radius: 0.8rem;
+}
+.eh-datepicker-container .datepicker-cell {
+    border-radius: 0.6rem;
+    transition-duration: 0.2s;
+}
+.eh-datepicker-container .day.prev,
+.eh-datepicker-container .day.next {
+    color: var(--fg0);
+}
+.eh-datepicker-container .datepicker-cell:not(.disabled):hover {
+    background-color: var(--bg3);
+}
+.eh-datepicker-container .datepicker-cell.selected,
+.eh-datepicker-container .datepicker-cell.focused {
+    background-color: var(--main);
+    color: var(--bg1);
+}
+.eh-datepicker-container .datepicker-cell.selected:hover {
+    background-color: var(--main-alt);
+    color: var(--bg1);
+}
+.eh-datepicker-container .datepicker-controls .button {
+    color: var(--fg1);
+    background-color: var(--bg2);
+    border-radius: 0.8rem;
+}
+.eh-datepicker-container .datepicker-controls .button:hover,
+.eh-datepicker-container .datepicker-controls .button:focus {
+    color: var(--main-alt);
+    background-color: var(--bg3);
+    transform: none;
 }
 
