@@ -11,7 +11,7 @@
     import IconClock from "$lib/icons/Clock.svelte";
     let { data } = $props();
     let description = $state({});
-    let unsavedChanges = false;
+    let unsavedChanges = $state(false);
     let bypassUnsavedChangesConfirmation = false;
     let showExitConfirmationModal = $state(false);
     let showDraftSavedIndicator = $state(false);
