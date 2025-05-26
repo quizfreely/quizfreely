@@ -23,7 +23,7 @@ export const fancyTimestamp = {
             };
         } else if (fancyTimestamp.hours == 12) {
             intlTimeOptions = {
-                hour: '2-digit',
+                hour: 'numeric',
                 minute: '2-digit',
                 hour12: true
             };

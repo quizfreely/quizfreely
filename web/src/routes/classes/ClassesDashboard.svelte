@@ -45,13 +45,13 @@
             {#if !(data?.classesData?.classesAsStudent?.length > 0)}
                 a
             {/if}
-            <p style="white-space: pre">
-            {JSON.stringify(
-                data.classesData,
-                null,
-                4
-            )}
-            </p>
+            <!-- <p style="white-space: pre"> -->
+            <!-- {JSON.stringify( -->
+            <!--     data.classesData, -->
+            <!--     null, -->
+            <!--     4 -->
+            <!-- )} -->
+            <!-- </p> -->
         </div>
     </div>
 </main>
