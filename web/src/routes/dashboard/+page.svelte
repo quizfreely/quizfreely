@@ -9,9 +9,9 @@
     import IconPlus from "$lib/icons/Plus.svelte";
 
     onMount(function () {
-      if (window.localStorage && (localStorage.getItem("quizfreely:settings.hourFormat") == "24h")) {
+      if (data?.settingsDateTimeFormatHours == "24h") {
         fancyTimestamp.hours = 24;
-      } else if (window.localStorage && (localStorage.getItem("quizfreely:settings.hourFormat") == "12h")) {
+      } else if (data?.settingsDateTimeFormatHours == "12h") {
         fancyTimestamp.hours = 12;
       }
 
