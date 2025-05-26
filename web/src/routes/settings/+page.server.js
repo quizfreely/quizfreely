@@ -5,6 +5,9 @@ export async function load({ locals, cookies }) {
         ...await fetchAuthData({ cookies }),
         theme: locals.theme,
         header: { activePage: "settings" },
-        settingsSection: "general"
+        settingsSection: "general",
+        dateTimeFormatHours: cookies?.get(
+            "settingsdatetimeformathours"
+        )
     }
 }
