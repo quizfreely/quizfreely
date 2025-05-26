@@ -9,12 +9,23 @@
     import IconBackArrow from "$lib/icons/BackArrow.svelte";
     import IconCheckmark from "$lib/icons/Checkmark.svelte";
     import IconClock from "$lib/icons/Clock.svelte";
+    import 'vanillajs-datepicker/css/datepicker.css';
+    import "$lib/vanillajsDatepickerCustomEhui.css";
     let { data } = $props();
     let description = $state({});
     let unsavedChanges = $state(false);
     let bypassUnsavedChangesConfirmation = false;
     let showExitConfirmationModal = $state(false);
     let showDraftSavedIndicator = $state(false);
+
+    let datePickerInput;
+    let datePicker;
+    onMount(async function () {
+        const { Datepicker } = await import('vanillajs-datepicker');
+        datePicker = new Datepicker(
+            datePickerInput
+        )
+    })
 
     beforeNavigate(function (navigation) {
         if (unsavedChanges && !bypassUnsavedChangesConfirmation) {
@@ -152,6 +163,9 @@
         <Noscript />
         <div>
             <input type="text" class="reasonable-title-size" placeholder="Title">
+            <div class="datepicker-container-div">
+            <input type="text" name="due-date" bind:this={datePickerInput} placeholder="Due date">
+            </div>
             <ProseMirrorEditor placeholder="Description" bind:value={description} oninputcallback={() => unsavedChanges = true}></ProseMirrorEditor>
             <div style="display: flex; gap: 1rem; flex-direction: row; justify-items: flex-end; justify-content: flex-end;">
                 <button class="alt" style="margin-top: 0px;">Cancel</button>
