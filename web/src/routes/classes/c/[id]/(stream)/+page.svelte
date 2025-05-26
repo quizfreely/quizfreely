@@ -58,7 +58,7 @@
                         }
                     }`,
                     variables: {
-                        "classId": data.classData?.classById?.id,
+                        "classId": data.classId,
                         "content": JSON.stringify(newAnnouncementContent)
                     }
                 })
