@@ -18,7 +18,6 @@
     let unsavedChanges = $state(false);
     let bypassUnsavedChangesConfirmation = false;
     let showExitConfirmationModal = $state(false);
-    let showDraftSavedIndicator = $state(false);
 
     let datePickerInput;
     let datePicker;
@@ -51,53 +50,57 @@
     })
 
     function saveDraft() {
-        var request = fetch("/classes/api/graphql", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                query: `mutation saveAssignmentDraft(
-                    $classId: ID!,
-                    $title: String!,
-                    $description: String!,
-                    $points: Int!,
-                    $dueAt: DateTime!
-                ) {
-                    createAssignmentDraft(
-                        classId: $classId,
-                        title: $title,
-                        descriptionProseMirrorJson: $description,
-                        points: $points,
-                        dueAt: $dueAt
+        if (data.new) {
+            var request = fetch("/classes/api/graphql", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    query: `mutation saveAssignmentDraft(
+                        $classId: ID!,
+                        $title: String!,
+                        $description: String!,
+                        $points: Int!,
+                        $dueAt: DateTime!
                     ) {
-                        id
+                        createAssignmentDraft(
+                            classId: $classId,
+                            title: $title,
+                            descriptionProseMirrorJson: $description,
+                            points: $points,
+                            dueAt: $dueAt
+                        ) {
+                            id
+                        }
+                    }`,
+                    variables: {
+                        "classId": data.classId,
+                        "title": title,
+                        "description": JSON.stringify(description),
+                        "points": points,
+                        "dueAt": dueAt
                     }
-                }`,
-                variables: {
-                    "classId": data.classId,
-                    "title": title,
-                    "description": JSON.stringify(description),
-                    "points": points,
-                    "dueAt": dueAt
-                }
-            })
-        });
-        request.catch(function (error) {
-            console.error(error);
-            alert("oops it like didnt work :(");
-        });
-        request.then(function (result) {
-            var requestJson = result.json()
-            requestJson.catch(function (error) {
+                })
+            });
+            request.catch(function (error) {
                 console.error(error);
-                alert("oops it couldn't parse as json?")
-            })
-            requestJson.then(function (resultJson) {
-                showDraftSavedIndicator = true;
-                unsavedChanges = false;
-            })
-        });
+                alert("oops it like didnt work :(");
+            });
+            request.then(function (result) {
+                var requestJson = result.json()
+                requestJson.catch(function (error) {
+                    console.error(error);
+                    alert("oops it couldn't parse as json?")
+                })
+                requestJson.then(function (resultJson) {
+                    unsavedChanges = false;
+                    goto(
+                        `/classes/c/${data.classId}/classwork`
+                    );
+                })
+            });
+        }
     }
 </script>
 <style>
@@ -153,12 +156,6 @@
                 </a>
             </div>
             <div class="flex" style="margin-top: 0px; justify-items: flex-end; justify-content: flex-end;">
-                {#if showDraftSavedIndicator && !unsavedChanges}
-                <span class="fg0" style="margin-top: 0px;">
-                    <IconCheckmark></IconCheckmark>
-                    Draft saved
-                </span>
-                {/if}
                 <button class="alt" style="margin-top: 0px;" onclick={saveDraft}>Save draft</button>
             </div>
         </div>
@@ -170,7 +167,14 @@
             </div>
             <ProseMirrorEditor placeholder="Description" bind:value={description} oninputcallback={() => unsavedChanges = true}></ProseMirrorEditor>
             <div style="display: flex; gap: 1rem; flex-direction: row; justify-items: flex-end; justify-content: flex-end;">
-                <button class="alt" style="margin-top: 0px;">Cancel</button>
+                <a href="/classes/c/{ data.classId }/{
+                    data.new ?
+                        "classwork" :
+                        `assignments/${data.assignmentId}`
+                    }"
+                    class="button alt"
+                    style="margin-top: 0px;"
+                >Cancel</a>
                 <button class="alt" style="margin-top: 0px;">
                     <IconClock></IconClock>
                     Schedule
