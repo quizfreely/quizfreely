@@ -87,13 +87,19 @@ export async function load({ cookies, locals }) {
               authed: apiRes.data.authed,
               authedUser: apiRes.data.authedUser,
               studysetList: apiRes.data.myStudysets,
-        header: { activePage: "home" }
+        header: { activePage: "home" },
+              settingsDateTimeFormatHours: cookies.get(
+                "settingsdatetimeformathours"
+              )
             }
           }
         } else {
           return {
             authed: false,
-      header: { activePage: "home" }
+      header: { activePage: "home" },
+              settingsDateTimeFormatHours: cookies.get(
+                "settingsdatetimeformathours"
+              )
           }
         }
       } catch (error) {
@@ -101,7 +107,10 @@ export async function load({ cookies, locals }) {
         //reply.send("work in progress error message error during api response json parse")
         return {
           authed: false,
-      header: { activePage: "home" }
+      header: { activePage: "home" },
+              settingsDateTimeFormatHours: cookies.get(
+                "settingsdatetimeformathours"
+              )
         }
       }
     } catch (error) {
@@ -110,13 +119,19 @@ export async function load({ cookies, locals }) {
       // in addition to an error message, our dashboard.html view should still be sent so that stuff like local studysets are still usable
       return {
         authed: false,
-      header: { activePage: "home" }
+      header: { activePage: "home" },
+              settingsDateTimeFormatHours: cookies.get(
+                "settingsdatetimeformathours"
+              )
       }
     }
   } else {
     return {
       authed: false,
-      header: { activePage: "home" }
+      header: { activePage: "home" },
+              settingsDateTimeFormatHours: cookies.get(
+                "settingsdatetimeformathours"
+              )
     }
   }
 };
