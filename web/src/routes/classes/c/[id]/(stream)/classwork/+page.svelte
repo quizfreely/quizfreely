@@ -1,9 +1,9 @@
 <script>
     import Noscript from "$lib/components/Noscript.svelte";
     // import { onMount } from "svelte";
-    import { invalidateAll } from '$app/navigation';
-    import ProseMirrorEditor from "$lib/proseMirrorEditor.svelte";
+    // import { invalidateAll } from '$app/navigation';
     // import { fancyTimestamp } from "$lib/fancyTimestamp.js";
+    import IconPencil from "$lib/icons/Pencil.svelte";
     let { data } = $props();
     let newAnnouncementContent = $state({});
     let announcementProseMirrorEditor;
@@ -37,50 +37,23 @@
 
 <Noscript />
 <div style="margin-top: 0px;">
-    <ProseMirrorEditor
-        placeholder="Post an announcement"
-        bind:this={announcementProseMirrorEditor}
-        bind:value={newAnnouncementContent}
-    ></ProseMirrorEditor>
-    <div class="flexbox-to-the-end">
-        <button onclick={function () {
-            var request = fetch("/classes/api/graphql", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    query: `mutation postAnnouncement($classId: ID!, $content: String!) {
-                        createAnnouncement(
-                            classId: $classId,
-                            contentProseMirrorJson: $content
-                        ) {
-                            id
-                        }
-                    }`,
-                    variables: {
-                        "classId": data.classId,
-                        "content": JSON.stringify(newAnnouncementContent)
-                    }
-                })
-            });
-            request.catch(function (error) {
-                console.error(error);
-                alert("oops it like didnt work :(");
-            });
-            request.then(function (result) {
-                var requestJson = result.json()
-                requestJson.catch(function (error) {
-                    console.error(error);
-                    alert("oops it couldn't parse as json?")
-                })
-                requestJson.then(function (resultJson) {
-                    announcementProseMirrorEditor.clearValue();
-                })
-                invalidateAll();
-            });
-        }}>Post</button>
-    </div>
+    {#if data?.classData?.classById?.assignmentDrafts}
+    Drafts <span class="fg0">(not visible to students)</span>
+    {#each data?.classData?.classById?.assignmentDrafts as draft}
+        <div class="box announcement">
+            <p style="font-size: 1.2rem;">{draft.title}</p>
+            <div class="flex" style="align-items: center; margin-top: 0.4rem;">
+                <a href="/classes/c/{data.classId}/edit-assignment/{draft.id}" class="button faint" style="margin-top: 0px;">
+                    <IconPencil></IconPencil>
+                    Edit
+                </a>
+            {#if draft.renderedDueDate}
+                <span class="fg0" style="margin-left: auto; margin-right: 1rem;">Due {draft.renderedDueDate}</span>
+            {/if}
+            </div>
+        </div>
+    {/each}
+    {/if}
     {#each data?.classData?.classById?.announcements as announcement}
         {#if announcement.safeRenderedHtml}
         <div class="box announcement">

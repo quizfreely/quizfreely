@@ -68,6 +68,7 @@ export async function load({ cookies, params }) {
                             assignmentDrafts {
                                 id
                                 title
+                                dueAt
                             }
                         }
                     }`,
@@ -80,55 +81,17 @@ export async function load({ cookies, params }) {
                 let responseJson = await response.json();
                 if (responseJson?.data) {
                     result.classData = responseJson.data;
-                    result.streamData = [];
-                    if (result.classData?.classById?.announcements) {
+                    if (result.classData?.classById?.assignmentDrafts) {
                         for (
                             let index = 0;
-                            index < result.classData.classById.announcements.length;
+                            index < result.classData.classById.assignmentDrafts.length;
                             index++
                         ) {
-                            try {
-                                const contentJson = JSON.parse(
-                                    result.classData.classById.announcements[
-                                        index
-                                    ].contentProseMirrorJson
-                                )
-                                let div = document.createElement("div");
-                                div.appendChild(DOMSerializer.fromSchema(schema).serializeFragment(
-                                    Node.fromJSON(schema, contentJson),
-                                    { document }
-                                ));
-                                result.classData.classById.announcements[
-                                    index
-                                ].safeRenderedHtml = sanitizeHtml(
-                                    div.innerHTML,
-                                    sanitizeHtmlOptions
-                                );
-                            } catch (error) {
-                                console.error(
-                                    "Error rendering announcement prosemirror content:",
-                                    error
-                                );
-                            }
-
-                            if (
-                                result.classData.classById.announcements[index]?.createdAt ==
-                                result.classData.classById.announcements[index]?.updatedAt
-                            ) {
-                                result.classData.classById.announcements[
-                                    index
-                                ].renderedTimestamp = fancyTimestamp.format(
-                                    result.classData.classById.announcements[index]?.createdAt
-                                );
-                            } else {
-                                result.classData.classById.announcements[
-                                    index
-                                ].renderedTimestamp = fancyTimestamp.format(
-                                    result.classData.classById.announcements[index]?.createdAt
-                                ) + " · updated " + fancyTimestamp.format(
-                                    result.classData.classById.announcements[index]?.updatedAt
-                                );
-                            }
+                            result.classData.classById.assignmentDrafts[
+                                index
+                            ].renderedDueDate = fancyTimestamp.format(
+                                result.classData.classById.assignmentDrafts[index]?.dueAt
+                            );
                         }
                     }
                     return result;
