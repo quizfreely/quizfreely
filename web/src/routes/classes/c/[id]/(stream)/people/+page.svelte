@@ -36,6 +36,25 @@
 
 <Noscript />
 <div style="margin-top: 0px;">
+    <p>
+    {#if data?.classData?.classById?.teachers?.length == 1}
+    {data?.classData?.classById?.teachers?.length} Teacher
+    {:else}
+    {data?.classData?.classById?.teachers?.length} Teachers
+    {/if}
+    </p>
+    {#each data?.classData?.classById?.teachers as teacher}
+        <div class="box">
+        {teacher.displayName}
+        </div>
+    {/each}
+    <p>
+    {#if data?.classData?.classById?.students?.length == 1}
+    {data?.classData?.classById?.students?.length} Student
+    {:else}
+    {data?.classData?.classById?.students?.length} Students
+    {/if}
+    </p>
     {#each data?.classData?.classById?.students as student}
         <div class="box">
         {student.displayName}
