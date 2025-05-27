@@ -19,7 +19,7 @@ export async function load({ cookies, params }) {
     const { schema } = await import("$lib/proseMirrorSchema.js");
     let result = {
         ...await fetchAuthData({ cookies }),
-        streamPage: "stream",
+        streamPage: "classwork",
         header: { activePage: "classes" },
         classId: params?.id
     };
@@ -64,6 +64,10 @@ export async function load({ cookies, params }) {
                                 contentProseMirrorJson
                                 createdAt
                                 updatedAt
+                            }
+                            assignmentDrafts {
+                                id
+                                title
                             }
                         }
                     }`,
