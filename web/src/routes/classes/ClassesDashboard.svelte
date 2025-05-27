@@ -1,4 +1,5 @@
 <script>
+    import { goto } from "$app/navigation";
     import Noscript from "$lib/components/Noscript.svelte";
     import PlusIcon from "$lib/icons/Plus.svelte";
     let { data } = $props();
@@ -159,9 +160,9 @@
                                     })
                                 }).then(function (result) {
                                     result.json().then(function (resultJson) {
-                                        if (resultJson?.joinClass) {
+                                        if (resultJson?.data?.joinClass) {
                                             /* joinClass returns class id */
-                                            goto(`/classes/c/${resultJson?.joinClass}`);
+                                            goto(`/classes/c/${resultJson?.data?.joinClass}`);
                                         } else {
                                             alert("invalid code");
                                         }
