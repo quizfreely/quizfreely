@@ -23,14 +23,53 @@
 .split-style-container-thing .left-div {
     justify-self: end;
     margin-top: 0px;
-    padding: 1rem;
-    border-right: 0.1rem solid var(--bg4);
+    margin-right: 0px;
+    padding-left: 1rem;
+    padding-bottom: 1rem;
+    padding-top: 1rem;
+    padding-right: 4rem;
+    border-right: 0.2rem solid var(--bg4);
 }
 .split-style-container-thing .right-div {
     justify-self: start;
     margin-top: 0px;
-    padding: 1rem;
-    border-left: 0.1rem solid var(--bg4);
+    margin-left: 0px;
+    padding-left: 3.9rem;
+    padding-bottom: 1rem;
+    padding-top: 1rem;
+    padding-right: 1rem;
+}
+.split-style-container-thing {
+    text-align: center;
+}
+.split-style-container-thing ::placeholder {
+    text-align: center;
+}
+@media only screen and (max-width: 800px) {
+    .split-style-container-thing {
+        display: grid;
+        gap: 0px;
+        grid-template-columns: auto;
+        grid-template-rows: 1fr 1fr;
+    }
+    .split-style-container-thing .left-div {
+        justify-self: center;
+        border-right: none;
+        margin-top: 0px;
+        padding-left: 2rem;
+        padding-bottom: 2rem;
+        padding-top: 2rem;
+        padding-right: 2rem;
+    }
+    .split-style-container-thing .right-div {
+        justify-self: center;
+        margin-top: 0px;
+        margin-left: 0px;
+        padding-left: 2rem;
+        padding-bottom: 2rem;
+        padding-top: 2rem;
+        padding-right: 2rem;
+    }
 }
 </style>
 
@@ -63,10 +102,14 @@
             {#if !(data?.classesData?.classesAsStudent?.length > 0 || data?.classesData?.classesAsTeacher?.length > 0)}
                 <div class="split-style-container-thing">
                     <div class="left-div">
-                        <h2 class="h3">Students</h2>
+                        <h3>Students</h3>
+                        <div style="display: flex; flex-direction: column; gap: 1rem;">
+                            <input type="text" placeholder="Enter Join Code" style="width: 14rem;">
+                            <button style="width: 14rem; margin-top: 0px;">Join</button>
+                        </div>
                     </div>
                     <div class="right-div">
-                        <h2 class="h3">Teachers</h2>
+                        <h3>Teachers</h3>
                     </div>
                 </div>
             {/if}
