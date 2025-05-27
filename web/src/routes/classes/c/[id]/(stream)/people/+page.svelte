@@ -36,6 +36,11 @@
 
 <Noscript />
 <div style="margin-top: 0px;">
+    {#each data?.classData?.classById?.students as student}
+        <div class="box">
+        {student.displayName}
+        </div>
+    {/each}
     <p style="white-space: pre-wrap;">
     {JSON.stringify(
         data.classData,

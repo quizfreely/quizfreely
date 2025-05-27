@@ -89,12 +89,12 @@
         </div>
         {/if}
     {/each}
-    <p style="white-space: pre-wrap;">
-    {JSON.stringify(
-        data.classData,
-        null,
-        4
-    )}
-    </p>
+    <!-- <p style="white-space: pre-wrap;"> -->
+    <!-- {JSON.stringify( -->
+    <!--     data.classData, -->
+    <!--     null, -->
+    <!--     4 -->
+    <!-- )} -->
+    <!-- </p> -->
 </div>
 
