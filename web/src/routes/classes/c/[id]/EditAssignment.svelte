@@ -102,6 +102,7 @@
             });
         }
     }
+    let isThereADueDate = $state(true);
 </script>
 <style>
 .class-box {
@@ -162,7 +163,25 @@
         <Noscript />
         <div>
             <input type="text" class="reasonable-title-size" placeholder="Title">
-            <div class="eh-datepicker-container">
+            <div class="combo-select">
+                <button class="left {
+                    !isThereADueDate ? "selected" : ""
+                }" onclick={() => isThereADueDate = false}>
+
+                    <IconCheckmark class="combo-selected-icon" />
+                    No due date
+                </button>
+                <button class="right {
+                    isThereADueDate ? "selected" : ""
+                }" onclick={() => isThereADueDate = true}>
+
+                    <IconCheckmark class="combo-selected-icon" />
+                    Select due date
+                </button>
+            </div>
+            <div class="eh-datepicker-container {
+                isThereADueDate ? "" : "hide"
+            }">
             <input type="text" name="due-date" bind:this={datePickerInput} placeholder="Due date">
             </div>
             <ProseMirrorEditor placeholder="Description" bind:value={description} oninputcallback={() => unsavedChanges = true}></ProseMirrorEditor>
@@ -195,7 +214,7 @@
             {#if showExitConfirmationModal}
             <div class="modal" transition:fade={{ duration: 200 }}>
               <div class="content">
-                <h4>Save changes?</h4>
+                <h4>You have unsaved changes</h4>
                 <div class="flex">
                   <button onclick={function () { showExitConfirmationModal = false; }}>Keep Editing</button>
                   <button class="button ohno" data-sveltekit-preload-data="false" onclick={function () {
