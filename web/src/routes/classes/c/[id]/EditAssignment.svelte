@@ -15,6 +15,7 @@
     import { fade } from "svelte/transition";
     let { data } = $props();
     let description = $state({});
+    let descriptionProseMirrorEditor;
     let unsavedChanges = $state(false);
     let bypassUnsavedChangesConfirmation = false;
     let showExitConfirmationModal = $state(false);
@@ -26,6 +27,20 @@
         datePicker = new Datepicker(
             datePickerInput
         )
+
+        if (!data.new && data.draft) {
+            descriptionProseMirrorEditor.updateValueFromJson(
+                JSON.parse(
+                data?.classData?.assignmentDraftById?.descriptionProseMirrorJson
+                )
+            );
+        } else if (!data.new) {
+            descriptionProseMirrorEditor.updateValueFromJson(
+                JSON.parse(
+                data?.classData?.assignmentById?.descriptionProseMirrorJson
+                )
+            );
+        }
     })
 
     beforeNavigate(function (navigation) {
@@ -36,16 +51,18 @@
                 show our js confirmation modal */
                 showExitConfirmationModal = true;
             }
+            /* our routes/+layout.svelte shows a progress bar
+            if navigation takes too long, so we cancel the timer
+            when we cancel navigation, so that it doesn't show */
+            cancelNprogressTimeout();
+            /* */
+            setTimeout(cancelNprogressTimeout, 50);
+
             /* if navigation.type is "leave",
             then its controlled by the browser &
             the browser shows it's own native modal
             when we use `.cancel()` */
             navigation.cancel();
-
-            /* our routes/+layout.svelte shows a progress bar
-            if navigation takes too long, so we cancel the timer
-            when we cancel navigation, so that it doesn't show */
-            cancelNprogressTimeout();
         }
     })
     let title = $state("");
@@ -212,7 +229,7 @@
                 <input type="text" class="input-thingy" placeholder="100" bind:value={points} oninput={() => unsavedChanges = true}>
                 <span class="input-thingy-sameline-label">points</span>
             </div>
-            <ProseMirrorEditor placeholder="Description" bind:value={description} oninputcallback={() => unsavedChanges = true}></ProseMirrorEditor>
+            <ProseMirrorEditor placeholder="Description" bind:value={description} bind:this={descriptionProseMirrorEditor} oninputcallback={() => unsavedChanges = true}></ProseMirrorEditor>
             <div style="display: flex; gap: 1rem; flex-direction: row; justify-items: flex-end; justify-content: flex-end;">
                 <a href="/classes/c/{ data.classId }/{
                     data.new ?
@@ -222,10 +239,10 @@
                     class="button alt"
                     style="margin-top: 0px;"
                 >Cancel</a>
-                <button class="alt" style="margin-top: 0px;">
-                    <IconClock></IconClock>
-                    Schedule
-                </button>
+                <!-- <button class="alt" style="margin-top: 0px;"> -->
+                <!--     <IconClock></IconClock> -->
+                <!--     Schedule -->
+                <!-- </button> -->
                 <button style="margin-top: 0px;">
                     <IconCheckmark></IconCheckmark>
                     Post
