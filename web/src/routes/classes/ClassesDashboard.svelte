@@ -104,7 +104,7 @@
                     <div class="left-div">
                         <h3>Students</h3>
                         <div style="display: flex; flex-direction: column; gap: 1rem;">
-                            <input type="text" placeholder="Enter Join Code" style="width: 14rem;">
+                            <input type="text" placeholder="Enter Class Code" style="width: 14rem;">
                             <button style="width: 14rem; margin-top: 0px;">Join</button>
                         </div>
                     </div>
