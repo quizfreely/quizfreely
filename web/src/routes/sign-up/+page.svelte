@@ -1,6 +1,7 @@
 <script>
     import Noscript from "$lib/components/Noscript.svelte";
     import { onMount } from "svelte";
+    import { goto } from "$app/navigation";
 
     let { data } = $props();
     onMount(function () {
@@ -39,7 +40,8 @@
                   "<b>Error</b>: " + response.error;
                 }
               } else {
-                window.location.reload();
+                goto("/dashboard");
+                // window.location.reload();
               }
             }).catch(function (error) {
               console.error(error)
