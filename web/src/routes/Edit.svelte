@@ -301,16 +301,20 @@
                 show our js confirmation modal */
                 showExitConfirmationModal = true;
             }
+            /* our routes/+layout.svelte shows a progress bar
+            if navigation takes too long, so we cancel the timer
+            when we cancel navigation, so that it doesn't show */
+            cancelNprogressTimeout();
+
+            /* run it again a little delayed to make sure it cancels the timeout after layout actually finishes creating the timeout */
+            setTimeout(cancelNprogressTimeout, 50);
+
             /* if navigation.type is "leave",
             then its controlled by the browser &
             the browser shows it's own native modal
             when we use `.cancel()` */
             navigation.cancel();
 
-            /* our routes/+layout.svelte shows a progress bar
-            if navigation takes too long, so we cancel the timer
-            when we cancel navigation, so that it doesn't show */
-            cancelNprogressTimeout();
         }
     })
 </script>
