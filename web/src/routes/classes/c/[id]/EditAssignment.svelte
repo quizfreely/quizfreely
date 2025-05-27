@@ -48,7 +48,8 @@
             cancelNprogressTimeout();
         }
     })
-
+    let title = $state("");
+    let points;
     function saveDraft() {
         if (data.new) {
             var request = fetch("/classes/api/graphql", {
@@ -78,8 +79,12 @@
                         "classId": data.classId,
                         "title": title,
                         "description": JSON.stringify(description),
-                        "points": points,
-                        "dueAt": dueAt
+                        "points": !isNaN(parseInt(points)) ?
+                            parseInt(points) :
+                            0,
+                        "dueAt": isThereADueDate ?
+                            datePicker.getDate() :
+                            null
                     }
                 })
             });
@@ -143,6 +148,21 @@
         width: 100%;
     }
 }
+.input-thingy-container {
+    display: flex;
+    margin-top: 0.4rem;
+    flex-direction: row;
+    gap: 0.4rem;
+    align-items: center;
+    align-content: center;
+}
+.input-thingy {
+    margin-top: 0px;
+    max-width: 5rem;
+}
+.input-thingy-sameline-label {
+    margin-top: 0px;
+}
 </style>
 <svelte:head>
     <title>Quizfreely Classes</title>
@@ -152,7 +172,11 @@
     <div class="content">
         <div class="top-container-split" style="margin-top: 1rem;">
             <div class="flex">
-                <a href="/classes" class="button faint">
+                <a href="/classes/c/{ data.classId }/{
+                    data.new ?
+                        "classwork" :
+                        `assignments/${data.assignmentId}`
+                }" class="button faint">
                     <IconBackArrow /> Back
                 </a>
             </div>
@@ -162,7 +186,7 @@
         </div>
         <Noscript />
         <div>
-            <input type="text" class="reasonable-title-size" placeholder="Title">
+            <input type="text" class="reasonable-title-size" placeholder="Title" bind:value={title}>
             <div class="combo-select">
                 <button class="left {
                     !isThereADueDate ? "selected" : ""
@@ -183,6 +207,10 @@
                 isThereADueDate ? "" : "hide"
             }">
             <input type="text" name="due-date" bind:this={datePickerInput} placeholder="Due date">
+            </div>
+            <div class="input-thingy-container" style="margin-top: 1rem;">
+                <input type="text" class="input-thingy" placeholder="100" bind:value={points} oninput={() => unsavedChanges = true}>
+                <span class="input-thingy-sameline-label">points</span>
             </div>
             <ProseMirrorEditor placeholder="Description" bind:value={description} oninputcallback={() => unsavedChanges = true}></ProseMirrorEditor>
             <div style="display: flex; gap: 1rem; flex-direction: row; justify-items: flex-end; justify-content: flex-end;">
@@ -220,11 +248,8 @@
                   <button class="button ohno" data-sveltekit-preload-data="false" onclick={function () {
                     bypassUnsavedChangesConfirmation = true;
                     goto(data.new ?
-                      "/dashboard" :
-                      (data.local ?
-                        "/studyset/local?id=" + data.localId :
-                        "/studysets/" + data.studysetId
-                      )
+                        `/classes/c/${data.classId}/classwork` :
+                        `/classes/c/${data.classId}/assignments/${data.assignmentId}`
                     );
                   }}>
                     <IconTrash />
