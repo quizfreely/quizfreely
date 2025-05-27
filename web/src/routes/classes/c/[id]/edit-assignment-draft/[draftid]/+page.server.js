@@ -6,7 +6,8 @@ export async function load({ cookies, params }) {
         ...await fetchAuthData({ cookies }),
         streamPage: "people",
         header: { activePage: "classes" },
-        classId: params.id
+        classId: params.id,
+        draftId: params.draftid
     };
     if (env?.ENABLE_CLASSES == "true") {
         try {

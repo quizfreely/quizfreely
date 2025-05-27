@@ -37,13 +37,13 @@
 
 <Noscript />
 <div style="margin-top: 0px;">
-    {#if data?.classData?.classById?.assignmentDrafts}
+    {#if data?.classData?.classById?.assignmentDrafts?.length > 0}
     Drafts <span class="fg0">(not visible to students)</span>
     {#each data?.classData?.classById?.assignmentDrafts as draft}
         <div class="box announcement">
             <p style="font-size: 1.2rem;">{draft.title}</p>
             <div class="flex" style="align-items: center; margin-top: 0.4rem;">
-                <a href="/classes/c/{data.classId}/edit-assignment/{draft.id}" class="button faint" style="margin-top: 0px;">
+                <a href="/classes/c/{data.classId}/edit-assignment-draft/{draft.id}" class="button faint" style="margin-top: 0px;">
                     <IconPencil></IconPencil>
                     Edit
                 </a>

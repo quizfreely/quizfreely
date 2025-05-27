@@ -55,7 +55,7 @@
             if navigation takes too long, so we cancel the timer
             when we cancel navigation, so that it doesn't show */
             cancelNprogressTimeout();
-            /* */
+            /* run it again a little delayed to make sure it cancels the timeout after layout actually finishes creating the timeout */
             setTimeout(cancelNprogressTimeout, 50);
 
             /* if navigation.type is "leave",
@@ -110,6 +110,64 @@
                 alert("oops it like didnt work :(");
             });
             request.then(function (result) {
+                var requestJson = result.json()
+                requestJson.catch(function (error) {
+                    console.error(error);
+                    alert("oops it couldn't parse as json?")
+                })
+                requestJson.then(function (resultJson) {
+                    unsavedChanges = false;
+                    goto(
+                        `/classes/c/${data.classId}/classwork`
+                    );
+                })
+            });
+        } else if (data.draft) {
+            console.log(data.draftId)
+            var request2 = fetch("/classes/api/graphql", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    query: `mutation updateAssignmentDraft(
+                        $id: ID!,
+                        $classId: ID!,
+                        $title: String!,
+                        $description: String!,
+                        $points: Int!,
+                        $dueAt: DateTime!
+                    ) {
+                        updateAssignmentDraft(
+                            id: $id,
+                            classId: $classId,
+                            title: $title,
+                            descriptionProseMirrorJson: $description,
+                            points: $points,
+                            dueAt: $dueAt
+                        ) {
+                            id
+                        }
+                    }`,
+                    variables: {
+                        "id": data.draftId,
+                        "classId": data.classId,
+                        "title": title,
+                        "description": JSON.stringify(description),
+                        "points": !isNaN(parseInt(points)) ?
+                            parseInt(points) :
+                            0,
+                        "dueAt": isThereADueDate ?
+                            datePicker.getDate() :
+                            null
+                    }
+                })
+            });
+            request2.catch(function (error) {
+                console.error(error);
+                alert("oops it like didnt work :(");
+            });
+            request2.then(function (result) {
                 var requestJson = result.json()
                 requestJson.catch(function (error) {
                     console.error(error);
@@ -198,7 +256,10 @@
                 </a>
             </div>
             <div class="flex" style="margin-top: 0px; justify-items: flex-end; justify-content: flex-end;">
-                <button class="alt" style="margin-top: 0px;" onclick={saveDraft}>Save draft</button>
+                {#if data.new || data.draft}
+                    <!-- only show if new or if it's an existing draft, cause how would we save something already posted and being edited as a draft? -->
+                    <button class="alt" style="margin-top: 0px;" onclick={saveDraft}>Save draft</button>
+                {/if}
             </div>
         </div>
         <Noscript />
