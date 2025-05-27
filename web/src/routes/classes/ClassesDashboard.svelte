@@ -2,6 +2,7 @@
     import Noscript from "$lib/components/Noscript.svelte";
     import PlusIcon from "$lib/icons/Plus.svelte";
     let { data } = $props();
+    let enteredClassCode = $state("");
 </script>
 <style>
 .class-box {
@@ -141,8 +142,44 @@
                     <div class="left-div">
                         <h3>Students</h3>
                         <div style="display: flex; flex-direction: column; gap: 1rem;">
-                            <input type="text" placeholder="Enter Class Code" style="width: 14rem;">
-                            <button style="width: 14rem; margin-top: 0px;">Join</button>
+                            <input type="text" placeholder="Enter Class Code" style="width: 14rem;" bind:value={enteredClassCode}>
+                            <button style="width: 14rem; margin-top: 0px;" onclick={function () {
+                                fetch("/classes/api/graphql", {
+                                    method: "POST",
+                                    headers: {
+                                        "Content-Type": "application/json"
+                                    },
+                                    body: JSON.stringify({
+                                        query: `mutation joinClass($classCode: String!) {
+                                            joinClass(classCode: $classCode)
+                                        }`,
+                                        variables: {
+                                            "classCode": enteredClassCode
+                                        }
+                                    })
+                                }).then(function (result) {
+                                    result.json().then(function (resultJson) {
+                                        if (resultJson?.joinClass) {
+                                            /* joinClass returns class id */
+                                            goto(`/classes/c/${resultJson?.joinClass}`);
+                                        } else {
+                                            alert("invalid code");
+                                        }
+                                    }).catch(function (error) {
+                                        console.error(
+                                            "Error parsing API reponse as JSON while joining class w class code",
+                                            error
+                                        );
+                                        alert("Error (the code you entered might be correct, but the API decided to not work)");
+                                    })
+                                }).catch(function (error) {
+                                    console.error(
+                                        "Error joining class w class code",
+                                        error
+                                    )
+                                    alert("Error (the code you entered might be correct, but we couldn't reach the API, mabye check ur internet)")
+                                })
+                            }}>Join</button>
                         </div>
                         <div class="separator">or</div>
               <a class="button fullWidth gaccount-button" href="/api/oauth/google">
