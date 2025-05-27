@@ -2,6 +2,7 @@ import fetchAuthData from "$lib/fetchAuthData.server";
 import { env } from '$env/dynamic/private';
 import sanitizeHtml from "sanitize-html";
 import { JSDOM } from "jsdom";
+import { fancyTimestamp } from "$lib/fancyTimestamp.js";
 
 const sanitizeHtmlOptions = {
     allowedTags: [
@@ -22,6 +23,11 @@ export async function load({ cookies, params }) {
         header: { activePage: "classes" },
         classId: params?.id
     };
+    if (cookies?.get("settingsdatetimeformathours") == "24") {
+        fancyTimestamp.hours = 24;
+    } else if (cookies?.get("settingsdatetimeformathours") == "12") {
+        fancyTimestamp.hours = 12;
+    }
     if (env?.ENABLE_CLASSES == "true") {
         try {
             let response = await fetch(env.CLASSES_API_URL + "/graphql", {
@@ -97,6 +103,25 @@ export async function load({ cookies, params }) {
                                 console.error(
                                     "Error rendering announcement prosemirror content:",
                                     error
+                                );
+                            }
+
+                            if (
+                                result.classData.classById.announcements[index]?.createdAt ==
+                                result.classData.classById.announcements[index]?.updatedAt
+                            ) {
+                                result.classData.classById.announcements[
+                                    index
+                                ].renderedTimestamp = fancyTimestamp.format(
+                                    result.classData.classById.announcements[index]?.createdAt
+                                );
+                            } else {
+                                result.classData.classById.announcements[
+                                    index
+                                ].renderedTimestamp = fancyTimestamp.format(
+                                    result.classData.classById.announcements[index]?.createdAt
+                                ) + " · updated " + fancyTimestamp.format(
+                                    result.classData.classById.announcements[index]?.updatedAt
                                 );
                             }
                         }
