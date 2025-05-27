@@ -21,9 +21,16 @@
     background-color: var(--bg3);
 }
 .eh-datepicker-container .datepicker-cell.selected,
-.eh-datepicker-container .datepicker-cell.focused {
+.eh-datepicker-container .datepicker-cell.selected.focused {
     background-color: var(--main);
     color: var(--bg1);
+}
+.eh-datepicker-container .datepicker-cell.focused {
+    background-color: var(--bg3);
+}
+.eh-datepicker-container .datepicker-cell.focused:hover {
+    background-color: var(--bg3);
+    color: var(--main-alt);
 }
 .eh-datepicker-container .datepicker-cell.selected:hover {
     background-color: var(--main-alt);
