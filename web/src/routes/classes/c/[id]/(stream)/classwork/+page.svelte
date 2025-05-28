@@ -54,14 +54,23 @@
         </div>
     {/each}
     {/if}
-    {#each data?.classData?.classById?.announcements as announcement}
-        {#if announcement.safeRenderedHtml}
+    {#if data?.classData?.classById?.assignments?.length > 0}
+    Assignments
+    {#each data?.classData?.classById?.assignments as assignment}
         <div class="box announcement">
-            <p>{announcement.user.displayName} · {announcement.renderedTimestamp}</p>
-            {@html announcement.safeRenderedHtml}
+            <p style="font-size: 1.2rem;">{assignment.title}</p>
+            <div class="flex" style="align-items: center; margin-top: 0.4rem;">
+                <a href="/classes/c/{data.classId}/edit-assignment/{assignment.id}" class="button faint" style="margin-top: 0px;">
+                    <IconPencil></IconPencil>
+                    Edit
+                </a>
+            {#if assignment.renderedDueDate}
+                <span class="fg0" style="margin-left: auto; margin-right: 1rem;">Due {assignment.renderedDueDate}</span>
+            {/if}
+            </div>
         </div>
-        {/if}
     {/each}
+    {/if}
     <p style="white-space: pre-wrap;">
     {JSON.stringify(
         data.classData,

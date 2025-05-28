@@ -65,6 +65,11 @@ export async function load({ cookies, params }) {
                                 createdAt
                                 updatedAt
                             }
+                            assignments {
+                                id
+                                title
+                                dueAt
+                            }
                             assignmentDrafts {
                                 id
                                 title
