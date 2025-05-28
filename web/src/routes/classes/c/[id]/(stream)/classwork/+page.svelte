@@ -1,4 +1,5 @@
 <script>
+    import AssignmentsListItem from "$lib/classes/AssignmentsListItem.svelte";
     import Noscript from "$lib/components/Noscript.svelte";
     // import { onMount } from "svelte";
     // import { invalidateAll } from '$app/navigation';
@@ -71,6 +72,7 @@
         </div>
     {/each}
     {/if}
+    <AssignmentsListItem></AssignmentsListItem>
     <p style="white-space: pre-wrap;">
     {JSON.stringify(
         data.classData,
