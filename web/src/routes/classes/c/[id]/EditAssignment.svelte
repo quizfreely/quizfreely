@@ -20,6 +20,7 @@
     let bypassUnsavedChangesConfirmation = false;
     let showExitConfirmationModal = $state(false);
 
+    let isThereADueDate = $state(true);
     let datePickerInput;
     let datePicker;
     onMount(async function () {
@@ -28,18 +29,28 @@
             datePickerInput
         )
 
-        if (!data.new && data.draft) {
+        if (data.draft) {
             descriptionProseMirrorEditor.updateValueFromJson(
                 JSON.parse(
                 data?.classData?.assignmentDraftById?.descriptionProseMirrorJson
                 )
             );
+            if (data?.classData?.assignmentDraftById?.dueAt == null) {
+                isThereADueDate = false;
+            } else {
+                datePicker.setDate(new Date(data?.classData?.assignmentDraftById?.dueAt));
+            }
         } else if (!data.new) {
             descriptionProseMirrorEditor.updateValueFromJson(
                 JSON.parse(
                 data?.classData?.assignmentById?.descriptionProseMirrorJson
                 )
             );
+            if (data?.classData?.assignmentById?.dueAt == null) {
+                isThereADueDate = false;
+            } else {
+                datePicker.setDate(new Date(data?.classData?.assignmentById?.dueAt));
+            }
         }
     })
 
@@ -67,6 +78,13 @@
     })
     let title = $state("");
     let points;
+    if (data.draft) {
+        title = data?.classData?.assignmentDraftById?.title;
+        points = data?.classData?.assignmentDraftById?.points;
+    } else if (!data.new) {
+        title = data?.classData?.assignmentById?.title;
+        points = data?.classData?.assignmentById?.points;
+    }
     function saveDraft() {
         if (data.new) {
             var request = fetch("/classes/api/graphql", {
@@ -80,7 +98,7 @@
                         $title: String!,
                         $description: String!,
                         $points: Int!,
-                        $dueAt: DateTime!
+                        $dueAt: DateTime
                     ) {
                         createAssignmentDraft(
                             classId: $classId,
@@ -94,7 +112,7 @@
                     }`,
                     variables: {
                         "classId": data.classId,
-                        "title": title,
+                        "title": title ?? "Untitled Assignment",
                         "description": JSON.stringify(description),
                         "points": !isNaN(parseInt(points)) ?
                             parseInt(points) :
@@ -116,10 +134,15 @@
                     alert("oops it couldn't parse as json?")
                 })
                 requestJson.then(function (resultJson) {
-                    unsavedChanges = false;
-                    goto(
-                        `/classes/c/${data.classId}/classwork`
-                    );
+                    if (resultJson.errors) {
+                        console.error(resultJson);
+                        alert("Oops there was an error");
+                    } else {
+                        unsavedChanges = false;
+                        goto(
+                            `/classes/c/${data.classId}/classwork`
+                        );
+                    }
                 })
             });
         } else if (data.draft) {
@@ -136,7 +159,7 @@
                         $title: String!,
                         $description: String!,
                         $points: Int!,
-                        $dueAt: DateTime!
+                        $dueAt: DateTime
                     ) {
                         updateAssignmentDraft(
                             id: $id,
@@ -152,7 +175,7 @@
                     variables: {
                         "id": data.draftId,
                         "classId": data.classId,
-                        "title": title,
+                        "title": title ?? "Untitled Assignment",
                         "description": JSON.stringify(description),
                         "points": !isNaN(parseInt(points)) ?
                             parseInt(points) :
@@ -174,15 +197,19 @@
                     alert("oops it couldn't parse as json?")
                 })
                 requestJson.then(function (resultJson) {
-                    unsavedChanges = false;
-                    goto(
-                        `/classes/c/${data.classId}/classwork`
-                    );
+                    if (resultJson.errors) {
+                        console.error(resultJson);
+                        alert("Oops there was an error");
+                    } else {
+                        unsavedChanges = false;
+                        goto(
+                            `/classes/c/${data.classId}/classwork`
+                        );
+                    }
                 })
             });
         }
     }
-    let isThereADueDate = $state(true);
 </script>
 <style>
 .class-box {
@@ -248,7 +275,7 @@
         <div class="top-container-split" style="margin-top: 1rem;">
             <div class="flex">
                 <a href="/classes/c/{ data.classId }/{
-                    data.new ?
+                    data.new || data.draft ?
                         "classwork" :
                         `assignments/${data.assignmentId}`
                 }" class="button faint">
@@ -293,7 +320,7 @@
             <ProseMirrorEditor placeholder="Description" bind:value={description} bind:this={descriptionProseMirrorEditor} oninputcallback={() => unsavedChanges = true}></ProseMirrorEditor>
             <div style="display: flex; gap: 1rem; flex-direction: row; justify-items: flex-end; justify-content: flex-end;">
                 <a href="/classes/c/{ data.classId }/{
-                    data.new ?
+                    data.new || data.draft ?
                         "classwork" :
                         `assignments/${data.assignmentId}`
                     }"
@@ -325,7 +352,7 @@
                   <button onclick={function () { showExitConfirmationModal = false; }}>Keep Editing</button>
                   <button class="button ohno" data-sveltekit-preload-data="false" onclick={function () {
                     bypassUnsavedChangesConfirmation = true;
-                    goto(data.new ?
+                    goto(data.new || data.draft ?
                         `/classes/c/${data.classId}/classwork` :
                         `/classes/c/${data.classId}/assignments/${data.assignmentId}`
                     );
