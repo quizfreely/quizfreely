@@ -210,6 +210,139 @@
             });
         }
     }
+    function saveAssignment() {
+        if (data.new || data.draft) {
+            var request = fetch("/classes/api/graphql", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    query: `mutation postAssignment(
+    $classId: ID!,
+    $title: String!,
+    $description: String!,
+    $points: Int!,
+    $dueAt: DateTime,
+    ${data.draft ?
+        "$draftId: ID!" :
+        ""
+    }
+) {
+    createAssignment(
+        classId: $classId,
+        title: $title,
+        descriptionProseMirrorJson: $description,
+        points: $points,
+        dueAt: $dueAt
+    ) {
+        id
+    }
+    ${data.draft ?
+        "deleteAssignmentDraft(id: $draftId)" :
+        ""
+    }
+}`,
+                    variables: {
+                        "classId": data.classId,
+                        "title": title ?? "Untitled Assignment",
+                        "description": JSON.stringify(description),
+                        "points": !isNaN(parseInt(points)) ?
+                            parseInt(points) :
+                            0,
+                        "dueAt": isThereADueDate ?
+                            datePicker.getDate() :
+                            null,
+                        "draftId": data.draftId
+                    }
+                })
+            });
+            request.catch(function (error) {
+                console.error(error);
+                alert("oops it like didnt work :(");
+            });
+            request.then(function (result) {
+                var requestJson = result.json()
+                requestJson.catch(function (error) {
+                    console.error(error);
+                    alert("oops it couldn't parse as json?")
+                })
+                requestJson.then(function (resultJson) {
+                    if (resultJson.errors) {
+                        console.error(resultJson);
+                        alert("Oops there was an error");
+                    } else {
+                        unsavedChanges = false;
+                        goto(
+                            `/classes/c/${data.classId}/classwork`
+                        );
+                    }
+                })
+            });
+        } else {
+            var request2 = fetch("/classes/api/graphql", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    query: `mutation updateAssignment(
+    $id: ID!,
+    $classId: ID!,
+    $title: String!,
+    $description: String!,
+    $points: Int!,
+    $dueAt: DateTime
+) {
+    updateAssignmentDraft(
+        id: $id,
+        classId: $classId,
+        title: $title,
+        descriptionProseMirrorJson: $description,
+        points: $points,
+        dueAt: $dueAt
+    ) {
+        id
+    }
+}`,
+                    variables: {
+                        "id": data.assignmentId,
+                        "classId": data.classId,
+                        "title": title ?? "Untitled Assignment",
+                        "description": JSON.stringify(description),
+                        "points": !isNaN(parseInt(points)) ?
+                            parseInt(points) :
+                            0,
+                        "dueAt": isThereADueDate ?
+                            datePicker.getDate() :
+                            null
+                    }
+                })
+            });
+            request2.catch(function (error) {
+                console.error(error);
+                alert("oops it like didnt work :(");
+            });
+            request2.then(function (result) {
+                var requestJson = result.json()
+                requestJson.catch(function (error) {
+                    console.error(error);
+                    alert("oops it couldn't parse as json?")
+                })
+                requestJson.then(function (resultJson) {
+                    if (resultJson.errors) {
+                        console.error(resultJson);
+                        alert("Oops there was an error");
+                    } else {
+                        unsavedChanges = false;
+                        goto(
+                            `/classes/c/${data.classId}/classwork`
+                        );
+                    }
+                })
+            });
+        }
+    }
 </script>
 <style>
 .class-box {
@@ -331,9 +464,13 @@
                 <!--     <IconClock></IconClock> -->
                 <!--     Schedule -->
                 <!-- </button> -->
-                <button style="margin-top: 0px;">
+                <button style="margin-top: 0px;" onclick={saveAssignment}>
                     <IconCheckmark></IconCheckmark>
-                    Post
+                    {#if data.new || data.draft}
+                        Post
+                    {:else}
+                        Save
+                    {/if}
                 </button>
             </div>
             <p style="white-space: pre-wrap;">
