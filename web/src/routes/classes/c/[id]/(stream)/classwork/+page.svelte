@@ -58,6 +58,7 @@
     {#if data?.classData?.classById?.assignments?.length > 0}
     Assignments
     {#each data?.classData?.classById?.assignments as assignment}
+        <AssignmentsListItem title={assignment.title} renderedDueDate={assignment.renderedDueDate}></AssignmentsListItem>
         <div class="box announcement">
             <p style="font-size: 1.2rem;">{assignment.title}</p>
             <div class="flex" style="align-items: center; margin-top: 0.4rem;">
@@ -72,7 +73,7 @@
         </div>
     {/each}
     {/if}
-    <AssignmentsListItem></AssignmentsListItem>
+    <AssignmentsListItem title="title goes here" amIATeacher editHref="/a" viewHref="/b" ></AssignmentsListItem>
     <p style="white-space: pre-wrap;">
     {JSON.stringify(
         data.classData,
