@@ -87,11 +87,13 @@ export async function load({ cookies, params }) {
                             index < result.classData.classById.assignmentDrafts.length;
                             index++
                         ) {
-                            result.classData.classById.assignmentDrafts[
-                                index
-                            ].renderedDueDate = fancyTimestamp.format(
-                                result.classData.classById.assignmentDrafts[index]?.dueAt
-                            );
+                            if (result.classData.classById.assignmentDrafts[index]?.dueAt) {
+                                result.classData.classById.assignmentDrafts[
+                                    index
+                                ].renderedDueDate = fancyTimestamp.format(
+                                    result.classData.classById.assignmentDrafts[index]?.dueAt
+                                );
+                            }
                         }
                     }
                     return result;
