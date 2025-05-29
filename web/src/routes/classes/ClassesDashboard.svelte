@@ -204,6 +204,7 @@
                                 Join
                             </button>
                         </div>
+            {#if data.enableOAuthGoogle}
                         <div class="separator">or</div>
                         <a class="button fullWidth gaccount-button" href="/api/oauth/google">
                           <div class="gaccount-container">
@@ -219,6 +220,7 @@
                             <div>Sign in with Google</div>
                           </div>
                         </a>
+            {/if}
                     </div>
                     <div class="right-div">
                         <h3>Teachers</h3>
