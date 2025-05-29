@@ -59,11 +59,13 @@ export async function load({ cookies, params }) {
                                 id
                                 title
                                 dueAt
+                                descriptionProseMirrorJson
                             }
                             assignmentDrafts {
                                 id
                                 title
                                 dueAt
+                                descriptionProseMirrorJson
                             }
                         }
                     }`,
@@ -76,6 +78,44 @@ export async function load({ cookies, params }) {
                 let responseJson = await response.json();
                 if (responseJson?.data) {
                     result.classData = responseJson.data;
+                    if (result.classData?.classById?.assignments) {
+                        for (
+                            let index = 0;
+                            index < result.classData.classById.assignments.length;
+                            index++
+                        ) {
+                            if (result.classData.classById.assignments[index]?.dueAt) {
+                                result.classData.classById.assignments[
+                                    index
+                                ].renderedDueDate = fancyTimestamp.format(
+                                    result.classData.classById.assignments[index]?.dueAt
+                                );
+                            }
+                            try {
+                                const contentJson = JSON.parse(
+                                    result.classData.classById.assignments[
+                                        index
+                                    ].contentProseMirrorJson
+                                )
+                                let div = document.createElement("div");
+                                div.appendChild(DOMSerializer.fromSchema(schema).serializeFragment(
+                                    Node.fromJSON(schema, contentJson),
+                                    { document }
+                                ));
+                                result.classData.classById.assignments[
+                                    index
+                                ].safeRenderedHtml = sanitizeHtml(
+                                    div.innerHTML,
+                                    sanitizeHtmlOptions
+                                );
+                            } catch (error) {
+                                console.error(
+                                    "Error rendering assignment description prosemirror:",
+                                    error
+                                );
+                            }
+                        }
+                    }
                     if (result.classData?.classById?.assignmentDrafts) {
                         for (
                             let index = 0;
@@ -87,6 +127,29 @@ export async function load({ cookies, params }) {
                                     index
                                 ].renderedDueDate = fancyTimestamp.format(
                                     result.classData.classById.assignmentDrafts[index]?.dueAt
+                                );
+                            }
+                            try {
+                                const contentJson = JSON.parse(
+                                    result.classData.classById.assignmentDrafts[
+                                        index
+                                    ].contentProseMirrorJson
+                                )
+                                let div = document.createElement("div");
+                                div.appendChild(DOMSerializer.fromSchema(schema).serializeFragment(
+                                    Node.fromJSON(schema, contentJson),
+                                    { document }
+                                ));
+                                result.classData.classById.assignmentDrafts[
+                                    index
+                                ].safeRenderedHtml = sanitizeHtml(
+                                    div.innerHTML,
+                                    sanitizeHtmlOptions
+                                );
+                            } catch (error) {
+                                console.error(
+                                    "Error rendering assignment draft description prosemirror:",
+                                    error
                                 );
                             }
                         }

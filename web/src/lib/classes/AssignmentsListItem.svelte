@@ -19,6 +19,7 @@
         color: var(--fg1);
         border-radius: 0.8rem;
         padding: 1rem;
+        font-weight: normal;
     }
     .container-thing-button:hover,
     button.container-thing-button:hover {
