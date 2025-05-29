@@ -5,12 +5,21 @@ export const fancyTimestamp = {
         var now = new Date();
         var yesterday = new Date();
         yesterday.setDate(yesterday.getDate() - 1);
-        var intlDate = new Intl.DateTimeFormat(undefined, {
-            weekday: "short",
-            year: "numeric",
-            month: "short",
-            day: "numeric"
-        });
+        var intlDate;
+        if (now.getFullYear() == dateObj.getFullYear()) {
+            intlDate = new Intl.DateTimeFormat(undefined, {
+                weekday: "short",
+                month: "short",
+                day: "numeric"
+            });
+        } else {
+            intlDate = new Intl.DateTimeFormat(undefined, {
+                weekday: "short",
+                year: "numeric",
+                month: "short",
+                day: "numeric"
+            });
+        }
         var intlTimeOptions = {
             hour: 'numeric',
             minute: '2-digit'
