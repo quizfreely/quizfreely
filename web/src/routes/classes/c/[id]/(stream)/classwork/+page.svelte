@@ -58,7 +58,7 @@
     {#if data?.classData?.classById?.assignments?.length > 0}
     Assignments
     {#each data?.classData?.classById?.assignments as assignment}
-        <AssignmentsListItem title={assignment.title} renderedDueDate={assignment.renderedDueDate}></AssignmentsListItem>
+        <AssignmentsListItem title={assignment.title} renderedDueDate={assignment.renderedDueDate} trustedViewHref="/classes/c/{ data.classId }/assignments/{ assignment.id }" trustedEditHref="/classes/c/{ data.classId }/edit-assignments/{ assignment.id }" descriptionSafeHtml={assignment.safeRenderedHtml}></AssignmentsListItem>
         <div class="box announcement">
             <p style="font-size: 1.2rem;">{assignment.title}</p>
             <div class="flex" style="align-items: center; margin-top: 0.4rem;">

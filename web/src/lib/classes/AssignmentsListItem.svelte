@@ -43,8 +43,8 @@
     </button>
     {#if open}
     <div class="container-thing-inside">
-        <div>{@html descriptionSafeHtml}</div>
-        <div class="flex" style="margin-top: 0px;">
+        {#if descriptionSafeHtml}<div>{@html descriptionSafeHtml}</div>{/if}
+        <div class="flex">
             {#if amIATeacher}
                 <a href={trustedEditHref} class="button faint">
                     Edit

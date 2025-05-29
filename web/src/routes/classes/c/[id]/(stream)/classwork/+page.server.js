@@ -95,7 +95,7 @@ export async function load({ cookies, params }) {
                                 const contentJson = JSON.parse(
                                     result.classData.classById.assignments[
                                         index
-                                    ].contentProseMirrorJson
+                                    ].descriptionProseMirrorJson
                                 )
                                 let div = document.createElement("div");
                                 div.appendChild(DOMSerializer.fromSchema(schema).serializeFragment(
@@ -133,7 +133,7 @@ export async function load({ cookies, params }) {
                                 const contentJson = JSON.parse(
                                     result.classData.classById.assignmentDrafts[
                                         index
-                                    ].contentProseMirrorJson
+                                    ].descriptionProseMirrorJson
                                 )
                                 let div = document.createElement("div");
                                 div.appendChild(DOMSerializer.fromSchema(schema).serializeFragment(
