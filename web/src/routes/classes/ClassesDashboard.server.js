@@ -57,11 +57,13 @@ export async function load({ cookies }) {
         return {
             ...await fetchAuthData({ cookies }),
             classesData: classesData,
+        enableOAuthGoogle: (env.ENABLE_OAUTH_GOOGLE == "true"),
             header: { activePage: "classes" }
         }
     } else {
         return {
             ...await fetchAuthData({ cookies }),
+        enableOAuthGoogle: (env.ENABLE_OAUTH_GOOGLE == "true"),
             header: { activePage: "classes" }
         }
     }
