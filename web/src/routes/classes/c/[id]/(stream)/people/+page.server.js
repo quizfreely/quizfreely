@@ -41,6 +41,7 @@ export async function load({ cookies, params }) {
                             userSettings {
                                 color
                             }
+                            classCode
                         }
                     }`,
                     variables: {
