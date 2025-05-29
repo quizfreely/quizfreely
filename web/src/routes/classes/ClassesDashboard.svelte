@@ -2,8 +2,11 @@
     import { goto } from "$app/navigation";
     import Noscript from "$lib/components/Noscript.svelte";
     import PlusIcon from "$lib/icons/Plus.svelte";
+    import { fade } from "svelte/transition";
     let { data } = $props();
     let enteredClassCode = $state("");
+    let modalEnteredClassCode = $state("");
+    let showJoinModal = $state(false);
 </script>
 <style>
 .class-box {
@@ -120,6 +123,15 @@
 <main>
     <div class="grid page">
         <div class="content">
+            {#if data?.classesData?.classesAsTeacher?.length > 0 || data?.classesData?.classesAsStudent?.length > 0}
+                <div class="flex" style="justify-items: flex-end; justify-content: flex-end;">
+                <button onclick={() => showJoinModal = true} class="button alt">Join class</button>
+                <a href="/classes/create-class" class="button alt"><PlusIcon></PlusIcon> Create class</a>
+                </div>
+            {/if}
+            {#if data?.classesData?.classesAsTeacher?.length > 0 && data?.classesData?.classesAsStudent?.length > 0}
+                <p>Teacher</p>
+            {/if}
             {#if data?.classesData?.classesAsTeacher?.length > 0}
                 <div class="grid list">
                     {#each data.classesData.classesAsTeacher as classobj}
@@ -128,6 +140,9 @@
                         </div>
                     {/each}
                 </div>
+            {/if}
+            {#if data?.classesData?.classesAsTeacher?.length > 0 && data?.classesData?.classesAsStudent?.length > 0}
+                <p>Student</p>
             {/if}
             {#if data?.classesData?.classesAsStudent?.length > 0}
                 <div class="grid list">
@@ -219,4 +234,56 @@
         </div>
     </div>
 </main>
+{#if showJoinModal}
+    <div class="modal" transition:fade={{ duration: 200 }}>
+        <div class="content">
+
+                        <div style="display: flex; flex-direction: column; gap: 1rem; align-items: center; align-content: center">
+                            <input type="text" placeholder="Enter Class Code" style="width: 14rem;" bind:value={modalEnteredClassCode}>
+                            <button style="width: 14rem; margin-top: 0px;" onclick={function () {
+                                fetch("/classes/api/graphql", {
+                                    method: "POST",
+                                    headers: {
+                                        "Content-Type": "application/json"
+                                    },
+                                    body: JSON.stringify({
+                                        query: `mutation joinClass($classCode: String!) {
+                                            joinClass(classCode: $classCode)
+                                        }`,
+                                        variables: {
+                                            "classCode": modalEnteredClassCode
+                                        }
+                                    })
+                                }).then(function (result) {
+                                    result.json().then(function (resultJson) {
+                                        if (resultJson?.data?.joinClass) {
+                                            /* joinClass returns class id */
+                                            goto(`/classes/c/${resultJson?.data?.joinClass}`);
+                                        } else {
+                                            alert("invalid code");
+                                        }
+                                    }).catch(function (error) {
+                                        console.error(
+                                            "Error parsing API reponse as JSON while joining class w class code",
+                                            error
+                                        );
+                                        alert("Error (the code you entered might be correct, but the API decided to not work)");
+                                    })
+                                }).catch(function (error) {
+                                    console.error(
+                                        "Error joining class w class code",
+                                        error
+                                    )
+                                    alert("Error (the code you entered might be correct, but we couldn't reach the API, mabye check ur internet)")
+                                })
+                            }}>
+                                Join
+                            </button>
+                            <button class="alt" style="width: 14rem; margin-top: 0px;" onclick={() => showJoinModal = false}>
+                                Close
+                            </button>
+                        </div>
+        </div>
+    </div>
+{/if}
 
