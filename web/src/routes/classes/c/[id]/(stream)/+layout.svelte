@@ -111,11 +111,11 @@
                     <a href="/classes/c/{ page.data?.classId }/people" class="layout-menu-link {page.data?.streamPage == "people" ? "current" : ""}">
                         People
                     </a>
-                    {#if amIATeacher}
-                    <a href="/classes/c/{ page.data?.classId }/settings" class="layout-menu-link {page.data?.streamPage == "settings" ? "current" : ""}">
-                        Settings
-                    </a>
-                    {/if}
+                    <!-- {#if amIATeacher} -->
+                    <!-- <a href="/classes/c/{ page.data?.classId }/settings" class="layout-menu-link {page.data?.streamPage == "settings" ? "current" : ""}"> -->
+                    <!--     Settings -->
+                    <!-- </a> -->
+                    <!-- {/if} -->
                 </div>
                 {#if !amIATeacher}
                 <div class="box">

@@ -36,6 +36,7 @@
 
 <Noscript />
 <div style="margin-top: 0px;">
+    <p>{data?.classData?.classById?.classCode}</p>
     <p>
     {#if data?.classData?.classById?.teachers?.length == 1}
     {data?.classData?.classById?.teachers?.length} Teacher
@@ -57,15 +58,15 @@
     </p>
     {#each data?.classData?.classById?.students as student}
         <div class="box">
-        {student.displayName}
+            {student.displayName}
         </div>
     {/each}
-    <p style="white-space: pre-wrap;">
-    {JSON.stringify(
-        data.classData,
-        null,
-        4
-    )}
-    </p>
+    <!-- <p style="white-space: pre-wrap;"> -->
+    <!-- {JSON.stringify( -->
+    <!--     data.classData, -->
+    <!--     null, -->
+    <!--     4 -->
+    <!-- )} -->
+    <!-- </p> -->
 </div>
 
