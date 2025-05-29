@@ -224,10 +224,10 @@
                     </div>
                     <div class="right-div">
                         <h3>Teachers</h3>
-                            <button style="width: 14rem; margin-top: 0px;">
+                            <a href="/classes/create-class" class="button" style="width: 14rem; margin-top: 0px;">
                             <PlusIcon></PlusIcon>
                             Create class
-                        </button>
+                        </a>
                     </div>
                 </div>
                 {:else}

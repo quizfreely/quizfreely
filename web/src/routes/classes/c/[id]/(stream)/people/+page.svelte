@@ -36,7 +36,46 @@
 
 <Noscript />
 <div style="margin-top: 0px;">
-    <p>{data?.classData?.classById?.classCode}</p>
+    {#if data?.classData?.classById?.classCode}
+    <p>Class code: <code>{data?.classData?.classById?.classCode}</code></p>
+    {:else}
+    <button class="alt" onclick={() => {
+                            fetch("/classes/api/graphql", {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json"
+                                },
+                                body: JSON.stringify({
+                                    query: `mutation generateClassCode($classId: ID!) {
+                                        generateClassCode(classId: $classId)
+                                    }`,
+                                    variables: {
+                                        "classId": data.classId
+                                    }
+                                })
+                            }).then(function (result) {
+                                result.json().then(function (resultJson) {
+                                    if (resultJson?.data?.generateClassCode) {
+                                        window.location.reload();
+                                    } else {
+                                        alert("Error after successful API response");
+                                    }
+                                }).catch(function (error) {
+                                    console.error(
+                                        "Error parsing API response as JSON in generateClassCode",
+                                        error
+                                    );
+                                    alert("Error in generateClassCode JSON");
+                                })
+                            }).catch(function (error) {
+                                console.error(
+                                    "Error creating class code",
+                                    error
+                                )
+                                alert("Error in generateClassCode")
+                            })
+    }}>Generate class code</button>
+    {/if}
     <p>
     {#if data?.classData?.classById?.teachers?.length == 1}
     {data?.classData?.classById?.teachers?.length} Teacher
