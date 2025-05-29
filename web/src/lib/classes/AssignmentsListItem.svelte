@@ -1,5 +1,5 @@
 <script>
-    let { title, amIATeacher, trustedEditHref, trustedViewHref, descriptionSafeHtml, renderedDueDate } = $props();
+    let { title, amIATeacher, trustedEditHref, trustedViewHref, descriptionSafeHtml, renderedDueDate, hideViewButton } = $props();
     let open = $state(false);
 </script>
 <style>
@@ -50,9 +50,11 @@
                     Edit
                 </a>
             {/if}
+            {#if !hideViewButton}
             <a href={trustedViewHref} class="button faint">
                 View Assignment
             </a>
+            {/if}
         </div>
     </div>
     {/if}

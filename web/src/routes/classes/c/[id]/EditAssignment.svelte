@@ -294,7 +294,7 @@
     $points: Int!,
     $dueAt: DateTime
 ) {
-    updateAssignmentDraft(
+    updateAssignment(
         id: $id,
         classId: $classId,
         title: $title,

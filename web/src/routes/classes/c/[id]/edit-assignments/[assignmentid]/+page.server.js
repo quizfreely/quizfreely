@@ -7,7 +7,7 @@ export async function load({ cookies, params }) {
         streamPage: "people",
         header: { activePage: "classes" },
         classId: params.id,
-        draftId: params.draftid
+        assignmentId: params.assignmentid
     };
     if (env?.ENABLE_CLASSES == "true") {
         try {
@@ -18,7 +18,7 @@ export async function load({ cookies, params }) {
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
-                    query: `query assignmentDraftEditPage($classId: ID!, $draftId: ID!) {
+                    query: `query assignmentEditPage($classId: ID!, $assignmentId: ID!) {
                         classById(id: $classId) {
                             id
                             name
@@ -43,7 +43,7 @@ export async function load({ cookies, params }) {
                                 color
                             }
                         }
-                        assignmentDraftById(id: $draftId) {
+                        assignmentById(id: $assignmentId) {
                             title
                             dueAt
                             points
@@ -52,7 +52,7 @@ export async function load({ cookies, params }) {
                     }`,
                     variables: {
                         "classId": params.id,
-                        "draftId": params.draftid
+                        "assignmentId": params.assignmentid
                     }
                 })
             })
