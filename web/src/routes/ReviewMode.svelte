@@ -7,98 +7,31 @@
     import IconCheckmark from "$lib/icons/Checkmark.svelte";
     import IconBackArrow from "$lib/icons/BackArrow.svelte";
     import IconRepeat from "$lib/icons/Repeat.svelte";
-    import IconSettingsGear from "$lib/icons/SettingsGear.svelte";
-    import { fade } from 'svelte/transition';
-    var goodAcc = $state(90) /* w state cause they're used in calculation stuff AND ui */
-    var badAcc = $state(80)
 
-    var reviewStarted = $state(false);
-    var showExitConfirmationPrompt = $state(false);
-
-    /*
-      producing/answering-with the term given the definition and
-      producing the definition from the term require different logic/brain power
-      (depending on the subject/context)
-      so we record accuracy when answering with terms seperatly from accuracy when answering with definitions
-      and we have seperate states for each terms' term and definition based on those seperate accuracys
-    */
-    let termsByTermStates = {
-      learning: [],
-      review: [],
-      relearning: []
-    }
-    let termsByDefStates = { /* "def" means definition here */
-      learning: [],
-      review: [],
-      relearning: []
-    }
-
-    /*
-      in this context, "overall" means based on term-producing AND definition-producing accuracy
-      `(termCorrect + defCorrect) / (termCorrect + termIncorrect + defCorrect + defIncorrect)`
-    */
-    var termsOverallBad = $state([]);
-    var termsOverallGood = $state([]);
-    var termsOverallBetween = $state([]);
-    var newTerms = $state([]); /* unreviewed terms, as an array */
-      
-    var answerChoices = $state([]);
-    var answerWithDef = $state(false);
-    var question = $state("");
-    var correctAnswerIndex = 0;
-    function nextQuestion() {
-        let randomSize = 0;
-        if (termsByTermStates.learning.length >= 1) {
-            randomSize++
-        }
-        if (termsByTermStates.review.length >= 1) {
-            randomSize++
-        }
-        if (termsByTermStates.relearning.length >= 1) {
-            randomSize++
-        }
-        if (termsByTermStates.learning.length >= 1) {
-            randomSize++
-        }
-        if (termsByTermStates.review.length >= 1) {
-            randomSize++
-        }
-        if (termsByTermStates.relearning.length >= 1) {
-            randomSize++
-        }
-    }
-    function checkAnswer(event) {
-    }
     onMount(function() {
-      if (window.localStorage) {
-        /* first load from settings before per-studyset settings */
-        var goodAccFromLocalStorage = localStorage.getItem("quizfreely:settings.goodAcc")
-        var badAccFromLocalStorage = localStorage.getItem("quizfreely:settings.badAcc")
-        /* if statements to avoid setting goodAcc or badAcc to null when setting is unset */
-        if (goodAccFromLocalStorage) {
-          goodAcc = goodAccFromLocalStorage
-        }
-        if (badAccFromLocalStorage) {
-          badAcc = badAccFromLocalStorage
-        }
-      }
-      function loadedStudysetSettings(studysetSettings) {
-        /* use stuff from per-studyset settings */
-        var loadedGoodAcc = parseFloat(studysetSettings?.goodAcc);
-        var loadedBadAcc = parseFloat(studysetSettings?.badAcc);
-        if (loadedGoodAcc >= 1 && loadedGoodAcc <= 100) {
-            goodAcc = loadedGoodAcc;
-        }
-        if (loadedBadAcc >= 0 && loadedBadAcc <= 100) {
-            badAcc = loadedBadAcc;
-        }
-      }
-
       var studysetTermsArray;
       var progressTermsMap;
       var studysetTermsWithProgress = [];
       var howManyNewTermsAreWeGoingToStartReviewingBasedOnAccuracyOfTermsWithProgressAndHowManyTimesTheyWereReviewed = 0;
 
+      /*
+        producing/answering-with the term given the definition and
+        producing the definition from the term require different logic/brain power
+        (depending on the subject/context)
+        so we record accuracy when answering with terms seperatly from accuracy when answering with definitions
+      */
+      var termBadCount = 0;
+      var termGoodCount = 0;
+      var defBadCount = 0; /* "def" is short for "definition" for these variables */
+      var defGoodCount = 0;
+
+      /*
+        in this context, "overall" means based on term-producing AND definition-producing accuracy
+        `(termCorrect + defCorrect) / (termCorrect + termIncorrect + defCorrect + defIncorrect)`
+      */
+      var overallBadCount = 0;
+      var overallGoodCount = 0;
+      var newTerms = []; /* unreviewed terms, as an array */
       var termsThatAreNotOverallBadButHaveNotBeenReviewed1OrLessDaysAgoCount = 0;
 
       var maxReviewSessionsCount = 0;
@@ -107,6 +40,9 @@
       based on how often existing terms have been reviewed,
       and minReviewSessionsCount is supposed to help us calculate */
       var minReviewSessionsCount = null;
+      /* weights for priority formula */
+      var timeWeight = 4;
+      var accuracyWeight = 5;
       /*
         setupStuff() is called right after the studyset (and/or studyset progress) is/are loaded
         to show the user their current progress and how many terms there are (or if there is no progress, just how many terms there are)
@@ -147,9 +83,7 @@
               if (progressForThisTerm == null /* `undefined == null` is true, so this also checks for undefined */) {
                 newTerms.push(studysetTermsArray[i]);
               } else {
-                progressForThisTerm.daysAgo = (Date.now() - new Date(progressForThisTerm.lastReviewedAt)) / (1000 * 60 * 60 * 24)
-                progressForThisTerm.msAgo = (Date.now() - new Date(progressForThisTerm.lastReviewedAt))
-                progressForThisTerm.overallAcc = 100 * (
+                var overallAccuracy = (
                   (progressForThisTerm.termCorrect + progressForThisTerm.defCorrect) / (
                     progressForThisTerm.termCorrect +
                     progressForThisTerm.termIncorrect +
@@ -157,30 +91,52 @@
                     progressForThisTerm.defIncorrect
                   )
                 );
-                progressForThisTerm.termAcc = 100 * (
+                if (overallAccuracy >= 0.9) {
+                  overallGoodCount++;
+                } else if (overallAccuracy < 0.8) {
+                  overallBadCount++;
+                }
+
+                var termAccuracy = (
                   progressForThisTerm.termCorrect / (
                     progressForThisTerm.termCorrect +
                     progressForThisTerm.termIncorrect
                   )
                 )
-                progressForThisTerm.defAcc = 100 * (
+                if (termAccuracy >= 0.9) {
+                  termGoodCount++;
+                } else if (termAccuracy < 0.8) {
+                  termBadCount++;
+                }
+
+                var defAccuracy = (
                   progressForThisTerm.defCorrect / (
                     progressForThisTerm.defCorrect +
                     progressForThisTerm.defIncorrect
                   )
                 )
-                if (progressForThisTerm.overallAcc > goodAcc) {
-                  termsOverallGood.push(progressForThisTerm);
-                } else if (progressForThisTerm.overallAcc < badAcc) {
-                  termsOverallBad.push(progressForThisTerm);
-                } else {
-                  termsOverallBetween.push(progressForThisTerm);
+                if (defAccuracy >= 0.9) {
+                  defGoodCount++;
+                } else if (defAccuracy < 0.8) {
+                  defBadCount++;
                 }
 
-                /* nullish coalescing operator, `??`, makes it default to "learning" if termState/defState is null(ish)
-                because term states were added after v0.32.1 */
-                termsByTermStates[progressForThisTerm.termState ?? "learning"].push(progressForThisTerm);
-                termsByDefStates[progressForThisTerm.defState ?? "learning"].push(progressForThisTerm);
+                var daysAgo = (Date.now() - new Date(progressForThisTerm.lastReviewedAt)) / (1000 * 60 * 60 * 24)
+                if (daysAgo > 1 && overallAccuracy >= 0.8) {
+                  termsThatAreNotOverallBadButHaveNotBeenReviewed1OrLessDaysAgoCount++;
+                }
+                studysetTermsWithProgress.push({
+                  term: progressForThisTerm.term,
+                  def: progressForThisTerm.def,
+                  termCorrect: progressForThisTerm.termCorrect,
+                  termIncorrect: progressForThisTerm.termIncorrect,
+                  defCorrect: progressForThisTerm.defCorrect,
+                  defIncorrect: progressForThisTerm.defIncorrect,
+                  lastReviewedAt: progressForThisTerm.lastReviewedAt,
+                  reviewSessionsCount: progressForThisTerm.reviewSessionsCount,
+                  daysAgo: daysAgo,
+                  priority: (daysAgo * timeWeight) * (1 - (overallAccuracy * accuracyWeight))
+                });
 
                 if (progressForThisTerm.reviewSessionsCount > maxReviewSessionsCount) {
                   maxReviewSessionsCount = progressForThisTerm.reviewSessionsCount;
@@ -193,38 +149,27 @@
                 }
               }
             }
-            /* sort arrays so that oldest/least-frequently-seen and worst/most-incorrect terms are first */
-            function sortTerms(a, b) {
-              /* a - b means increasing (and b - a is decreasing) */
-              if (Math.abs(a.reviewSessionsCount - b.reviewSessionsCount) < 10) {
-                if (Math.abs(a.termAcc - b.termAcc) < 20) {
-                  /* b - a = decreasing = first is more */
-                  return b.msAgo - a.msAgo;
-                } else {
-                  /* a - b = increasing = first is less */
-                  return a.termAcc - b.termAcc;
-                }
-              } else {
-                /* a - b = increasing = first is less */
-                return a.reviewSessionsCount - b.reviewSessionsCount;
-              }
-            }
-            termsByTermStates.learning.sort(sortTerms);
-            termsByTermStates.review.sort(sortTerms);
-            termsByTermStates.relearning.sort(sortTerms);
-            termsByDefStates.learning.sort(sortTerms);
-            termsByDefStates.review.sort(sortTerms);
-            termsByDefStates.relearning.sort(sortTerms);
-            console.log(termsByTermStates);
-            console.log(termsByTermStates);
-            console.log(termsByDefStates);
-            console.log(termsByDefStates);
-            console.log(termsByDefStates);
 
-            /* after we finish adding to termsOverallGood and termsOverallBad,
-            display their count in these text elements. (notice this is outside of the for-loop above) */
-            document.getElementById("preview-good-terms-count").innerText =  termsOverallGood.length;
-            if (termsOverallGood.length == 0) {
+            /* use minReviewSessionsCount to calculate how many new terms to add
+            this updates howManyNewTermsAreWeGoingToStartReviewingBasedOnAccuracyOfTermsWithProgressAndHowManyTimesTheyWereReviewed,
+            that variable is used later to show users a combination of existing terms and a specific count of new terms
+            but it wont show users new terms if they need to work on old or low-accuracy terms
+            
+            notice that this is outside the for-loop */
+            if (minReviewSessionsCount > 5 || studysetTermsWithProgress.length < 10) {
+              /* we need to review bad terms and old terms before introducing new terms
+              so if there's a few bad terms and/or old terms, we can do both new terms and old/bad terms in the same session 
+              we subtract them from 10 so that we have a max of 10 new terms if there are no other higher-priority terms */
+              howManyNewTermsAreWeGoingToStartReviewingBasedOnAccuracyOfTermsWithProgressAndHowManyTimesTheyWereReviewed = (
+                /* we use Math.min with newTerms to make sure we don't try to review new terms that don't exist */
+                Math.min(10, newTerms.length) - overallBadCount - termsThatAreNotOverallBadButHaveNotBeenReviewed1OrLessDaysAgoCount
+              );
+            }
+
+            /* after we finish adding to overallGoodCount and overallBadCount,
+            display those numbers in these text elements. (notice this is outside of the for-loop above) */
+            document.getElementById("preview-good-terms-count").innerText = overallGoodCount;
+            if (overallGoodCount == 0) {
               /* make the text and label text underneath it greyed out when its 0
               these css classes are added to and removed from the parent element, and the label visually under the parent element, but under the same div */
               document.getElementById("preview-good-terms-count-parent").classList.add("fg0");
@@ -234,8 +179,8 @@
               document.getElementById("preview-good-terms-count-parent").classList.add("yay");
             }
 
-            document.getElementById("preview-bad-terms-count").innerText = termsOverallBad.length;
-            if (termsOverallBad.length == 0) {
+            document.getElementById("preview-bad-terms-count").innerText = overallBadCount;
+            if (overallBadCount == 0) {
               /* make the text and label text underneath it greyed out when its 0 */
               document.getElementById("preview-bad-terms-count-parent").classList.add("fg0");
               document.getElementById("preview-bad-terms-count-parent-label").classList.add("fg0");
@@ -316,7 +261,6 @@
       });
 
       document.getElementById("start-button").addEventListener("click", function () {
-        reviewStarted = true;
         if (
           document.getElementById("setup-split").classList.contains("hide") === false &&
           document.getElementById("split-true-button").classList.contains("selected")
@@ -339,16 +283,227 @@
 
       var sessionIncorrectCount = 0;
       var sessionCorrectCount = 0;
-      var sectionIncorrectCount = 0;
-      var sectionCorrectCount = 0;
 
       var currentQuestionNum = 1;
       var sessionIncorrectTerms = [];
-      /* array of terms this session */
-      var sessionProgress = [];
+      var sessionProgressMap = new Map();
       var currentNewTerm = 0;
       var currentTermWithProgress = 0;
       var newTermsStartedThisSessionCount = 0;
+      function nextQuestion() {
+        /* remove selected class and incorrect/correct styles cause we're going to the next question */
+        document.getElementById("answer-1").classList.remove("selected", "yay", "ohno");
+        document.getElementById("answer-2").classList.remove("selected", "yay", "ohno");
+        document.getElementById("answer-3").classList.remove("selected", "yay", "ohno");
+        document.getElementById("answer-4").classList.remove("selected", "yay", "ohno");
+        /* hide the next button again (its shown again after the user picks an answer) */
+        document.getElementById("next-button").classList.add("hide");
+
+        /* random number 0 or 1 to answer with term or def (0 for term, 1 for def) */
+        var answerWithTermOrDef = Math.floor(Math.random() * 2);
+
+        if (answerWithTermOrDef == 0) {
+          document.getElementById("answer-with-term").classList.remove("hide");
+          document.getElementById("answer-with-def").classList.add("hide");
+        } else {
+          document.getElementById("answer-with-term").classList.add("hide");
+          document.getElementById("answer-with-def").classList.remove("hide");
+        }
+
+        /* pick random number from 1 to 4 */
+        var correctAnswerPosition = Math.floor(Math.random() * 4) + 1;
+
+        //if (currentQuestionNum > 10 && sessionIncorrectTerms.length >= 1) {
+        //  /* after the first 10 questions, we repeat questions users got wrong this session */
+        //  alert("congrats, i didn't implement this yet")
+
+        if (currentQuestionNum > 10) {
+          showSummaryAndSaveResults()
+        } else {
+          var correctAnswerContent;
+          if (
+            (howManyNewTermsAreWeGoingToStartReviewingBasedOnAccuracyOfTermsWithProgressAndHowManyTimesTheyWereReviewed -
+            newTermsStartedThisSessionCount) >= 1
+            /* newTermsStartedThisSessionCount records how many new terms we already started this session
+            howManyNewTermsAreWeGoingToStartReviewing... records how many new terms we are going to start this session,
+            so if subtracting them is greater than 1, then we need to introduce another new term
+            
+            so the body of this if-statement will show a question from our newTerms array */
+          ) {
+            if (currentNewTerm >= newTerms.length) {
+              currentNewTerm = 0;
+            }
+
+            /* put the term/def from newTerms into the actual element(s) */
+            if (answerWithTermOrDef == 0) {
+              /* answerWithTermOrDef is 0 for term and 1 for def,
+              we ask the question with the opposite of what we want to answer with */
+              document.getElementById("question").innerText = newTerms[currentNewTerm][1]
+              document.getElementById("question").dataset.answerwith = "term";
+              document.getElementById("question").dataset.array = "newTerms";
+              document.getElementById("question").dataset.index = currentNewTerm;
+            } else {
+              document.getElementById("question").innerText = newTerms[currentNewTerm][0]
+              document.getElementById("question").dataset.answerwith = "def";
+              document.getElementById("question").dataset.array = "newTerms";
+              document.getElementById("question").dataset.index = currentNewTerm;
+            }
+            correctAnswerContent = newTerms[currentNewTerm][answerWithTermOrDef]; /* answerWithTermOrDef is 0 for term and 1 for def, that's why we can use it as the index */
+            document.getElementById("answer-" + correctAnswerPosition).innerText = correctAnswerContent;
+            document.getElementById("answer-" + correctAnswerPosition).dataset.answer = "correct"; /* this data-answer="..." attribute is used by function checkAnswer() later */
+            currentNewTerm++ /* increment currentNewTerm to keep a seperate question count just for new terms for use as the array index */
+            newTermsStartedThisSessionCount++ /* increment newTermsStartedThisSessionCount to later calculate how many new terms left to introduce this session */
+          } else { /* this else statement is for showing terms with progress (instead of new terms)*/
+            if (currentTermWithProgress >= studysetTermsWithProgress.length) {
+              currentTermWithProgress = 0;
+            }
+
+            /* put the term/def from newTerms into the actual element(s) */
+            if (answerWithTermOrDef == 0) {
+              /* answerWithTermOrDef is 0 for term and 1 for def, if it's term then we ask the definition */
+              document.getElementById("question").innerText = studysetTermsWithProgress[currentTermWithProgress].def
+              document.getElementById("question").dataset.answerwith = "term";
+              document.getElementById("question").dataset.array = "studysetTermsWithProgress";
+              document.getElementById("question").dataset.index = currentTermWithProgress;
+            } else {
+              /* 0 for term, 1 for def. If it's 1 (not 0), then we need to ask with the temr */
+              document.getElementById("question").innerText = studysetTermsWithProgress[currentTermWithProgress].term
+              document.getElementById("question").dataset.answerwith = "def";
+              document.getElementById("question").dataset.array = "studysetTermsWithProgress";
+              document.getElementById("question").dataset.index = currentTermWithProgress;
+            }
+            if (answerWithTermOrDef == 0) {
+              correctAnswerContent = studysetTermsWithProgress[currentTermWithProgress].term;
+            } else {
+              correctAnswerContent = studysetTermsWithProgress[currentTermWithProgress].def;
+            }
+            document.getElementById("answer-" + correctAnswerPosition).innerText = correctAnswerContent;
+            document.getElementById("answer-" + correctAnswerPosition).dataset.answer = "correct"; /* this data-answer="..." attribute is used by function checkAnswer() later */
+            currentTermWithProgress++ /* increment currentTermWithProgress to keep track of what index we are at */
+          }
+          var alreadyUsedRandomIndexes = [];
+          /* we iterate 4 times for each answer choice */
+          for (var i = 1; i <= 4; i++) {
+            /* this for-loop generates random, incorrect, answer choices
+            in this for loop, `i` is the visual/layout position of each answer choice,
+            and right before this for-loop, one correct answer choice was already put,
+            so we skip the correct answer's position by checking if correctAnswerPosition does not equal `i` */
+            if (correctAnswerPosition != i) {
+              /* select a random index and use a while-loop to avoid duplicate answer choices */
+              var randomIndex = Math.floor(Math.random() * studysetTermsArray.length);
+              var extraWhileLoopCounterJustInCase = 0; /* avoid accidental infinite-while-loop-hanging by counting how many times the while-loop runs */
+              while (
+                /* this while-loop re-generates the random index if it is a duplicate answer choice
+                so we check alreadyUsedRandomIndexes to avoid duplicates of previous random choices,
+                and we also check correctAnswerContent to avoid a duplicate of the correct choice */
+                alreadyUsedRandomIndexes.includes(randomIndex) ||
+                (
+                  studysetTermsArray[randomIndex][answerWithTermOrDef] == correctAnswerContent
+                  /* answerWithTermOrDef is 0 for term and 1 for def
+                  and conveniently, the array's 0th element is its term & 1st element is its definition */
+                )
+              ) {
+                randomIndex = Math.floor(Math.random() * studysetTermsArray.length);
+                
+                if (extraWhileLoopCounterJustInCase > 100) {
+                  /* if this while-loop ran more than 100 times, something is wrong
+                  the condition of this while-loop checks if a random term is a repeat answer choice or a duplicate of the correct answer.
+                  If a user inputs a bunch of duplicate terms, the while-loop would try to go on forever.
+                  We check if it ran too many times and then break the loop to prevent infinite loops. */
+                  if (i == 1) {
+                    alert("Do you have an unreasonable amount of duplicate terms or is Math.random() broken? 💀");
+                  }
+                  break; /* Everything you say to me Takes me one step closer to the edge And I'm about to break I need a little room to breathe 'Cause I'm one step closer to the edge And I'm about to... break (break) (break) (break) */
+                }
+                extraWhileLoopCounterJustInCase++
+              }
+              if (answerWithTermOrDef == 0) {
+                document.getElementById("answer-" + i).innerText = studysetTermsArray[randomIndex][0];
+                /* this element's `data-answer` attribute is used by our checkAnswer() function
+                `dataset.abc` in this js code is `data-abc` in the actual html and DOM */
+                document.getElementById("answer-" + i).dataset.answer = "incorrect";
+              } else {
+                document.getElementById("answer-" + i).innerText = studysetTermsArray[randomIndex][1];
+                /* this element's `data-answer` attribute is used by our checkAnswer() function
+                `dataset.abc` in this js code is `data-abc` in the actual html and DOM */
+                document.getElementById("answer-" + i).dataset.answer = "incorrect";
+              }
+              /* record the randomly selected index so we dont show duplicate answer choices */
+              alreadyUsedRandomIndexes.push(randomIndex);
+            }
+          }
+        }
+        currentQuestionNum++;
+      }
+      document.getElementById("next-button").addEventListener("click", nextQuestion);
+
+      function checkAnswer(event) {
+        if (
+          /* we use this if-statement to make sure nothing is already selected so that users can only select one answer choice */
+          document.getElementById("answer-1").classList.contains("selected") == false &&
+          document.getElementById("answer-2").classList.contains("selected") == false &&
+          document.getElementById("answer-3").classList.contains("selected") == false &&
+          document.getElementById("answer-4").classList.contains("selected") == false
+        ) {
+          event.target.classList.add("selected");
+
+          /* the question element has attributes data-answerwith, data-array, and data-index
+          we use those attributes to find the question's data from arrays studysetTermsWithProgress or newTerms
+          those arrays are populated/modified by setupStuff() and `start-button`'s onclick event,
+          and then the indexes of those arrays are used by nextQuestion() and checkAnswer() */
+          var question = document.getElementById("question")
+          if (event.target.dataset.answer == "correct") {
+            event.target.classList.add("yay");
+            sessionCorrectCount++;
+            
+            if (question.dataset.array == "studysetTermsWithProgress") {
+              updateSessionProgressMap(
+                studysetTermsWithProgress[question.dataset.index].term,
+                studysetTermsWithProgress[question.dataset.index].def,
+                question.dataset.answerwith,
+                true /* true for correct */
+              )
+            } else if (question.dataset.array == "newTerms") {
+              updateSessionProgressMap(
+                newTerms[question.dataset.index][0],
+                newTerms[question.dataset.index][1],
+                question.dataset.answerwith,
+                true /* true for correct */
+              )
+            } else {
+              alert("this question's data-array attribute is wrong? 💀")
+            }
+          } else if (event.target.dataset.answer == "incorrect") {
+            event.target.classList.add("ohno");
+            sessionIncorrectCount++
+
+            if (question.dataset.array == "studysetTermsWithProgress") {
+              updateSessionProgressMap(
+                studysetTermsWithProgress[question.dataset.index].term,
+                studysetTermsWithProgress[question.dataset.index].def,
+                question.dataset.answerwith,
+                false /* false for incorrect */
+              )
+            } else if (question.dataset.array == "newTerms") {
+              updateSessionProgressMap(
+                newTerms[question.dataset.index][0],
+                newTerms[question.dataset.index][1],
+                question.dataset.answerwith,
+                false /* false for incorrect */
+              )
+            } else {
+              alert("invalid data-array attribute i think 💀")
+            }
+          } else {
+            alert("impossible error?")
+          }
+          document.getElementById("next-button").classList.remove("hide");
+        }
+      }
+      document.getElementById("answer-1").addEventListener("click", checkAnswer);
+      document.getElementById("answer-2").addEventListener("click", checkAnswer);
+      document.getElementById("answer-3").addEventListener("click", checkAnswer);
+      document.getElementById("answer-4").addEventListener("click", checkAnswer);
 
       function updateSessionProgressMap(term, def, answerWith, correct) {
         var mapKey = JSON.stringify([term, def]);
@@ -426,10 +581,9 @@
       }
     if (data.local) {
       openIndexedDB(function (db) {
-        var dbTransaction = db.transaction(["studysets", "studysetprogress", "studysetsettings"]);
+        var dbTransaction = db.transaction(["studysets", "studysetprogress"]);
         var studysetsObjectStore = dbTransaction.objectStore("studysets");
         var studysetprogressObjectStore = dbTransaction.objectStore("studysetprogress");
-        var studysetsettingsObjectStore = dbTransaction.objectStore("studysetsettings")
         var dbStudysetGetReq = studysetsObjectStore.get(data.localId);
         dbStudysetGetReq.onerror = function (event) {
           alert("oopsie woopsie, indexeddb error");
@@ -446,16 +600,6 @@
                   setupStuff(dbStudysetGetReq.result.data.terms);
                 } else {
                   setupStuff(dbStudysetGetReq.result.data.terms, dbProgressGetReq.result.terms);
-                }
-              }
-              /* also load per-studyset settings (if they exist) */
-              var dbSettingsGetReq = studysetsettingsObjectStore.get(data.localId);
-              dbSettingsGetReq.onerror = function (event) {
-                alert("indexeddb error while trying to get studyset settings");
-              }
-              dbSettingsGetReq.onsuccess = function (event) {
-                if (dbSettingsGetReq.result !== undefined) {
-                  loadedStudysetSettings(dbSettingsGetReq.result)
                 }
               }
             } else {
@@ -491,11 +635,6 @@
                 reviewSessionsCount
               }
             }
-            studysetSettings(studysetId: $id) {
-              goodAcc
-              badAcc
-              learningMinSessionsCount
-            }
            }`,
           variables: {
             "id": data.studysetId
@@ -514,9 +653,6 @@
               setupStuff(apiResponse.data.studyset.data.terms, apiResponse.data.studysetProgress.terms)
             } else {
               setupStuff(apiResponse.data.studyset.data.terms)
-            }
-            if (apiResponse.data.studysetSettings) {
-              loadedStudysetSettings(apiResponse.data.studysetSettings)
             }
           } else if (apiResponse.data && apiResponse.data.studyset) {
             alert("oopsie woopsie, your studyset has zero terms?")
@@ -704,23 +840,6 @@
     }
     })
 </script>
-<style>
-  .review-mode-answer-choices {
-    display: grid;
-    gap: 1rem;
-    grid-template-rows: auto auto;
-    grid-template-columns: 1fr 1fr;
-  }
-  .review-mode-answer-choice {
-    margin-top: 0px;
-  }
-  @media only screen and (max-width: 800px) {
-    .review-mode-answer-choices {
-      grid-template-rows: auto auto auto auto;
-      grid-template-columns: 1fr;
-    }
-  }
-</style>
 
 <svelte:head>
     {#if (data.studyset) }
@@ -730,49 +849,22 @@
     {/if}
 </svelte:head>
 
+
+    {#if (data.local)}
     <Noscript />
-    {#if showExitConfirmationPrompt}
-    <div transition:fade={{ duration: 200 }} class="modal">
-      <div class="content">
-        <h4>
-          Exit Review Mode?
-        </h4>
-        <p>
-          Are you sure you want to exit without finishing your session?
-        </p>
-        <div class="flex">
-          {#if data.local}
-            <a href="/studyset/local?id={data.localId}" class="button ohno">Exit</a>
-          {:else}
-            <a href="/studysets/{data.studysetId}" class="button ohno">Exit</a>
-          {/if}
-          <button class="alt" onclick={function () {
-            showExitConfirmationPrompt = false;
-          }}>Continue</button>
-        </div>
-      </div>
-    </div>
     {/if}
     <main>
       <div class="grid page">
         <div class="content">
           <div>
-            {#if reviewStarted}
-            <button class="button faint" onclick={function () {
-              showExitConfirmationPrompt = true;
-            }}>
+            {#if (data.local) }
+            <a href="/studyset/local?id={ data.localId }" class="button faint">
               <IconBackArrow /> Back
-            </button>
+            </a>
             {:else}
-              {#if (data.local) }
-              <a href="/studyset/local?id={ data.localId }" class="button faint">
-                <IconBackArrow /> Back
-              </a>
-              {:else}
-              <a href="/studysets/{ data.studysetId }" class="button faint">
-                <IconBackArrow /> Back
-              </a>
-              {/if}
+            <a href="/studysets/{ data.studysetId }" class="button faint">
+              <IconBackArrow /> Back
+            </a>
             {/if}
           </div>
           <div id="review-mode-setup" style="min-height:60vh">
@@ -780,11 +872,11 @@
             <div class="flex" style="gap: 2rem;">
               <div>
                 <p id="preview-good-terms-count-parent" class="h4" style="margin-bottom: 0.2rem;"><span id="preview-good-terms-count">...</span> terms</p>
-                <p id="preview-good-terms-count-parent-label" style="margin-top: 0.2rem;">&gt; {goodAcc}% accuracy</p>
+                <p id="preview-good-terms-count-parent-label" style="margin-top: 0.2rem;">&ge; 90% accuracy</p>
               </div>
               <div>
                 <p id="preview-bad-terms-count-parent" class="h4" style="margin-bottom: 0.2rem;"><span id="preview-bad-terms-count">...</span> terms</p>
-                <p id="preview-bad-terms-count-parent-label" style="margin-top: 0.2rem;">&lt; {badAcc}% accuracy</p>
+                <p id="preview-bad-terms-count-parent-label" style="margin-top: 0.2rem;">&lt; 80% accuracy</p>
               </div>
               <div>
                 <p id="preview-new-terms-count-parent" class="h4" style="margin-bottom: 0.2rem;"><span id="preview-new-terms-count">...</span> terms</p>
@@ -808,201 +900,6 @@
             </div>
             <div class="flex">
               <button id="start-button"><IconCheckmark /> Start</button>
-              <a class="button alt" href={
-                data.local ?
-                  "/studyset/local/settings?id=" + data.localId :
-                  "/studysets/" + data.studysetId + "/settings"
-              }>
-                <IconSettingsGear /> Settings
-              </a>
-            </div>
-            <div style="margin-top:2rem;">
-              {#if termsOverallBad.length >= 1}
-              <details>
-                <summary>{termsOverallBad.length} terms &lt; {badAcc}%</summary>
-                <p class="fg0">"Term accuracy" and "definition accuracy" record accuracy when answering with a term & answering with a definition separately.</p>
-                <table class="inner">
-                  <thead>
-                    <tr>
-                      <th>Term</th>
-                      <th>Definition</th>
-                      <th>Accuracy</th>
-                      <th>Term Accuracy</th>
-                      <th>Definition Accuracy</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {#each termsOverallBad as term}
-                    <tr>
-                      <td>{term.term}</td>
-                      <td>{term.def}</td>
-                      {#if isNaN(term.overallAcc)}
-                      <td class="text fg0">N/A</td>
-                      {:else}
-                      <td class="text {
-                        term.overallAcc > goodAcc ? "yay" :
-                        term.overallAcc < badAcc ? "ohno" : ""
-                      }">
-                        {Math.round(term.overallAcc)}%
-                      </td>
-                      {/if}
-                      {#if isNaN(term.termAcc)}
-                      <td class="text fg0">N/A</td>
-                      {:else}
-                      <td class="text {
-                        term.termAcc > goodAcc ? "yay" :
-                        term.termAcc < badAcc ? "ohno" : ""
-                      }">
-                        {Math.round(term.termAcc)}%
-                      </td>
-                      {/if}
-                      {#if isNaN(term.defAcc)}
-                      <td class="text fg0">N/A</td>
-                      {:else}
-                      <td class="text {
-                        term.defAcc > goodAcc ? "yay" :
-                        term.defAcc < badAcc ? "ohno" : ""
-                      }">
-                        {Math.round(term.defAcc)}%
-                      </td>
-                      {/if}
-                    </tr>
-                    {/each}
-                  </tbody>
-                </table>
-              </details>
-              {/if}
-              {#if termsOverallBetween.length >= 1}
-              <details>
-                <summary>{badAcc} &lt; {termsOverallBetween.length} terms &lt; {goodAcc}%</summary>
-                <p class="fg0">"Term accuracy" and "definition accuracy" record accuracy when answering with a term & answering with a definition separately.</p>
-                <table class="inner">
-                  <thead>
-                    <tr>
-                      <th>Term</th>
-                      <th>Definition</th>
-                      <th>Accuracy</th>
-                      <th>Term Accuracy</th>
-                      <th>Definition Accuracy</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {#each termsOverallBetween as term}
-                    <tr>
-                      <td>{term.term}</td>
-                      <td>{term.def}</td>
-                      {#if isNaN(term.overallAcc)}
-                      <td class="text fg0">N/A</td>
-                      {:else}
-                      <td class="text {
-                        term.overallAcc > goodAcc ? "yay" :
-                        term.overallAcc < badAcc ? "ohno" : ""
-                      }">
-                        {Math.round(term.overallAcc)}%
-                      </td>
-                      {/if}
-                      {#if isNaN(term.termAcc)}
-                      <td class="text fg0">N/A</td>
-                      {:else}
-                      <td class="text {
-                        term.termAcc > goodAcc ? "yay" :
-                        term.termAcc < badAcc ? "ohno" : ""
-                      }">
-                        {Math.round(term.termAcc)}%
-                      </td>
-                      {/if}
-                      {#if isNaN(term.defAcc)}
-                      <td class="text fg0">N/A</td>
-                      {:else}
-                      <td class="text {
-                        term.defAcc > goodAcc ? "yay" :
-                        term.defAcc < badAcc ? "ohno" : ""
-                      }">
-                        {Math.round(term.defAcc)}%
-                      </td>
-                      {/if}
-                    </tr>
-                    {/each}
-                  </tbody>
-                </table>
-              </details>
-              {/if}
-              {#if termsOverallGood.length >= 1}
-              <details>
-                <summary>{termsOverallGood.length} terms &gt; {goodAcc}%</summary>
-                <p class="fg0">"Term accuracy" and "definition accuracy" record accuracy when answering with a term & answering with a definition separately.</p>
-                <table class="inner">
-                  <thead>
-                    <tr>
-                      <th>Term</th>
-                      <th>Definition</th>
-                      <th>Accuracy</th>
-                      <th>Term Accuracy</th>
-                      <th>Definition Accuracy</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {#each termsOverallGood as term}
-                    <tr>
-                      <td>{term.term}</td>
-                      <td>{term.def}</td>
-                      {#if isNaN(term.overallAcc)}
-                      <td class="text fg0">N/A</td>
-                      {:else}
-                      <td class="text {
-                        term.overallAcc > goodAcc ? "yay" :
-                        term.overallAcc < badAcc ? "ohno" : ""
-                      }">
-                        {Math.round(term.overallAcc)}%
-                      </td>
-                      {/if}
-                      {#if isNaN(term.termAcc)}
-                      <td class="text fg0">N/A</td>
-                      {:else}
-                      <td class="text {
-                        term.termAcc > goodAcc ? "yay" :
-                        term.termAcc < badAcc ? "ohno" : ""
-                      }">
-                        {Math.round(term.termAcc)}%
-                      </td>
-                      {/if}
-                      {#if isNaN(term.defAcc)}
-                      <td class="text fg0">N/A</td>
-                      {:else}
-                      <td class="text {
-                        term.defAcc > goodAcc ? "yay" :
-                        term.defAcc < badAcc ? "ohno" : ""
-                      }">
-                        {Math.round(term.defAcc)}%
-                      </td>
-                      {/if}
-                    </tr>
-                    {/each}
-                  </tbody>
-                </table>
-              </details>
-              {/if}
-              {#if newTerms.length >= 1}
-              <details>
-                <summary>{newTerms.length} new/unreviewed terms</summary>
-                <table class="inner">
-                  <thead>
-                    <tr>
-                      <th>Term</th>
-                      <th>Definition</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {#each newTerms as term}
-                    <tr>
-                      <td>{term[0]}</td>
-                      <td>{term[1]}</td>
-                    </tr>
-                    {/each}
-                  </tbody>
-                </table>
-              </details>
-              {/if}
             </div>
           </div>
           <div id="review-mode-error-min-terms" class="hide" style="min-height:60vh">
@@ -1011,23 +908,16 @@
             <p>You need at least 4 terms to use review mode or practice quizzes, sorry :(</p>
           </div>
           <div id="review-mode-questions" class="hide" style="min-height:60vh">
-            <p class="h4 hide">
-              {#if answerWithDef}
-              Select the matching definition
-              {:else}
-              Select the matching term
-              {/if}
-            </p>
-            <p style="white-space:pre-wrap">
-              {question}
-            </p>
-            <div class="review-mode-answer-choices">
-              <button id="answer-choice-0" class="button-box no-clickable-effect review-mode-answer-choice" style="white-space:pre-wrap" onclick={checkAnswer}>{answerChoices[0]}</button>
-              <button id="answer-choice-1" class="button-box no-clickable-effect review-mode-answer-choice" style="white-space:pre-wrap" onclick={checkAnswer}>{answerChoices[1]}</button>
-              <button id="answer-choice-2" class="button-box no-clickable-effect review-mode-answer-choice" style="white-space:pre-wrap" onclick={checkAnswer}>{answerChoices[2]}</button>
-              <button id="answer-choice-3" class="button-box no-clickable-effect review-mode-answer-choice" style="white-space:pre-wrap" onclick={checkAnswer}>{answerChoices[3]}</button>
+            <p class="h4 hide" id="answer-with-term">Select the matching term</p>
+            <p class="h4 hide" id="answer-with-def">Select the matching definition</p>
+            <p id="question" style="white-space:pre-wrap">...</p>
+            <div class="flex">
+              <button id="answer-1" data-answer="incorrect" class="button-box no-clickable-effect" style="white-space:pre-wrap">...</button>
+              <button id="answer-2" data-answer="incorrect" class="button-box no-clickable-effect" style="white-space:pre-wrap">...</button>
+              <button id="answer-3" data-answer="incorrect" class="button-box no-clickable-effect" style="white-space:pre-wrap">...</button>
+              <button id="answer-4" data-answer="incorrect" class="button-box no-clickable-effect" style="white-space:pre-wrap">...</button>
             </div>
-            <button id="next-button" class="hide" onclick={nextQuestion}>Next</button>
+            <button id="next-button" class="hide">Next</button>
           </div>
           <div id="review-mode-summary" class="hide" style="min-height:60vh">
             <div class="flex" style="gap: 2rem;">
