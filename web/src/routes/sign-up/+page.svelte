@@ -79,7 +79,7 @@
       .button.gaccount-button {
         background-color: #F0F0F0;
         color: #1F1F1F;
-        font-family: "roboto";
+        font-family: Roboto, Inter, Arial, Helvetica, sans-serif;
         font-weight: 500;
         border: none;
         border-radius: 2rem;
