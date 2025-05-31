@@ -112,7 +112,9 @@
                     }`,
                     variables: {
                         "classId": data.classId,
-                        "title": title ?? "Untitled Assignment",
+                        "title": title?.length > 0 ?
+                            title :
+                            "Untitled Assignment",
                         "description": JSON.stringify(description),
                         "points": !isNaN(parseInt(points)) ?
                             parseInt(points) :
@@ -175,7 +177,9 @@
                     variables: {
                         "id": data.draftId,
                         "classId": data.classId,
-                        "title": title ?? "Untitled Assignment",
+                        "title": title?.length > 0 ?
+                            title :
+                            "Untitled Assignment",
                         "description": JSON.stringify(description),
                         "points": !isNaN(parseInt(points)) ?
                             parseInt(points) :
@@ -245,7 +249,9 @@
 }`,
                     variables: {
                         "classId": data.classId,
-                        "title": title ?? "Untitled Assignment",
+                        "title": title?.length > 0 ?
+                            title :
+                            "Untitled Assignment",
                         "description": JSON.stringify(description),
                         "points": !isNaN(parseInt(points)) ?
                             parseInt(points) :
@@ -308,7 +314,9 @@
                     variables: {
                         "id": data.assignmentId,
                         "classId": data.classId,
-                        "title": title ?? "Untitled Assignment",
+                        "title": title?.length > 0 ?
+                            title :
+                            "Untitled Assignment",
                         "description": JSON.stringify(description),
                         "points": !isNaN(parseInt(points)) ?
                             parseInt(points) :

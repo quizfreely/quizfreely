@@ -405,26 +405,18 @@
 
 <div class="grid page">
     <div class="content">
-        <div class="top-container-split" style="margin-top: 1rem;">
-            <div class="flex">
-                <a href="/classes/c/{ data.classId }/{
-                    data.new || data.draft ?
-                        "classwork" :
-                        `assignments/${data.assignmentId}`
-                }" class="button faint">
-                    <IconBackArrow /> Back
-                </a>
-            </div>
-            <div class="flex" style="margin-top: 0px; justify-items: flex-end; justify-content: flex-end;">
-                {#if data.new || data.draft}
-                    <!-- only show if new or if it's an existing draft, cause how would we save something already posted and being edited as a draft? -->
-                    <button class="alt" style="margin-top: 0px;" onclick={saveDraft}>Save draft</button>
-                {/if}
-            </div>
+        <div class="flex" style="margin-top: 1rem;">
+            <a href="/classes/c/{ data.classId }/{
+                data.new || data.draft ?
+                    "classwork" :
+                    `assignments/${data.assignmentId}`
+            }" class="button faint">
+                <IconBackArrow /> Back
+            </a>
         </div>
         <Noscript />
         <div>
-            <input type="text" class="reasonable-title-size" placeholder="Title" bind:value={title}>
+            <h1 class="h3">{title}</h1>
             <div class="combo-select">
                 <button class="left {
                     !isThereADueDate ? "selected" : ""
@@ -473,13 +465,13 @@
                     {/if}
                 </button>
             </div>
-            <p style="white-space: pre-wrap;">
-            {JSON.stringify(
-                data.classData,
-                null,
-                4
-            )}
-            </p>
+            <!-- <p style="white-space: pre-wrap;"> -->
+            <!-- {JSON.stringify( -->
+            <!--     data.classData, -->
+            <!--     null, -->
+            <!--     4 -->
+            <!-- )} -->
+            <!-- </p> -->
         </div>
             {#if showExitConfirmationModal}
             <div class="modal" transition:fade={{ duration: 200 }}>
