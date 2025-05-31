@@ -77,20 +77,19 @@
 
 <style>
       .button.gaccount-button {
-        background-color: #F0F0F0;
+        background-color: #FeFeFe;
         color: #1F1F1F;
         font-family: Roboto, Inter, Arial, Helvetica, sans-serif;
         font-weight: 500;
-        border: none;
+        border: 0.2rem solid var(--eh-border);
         border-radius: 2rem;
-        padding: 0.8rem;
+        padding: 0.6rem;
       }
       .button.gaccount-button:hover,
       .button.gaccount-button:focus,
       .button.gaccount-button:focus-visible {
-        background-color: #E0E0E0;
+        background-color: #f0f0f0;
         color: #1F1F1F;
-        border: none;
       }
 
       .button.gaccount-button div.gaccount-container {
