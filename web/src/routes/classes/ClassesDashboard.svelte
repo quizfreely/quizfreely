@@ -2,6 +2,7 @@
     import { goto } from "$app/navigation";
     import Noscript from "$lib/components/Noscript.svelte";
     import PlusIcon from "$lib/icons/Plus.svelte";
+    import UserIcon from "$lib/icons/User.svelte";
     import { fade } from "svelte/transition";
     let { data } = $props();
     let enteredClassCode = $state("");
@@ -128,7 +129,7 @@
         <div class="content">
             {#if data?.classesData?.classesAsTeacher?.length > 0 || data?.classesData?.classesAsStudent?.length > 0}
                 <div class="flex" style="justify-items: flex-end; justify-content: flex-end;">
-                <button onclick={() => showJoinModal = true} class="button alt">Join class</button>
+                <button onclick={() => showJoinModal = true} class="button alt"><UserIcon></UserIcon> Join class</button>
                 <a href="/classes/create-class" class="button alt"><PlusIcon></PlusIcon> Create class</a>
                 </div>
             {/if}

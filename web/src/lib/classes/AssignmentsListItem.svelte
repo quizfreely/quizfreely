@@ -1,5 +1,5 @@
 <script>
-    let { title, amIATeacher, trustedEditHref, trustedViewHref, descriptionSafeHtml, renderedDueDate, hideViewButton } = $props();
+    let { title, amIATeacher, trustedEditHref, trustedStudentViewHref, trustedTeacherViewHref, descriptionSafeHtml, renderedDueDate, hideTeacherViewButton } = $props();
     let open = $state(false);
 </script>
 <style>
@@ -46,14 +46,18 @@
         {#if descriptionSafeHtml}<div>{@html descriptionSafeHtml}</div>{/if}
         <div class="flex">
             {#if amIATeacher}
-                <a href={trustedEditHref} class="button faint">
+                <a href={trustedEditHref} class="button alt">
                     Edit
                 </a>
-            {/if}
-            {#if !hideViewButton}
-            <a href={trustedViewHref} class="button faint">
-                View Assignment
-            </a>
+                {#if !hideTeacherViewButton}
+                <a href={trustedTeacherViewHref} class="button alt">
+                    View assignment
+                </a>
+                {/if}
+            {:else}
+                <a href={trustedStudentViewHref} class="button alt">
+                    View assignment
+                </a>
             {/if}
         </div>
     </div>
