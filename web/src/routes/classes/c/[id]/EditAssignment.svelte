@@ -8,6 +8,7 @@
     import { cancelNprogressTimeout } from "$lib/stores/nprogressTimeout.js";
     import IconBackArrow from "$lib/icons/BackArrow.svelte";
     import IconCheckmark from "$lib/icons/Checkmark.svelte";
+    import IconCloseXMark from "$lib/icons/CloseXMark.svelte";
     import IconClock from "$lib/icons/Clock.svelte";
     import IconTrash from "$lib/icons/Trash.svelte";
     import 'vanillajs-datepicker/css/datepicker.css';
@@ -21,6 +22,7 @@
     let showExitConfirmationModal = $state(false);
 
     let isThereADueDate = $state(true);
+    let showPoints = $state(true);
     let datePickerInput;
     let datePicker;
     onMount(async function () {
@@ -116,8 +118,11 @@
                             title :
                             "Untitled Assignment",
                         "description": JSON.stringify(description),
-                        "points": !isNaN(parseInt(points)) ?
-                            parseInt(points) :
+                        "points": showPoints ?
+                            (!isNaN(parseInt(points)) ?
+                                parseInt(points) :
+                                0
+                            ) :
                             0,
                         "dueAt": isThereADueDate ?
                             datePicker.getDate() :
@@ -181,8 +186,11 @@
                             title :
                             "Untitled Assignment",
                         "description": JSON.stringify(description),
-                        "points": !isNaN(parseInt(points)) ?
-                            parseInt(points) :
+                        "points": showPoints ?
+                            (!isNaN(parseInt(points)) ?
+                                parseInt(points) :
+                                0
+                            ) :
                             0,
                         "dueAt": isThereADueDate ?
                             datePicker.getDate() :
@@ -253,8 +261,11 @@
                             title :
                             "Untitled Assignment",
                         "description": JSON.stringify(description),
-                        "points": !isNaN(parseInt(points)) ?
-                            parseInt(points) :
+                        "points": showPoints ?
+                            (!isNaN(parseInt(points)) ?
+                                parseInt(points) :
+                                0
+                            ) :
                             0,
                         "dueAt": isThereADueDate ?
                             datePicker.getDate() :
@@ -318,8 +329,11 @@
                             title :
                             "Untitled Assignment",
                         "description": JSON.stringify(description),
-                        "points": !isNaN(parseInt(points)) ?
-                            parseInt(points) :
+                        "points": showPoints ?
+                            (!isNaN(parseInt(points)) ?
+                                parseInt(points) :
+                                0
+                            ) :
                             0,
                         "dueAt": isThereADueDate ?
                             datePicker.getDate() :
@@ -433,6 +447,7 @@
         <Noscript />
         <div>
             <input type="text" class="reasonable-title-size" placeholder="Title" bind:value={title}>
+            {#if !isThereADueDate}
             <div class="combo-select">
                 <button class="left {
                     !isThereADueDate ? "selected" : ""
@@ -449,15 +464,52 @@
                     Select due date
                 </button>
             </div>
-            <div class="eh-datepicker-container {
+            {/if}
+            <div class="flex {
                 isThereADueDate ? "" : "hide"
             }">
-            <input type="text" name="due-date" bind:this={datePickerInput} placeholder="Due date">
+                <div class="eh-datepicker-container">
+                    <input type="text" name="due-date" bind:this={datePickerInput} placeholder="Due date">
+                </div>
+                <button class="alt" onclick={
+                    () => isThereADueDate = false
+                }>
+                    <IconCloseXMark></IconCloseXMark>
+                    Remove due date
+                </button>
             </div>
-            <div class="input-thingy-container" style="margin-top: 1rem;">
-                <input type="text" class="input-thingy" placeholder="100" bind:value={points} oninput={() => unsavedChanges = true}>
-                <span class="input-thingy-sameline-label">points</span>
+            {#if !showPoints}
+            <div class="combo-select">
+                <button class="left {
+                    !showPoints ? "selected" : ""
+                }" onclick={() => showPoints = false}>
+
+                    <IconCheckmark class="combo-selected-icon" />
+                    Ungraded
+                </button>
+                <button class="right {
+                    showPoints ? "selected" : ""
+                }" onclick={() => showPoints = true}>
+
+                    <IconCheckmark class="combo-selected-icon" />
+                    Select points
+                </button>
             </div>
+            {/if}
+            {#if showPoints}
+            <div class="flex">
+                <div class="input-thingy-container">
+                    <input type="text" class="input-thingy" placeholder="100" bind:value={points} oninput={() => unsavedChanges = true}>
+                    <span class="input-thingy-sameline-label">points</span>
+                </div>
+                <button class="alt" onclick={
+                    () => showPoints = false
+                }>
+                    <IconCloseXMark></IconCloseXMark>
+                    Make it ungraded
+                </button>
+            </div>
+            {/if}
             <ProseMirrorEditor placeholder="Description" bind:value={description} bind:this={descriptionProseMirrorEditor} oninputcallback={() => unsavedChanges = true}></ProseMirrorEditor>
             <div style="display: flex; gap: 1rem; flex-direction: row; justify-items: flex-end; justify-content: flex-end;">
                 <a href="/classes/c/{ data.classId }/{
@@ -481,13 +533,13 @@
                     {/if}
                 </button>
             </div>
-            <p style="white-space: pre-wrap;">
-            {JSON.stringify(
-                data.classData,
-                null,
-                4
-            )}
-            </p>
+            <!-- <p style="white-space: pre-wrap;"> -->
+            <!-- {JSON.stringify( -->
+            <!--     data.classData, -->
+            <!--     null, -->
+            <!--     4 -->
+            <!-- )} -->
+            <!-- </p> -->
         </div>
             {#if showExitConfirmationModal}
             <div class="modal" transition:fade={{ duration: 200 }}>
