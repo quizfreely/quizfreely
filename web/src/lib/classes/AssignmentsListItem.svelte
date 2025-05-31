@@ -5,7 +5,7 @@
 <style>
     .container-thing {
         padding: 0px;
-        background-color: var(--bg2);
+        background-color: var(--bg-2);
         border-radius: 0.8rem;
     }
     .container-thing-button,
@@ -15,19 +15,19 @@
         justify-content: space-between;
         align-items: center;
         text-align: start;
-        background-color: var(--bg2);
-        color: var(--fg1);
+        background-color: var(--bg-2);
+        color: var(--fg-1);
         border-radius: 0.8rem;
         padding: 1rem;
         font-weight: normal;
     }
     .container-thing-button:hover,
     button.container-thing-button:hover {
-        background-color: var(--bg3);
+        background-color: var(--bg-3);
     }
     .container-thing-button:focus-visible,
     button.container-thing-button:focus-visible {
-        background-color: var(--bg3);
+        background-color: var(--bg-3);
     }
     .container-thing-inside {
         padding: 1rem;

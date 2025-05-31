@@ -56,7 +56,7 @@
     box-sizing: border-box;
     text-align: left;
     text-decoration: none;
-    color: var(--fg1);
+    color: var(--fg-1);
     outline: none;
     padding: 0.4rem 0.8rem;
     font-size: 1rem;
