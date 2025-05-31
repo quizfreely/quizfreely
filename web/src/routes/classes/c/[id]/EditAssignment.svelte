@@ -351,10 +351,10 @@
     border-radius: 0.8rem;
 }
 .class-link {
-    color: var(--fg1);
+    color: var(--fg-1);
 }
 .class-link:hover {
-    color: var(--fg0);
+    color: var(--fg-0);
 }
 .flexbox-to-the-end {
     display: flex;

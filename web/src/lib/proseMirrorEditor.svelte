@@ -122,14 +122,14 @@
     .container {
         overflow: hidden;
         margin-top: 0.4rem;
-        background-color: var(--bg1);
+        background-color: var(--bg-1);
         border-radius: 0.8rem;
     }
     :global {
         .ProseMirror {
             margin-top: 0px;
             border-radius: 0.8rem;
-            border: 0.2rem solid var(--bg4);
+            border: 0.2rem solid var(--border);
             padding: 0.8rem;
             min-height: 4rem;
             white-space: pre-wrap;
@@ -138,7 +138,7 @@
         }
         .ProseMirror .placeholder {
           position: absolute;
-          color: var(--fg0);
+          color: var(--fg-0);
           pointer-events: none;
           user-select: none;
         }
@@ -152,7 +152,7 @@
         .editor-toolbar-button-active,
         button.editor-toolbar-button-active {
             color: var(--main);
-            background-color: var(--bg3);
+            background-color: var(--bg-3);
         }
     }
 </style>

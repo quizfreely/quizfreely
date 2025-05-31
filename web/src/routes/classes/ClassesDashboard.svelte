@@ -15,10 +15,10 @@
     border-radius: 0.8rem;
 }
 .class-link {
-    color: var(--fg1);
+    color: var(--fg-1);
 }
 .class-link:hover {
-    color: var(--fg0);
+    color: var(--fg-0);
 }
 .split-style-container-thing {
     display: grid;
@@ -34,7 +34,7 @@
     padding-bottom: 1rem;
     padding-top: 1rem;
     padding-right: 4rem;
-    border-right: 0.2rem solid var(--bg4);
+    border-right: 0.2rem solid var(--border);
 }
 .split-style-container-thing .right-div {
     justify-self: start;

@@ -233,16 +233,16 @@ and web/src/routes/studysets/[id]/settings/+page.svelte
     }
     .settings-menu-link {
         margin-top: 0px;
-        color: var(--fg1);
+        color: var(--fg-1);
         padding: 0.4rem 0.8rem;
         border-radius: 0.8rem;
     }
     .settings-menu-link:hover {
-        background-color: var(--bg3);
+        background-color: var(--bg-3);
     }
     .settings-menu-link.current {
         color: var(--main);
-        background-color: var(--bg3);
+        background-color: var(--bg-3);
     }
     .settings-menu-link.current:hover {
         color: var(--main-alt);

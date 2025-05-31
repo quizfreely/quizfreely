@@ -17,10 +17,10 @@
     border-radius: 0.8rem;
 }
 .class-link {
-    color: var(--fg1);
+    color: var(--fg-1);
 }
 .class-link:hover {
-    color: var(--fg0);
+    color: var(--fg-0);
 }
 /* from web/src/routes/settings/+layout.svelte */
     .layout-container {
@@ -31,16 +31,16 @@
     }
     .layout-menu-link {
         margin-top: 0px;
-        color: var(--fg1);
+        color: var(--fg-1);
         padding: 0.4rem 0.8rem;
         border-radius: 0.8rem;
     }
     .layout-menu-link:hover {
-        background-color: var(--bg3);
+        background-color: var(--bg-3);
     }
     .layout-menu-link.current {
         color: var(--main);
-        background-color: var(--bg3);
+        background-color: var(--bg-3);
     }
     .layout-menu-link.current:hover {
         color: var(--main-alt);
