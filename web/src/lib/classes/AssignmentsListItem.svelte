@@ -33,6 +33,14 @@
         padding: 1rem;
         margin-top: 0px;
     }
+    :global {
+        .description-container {
+            white-space: pre-wrap;
+        }
+        .description-container p:empty::before {
+            content: "\00a0"; /* nbsp, non-breaking space */
+        }
+    }
 </style>
 <div class="container-thing">
     <button class="container-thing-button no-clickable-effect" onclick={() => open = !open}>
@@ -43,7 +51,7 @@
     </button>
     {#if open}
     <div class="container-thing-inside">
-        {#if descriptionSafeHtml}<div>{@html descriptionSafeHtml}</div>{/if}
+        {#if descriptionSafeHtml}<div class="description-container no-child-margin-top">{@html descriptionSafeHtml}</div>{/if}
         <div class="flex">
             {#if amIATeacher}
                 <a href={trustedEditHref} class="button alt">
