@@ -8,7 +8,6 @@
     import { cancelNprogressTimeout } from "$lib/stores/nprogressTimeout.js";
     import IconBackArrow from "$lib/icons/BackArrow.svelte";
     import IconCheckmark from "$lib/icons/Checkmark.svelte";
-    import IconCloseXMark from "$lib/icons/CloseXMark.svelte";
     import IconClock from "$lib/icons/Clock.svelte";
     import IconTrash from "$lib/icons/Trash.svelte";
     import 'vanillajs-datepicker/css/datepicker.css';
@@ -22,7 +21,6 @@
     let showExitConfirmationModal = $state(false);
 
     let isThereADueDate = $state(true);
-    let showPoints = $state(true);
     let datePickerInput;
     let datePicker;
     onMount(async function () {
@@ -114,15 +112,10 @@
                     }`,
                     variables: {
                         "classId": data.classId,
-                        "title": title?.length > 0 ?
-                            title :
-                            "Untitled Assignment",
+                        "title": title ?? "Untitled Assignment",
                         "description": JSON.stringify(description),
-                        "points": showPoints ?
-                            (!isNaN(parseInt(points)) ?
-                                parseInt(points) :
-                                0
-                            ) :
+                        "points": !isNaN(parseInt(points)) ?
+                            parseInt(points) :
                             0,
                         "dueAt": isThereADueDate ?
                             datePicker.getDate() :
@@ -182,15 +175,10 @@
                     variables: {
                         "id": data.draftId,
                         "classId": data.classId,
-                        "title": title?.length > 0 ?
-                            title :
-                            "Untitled Assignment",
+                        "title": title ?? "Untitled Assignment",
                         "description": JSON.stringify(description),
-                        "points": showPoints ?
-                            (!isNaN(parseInt(points)) ?
-                                parseInt(points) :
-                                0
-                            ) :
+                        "points": !isNaN(parseInt(points)) ?
+                            parseInt(points) :
                             0,
                         "dueAt": isThereADueDate ?
                             datePicker.getDate() :
@@ -257,15 +245,10 @@
 }`,
                     variables: {
                         "classId": data.classId,
-                        "title": title?.length > 0 ?
-                            title :
-                            "Untitled Assignment",
+                        "title": title ?? "Untitled Assignment",
                         "description": JSON.stringify(description),
-                        "points": showPoints ?
-                            (!isNaN(parseInt(points)) ?
-                                parseInt(points) :
-                                0
-                            ) :
+                        "points": !isNaN(parseInt(points)) ?
+                            parseInt(points) :
                             0,
                         "dueAt": isThereADueDate ?
                             datePicker.getDate() :
@@ -325,15 +308,10 @@
                     variables: {
                         "id": data.assignmentId,
                         "classId": data.classId,
-                        "title": title?.length > 0 ?
-                            title :
-                            "Untitled Assignment",
+                        "title": title ?? "Untitled Assignment",
                         "description": JSON.stringify(description),
-                        "points": showPoints ?
-                            (!isNaN(parseInt(points)) ?
-                                parseInt(points) :
-                                0
-                            ) :
+                        "points": !isNaN(parseInt(points)) ?
+                            parseInt(points) :
                             0,
                         "dueAt": isThereADueDate ?
                             datePicker.getDate() :
@@ -427,27 +405,18 @@
 
 <div class="grid page">
     <div class="content">
-        <div class="top-container-split" style="margin-top: 1rem;">
-            <div class="flex">
-                <a data-sveltekit-preload-data="false" href="/classes/c/{ data.classId }/{
-                    data.new || data.draft ?
-                        "classwork" :
-                        `assignments/${data.assignmentId}`
-                }" class="button faint">
-                    <IconBackArrow /> Back
-                </a>
-            </div>
-            <div class="flex" style="margin-top: 0px; justify-items: flex-end; justify-content: flex-end;">
-                {#if data.new || data.draft}
-                    <!-- only show if new or if it's an existing draft, cause how would we save something already posted and being edited as a draft? -->
-                    <button class="alt" style="margin-top: 0px;" onclick={saveDraft}>Save draft</button>
-                {/if}
-            </div>
+        <div class="flex" style="margin-top: 1rem;">
+            <a href="/classes/c/{ data.classId }/{
+                data.new || data.draft ?
+                    "classwork" :
+                    `assignments/${data.assignmentId}`
+            }" class="button faint">
+                <IconBackArrow /> Back
+            </a>
         </div>
         <Noscript />
         <div>
-            <input type="text" class="reasonable-title-size" placeholder="Title" bind:value={title}>
-            {#if !isThereADueDate}
+            <h1 class="h3">{title}</h1>
             <div class="combo-select">
                 <button class="left {
                     !isThereADueDate ? "selected" : ""
@@ -464,55 +433,18 @@
                     Select due date
                 </button>
             </div>
-            {/if}
-            <div class="flex {
+            <div class="eh-datepicker-container {
                 isThereADueDate ? "" : "hide"
             }">
-                <div class="eh-datepicker-container">
-                    <input type="text" name="due-date" bind:this={datePickerInput} placeholder="Due date">
-                </div>
-                <button class="alt" onclick={
-                    () => isThereADueDate = false
-                }>
-                    <IconCloseXMark></IconCloseXMark>
-                    Remove due date
-                </button>
+            <input type="text" name="due-date" bind:this={datePickerInput} placeholder="Due date">
             </div>
-            {#if !showPoints}
-            <div class="combo-select">
-                <button class="left {
-                    !showPoints ? "selected" : ""
-                }" onclick={() => showPoints = false}>
-
-                    <IconCheckmark class="combo-selected-icon" />
-                    Ungraded
-                </button>
-                <button class="right {
-                    showPoints ? "selected" : ""
-                }" onclick={() => showPoints = true}>
-
-                    <IconCheckmark class="combo-selected-icon" />
-                    Select points
-                </button>
+            <div class="input-thingy-container" style="margin-top: 1rem;">
+                <input type="text" class="input-thingy" placeholder="100" bind:value={points} oninput={() => unsavedChanges = true}>
+                <span class="input-thingy-sameline-label">points</span>
             </div>
-            {/if}
-            {#if showPoints}
-            <div class="flex">
-                <div class="input-thingy-container">
-                    <input type="text" class="input-thingy" placeholder="100" bind:value={points} oninput={() => unsavedChanges = true}>
-                    <span class="input-thingy-sameline-label">points</span>
-                </div>
-                <button class="alt" onclick={
-                    () => showPoints = false
-                }>
-                    <IconCloseXMark></IconCloseXMark>
-                    Make it ungraded
-                </button>
-            </div>
-            {/if}
             <ProseMirrorEditor placeholder="Description" bind:value={description} bind:this={descriptionProseMirrorEditor} oninputcallback={() => unsavedChanges = true}></ProseMirrorEditor>
             <div style="display: flex; gap: 1rem; flex-direction: row; justify-items: flex-end; justify-content: flex-end;">
-                <a data-sveltekit-preload-data="false" href="/classes/c/{ data.classId }/{
+                <a href="/classes/c/{ data.classId }/{
                     data.new || data.draft ?
                         "classwork" :
                         `assignments/${data.assignmentId}`
