@@ -29,6 +29,9 @@
     .announcement p {
         margin-top: 0px;
     }
+    .announcement p:empty::before {
+        content: "\00a0"; /* nbsp, non-breaking space */
+    }
 }
 </style>
 <svelte:head>
@@ -85,7 +88,9 @@
         {#if announcement.safeRenderedHtml}
         <div class="box announcement">
             <p>{announcement.user.displayName} · {announcement.renderedTimestamp}</p>
+            <div style="white-space: pre-wrap;">
             {@html announcement.safeRenderedHtml}
+            </div>
         </div>
         {/if}
     {/each}
