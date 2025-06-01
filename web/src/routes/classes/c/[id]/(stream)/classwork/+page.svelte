@@ -8,6 +8,9 @@
     let { data } = $props();
     let newAnnouncementContent = $state({});
     let announcementProseMirrorEditor;
+    let amIATeacher = data?.classData?.classById?.teachers?.some(
+        teacher => data?.authedUser?.id == teacher?.id
+    );
 </script>
 <style>
 .class-box {
