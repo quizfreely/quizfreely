@@ -5,6 +5,11 @@
     let options = $state({
         view: 'timeGridWeek',
         events: [
+            (() => {
+                if (data?.classData?.allAssignmentsAsStudent?.length > 0) {
+                    let eventsArray = [];
+                }
+            })
         ],
         headerToolbar: {
             start: 'prev,next today',

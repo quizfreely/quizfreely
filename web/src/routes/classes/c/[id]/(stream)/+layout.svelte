@@ -117,10 +117,10 @@
                     <!-- </a> -->
                     <!-- {/if} -->
                 </div>
-                {#if !amIATeacher}
-                <div class="box">
-                </div>
-                {/if}
+                <!-- {#if !amIATeacher} -->
+                <!-- <div class="box"> -->
+                <!-- </div> -->
+                <!-- {/if} -->
             </div>
             <div style="margin-top:0px" class="container-main-content">
                 {#if amIATeacher}
