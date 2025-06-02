@@ -18,42 +18,14 @@ export async function load({ locals, cookies, params }) {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                query: `query assignmentEditPage($classId: ID!, $assignmentId: ID!) {
-                    classById(id: $classId) {
-                        id
-                        name
-                        course {
-                            id
-                            name
-                        }
-                        teachers {
-                            id
-                            displayName
-                            username
-                            oauthGoogleEmail
-                        }
-                        students {
-                            id
-                            displayName
-                            username
-                            oauthGoogleEmail
-                        }
-                        color
-                        userSettings {
-                            color
-                        }
-                    }
-                    assignmentById(id: $assignmentId) {
-                        title
-                        dueAt
-                        points
-                        descriptionProseMirrorJson
-                    }
-                }`,
-                variables: {
-                    "classId": params.id,
-                    "assignmentId": params.assignmentid
-                }
+                query: `{
+    allAssignmentsAsStudent {
+        id
+        classId
+        title
+        dueAt
+    }
+}`,
             })
         })
         try {
