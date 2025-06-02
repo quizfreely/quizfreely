@@ -44,13 +44,13 @@
     {#if data?.classData?.classById?.assignmentDrafts?.length > 0}
     Drafts <span class="fg0">(not visible to students)</span>
     {#each data?.classData?.classById?.assignmentDrafts as draft}
-        <AssignmentsListItem title={draft.title} renderedDueDate={draft.renderedDueDate} amIATeacher hideTeacherViewButton="true" trustedEditHref="/classes/c/{ data.classId }/edit-assignment-draft/{ draft.id }" descriptionSafeHtml={draft.safeRenderedHtml}></AssignmentsListItem>
+        <AssignmentsListItem title={draft.title} renderedDueDate={draft.renderedDueDate} {amIATeacher} hideViewButton="true" trustedEditHref="/classes/c/{ data.classId }/edit-assignment-draft/{ draft.id }" descriptionSafeHtml={draft.safeRenderedHtml}></AssignmentsListItem>
     {/each}
     {/if}
     {#if data?.classData?.classById?.assignments?.length > 0}
     <p>Assignments</p>
     {#each data?.classData?.classById?.assignments as assignment}
-        <AssignmentsListItem title={assignment.title} renderedDueDate={assignment.renderedDueDate} amIATeacher trustedViewHref="/classes/c/{ data.classId }/assignments/{ assignment.id }" trustedEditHref="/classes/c/{ data.classId }/edit-assignment/{ assignment.id }" descriptionSafeHtml={assignment.safeRenderedHtml}></AssignmentsListItem>
+        <AssignmentsListItem title={assignment.title} renderedDueDate={assignment.renderedDueDate} {amIATeacher} trustedViewHref="/classes/c/{ data.classId }/assignments/{ assignment.id }" trustedEditHref="/classes/c/{ data.classId }/edit-assignment/{ assignment.id }" descriptionSafeHtml={assignment.safeRenderedHtml}></AssignmentsListItem>
     {/each}
     {/if}
     <!-- <p style="white-space: pre-wrap;"> -->
