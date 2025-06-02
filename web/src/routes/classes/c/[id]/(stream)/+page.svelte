@@ -1,4 +1,5 @@
 <script>
+    import AssignmentsListItem from "$lib/classes/AssignmentsListItem.svelte";
     import Noscript from "$lib/components/Noscript.svelte";
     // import { onMount } from "svelte";
     import { invalidateAll } from '$app/navigation';
@@ -7,6 +8,9 @@
     let { data } = $props();
     let newAnnouncementContent = $state({});
     let announcementProseMirrorEditor;
+    let amIATeacher = data?.classData?.classById?.teachers?.some(
+        teacher => data?.authedUser?.id == teacher?.id
+    );
 </script>
 <style>
 .class-box {
@@ -84,14 +88,18 @@
             });
         }}>Post</button>
     </div>
-    {#each data?.classData?.classById?.announcements as announcement}
-        {#if announcement.safeRenderedHtml}
-        <div class="box announcement">
-            <p>{announcement.user.displayName} · {announcement.renderedTimestamp}</p>
-            <div style="white-space: pre-wrap;">
-            {@html announcement.safeRenderedHtml}
+    {#each data?.streamData as item}
+        {#if item.type == "announcement"}
+            {#if item.safeRenderedHtml}
+            <div class="box announcement">
+                <p>{item.user.displayName} · {item.renderedTimestamp}</p>
+                <div style="white-space: pre-wrap;">
+                {@html item.safeRenderedHtml}
+                </div>
             </div>
-        </div>
+            {/if}
+        {:else if item.type == "assignment"}
+        <AssignmentsListItem title={item.title} renderedDueDate={item.renderedDueDate} {amIATeacher} trustedViewHref="/classes/c/{ data.classId }/assignments/{ item.id }" trustedEditHref="/classes/c/{ data.classId }/edit-assignment/{ item.id }" descriptionSafeHtml={item.safeRenderedHtml}></AssignmentsListItem>
         {/if}
     {/each}
     <!-- <p style="white-space: pre-wrap;"> -->

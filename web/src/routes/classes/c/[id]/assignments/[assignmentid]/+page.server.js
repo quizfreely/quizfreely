@@ -1,7 +1,22 @@
 import fetchAuthData from "$lib/fetchAuthData.server";
 import { env } from '$env/dynamic/private';
+import sanitizeHtml from "sanitize-html";
+import { JSDOM } from "jsdom";
+import { fancyTimestamp } from "$lib/fancyTimestamp.js";
 
+const sanitizeHtmlOptions = {
+    allowedTags: [
+        "p", "strong", "em", "u", "s", "sup", "sub"
+    ],
+    disallowedTagsMode: "escape",
+    allowedAttributes: {},
+    parseStyleAttributes: false
+};
 export async function load({ cookies, params }) {
+    const { window } = new JSDOM("<div></div>");
+    const document = window.document;
+    const { DOMSerializer, Node } = await import("prosemirror-model");
+    const { schema } = await import("$lib/proseMirrorSchema.js");
     let result = {
         ...await fetchAuthData({ cookies }),
         streamPage: "people",
@@ -60,6 +75,25 @@ export async function load({ cookies, params }) {
                 let responseJson = await response.json();
                 if (responseJson?.data) {
                     result.classData = responseJson.data;
+                    try {
+                        const contentJson = JSON.parse(
+                            result.classData.assignmentById.descriptionProseMirrorJson
+                        )
+                        let div = document.createElement("div");
+                        div.appendChild(DOMSerializer.fromSchema(schema).serializeFragment(
+                            Node.fromJSON(schema, contentJson),
+                            { document }
+                        ));
+                        result.classData.assignmentById.safeRenderedHtml = sanitizeHtml(
+                            div.innerHTML,
+                            sanitizeHtmlOptions
+                        );
+                    } catch (error) {
+                        console.error(
+                            "Error rendering assignment prosemirror description:",
+                            error
+                        );
+                    }
                     return result;
                 } else {
                     console.error(responseJson);

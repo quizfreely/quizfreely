@@ -65,6 +65,14 @@ export async function load({ cookies, params }) {
                                 createdAt
                                 updatedAt
                             }
+                            assignments {
+                                id
+                                title
+                                dueAt
+                                descriptionProseMirrorJson
+                                createdAt
+                                updatedAt
+                            }
                         }
                     }`,
                     variables: {
@@ -76,13 +84,13 @@ export async function load({ cookies, params }) {
                 let responseJson = await response.json();
                 if (responseJson?.data) {
                     result.classData = responseJson.data;
-                    result.streamData = [];
                     if (result.classData?.classById?.announcements) {
                         for (
                             let index = 0;
                             index < result.classData.classById.announcements.length;
                             index++
                         ) {
+                            result.classData.classById.announcements[index].type = "announcement";
                             try {
                                 const contentJson = JSON.parse(
                                     result.classData.classById.announcements[
@@ -127,6 +135,55 @@ export async function load({ cookies, params }) {
                             }
                         }
                     }
+                    if (result.classData?.classById?.assignments) {
+                        for (
+                            let index = 0;
+                            index < result.classData.classById.assignments.length;
+                            index++
+                        ) {
+                            result.classData.classById.assignments[index].type = "assignment";
+                            if (result.classData.classById.assignments[index]?.dueAt) {
+                                result.classData.classById.assignments[
+                                    index
+                                ].renderedDueDate = fancyTimestamp.format(
+                                    result.classData.classById.assignments[index]?.dueAt
+                                );
+                            }
+                            try {
+                                const contentJson = JSON.parse(
+                                    result.classData.classById.assignments[
+                                        index
+                                    ].descriptionProseMirrorJson
+                                )
+                                let div = document.createElement("div");
+                                div.appendChild(DOMSerializer.fromSchema(schema).serializeFragment(
+                                    Node.fromJSON(schema, contentJson),
+                                    { document }
+                                ));
+                                result.classData.classById.assignments[
+                                    index
+                                ].safeRenderedHtml = sanitizeHtml(
+                                    div.innerHTML,
+                                    sanitizeHtmlOptions
+                                );
+                            } catch (error) {
+                                console.error(
+                                    "Error rendering assignment description prosemirror:",
+                                    error
+                                );
+                            }
+                        }
+                    }
+                    result.streamData = [];
+                    if (result?.classData?.classById?.announcements) {
+                        result.streamData = result.classData.classById.announcements;
+                    }
+                    if (result?.classData?.classById?.assignments) {
+                        result.streamData = result.streamData.concat(result.classData.classById.assignments);
+                    }
+                    result.streamData.sort(function (a, b) {
+                        return Date.parse(b.createdAt) - Date.parse(a.createdAt);
+                    });
                     return result;
                 } else {
                     console.error(responseJson);
