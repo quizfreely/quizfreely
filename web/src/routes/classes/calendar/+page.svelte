@@ -8,6 +8,14 @@
             (() => {
                 if (data?.classData?.allAssignmentsAsStudent?.length > 0) {
                     let eventsArray = [];
+                    data.classData.allAssignmentsAsStudent.forEach(function (assignment) {
+                        if (assignment.due_at) {
+                            eventsArray.push[{
+                                title: assignment.title,
+                                start: new Date(assignment.due_at)
+                            }]
+                        }
+                    })
                 }
             })
         ],
