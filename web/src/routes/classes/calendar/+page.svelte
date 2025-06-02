@@ -5,7 +5,6 @@
     let options = $state({
         view: 'timeGridWeek',
         events: [
-            data?.classData?.
         ],
         headerToolbar: {
             start: 'prev,next today',
