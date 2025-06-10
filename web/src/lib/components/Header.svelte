@@ -46,9 +46,9 @@
             <div class={ page.data?.header?.activePage == "explore" ? "current" : "" }>
               <a href="/explore" class="clickable-effect">Explore</a>
             </div>
-            <div class={ page.data?.header?.activePage == "classes" ? "current" : "" }>
+            <!--<div class={ page.data?.header?.activePage == "classes" ? "current" : "" }>
               <a href="/classes" class="clickable-effect">Classes</a>
-            </div>
+            </div>-->
             <div class={ page.data?.header?.activePage == "settings" ? "current" : "" }>
               <a href="/settings" class="clickable-effect">Settings</a>
             </div>
