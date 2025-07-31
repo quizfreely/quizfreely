@@ -66,7 +66,7 @@
 </style>
 
 <!-- notice class is AFTER `...div` because we're overwriting class from spread props -->
-<div {...div} class={["auto-resize-textarea-div", div.class]} data-autoresizetextvalue={value}>
+<div {...div} class={["auto-resize-textarea-div", div?.class ?? ""]} data-autoresizetextvalue={value}>
     <textarea bind:value={value} {...textarea} ></textarea>
 </div>
 
