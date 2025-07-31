@@ -7,7 +7,7 @@
         and attributes under div are applied to the div container
         
         for example
-        <AutoResizeTextarea textarea={ placeholder: "abc" } />
+        <AutoResizeTextarea textarea={{ placeholder: "abc" }} />
         would give us
         <div>
             <textarea placeholder="abc"></textarea>
