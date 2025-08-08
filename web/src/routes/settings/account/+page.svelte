@@ -14,24 +14,36 @@
                 document.getElementById("display-name-view-div").classList.add("hide");
             })
             document.getElementById("display-name-edit-save-button").addEventListener("click", function () {
-                fetch("/api/v0/auth/user", {
-                    method: "PATCH",
-                    credentials: "same-origin",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        display_name: document.getElementById("display-name-edit").value
-                    })
-                }).then(function (rawResponse) {
-                    rawResponse.json().then(function (response) {
-                        if (response.data && response.data.user) {
-                            document.getElementById("account-display-name").innerText = response.data.user.display_name;
-                        }
-                        document.getElementById("display-name-view-div").classList.remove("hide");
-                        document.getElementById("display-name-edit-div").classList.add("hide");
-                    })
-                })
+    const displayName = document.getElementById("display-name-edit").value;
+    
+    fetch("/api/graphql", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            query: `
+                mutation UpdateDisplayName($display_name: String) {
+                    updateUser(display_name: $display_name) {
+                        display_name
+                    }
+                }
+            `,
+            variables: {
+                display_name: displayName
+            }
+        })
+    }).then(response => response.json())
+    .then(result => {
+        if (result.errors) {
+            console.error(result.errors);
+        } else if (result.data?.updateUser) {
+            document.getElementById("account-display-name").innerText = result.data.updateUser.display_name;
+        }
+        document.getElementById("display-name-view-div").classList.remove("hide");
+        document.getElementById("display-name-edit-div").classList.add("hide");
+    });
             })
             document.getElementById("display-name-edit-cancel-button").addEventListener("click", function () {
                 document.getElementById("display-name-view-div").classList.remove("hide");

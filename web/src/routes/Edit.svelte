@@ -85,26 +85,48 @@
     } else if (data.studysetId) {
     /* data.new is false (updating an existing studyset, not creating one) */
     if (data.authed) {
-        fetch("/api/v0/studysets/" + data.studysetId, {
-          method: "GET",
-          credentials: "same-origin"
-        }).then(function (rawResponse) {
-          rawResponse.json().then(function (result) {
-              if (result.error) {
-              alert("error, could not load studyset while trying to edit")
-            } else {
-              document.getElementById("edit-title").value = result.data.studyset.title;
-              addTermsFrom2DArray(result.data.studyset.data.terms);
-              if (result.data.studyset.private) {
-                document.getElementById("edit-private-false").classList.remove("selected");
-                document.getElementById("edit-private-true").classList.add("selected");
-              } else {
-                document.getElementById("edit-private-false").classList.add("selected");
-                document.getElementById("edit-private-true").classList.remove("selected");
-              }
+        fetch("/api/graphql", {
+    method: "POST",
+    headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+    },
+    credentials: "same-origin",
+    body: JSON.stringify({
+        query: `
+            query GetStudyset($id: ID!) {
+                studyset(id: $id) {
+                    title
+                    private
+                    data {
+                        terms
+                    }
+                }
             }
-          })
-        })
+        `,
+        variables: {
+            id: data.studysetId
+        }
+    })
+})
+.then(response => response.json())
+.then(result => {
+    if (result.errors) {
+        alert("Error loading studyset");
+        console.error(result.errors);
+    } else {
+        const studyset = result.data.studyset;
+        document.getElementById("edit-title").value = studyset.title;
+        addTermsFrom2DArray(studyset.data.terms);
+        if (studyset.private) {
+            document.getElementById("edit-private-false").classList.remove("selected");
+            document.getElementById("edit-private-true").classList.add("selected");
+        } else {
+            document.getElementById("edit-private-false").classList.add("selected");
+            document.getElementById("edit-private-true").classList.remove("selected");
+        }
+    }
+});
       }
     }
     if (data.local && !data.new) {
@@ -208,30 +230,43 @@
       if (!updateCloudStudysetCooldown) {
           updateCloudStudysetCooldown = true;
           setTimeout(function () { updateCloudStudysetCooldown = false}, 2000)
-                fetch("/api/v0/studysets/" + data.studysetId, {
-            method: "PUT",
-            credentials: "same-origin",
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-              studyset: {
+                fetch("/api/graphql", {
+    method: "POST",
+    headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+    },
+    credentials: "same-origin",
+    body: JSON.stringify({
+        query: `
+            mutation UpdateStudyset($id: ID!, $studyset: StudysetInput) {
+                updateStudyset(id: $id, studyset: $studyset) {
+                    id
+                    title
+                }
+            }
+        `,
+        variables: {
+            id: data.studysetId,
+            studyset: {
                 title: document.getElementById("edit-title").value,
                 private: document.getElementById("edit-private-true").classList.contains("selected"),
                 data: {
-                  terms: termsTo2DArray()
+                    terms: termsTo2DArray()
                 }
-              }
-            })
-          }).then(function (rawResponse) {
-            rawResponse.json().then(function (result) {
-              if (result.error) {
-                alert("error while trying to update studyset")
-              } else {
-                goto("/studysets/" + result.data.studyset.id)
-              }
-            })
-          })
+            }
+        }
+    })
+})
+.then(response => response.json())
+.then(result => {
+    if (result.errors) {
+        alert("Error updating studyset");
+        console.error(result.errors);
+    } else if (result.data?.updateStudyset) {
+        goto("/studysets/" + result.data.updateStudyset.id);
+    }
+});
       }
     }
     var createCloudStudysetCooldown = false;
@@ -239,38 +274,55 @@
               if (createCloudStudysetCooldown == false) {
           createCloudStudysetCooldown = true;
           setTimeout(function () { createCloudStudysetCooldown = false}, 2000)
-          fetch("/api/v0/studysets", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-              studyset: {
-                title: document.getElementById("edit-title").value,
-                private: document.getElementById("edit-private-true").classList.contains("selected"),
-                data: {
-                  terms: termsTo2DArray()
-                }
-              }
-            })
-          }).then(function (rawRes) {
-            rawRes.json().then(function (result) {
-              if (result.data && result.data.studyset) {
-                goto("/studysets/" + result.data.studyset.id)
-              } else if (result.error) {
-                var errorModal = document.createElement("div");
-                errorModal.classList.add("modal")
-                errorModal.id = "create-error-modal"
-                var errorModalContent = document.createElement("div");
-                errorModalContent.classList.add("content");
-              } else {
-                alert("big error")
-              }
-            })
-          }).catch(function (error) {
-            alert("fetch error?");
-            console.error(error);
-          })
+          const title = document.getElementById("edit-title").value;
+const isPrivate = document.getElementById("edit-private-true").classList.contains("selected");
+const terms = termsTo2DArray();
+
+const query = `
+    mutation CreateStudyset($studyset: StudysetInput!) {
+        createStudyset(studyset: $studyset) {
+            id
+            title
+        }
+    }
+`;
+
+const variables = {
+    studyset: {
+        title,
+        private: isPrivate,
+        data: {
+            terms
+        }
+    }
+};
+
+fetch("/api/graphql", {
+    method: "POST",
+    headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+    },
+    body: JSON.stringify({
+        query,
+        variables
+    })
+})
+.then(response => response.json())
+.then(result => {
+    if (result.errors) {
+        alert("Error creating studyset");
+        console.error(result.errors);
+    } else if (result.data?.createStudyset) {
+        goto("/studysets/" + result.data.createStudyset.id);
+    } else {
+        alert("Unexpected response when creating studyset");
+    }
+})
+.catch(error => {
+    alert("Network error");
+    console.error(error);
+});
         }
     }
     function saveButtonOrCreateButton() {
