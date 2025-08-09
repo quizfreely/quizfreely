@@ -123,27 +123,36 @@
           }
         })
       } else {
-          fetch("/api/v0/studysets/" + data.studyset.id, {
-            method: "DELETE",
-            credentials: "same-origin"
-          }).then(function (rawResponse) {
-            rawResponse.json().then(function (response) {
-              if (response.error) {
-                console.log(response)
-                alert(response.error)
-              } else {
-                goto("/dashboard");
+        fetch("/api/graphql", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "same-origin",
+          body: JSON.stringify({
+            query: `
+              mutation DeleteStudyset($id: ID!) {
+                deleteStudyset(id: $id)
               }
-            }).catch(function (error) {
-              console.error(error);
-              alert("json parsing fetch error");
-              /* work in progress error msgs */
-            })
-          }).catch(function (error) {
-            console.error(error);
-            alert("fetch error")
-            /* work in progress error messages? */
+            `,
+            variables: {
+              id: data.studyset.id
+            }
           })
+        })
+        .then(response => response.json())
+        .then(response => {
+          if (response.errors) {
+            console.error(response.errors);
+            alert("GraphQL error: " + response.errors[0].message);
+          } else {
+            goto("/dashboard");
+          }
+        })
+        .catch(error => {
+          console.error(error);
+          alert("Network error while deleting studyset");
+        });
       }
     }
 </script>
