@@ -82,7 +82,6 @@ export async function load({ cookies, locals }) {
     try {
     let apiRes = await rawApiRes.json();
         if (apiRes?.data?.authed) {
-          if (apiRes?.data?.myStudysets) {
             return {
               authed: apiRes.data.authed,
               authedUser: apiRes.data.authedUser,
@@ -92,7 +91,6 @@ export async function load({ cookies, locals }) {
                 "settingsdatetimeformathours"
               )
             }
-          }
         } else {
           return {
             authed: false,

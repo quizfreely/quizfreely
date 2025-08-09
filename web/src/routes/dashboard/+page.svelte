@@ -18,7 +18,9 @@
       if (data.authed) {
         for (var i = 0; i < document.getElementById("studyset-list").children.length; i++) {
           var timestampElement = document.getElementById("studyset-list").children[i].children[1]
-          timestampElement.innerText = fancyTimestamp.format(timestampElement.dataset.timestamp);
+          if (timestampElement) {
+            timestampElement.innerText = fancyTimestamp.format(timestampElement.dataset.timestamp);
+          }
         }
       }
 
