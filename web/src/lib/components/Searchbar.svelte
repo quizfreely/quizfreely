@@ -5,7 +5,7 @@
     function onSearchbarInput(event) {
         if (event.target.value.length > 0 && event.target.value.length < 50) {
             fetch(
-                "/api/v0/public/search/queries?q=" + encodeURIComponent(event.target.value)
+                "/api/v0/search-queries?q=" + encodeURIComponent(event.target.value)
             ).then(function (response) {
                 response.json().then(function (responseJson) {
                     if (responseJson.data && responseJson.data.queries && responseJson.data.queries.length > 0) {
