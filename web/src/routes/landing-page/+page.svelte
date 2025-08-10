@@ -13,7 +13,18 @@
 <div class="grid intro" style="margin-bottom: 0px; padding-bottom: 0px; border:none">
     <div class="logotype">
       <div class="logo">
-        <svg xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><defs><linearGradient id="a"><stop style="stop-color:#00b377;stop-opacity:1" offset="0"/><stop style="stop-color:#6fc;stop-opacity:1" offset="1"/></linearGradient><linearGradient id="b"><stop style="stop-color:#7c49f2;stop-opacity:1" offset="0"/><stop style="stop-color:#9466ff;stop-opacity:1" offset="1"/></linearGradient><linearGradient xlink:href="#a" id="d" x1="130" y1="400" x2="385" y2="150" gradientUnits="userSpaceOnUse" gradientTransform="translate(36.902 -20.78)"/><linearGradient xlink:href="#b" id="c" gradientUnits="userSpaceOnUse" gradientTransform="translate(33.36 -551.01)" x1="70" y1="140" x2="375" y2="450"/></defs><path d="M295.74-412.406q6.927 6.745 6.927 16.406 0 9.662-6.927 16.589-6.745 6.744-16.407 6.744H116q-9.661 0-16.588-6.744-6.745-6.927-6.745-16.589 0-9.661 6.745-16.406 6.927-6.927 16.588-6.927h163.333q9.662 0 16.407 6.927zm0 186.666q6.927 6.745 6.927 16.407 0 9.661-6.927 16.588Q288.995-186 279.333-186H116q-9.661 0-16.588-6.745-6.745-6.927-6.745-16.588 0-9.662 6.745-16.407 6.927-6.927 16.588-6.927h163.333q9.662 0 16.407 6.927zM99.412-286.078q-6.745-6.927-6.745-16.589 0-9.661 6.745-16.406Q106.339-326 116-326h280q9.661 0 16.406 6.927 6.927 6.745 6.927 16.406 0 9.662-6.927 16.589-6.745 6.745-16.406 6.745H116q-9.661 0-16.588-6.745zm312.994 153.672q6.927 6.744 6.927 16.406 0 9.661-6.927 16.406-6.745 6.927-16.406 6.927H116q-9.661 0-16.588-6.927-6.745-6.745-6.745-16.406 0-9.662 6.745-16.406 6.927-6.927 16.588-6.927h280q9.661 0 16.406 6.927z" style="font-size:373.333px;font-family:'NotoMono Nerd Font Propo';-inkscape-font-specification:'NotoMono Nerd Font Propo';fill:url(#c);stroke-width:40;paint-order:markers stroke fill" transform="scale(1 -1)"/><path d="M395.792 139.333q8.333 0 14.166 5.834 5.834 5.833 5.834 14.166 0 8.334-5.834 14.167L216.625 366.833q-5.833 5.834-14.167 5.834-8.333 0-14.166-5.834l-21.667-21.666-43.333-43.334-21.667-21.666q-5.417-5.834-5.417-13.75 0-8.125 5.834-13.959 6.041-6.041 14.166-6.041 7.917 0 13.75 5.416l18.125 18.125 36.25 36.25 18.125 18.125 179.167-179.166q5.833-5.834 14.167-5.834z" style="font-size:426.667px;font-family:'NotoMono Nerd Font Propo';-inkscape-font-specification:'NotoMono Nerd Font Propo';fill:url(#d);stroke:#2b2b3d;stroke-width:40;paint-order:markers stroke fill"/></svg>
+        <svg
+           viewBox="0 0 512 512"
+           version="1.1"
+           id="svg1"
+           xml:space="preserve"
+           xmlns="http://www.w3.org/2000/svg"
+           xmlns:svg="http://www.w3.org/2000/svg"><defs
+             id="defs1" /><g
+             id="layer1"><path
+               id="path1"
+               style="fill:var(--main);fill-opacity:1;stroke-width:0.976652"
+               d="M 130.98828,6 C 113.75037,6 68.482,6 68.482,6 c 0,0 0,45.267945 0,62.505859 l 4.22e-4,203.143551 v 203.14356 c 0,11.2315 6.055743,21.68114 15.822266,27.15039 9.766524,5.46926 21.778402,5.37162 31.447262,-0.39063 L 256,417.46289 396.15039,501.55273 c 9.66886,5.76225 21.68074,5.95755 31.44727,0.39063 9.76652,-5.56691 15.91992,-15.91889 15.91992,-27.15039 L 443.518,6 Z M 359.6875,95.041016 c 6.92391,-0.07611 11.74967,3.706695 16.29883,8.292964 6.11307,7.59569 6.77618,18.64249 0.7832,26.88282 L 239.62891,318.7832 c -3.80694,5.26051 -9.73129,8.52106 -16.16211,9.06836 -6.5353,0.55619 -12.87048,-1.89196 -17.40625,-6.42773 l -68.57422,-68.57422 c -8.61052,-8.61052 -8.61053,-22.72933 0,-31.33984 8.61052,-8.61052 22.72932,-8.61052 31.33984,0 L 219.06641,271.75 340.98438,104.13672 c 4.47271,-6.149988 11.58963,-9.326467 18.70312,-9.095704 z" /></g></svg>
       </div>
       <div>
         <p class="h3">Quizfreely</p>
