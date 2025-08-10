@@ -37,7 +37,21 @@ export function handle({ event, resolve }) {
     event.locals.theme = theme;
     return resolve(event, {
         transformPageChunk: function ({ html }) {
-            return html.replace("%theme%", theme);
+            return html.replace(
+                "%theme%", theme
+            ).replace(
+                "%theme%", theme
+            ); /* run `replace` exactly twice,
+            once for %theme% in html's class attribute,
+            and again for %theme% in the css href
+            see web/src/app.html for details
+            
+            we run it a fixed number of times
+            and do not use replaceAll
+            because there might be edge cases
+            where %theme% is literally in rendered html
+            that we don't want to replace,
+            for example documentation might have `%theme%` */
         }
     });
 }
