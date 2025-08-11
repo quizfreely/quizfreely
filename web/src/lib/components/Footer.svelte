@@ -31,7 +31,6 @@
         <div class="flex col compact-gap" style="width:fit-content">
           <a href="https://codeberg.org/quizfreely/quizfreely">Source Code (Codeberg)</a>
           <a href="https://github.com/quizfreely/quizfreely">Source Code (GitHub)</a>
-          <a href="/api-status">API Status</a>
         </div>
       </div>
       <div>
@@ -43,9 +42,9 @@
       </div>
     </div>
     <div style="text-align: start; padding: 0px 2rem">
-      <p>
-        v0.32.1 · <a href="https://codeberg.org/quizfreely/quizfreely/releases">Changelog (on Codeberg)</a> or <a href="https://github.com/quizfreely/quizfreely/releases">on GitHub</a>
-      </p>
+      <!-- <p> -->
+      <!--   v0.32.1 · <a href="https://codeberg.org/quizfreely/quizfreely/releases">Changelog (on Codeberg)</a> or <a href="https://github.com/quizfreely/quizfreely/releases">on GitHub</a> -->
+      <!-- </p> -->
       <p>
         Copyright © 2022-2025 Ehan Ahamed and contributors
         <br />
