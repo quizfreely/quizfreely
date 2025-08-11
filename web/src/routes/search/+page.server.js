@@ -46,24 +46,25 @@ if (searchQuery.length >= 1) {
         authed = apiRes.data.authed;
         authedUser = apiRes.data?.authedUser
       }
-      if (apiRes?.data?.searchStudysets?.length >= 0) {
+      if (apiRes?.data?.searchStudysets?.length >= 0 || apiRes?.data?.searchStudysets === null) {
         return {
           query: searchQuery,
           header: {
             activePage: "explore",
             searchQuery: searchQuery
           },
-          results: apiRes.data.searchStudysets,
+          results: apiRes.data.searchStudysets ?? [],
           authed: authed,
           authedUser: authedUser
         }
       } else {
+        console.log("Error in search +page.server.js, api res: ", apiRes)
         error(500, {
             message: "looks like this is broken, idk why though :("
         })
       }
     } catch (err) {
-      console.error(err);
+      console.error("Error in search +page.server.js: ", err);
       error(500, {
             message: "something went wrong, idk"
         }
