@@ -49,13 +49,21 @@
                 document.getElementById("display-name-view-div").classList.remove("hide");
                 document.getElementById("display-name-edit-div").classList.add("hide");
             })
-            document.getElementById("account-sign-out-button").addEventListener("click", function () {
-                fetch("/api/v0/auth/sign-out", {
-                    method: "POST",
-                    credentials: "same-origin",
-                }).then(function (rawResponse) {
-                    window.location.reload();
-                })
+            document.getElementById("account-sign-out-button").addEventListener("click", async function () {
+                try {
+                    const rawResp = await fetch("/api/v0/auth/sign-out", {
+                        method: "POST",
+                        credentials: "same-origin",
+                    });
+                    const resp = await rawResp.json();
+                    if (resp.error) {
+                        console.log("Failed to sign out, api response: ", resp);
+                    } else {
+                        window.location.reload();
+                    }
+                } catch (err) {
+                    console.error("Error signing out: ", err);
+                }
             })
             document.getElementById("show-delete-account-modal").addEventListener("click", function () {
                 document.getElementById("delete-account-modal").classList.remove("hide");
