@@ -1,6 +1,0 @@
-node_modules
-.env
-.env.example
-.containerignore
-Containerfile
-quizfreely-api.log
