@@ -147,5 +147,5 @@
         }
     }}><IconCheckmark /> Save</button>
     </div>
-    <p class="fg0">You can choose different settings for each studyset inside Review Mode or a Practice Test for that studyset.</p>
+    <!-- <p class="fg0">You can choose different settings for each studyset inside Review Mode or a Practice Test for that studyset.</p> -->
 </div>
