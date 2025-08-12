@@ -1,5 +1,4 @@
 node_modules
-api/quizfreely-api.log
 
 .output
 web/.svelte-kit
