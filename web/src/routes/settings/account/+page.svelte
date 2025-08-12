@@ -81,11 +81,11 @@
                 document.getElementById("delete-account-delete-all-my-studysets-false").classList.remove("selected");
             })
             document.getElementById("delete-account-confirm-button").addEventListener("click", function () {
-                if (data.authedUser.auth_type == "oauth_google" || document.getElementById("delete-account-confirm-password-input").value.length > 0) {
+                if (data.authedUser.auth_type == "OAUTH_GOOGLE" || document.getElementById("delete-account-confirm-password-input").value.length > 0) {
                     var reqBody = {
                         deleteAllMyStudysets: document.getElementById("delete-account-delete-all-my-studysets-true").classList.contains("selected"),
                     };
-                    if (data.authedUser.auth_type != "oauth_google") {
+                    if (data.authedUser.auth_type != "OAUTH_GOOGLE") {
                         reqBody.confirmPassword = document.getElementById("delete-account-confirm-password-input").value
                     };
                     fetch("/api/v0/auth/delete-account", {
@@ -98,7 +98,7 @@
                         response.json().then(function (responseJSON) {
                             if (responseJSON.error) {
                                 console.error(responseJSON.error);
-                                if (data.authedUser.auth_type == "oauth_google") {
+                                if (data.authedUser.auth_type == "OAUTH_GOOGLE") {
                                     alert("API Error, idk why skull emoji")
                                 } else {
                                     alert("API Errored (but nicely), check your password mabye?");
@@ -137,7 +137,7 @@
       <button id="display-name-edit-cancel-button" class="alt">Cancel</button>
     </div>
   </div>
-  {#if data.authedUser.auth_type == "oauth_google"}
+  {#if data.authedUser.auth_type == "OAUTH_GOOGLE"}
   <div id="account-oauth-google-div">
       <p class="fg0">Signed in with Google</p>
       <p>
@@ -189,7 +189,7 @@
       </div>
       <br>
       <p class="fg0">This will delete all data/content in your account. <br>Even if you keep your public studysets, all your account/profile info will be deleted.</p>
-      {#if !(data.authedUser.auth_type == "oauth_google") }
+      {#if !(data.authedUser.auth_type == "OAUTH_GOOGLE") }
           <div><input type="password" placeholder="Enter password to confirm" id="delete-account-confirm-password-input"></div>
       {/if}
       <div class="flex">
