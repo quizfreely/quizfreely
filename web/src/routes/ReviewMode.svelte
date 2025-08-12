@@ -733,6 +733,7 @@
     }
 
     function updateStudysetProgress(progressTermsArray) {
+        const rnDateTimeString = (new Date()).toISOString();
         if (data.local || !(data.authed)) {
         /* if the studyset is local, or if the user isn't signed in,
         we need to save/update progress locally */
@@ -743,7 +744,6 @@
             alert("indexeddb error while getting existing progress to update");
           }
           dbProgressGetReq.onsuccess = function (event) {
-            var rnDateTimeString = (new Date()).toISOString();
             if (dbProgressGetReq.result === undefined) {
               /* no existing progress, so we're adding new progress (not updating existing) */
               var progressTermsArrayWithEverything = [];
@@ -765,7 +765,7 @@
               var dbProgressAddReq = studysetprogressObjStore.add({
                 studyset_id: studysetId,
                 terms: progressTermsArrayWithEverything,
-                updated_at: (new Date()).toISOString()
+                updated_at: rnDateTimeString
               });
             } else {
               /* there is existing progress, so we're updating it */
@@ -800,7 +800,7 @@
               var dbProgressPutReq = studysetprogressObjStore.put({
                 studyset_id: studysetId,
                 terms: progress,
-                updated_at: (new Date()).toISOString()
+                updated_at: rnDateTimeString
               });
             }
           }
@@ -808,6 +808,12 @@
         } else {
     /* the studyset is not local, and the user is signed in
     so we're saving progress under the users account */
+        for (let index = 0; index < progressTermsArray.length; index++) {
+            /* add lastReviewedAt timestamps */
+            if (progressTermsArray[index].lastReviewedAt == null) {
+                progressTermsArray[index].lastReviewedAt = rnDateTimeString
+            }
+        }
         console.log(progressTermsArray)
         fetch("/api/graphql", {
           method: "POST",
