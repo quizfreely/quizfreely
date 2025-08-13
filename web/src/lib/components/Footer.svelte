@@ -31,6 +31,7 @@
         <div class="flex col compact-gap" style="width:fit-content">
           <a href="https://codeberg.org/quizfreely/quizfreely">Source Code (Codeberg)</a>
           <a href="https://github.com/quizfreely/quizfreely">Source Code (GitHub)</a>
+          <a href="https://quizfreely.org/docs">Documentation</a>
         </div>
       </div>
       <div>
