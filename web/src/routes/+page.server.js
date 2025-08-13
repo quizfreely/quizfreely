@@ -9,7 +9,7 @@ export async function load({ cookies, locals }) {
         }
     } else {
         return {
-            ...await landingPageLoad(),
+            ...await landingPageLoad({ cookies }),
             dashboard: false
         }
     }
