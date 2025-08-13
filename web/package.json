@@ -1,7 +1,7 @@
 {
 	"name": "quizfreely-web",
 	"private": true,
-	"version": "0.32.1",
+	"version": "1.0.0",
 	"author": "Ehan Ahamed",
 	"license": "AGPL-3.0-or-later",
 	"type": "module",
