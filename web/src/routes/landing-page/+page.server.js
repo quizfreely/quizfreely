@@ -7,7 +7,7 @@ export async function load({ cookies }) {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "Authorization": authToken != null ?
+      "Authorization": authToken != null && authToken != "" ?
         `Bearer ${authToken}` :
         undefined
     },
@@ -48,14 +48,14 @@ export async function load({ cookies }) {
         }
       }
     } catch (err) {
-      console.error(err);
+      console.error("Error in landing-page/+page.server.js: ", err);
       return {
         featuredRows: false,
       header: { activePage: "home" }
       }
     };
   } catch (err) {
-    console.error(err);
+    console.error("Error in landing-page/+page.server.js: ", err);
     return {
       featuredRows: false,
       header: { activePage: "home" }
