@@ -41,16 +41,16 @@
             <div class={
               (page.data?.header?.activePage == "home") ? "current" : ""
             }>
-              <a href="/home" class="clickable-effect">Home</a>
+              <a href="/home">Home</a>
             </div>
             <div class={ page.data?.header?.activePage == "explore" ? "current" : "" }>
-              <a href="/explore" class="clickable-effect">Explore</a>
+              <a href="/explore">Explore</a>
             </div>
             <!--<div class={ page.data?.header?.activePage == "classes" ? "current" : "" }>
-              <a href="/classes" class="clickable-effect">Classes</a>
+              <a href="/classes">Classes</a>
             </div>-->
             <div class={ page.data?.header?.activePage == "settings" ? "current" : "" }>
-              <a href="/settings" class="clickable-effect">Settings</a>
+              <a href="/settings">Settings</a>
             </div>
         </div>
     </div>
