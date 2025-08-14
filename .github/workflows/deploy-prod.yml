@@ -8,22 +8,29 @@ jobs:
     environment: production
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-go@v5
-      - name: Compile API
-        run: go build -o api-server
+      - name: npm run build
+        run: |
+          cd web
+          npm run build
       - name: Set up SSH
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.PROD_SERVER_NONROOT_SSH_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -H server.quizfreely.org >> ~/.ssh/known_hosts
-      - name: Use SCP to upload api-server executable
-        run: scp api-server quizfreely@server.quizfreely.org:/home/quizfreely/api/api-server
-      - name: SSH into server, update DB, & restart systemd service
+      - name: Rsync build, node_modules, package.json, & package-lock.json
+        run: |
+          rsync -av --delete \
+            --include='node_modules/***' \
+            --include='build/***' \
+            --include='package.json' \
+            --include='package-lock.json' \
+            --exclude="*" \
+            -e "ssh -i ~/.ssh/id_ed25519" \
+            web/ quizfreely@server.quizfreely.org:/home/quizfreely/web/
+      - name: SSH into server & restart systemd service
         run: |
           ssh -i ~/.ssh/id_ed25519 \
             quizfreely@server.quizfreely.org \
             "cd ~/api \
-            sudo systemctl stop quizfreely-api.service \
-            api-server migrate-db \
-            sudo systemctl start quizfreely-api.service"
+            sudo systemctl restart quizfreely-web.service"
