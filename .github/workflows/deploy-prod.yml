@@ -32,5 +32,4 @@ jobs:
         run: |
           ssh -i ~/.ssh/id_ed25519 \
             quizfreely@server.quizfreely.org \
-            "cd ~/api \
-            sudo systemctl restart quizfreely-web.service"
+            "sudo systemctl restart quizfreely-web.service"
