@@ -1,3 +1,4 @@
+name: Push to GitHub
 on:
   workflow_dispatch:
 jobs:
