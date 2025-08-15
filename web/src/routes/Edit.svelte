@@ -27,14 +27,16 @@
     var bypassUnsavedChangesConfirmation = false;
 
     var terms = $state([]);
-    var termId = 0;
-    function addTerm(term, def) {
+    var existingTermIdsToDelete = [];
+    var key = 0;
+    function addTerm(term, def, id) {
       terms.push({
-        id: termId,
+        id: id ?? undefined,
         term: term ?? "",
-        def: def ?? ""
+        def: def ?? "",
+        key: key,
       })
-      termId++;
+      key++;
     }
     function moveTerm(oldIndex, newIndex) {
       if (
@@ -47,8 +49,14 @@
       }
     }
     function deleteTerm(index) {
+      if (terms[index].id != null) {
+        existingTermIdsToDelete.push(
+          terms[index].id
+        );
+      }
       terms.splice(index, 1);
     }
+
     function termsTo2DArray() {
       var arr = [];
       for (var index = 0; index < terms.length; index++) {
@@ -98,8 +106,10 @@
                 studyset(id: $id) {
                     title
                     private
-                    data {
-                        terms
+                    terms {
+                        id
+                        term
+                        def
                     }
                 }
             }
@@ -117,13 +127,21 @@
     } else {
         const studyset = result.data.studyset;
         document.getElementById("edit-title").value = studyset.title;
-        addTermsFrom2DArray(studyset.data.terms);
         if (studyset.private) {
             document.getElementById("edit-private-false").classList.remove("selected");
             document.getElementById("edit-private-true").classList.add("selected");
         } else {
             document.getElementById("edit-private-false").classList.add("selected");
             document.getElementById("edit-private-true").classList.remove("selected");
+        }
+        if (studyset.terms != null) {
+            studyset.terms.forEach((t) => {
+                addTerm(
+                    t.term,
+                    t.def,
+                    t.id
+                )
+            })
         }
     }
 });
@@ -227,103 +245,131 @@
     }
     var updateCloudStudysetCooldown = false;
     function updateCloudStudyset() {
-      if (!updateCloudStudysetCooldown) {
-          updateCloudStudysetCooldown = true;
-          setTimeout(function () { updateCloudStudysetCooldown = false}, 2000)
-                fetch("/api/graphql", {
-    method: "POST",
-    headers: {
-        "Content-Type": "application/json",
-        "Accept": "application/json"
-    },
-    credentials: "same-origin",
-    body: JSON.stringify({
-        query: `
-            mutation UpdateStudyset($id: ID!, $studyset: StudysetInput) {
-                updateStudyset(id: $id, studyset: $studyset) {
-                    id
-                    title
-                }
-            }
-        `,
-        variables: {
-            id: data.studysetId,
-            studyset: {
-                title: document.getElementById("edit-title").value,
-                private: document.getElementById("edit-private-true").classList.contains("selected"),
-                data: {
-                    terms: termsTo2DArray()
-                }
+        if (updateCloudStudysetCooldown) {
+            return;
+        }
+        
+        updateCloudStudysetCooldown = true;
+        setTimeout(function () { updateCloudStudysetCooldown = false}, 2000);
+
+        let existingTerms = [];
+        let newTerms = [];
+        for (let index = 0; index < terms.length; index++) {
+            if (terms[index].id != null) {
+                existingTerms.push({
+                    id: terms[index].id,
+                    term: terms[index].term,
+                    def: terms[index].def,
+                    sort_order: index
+                });
+            } else {
+                newTerms.push({
+                    term: terms[index].term,
+                    def: terms[index].def,
+                    sort_order: index
+                });
             }
         }
-    })
-})
-.then(response => response.json())
-.then(result => {
-    if (result.errors) {
-        alert("Error updating studyset");
-        console.error(result.errors);
-    } else if (result.data?.updateStudyset) {
-        goto("/studysets/" + result.data.updateStudyset.id);
+
+        fetch("/api/graphql", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            },
+            credentials: "same-origin",
+            body: JSON.stringify({
+                query: `mutation UpdateStudyset($id: ID!, $studyset: StudysetInput, $terms: [TermInput], $newTerms: [NewTermInput], $deleteTerms: [ID]) {
+    updateStudyset(
+        id: $id,
+        studyset: $studyset,
+            terms: $terms,
+            newTerms: $newTerms,
+            deleteTerms: $deleteTerms
+    ) {
+        id
     }
-});
-      }
+}`,
+                variables: {
+                    id: data.studysetId,
+                    studyset: {
+                        title: document.getElementById("edit-title").value,
+                        private: document.getElementById("edit-private-true").classList.contains("selected"),
+                    },
+                    terms: existingTerms,
+                    newTerms: newTerms,
+                    deleteTerms: existingTermIdsToDelete
+                }
+            })
+        }).then(response => response.json()).then(result => {
+            if (result.errors) {
+                console.log(result);
+                alert("Error updating studyset");
+            } else if (result.data?.updateStudyset) {
+                goto("/studysets/" + result.data.updateStudyset.id);
+            }
+        });
     }
     var createCloudStudysetCooldown = false;
     function createCloudStudyset() {
-              if (createCloudStudysetCooldown == false) {
-          createCloudStudysetCooldown = true;
-          setTimeout(function () { createCloudStudysetCooldown = false}, 2000)
-          const title = document.getElementById("edit-title").value;
-const isPrivate = document.getElementById("edit-private-true").classList.contains("selected");
-const terms = termsTo2DArray();
-
-const query = `
-    mutation CreateStudyset($studyset: StudysetInput!) {
-        createStudyset(studyset: $studyset) {
-            id
-            title
+        if (createCloudStudysetCooldown) {
+            return;
         }
-    }
-`;
-
-const variables = {
-    studyset: {
-        title,
-        private: isPrivate,
-        data: {
-            terms
+        
+        createCloudStudysetCooldown = true;
+        setTimeout(function () { createCloudStudysetCooldown = false}, 2000);
+        const title = document.getElementById("edit-title").value;
+        const isPrivate = document.getElementById("edit-private-true").classList.contains("selected");
+        let newTerms = [];
+        for (let index = 0; index < terms.length; index++) {
+            newTerms.push({
+                term: terms[index].term,
+                def: terms[index].def,
+                sort_order: index
+            });
         }
-    }
-};
-
-fetch("/api/graphql", {
-    method: "POST",
-    headers: {
-        "Content-Type": "application/json",
-        "Accept": "application/json"
-    },
-    body: JSON.stringify({
-        query,
-        variables
-    })
-})
-.then(response => response.json())
-.then(result => {
-    if (result.errors) {
-        alert("Error creating studyset");
-        console.error(result.errors);
-    } else if (result.data?.createStudyset) {
-        goto("/studysets/" + result.data.createStudyset.id);
-    } else {
-        alert("Unexpected response when creating studyset");
-    }
-})
-.catch(error => {
-    alert("Network error");
-    console.error(error);
-});
-        }
+        const query = `
+            mutation CreateStudyset($studyset: StudysetInput!, $terms: [NewTermInput]) {
+                createStudyset(studyset: $studyset, terms: $terms) {
+                    id
+                }
+            }
+        `;
+        
+        const variables = {
+            studyset: {
+                title,
+                private: isPrivate,
+            },
+            terms: newTerms
+        };
+        
+        fetch("/api/graphql", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            },
+            body: JSON.stringify({
+                query,
+                variables
+            })
+        })
+        .then(response => response.json())
+        .then(result => {
+            if (result.errors) {
+                alert("Error creating studyset");
+                console.error(result.errors);
+            } else if (result.data?.createStudyset) {
+                goto("/studysets/" + result.data.createStudyset.id);
+            } else {
+                alert("Unexpected response when creating studyset");
+            }
+        })
+        .catch(error => {
+            alert("Network error");
+            console.error(error);
+        });
     }
     function saveButtonOrCreateButton() {
       bypassUnsavedChangesConfirmation = true;

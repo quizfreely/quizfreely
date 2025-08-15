@@ -27,13 +27,16 @@ export async function load({ params, cookies }) {
                 id
                 title
                 updated_at
-                user_id
-                user_display_name
-                private
-                data {
-                  terms
+                user {
+                    id
+                    display_name
                 }
-                terms_count
+                private
+                terms {
+                    id
+                    term
+                    def
+                }
               }
             }`,
             variables: {

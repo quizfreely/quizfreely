@@ -185,15 +185,15 @@
         <p class="fg0">
           <IconEyeSlash /> Private Studyset
         </p>
-        {:else if data?.studyset?.user_display_name}
+        {:else if data?.studyset?.user?.display_name != null}
         <!--<p>
           Created by <a href="/users/{ data.studyset.user_id }">{ data.studyset.user_display_name }</a>
         </p>-->
         <p>
-          Created by { data.studyset.user_display_name }
+          Created by { data.studyset.user.display_name }
         </p>
         {/if}
-        {#if (data.studyset && data.authed && (data.authedUser.id == data.studyset.user_id)) }
+        {#if (data.studyset && data.authed && (data.authedUser.id == data.studyset.user.id)) }
         <div id="edit-menu" class="flex">
           <a href="/studyset/edit/{ data.studyset.id }" class="button">
             <IconPencil />
@@ -234,10 +234,10 @@
             class="card double"
             id="flashcard"
           >
-            {#if (data.studyset && data.studyset.data && data.studyset.data.terms && data.studyset.data.terms.length >= 1) }
+            {#if (data.studyset?.terms != null && data.studyset.terms.length > 0) }
             <div class="content">
-              <div class="front" id="flashcard-front" style="white-space:pre-wrap">{ data.studyset.data.terms[0][0] }</div>
-              <div class="back" id="flashcard-back" style="white-space:pre-wrap">{ data.studyset.data.terms[0][1] }</div>
+              <div class="front" id="flashcard-front" style="white-space:pre-wrap">{ data.studyset.terms[0].term }</div>
+              <div class="back" id="flashcard-back" style="white-space:pre-wrap">{ data.studyset.terms[0].def }</div>
             </div>
             {:else}
             <div class="content">
@@ -251,9 +251,9 @@
             {/if}
           </div>
           <div class="caption centerThree">
-            {#if (data.studyset && data.studyset.data && data.studyset.data.terms) }
+            {#if (data.studyset?.terms != null) }
             <p id="flashcards-count">
-              1/{ data.studyset.data.terms.length }
+              1/{ data.studyset.terms.length }
             </p>
             {:else}
             <p id="flashcards-count">
@@ -320,11 +320,11 @@
               <th>Term</th>
               <th>Definition</th>
             </tr>
-            {#if (data.studyset && data.studyset.data && data.studyset.data.terms) }
-                {#each data.studyset.data.terms as term }
+            {#if (data.studyset?.terms != null) }
+                {#each data.studyset.terms as term }
                     <tr>
-                      <td style="white-space:pre-wrap">{ term[0] }</td>
-                      <td style="white-space:pre-wrap">{ term[1] }</td>
+                      <td style="white-space:pre-wrap">{ term.term }</td>
+                      <td style="white-space:pre-wrap">{ term.def }</td>
                     </tr>
                 {/each}
             {/if}
