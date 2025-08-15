@@ -20,6 +20,7 @@
 		"vite": "^6.0.11"
 	},
 	"dependencies": {
+		"dexie": "^4.0.11",
 		"jsdom": "^26.1.0",
 		"nprogress": "^0.2.0",
 		"prosemirror-commands": "^1.7.1",
