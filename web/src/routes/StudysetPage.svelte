@@ -1,7 +1,8 @@
 <script>
     import Noscript from "$lib/components/Noscript.svelte";
     import { onMount } from "svelte";
-    import { openIndexedDB } from "$lib/indexedDB";
+    import db from "$lib/idb-api-layer/db.js";
+    import idbApiLayer from "$lib/idb-api-layer/idb-api-layer.js";
     import { goto } from "$app/navigation";
     import { fade } from "svelte/transition";
     let { data } = $props();
@@ -109,50 +110,38 @@
       document.getElementById("flashcards-unmaximize").addEventListener("click", unmaximizeFlashcards);
     })
     function deleteConfirmButtonClicked() {
-      if (data.local) {
-        openIndexedDB(function (db) {
-          var studysetsObjectStore = db.transaction(["studysets"], "readwrite").objectStore("studysets");
-          var dbDeleteReq = studysetsObjectStore.delete(data.localId);
-          dbDeleteReq.onsuccess = function (event) {
+        if (data.local) {
+            await db.studysets.delete(data.localId);
             goto("/dashboard");
-          }
-          dbDeleteReq.onerror = function (error) {
-            console.error(error);
-            alert("indexeddb error while trying to delete local studyset")
-          }
-        })
-      } else {
-        fetch("/api/graphql", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "same-origin",
-          body: JSON.stringify({
-            query: `
-              mutation DeleteStudyset($id: ID!) {
-                deleteStudyset(id: $id)
-              }
-            `,
-            variables: {
-              id: data.studyset.id
-            }
-          })
-        })
-        .then(response => response.json())
-        .then(response => {
-          if (response.errors) {
-            console.error(response.errors);
-            alert("GraphQL error: " + response.errors[0].message);
-          } else {
-            goto("/dashboard");
-          }
-        })
-        .catch(error => {
-          console.error(error);
-          alert("Network error while deleting studyset");
-        });
-      }
+        } else {
+            fetch("/api/graphql", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                credentials: "same-origin",
+                body: JSON.stringify({
+                    query: `mutation DeleteStudyset($id: ID!) {
+    deleteStudyset(id: $id)
+}`,
+                    variables: {
+                        id: data.studyset.id
+                    }
+                })
+            }).then(
+                response => response.json()
+            ).then(response => {
+                if (response.errors) {
+                    console.error(response.errors);
+                    alert("GraphQL error: " + response.errors[0].message);
+                } else {
+                    goto("/dashboard");
+                }
+            }).catch(error => {
+              console.error(error);
+              alert("Network error while deleting studyset");
+            });
+        }
     }
 </script>
 
