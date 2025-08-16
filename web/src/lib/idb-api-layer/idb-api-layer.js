@@ -7,6 +7,19 @@
  */
 import db from "./db.js";
 
+function isTitleValid(newTitle) {
+    return (
+      newTitle.length > 0 &&
+      newTitle.length < 9000 &&
+      /*
+          use regex to make sure title is not just a bunch of spaces
+          (if removing all spaces makes it equal to an empty string, it's all spaces)
+          notice the exclamation mark for negation
+      */
+      !(newTitle.replace(/[\s\p{C}]+/gu, "") == "")
+    );
+}
+
 export const idbApiLayer = {
     getStudysetById: async function (id, resolveProps) {
         const studyset = await db.studysets.where("id").equals(id).toArray();
@@ -34,7 +47,8 @@ export const idbApiLayer = {
     createStudyset: async function ({ title, private }, terms) {
         const rnISOString = (new Date()).toISOString();
         const newId = await db.studysets.add({
-            title,
+            isTitleValid(title) ?
+                title : "Untitled Studyset",
             private,
             created_at: rnISOString,
             updated_at: rnISOString
@@ -57,7 +71,8 @@ export const idbApiLayer = {
     updateStudyset: async function ({ id, title, private }, terms, newTerms, deleteTermIDs) {
         const rnISOString = (new Date()).toISOString();
         await db.studysets.update(id, {
-            title,
+            isTitleValid(title) ?
+                title : "Untitled Studyset",
             private,
             updated_at: rnISOString
         });
