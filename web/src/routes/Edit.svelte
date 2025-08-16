@@ -2,6 +2,7 @@
     import Noscript from "$lib/components/Noscript.svelte";
     import { onMount, mount } from "svelte";
     import { openIndexedDB } from "$lib/indexedDB";
+    import db from "$lib/db.js";
     import { goto, beforeNavigate } from "$app/navigation";
     import { cancelNprogressTimeout } from "$lib/stores/nprogressTimeout.js";
     let { data } = $props();
@@ -148,10 +149,14 @@
       }
     }
     if (data.local && !data.new) {
-      var studysetIDBRecord;
+        var studysetIDBRecord;
+        const [studysetRecord] = db.studysets.where("id").equals(data.localId).toArray();
+        if (studysetRecord) {
+            document.getElementById("edit-title").value = studysetRecord.title;
+        }
       openIndexedDB(function (db) {
-        var studysetsObjectStore = db.transaction(["studysets"], "readonly").objectStore("studysets");
-        var dbGetReq = studysetsObjectStore.get(data.localId);
+        // var studysetsObjectStore = db.transaction(["studysets"], "readonly").objectStore("studysets");
+        // var dbGetReq = studysetsObjectStore.get(data.localId);
         dbGetReq.onsuccess = function (event) {
           if (dbGetReq.result) {
             document.getElementById("edit-title").value = dbGetReq.result.title;
