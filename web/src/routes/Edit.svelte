@@ -165,78 +165,75 @@
         }
     });
 
+    var updateLocalStudysetCooldown = false;
     function updateLocalStudyset() {
-                    var title = "Untitled Studyset";
-              var newTitle = document.getElementById("edit-title").value;
-              if (
-                newTitle.length > 0 &&
-                newTitle.length < 9000 &&
-                /*
-                    use regex to make sure title is not just a bunch of spaces
-                    (if removing all spaces makes it equal to an empty string, it's all spaces)
-                    notice the exclamation mark for negation
-                */
-                !(newTitle.replace(/[\s\p{C}]+/gu, "") == "")
-              ) {
-                  title = newTitle;
-              }
-              var updatedStudyset = {
-                id: data.localId,
-                title: title,
-                data: {
-                  terms: termsTo2DArray()
+        if (updateCloudStudysetCooldown) {
+            return;
+        }
+
+        updateLocalStudysetCooldown = true;
+        setTimeout(function () { updateLocalStudysetCooldown = false}, 2000);
+
+        let existingTerms = [];
+        let newTerms = [];
+        for (let index = 0; index < terms.length; index++) {
+            if (terms[index].id != null) {
+                existingTerms.push({
+                    id: terms[index].id,
+                    term: terms[index].term,
+                    def: terms[index].def,
+                    sort_order: index
+                });
+            } else {
+                newTerms.push({
+                    term: terms[index].term,
+                    def: terms[index].def,
+                    sort_order: index
+                });
+            }
+        }
+
+        (async () => {
+            await idbApiLayer.updateStudyset(
+                {
+                    id: data.localId,
+                    title: document.getElementById("edit-title").value,
                 },
-                updated_at: (new Date()).toISOString()
-              }
-              openIndexedDB(function (db) {
-                var studysetsObjectStore = db.transaction(["studysets"], "readwrite").objectStore("studysets");
-                var dbPutReq = studysetsObjectStore.put(updatedStudyset);
-                dbPutReq.onsuccess = function (event) {
-                  goto("/studyset/local?id=" + data.localId);
-                }
-                dbPutReq.onerror = function (error) {
-                  console.error(error);
-                  alert("indexeddb error while trying to update studyset")
-                }
-              })
+                existingTerms,
+                newTerms,
+                existingTermIdsToDelete
+            );
+            goto("/studyset/local?id=" + data.localId);
+        })();
     }
+
+    var createLocalStudysetCooldown = false;
     function createLocalStudyset() {
-        openIndexedDB(function (db) {
-          var studysetsObjectStore = db.transaction("studysets", "readwrite").objectStore("studysets");
-          var title = "Untitled Studyset";
-          var newTitle = document.getElementById("edit-title").value;
-          if (
-            newTitle.length > 0 &&
-            newTitle.length < 9000 &&
-            /*
-                use regex to make sure title is not just a bunch of spaces
-                (if removing all spaces makes it equal to an empty string, it's all spaces)
-                notice the exclamation mark for negation
-            */
-            !(newTitle.replace(/[\s\p{C}]+/gu, "") == "")
-          ) {
-              title = newTitle;
-          }
-          var dbAddReq = studysetsObjectStore.add({
-            title: title,
-            data: {
-              terms: termsTo2DArray()
-            },
-            updated_at: (new Date()).toISOString()
-          });
-          dbAddReq.onsuccess = function (event) {
-            /*
-              "If the operation is successful,
-              the value of the request's result property is the key
-              for the new record" (https://developer.mozilla.org/en-US/docs/Web/API/IDBObjectStore/add)
-            */
-            goto("/studyset/local?id=" + dbAddReq.result)
-          }
-          dbAddReq.onerror = function (error) {
-            console.error(error);
-            alert("indexeddb error while trying to add studyset")
-          }
-        })
+        if (createCloudStudysetCooldown) {
+            return;
+        }
+
+        createLocalStudysetCooldown = true;
+        setTimeout(function () { createLocalStudysetCooldown = false}, 2000);
+
+        let newTerms = [];
+        for (let index = 0; index < terms.length; index++) {
+            newTerms.push({
+                term: terms[index].term,
+                def: terms[index].def,
+                sort_order: index
+            });
+        }
+
+        (async () => {
+            const newId = await idbApiLayer.createStudyset(
+                {
+                    title: document.getElementById("edit-title").value
+                },
+                newTerms
+            )
+            goto("/studyset/local?id=" + newId);
+        })();
     }
     var updateCloudStudysetCooldown = false;
     function updateCloudStudyset() {
