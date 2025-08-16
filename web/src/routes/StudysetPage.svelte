@@ -102,7 +102,7 @@
       document.getElementById("flashcards-maximize").addEventListener("click", maximizeFlashcards);
       document.getElementById("flashcards-unmaximize").addEventListener("click", unmaximizeFlashcards);
     })
-    function deleteConfirmButtonClicked() {
+    async function deleteConfirmButtonClicked() {
         if (data.local) {
             await db.studysets.delete(data.localId);
             goto("/dashboard");
