@@ -23,7 +23,6 @@
     onMount(function () {
         if (data.local) {
         openIndexedDB(function (db) {
-        /* load local studyset from indexeddb (this whole script tag is only there if `data.local` is true) */
         var studysetsObjectStore = db.transaction(["studysets"]).objectStore("studysets");
         var dbGetReq = studysetsObjectStore.get(data.localId);
         dbGetReq.onerror = function (event) {
