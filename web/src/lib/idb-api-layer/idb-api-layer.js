@@ -11,7 +11,7 @@ export const idbApiLayer = {
     getStudysetById: async function (id, resolveProps) {
         const studyset = await db.studysets.where("id").equals(id).toArray();
         
-        if (resolveProps.terms) {
+        if (resolveProps?.terms) {
             studyset.terms = await idbApiLayer.getTermsByStudysetId(
                 id,
                 resolveProps.terms
@@ -23,7 +23,7 @@ export const idbApiLayer = {
     getTermsByStudysetId: async function (studyset_id, resolveProps) {
         const terms = db.terms.where("studyset_id").equals(studyset_id).toArray();
 
-        if (resolveProps.progress) {
+        if (resolveProps?.progress) {
             await terms.forEach(async term => {
                 term.progress = await db.progress.where("term_id").equals(term.id).toArray();
             });
