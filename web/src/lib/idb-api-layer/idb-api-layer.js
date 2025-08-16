@@ -47,7 +47,7 @@ export const idbApiLayer = {
     createStudyset: async function ({ title }, terms) {
         const rnISOString = (new Date()).toISOString();
         const newId = await db.studysets.add({
-            isTitleValid(title) ?
+            title: isTitleValid(title) ?
                 title : "Untitled Studyset",
             created_at: rnISOString,
             updated_at: rnISOString
@@ -70,7 +70,7 @@ export const idbApiLayer = {
     updateStudyset: async function ({ id, title }, terms, newTerms, deleteTermIDs) {
         const rnISOString = (new Date()).toISOString();
         await db.studysets.update(id, {
-            isTitleValid(title) ?
+            title: isTitleValid(title) ?
                 title : "Untitled Studyset",
             updated_at: rnISOString
         });
