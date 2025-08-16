@@ -1,8 +1,7 @@
 <script>
     import Noscript from "$lib/components/Noscript.svelte";
     import { onMount, mount } from "svelte";
-    import { openIndexedDB } from "$lib/indexedDB";
-    import db from "$lib/db.js";
+    import idbApiLayer from "$lib/idb-api-layer/idb-api-layer.js";
     import { goto, beforeNavigate } from "$app/navigation";
     import { cancelNprogressTimeout } from "$lib/stores/nprogressTimeout.js";
     let { data } = $props();
@@ -141,7 +140,7 @@
                     t.term,
                     t.def,
                     t.id
-                )
+                );
             })
         }
     }
@@ -149,29 +148,22 @@
       }
     }
     if (data.local && !data.new) {
-        var studysetIDBRecord;
-        const [studysetRecord] = db.studysets.where("id").equals(data.localId).toArray();
+        const studysetRecord = idbApiLayer.getStudysetById(
+            data.localId,
+            { terms: true }
+        );
         if (studysetRecord) {
             document.getElementById("edit-title").value = studysetRecord.title;
-        }
-      openIndexedDB(function (db) {
-        // var studysetsObjectStore = db.transaction(["studysets"], "readonly").objectStore("studysets");
-        // var dbGetReq = studysetsObjectStore.get(data.localId);
-        dbGetReq.onsuccess = function (event) {
-          if (dbGetReq.result) {
-            document.getElementById("edit-title").value = dbGetReq.result.title;
-            if (dbGetReq.result.data && dbGetReq.result.data.terms) {
-              addTermsFrom2DArray(dbGetReq.result.data.terms);
+            if (studysetRecord.terms != null) {
+                studyset.terms.forEach((t) => {
+                    addTerm(
+                        t.term,
+                        t.def,
+                        t.id
+                    );
+                })
             }
-          } else {
-            alert("couldn't load local studyset, mabye it doesn't exist?")
-          }
         }
-        dbGetReq.onerror = function (error) {
-          console.error(error);
-          alert("indexeddb error while trying to load local studyset")
-        }
-      })
     }
     })
 
