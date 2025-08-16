@@ -44,12 +44,11 @@ export const idbApiLayer = {
 
         return terms;
     },
-    createStudyset: async function ({ title, private }, terms) {
+    createStudyset: async function ({ title }, terms) {
         const rnISOString = (new Date()).toISOString();
         const newId = await db.studysets.add({
             isTitleValid(title) ?
                 title : "Untitled Studyset",
-            private,
             created_at: rnISOString,
             updated_at: rnISOString
         });
@@ -68,12 +67,11 @@ export const idbApiLayer = {
         await db.terms.bulkAdd(newTerms);
         return newId;
     },
-    updateStudyset: async function ({ id, title, private }, terms, newTerms, deleteTermIDs) {
+    updateStudyset: async function ({ id, title }, terms, newTerms, deleteTermIDs) {
         const rnISOString = (new Date()).toISOString();
         await db.studysets.update(id, {
             isTitleValid(title) ?
                 title : "Untitled Studyset",
-            private,
             updated_at: rnISOString
         });
 
