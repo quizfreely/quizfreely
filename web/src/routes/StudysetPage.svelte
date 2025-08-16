@@ -21,37 +21,30 @@
 
     var showDeleteConfirmationModal = $state(false);
 
-    onMount(function () {
+    onMount(async function () {
         if (data.local) {
-        openIndexedDB(function (db) {
-        var studysetsObjectStore = db.transaction(["studysets"]).objectStore("studysets");
-        var dbGetReq = studysetsObjectStore.get(data.localId);
-        dbGetReq.onerror = function (event) {
-          alert("oopsie woopsie, indexeddb error");
-        }
-        dbGetReq.onsuccess = function (event) {
-          if (dbGetReq.result) {
-            if (dbGetReq.result.title) {
-              document.getElementById("studyset-title").innerText = dbGetReq.result.title;
+            const studyset = await idbApiLayer.getStudysetById(
+                data.localId,
+                {
+                    terms: {
+                        progress: true
+                    }
+                }
+            );
+            document.getElementById("studyset-title").innerText = studyset.title;
+            if (studyset?.terms != null && studyset.terms.length > 0) {
+                var termsTable = document.getElementById("terms-table");
+                for (var i = 0; i < studyset.terms.length; i++) {
+                    var newRow = termsTable.insertRow();
+                    var newCell0 = newRow.insertCell();
+                    var newCell1 = newRow.insertCell();
+                    newCell0.innerText = studyset.terms[i].term;
+                    newCell0.style.whiteSpace = "pre-wrap";
+                    newCell1.innerText = studyset.terms[i].def;
+                    newCell1.style.whiteSpace = "pre-wrap";
+                }
+                flashcardsChange();
             }
-            if (dbGetReq.result.data && dbGetReq.result.data.terms) {
-              var termsTable = document.getElementById("terms-table");
-              for (var i = 0; i < dbGetReq.result.data.terms.length; i++) {
-                var newRow = termsTable.insertRow();
-                var newCell0 = newRow.insertCell();
-                var newCell1 = newRow.insertCell();
-                newCell0.innerText = dbGetReq.result.data.terms[i][0];
-                newCell0.style.whiteSpace = "pre-wrap";
-                newCell1.innerText = dbGetReq.result.data.terms[i][1];
-                newCell1.style.whiteSpace = "pre-wrap";
-              }
-              flashcardsChange();
-            }
-          } else {
-            alert("studyset not found :(")
-          }
-        }
-      })
         }
 
         var flashcardsIndex = 0;
@@ -138,8 +131,8 @@
                     goto("/dashboard");
                 }
             }).catch(error => {
-              console.error(error);
-              alert("Network error while deleting studyset");
+                console.error(error);
+                alert("Network error while deleting studyset");
             });
         }
     }
