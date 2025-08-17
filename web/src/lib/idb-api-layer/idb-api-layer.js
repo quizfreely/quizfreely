@@ -20,7 +20,7 @@ function isTitleValid(newTitle) {
     );
 }
 
-export const idbApiLayer = {
+export default {
     getStudysetById: async function (id, resolveProps) {
         const studyset = await db.studysets.where("id").equals(id).toArray();
         
