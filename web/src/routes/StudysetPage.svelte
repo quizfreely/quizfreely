@@ -20,10 +20,11 @@
     import IconSettingsGear from "$lib/icons/SettingsGear.svelte";
 
     var showDeleteConfirmationModal = $state(false);
+    let studyset = $state(data?.studyset);
 
     onMount(async function () {
         if (data.local) {
-            const studyset = await idbApiLayer.getStudysetById(
+            const localStudyset = await idbApiLayer.getStudysetById(
                 data.localId,
                 {
                     terms: {
@@ -31,38 +32,26 @@
                     }
                 }
             );
-            document.getElementById("studyset-title").innerText = studyset.title;
-            if (studyset?.terms != null && studyset.terms.length > 0) {
-                var termsTable = document.getElementById("terms-table");
-                for (var i = 0; i < studyset.terms.length; i++) {
-                    var newRow = termsTable.insertRow();
-                    var newCell0 = newRow.insertCell();
-                    var newCell1 = newRow.insertCell();
-                    newCell0.innerText = studyset.terms[i].term;
-                    newCell0.style.whiteSpace = "pre-wrap";
-                    newCell1.innerText = studyset.terms[i].def;
-                    newCell1.style.whiteSpace = "pre-wrap";
-                }
-                flashcardsChange();
-            }
+            studyset = localStudyset;
+            flashcardsChange();
         }
 
         var flashcardsIndex = 0;
-      function flashcardsFlip() {
-        document.getElementById("flashcard").classList.toggle("flip");
-      }
-      document.getElementById("flashcard").addEventListener("click", flashcardsFlip);
-      document.getElementById("flashcards-flip-button").addEventListener("click", flashcardsFlip);
+        function flashcardsFlip() {
+            document.getElementById("flashcard").classList.toggle("flip");
+        }
+        document.getElementById("flashcard").addEventListener("click", flashcardsFlip);
+        document.getElementById("flashcards-flip-button").addEventListener("click", flashcardsFlip);
       
       function flashcardsChange() {
-        var termsList = document.getElementById("terms-table").children[0];
-        document.getElementById("flashcard-front").innerHTML = termsList.children[flashcardsIndex + 1].children[0].innerHTML
-        document.getElementById("flashcard-back").innerHTML = termsList.children[flashcardsIndex + 1].children[1].innerHTML
-        document.getElementById("flashcards-count").innerText = (flashcardsIndex + 1) + "/" + (termsList.children.length - 1);
+        console.log(studyset)
+        document.getElementById("flashcard-front").innerText = studyset.terms[flashcardsIndex].term;
+        document.getElementById("flashcard-back").innerText = studyset.terms[flashcardsIndex].def;
+        document.getElementById("flashcards-count").innerText = (flashcardsIndex + 1) + "/" + (studyset.terms.length - 1);
       }
 
       function flashcardsNext() {
-        if (flashcardsIndex < (document.getElementById("terms-table").children[0].children.length - 2)) {
+        if (flashcardsIndex < (studyset.terms.length - 1)) {
           flashcardsIndex += 1
           flashcardsChange()
         }
@@ -301,8 +290,8 @@
               <th>Term</th>
               <th>Definition</th>
             </tr>
-            {#if (data.studyset?.terms != null) }
-                {#each data.studyset.terms as term }
+            {#if (studyset?.terms != null) }
+                {#each studyset.terms as term }
                     <tr>
                       <td style="white-space:pre-wrap">{ term.term }</td>
                       <td style="white-space:pre-wrap">{ term.def }</td>

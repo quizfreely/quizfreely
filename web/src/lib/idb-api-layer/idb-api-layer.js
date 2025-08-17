@@ -25,7 +25,7 @@ export default {
         const studyset = await db.studysets.where("id").equals(id).toArray();
         
         if (resolveProps?.terms) {
-            studyset.terms = await idbApiLayer.getTermsByStudysetId(
+            studyset.terms = await this.getTermsByStudysetId(
                 id,
                 resolveProps.terms
             );
@@ -34,11 +34,11 @@ export default {
         return studyset;
     },
     getTermsByStudysetId: async function (studyset_id, resolveProps) {
-        const terms = db.terms.where("studyset_id").equals(studyset_id).toArray();
+        const terms = await db.terms.where("studyset_id").equals(studyset_id).toArray();
 
         if (resolveProps?.progress) {
             await terms.forEach(async term => {
-                term.progress = await db.progress.where("term_id").equals(term.id).toArray();
+                term.progress = await db.term_progress.where("term_id").equals(term.id).toArray();
             });
         }
 
