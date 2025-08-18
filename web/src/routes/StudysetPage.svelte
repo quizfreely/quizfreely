@@ -22,6 +22,28 @@
     var showDeleteConfirmationModal = $state(false);
     let studyset = $state(data?.studyset);
 
+    let flashcardsIndex = 0;
+    function flashcardsFlip() {
+        document.getElementById("flashcard").classList.toggle("flip");
+    }
+    function flashcardsChange() {
+        document.getElementById("flashcard-front").innerText = studyset.terms[flashcardsIndex].term;
+        document.getElementById("flashcard-back").innerText = studyset.terms[flashcardsIndex].def;
+        document.getElementById("flashcards-count").innerText = (flashcardsIndex + 1) + "/" + (studyset.terms.length);
+    }
+    function flashcardsPrev() {
+        if (flashcardsIndex > 0) {
+            flashcardsIndex -= 1
+            flashcardsChange()
+        }
+    }
+    function flashcardsNext() {
+        if (flashcardsIndex < (studyset.terms.length - 1)) {
+            flashcardsIndex += 1
+            flashcardsChange()
+        }
+    }
+
     onMount(async function () {
         if (data.local) {
             const localStudyset = await idbApiLayer.getStudysetById(
@@ -36,60 +58,35 @@
             flashcardsChange();
         }
 
-        var flashcardsIndex = 0;
-        function flashcardsFlip() {
-            document.getElementById("flashcard").classList.toggle("flip");
-        }
         document.getElementById("flashcard").addEventListener("click", flashcardsFlip);
         document.getElementById("flashcards-flip-button").addEventListener("click", flashcardsFlip);
-      
-      function flashcardsChange() {
-        console.log(studyset)
-        document.getElementById("flashcard-front").innerText = studyset.terms[flashcardsIndex].term;
-        document.getElementById("flashcard-back").innerText = studyset.terms[flashcardsIndex].def;
-        document.getElementById("flashcards-count").innerText = (flashcardsIndex + 1) + "/" + (studyset.terms.length - 1);
-      }
+        document.getElementById("flashcards-prev-button").addEventListener("click", flashcardsPrev);
+        document.getElementById("flashcards-next-button").addEventListener("click", flashcardsNext);
 
-      function flashcardsNext() {
-        if (flashcardsIndex < (studyset.terms.length - 1)) {
-          flashcardsIndex += 1
-          flashcardsChange()
+        /* the modal's html is the same for local and authed */
+        if (document.getElementById("delete-button")) {
+          document.getElementById("delete-button").addEventListener("click", function () {
+            showDeleteConfirmationModal = true
+          })
         }
-      }
-      document.getElementById("flashcards-next-button").addEventListener("click", flashcardsNext);
+        function maximizeFlashcards() {
+            document.getElementById("title-and-menu-outer-div").classList.add("hide");
+            document.getElementById("terms-and-stuff-outer-div").classList.add("hide");
+            document.getElementById("footer-wave").classList.add("hide");
+            document.getElementById("footer").classList.add("hide");
 
-      function flashcardsPrev() {
-        if (flashcardsIndex > 0) {
-          flashcardsIndex -= 1
-          flashcardsChange()
+            document.getElementById("flashcards-unmaximize").classList.remove("hide");
         }
-      }
-      document.getElementById("flashcards-prev-button").addEventListener("click", flashcardsPrev);
+        function unmaximizeFlashcards() {
+            document.getElementById("title-and-menu-outer-div").classList.remove("hide");
+            document.getElementById("terms-and-stuff-outer-div").classList.remove("hide");
+            document.getElementById("footer-wave").classList.remove("hide");
+            document.getElementById("footer").classList.remove("hide");
 
-      /* the modal's html is the same for local and authed */
-      if (document.getElementById("delete-button")) {
-        document.getElementById("delete-button").addEventListener("click", function () {
-          showDeleteConfirmationModal = true
-        })
-      }
-      function maximizeFlashcards() {
-        document.getElementById("title-and-menu-outer-div").classList.add("hide");
-        document.getElementById("terms-and-stuff-outer-div").classList.add("hide");
-        document.getElementById("footer-wave").classList.add("hide");
-        document.getElementById("footer").classList.add("hide");
-
-        document.getElementById("flashcards-unmaximize").classList.remove("hide");
-      }
-      function unmaximizeFlashcards() {
-        document.getElementById("title-and-menu-outer-div").classList.remove("hide");
-        document.getElementById("terms-and-stuff-outer-div").classList.remove("hide");
-        document.getElementById("footer-wave").classList.remove("hide");
-        document.getElementById("footer").classList.remove("hide");
-
-        document.getElementById("flashcards-unmaximize").classList.add("hide");
-      }
-      document.getElementById("flashcards-maximize").addEventListener("click", maximizeFlashcards);
-      document.getElementById("flashcards-unmaximize").addEventListener("click", unmaximizeFlashcards);
+            document.getElementById("flashcards-unmaximize").classList.add("hide");
+        }
+        document.getElementById("flashcards-maximize").addEventListener("click", maximizeFlashcards);
+        document.getElementById("flashcards-unmaximize").addEventListener("click", unmaximizeFlashcards);
     })
     async function deleteConfirmButtonClicked() {
         if (data.local) {
@@ -128,10 +125,10 @@
 </script>
 
 <svelte:head>
-    {#if data.studyset}
-    <title>{ data.studyset.title } - Quizfreely</title>
+    {#if studyset}
+        <title>{studyset.title} - Quizfreely</title>
     {:else}
-    <title>Quizfreely</title>
+        <title>Quizfreely</title>
     {/if}
 </svelte:head>
 
@@ -142,10 +139,10 @@
   <div class="grid page">
     <div class="content">
       <div id="title-and-menu-outer-div">
-        {#if (data?.studyset?.title) }
-        <h2 class="caption" style="overflow-wrap:anywhere">{ data.studyset.title }</h2>
+        {#if studyset}
+            <h2 class="caption" style="overflow-wrap:anywhere">{ studyset.title }</h2>
         {:else}
-        <h2 id="studyset-title" class="caption" style="overflow-wrap:anywhere">Title</h2>
+            <h2 id="studyset-title" class="caption" style="overflow-wrap:anywhere">Title</h2>
         {/if}
         {#if data.local}
         <p class="fg0">

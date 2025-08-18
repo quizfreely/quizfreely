@@ -70,7 +70,7 @@
       }
     }
 
-    onMount(function () {
+    onMount(async function () {
         if (data.authed && !(data.local)) {
             document.getElementById("edit-private-false").addEventListener("click",
                 function () {
@@ -146,14 +146,14 @@
             }
         }
         if (data.local && !data.new) {
-            const studysetRecord = idbApiLayer.getStudysetById(
+            const studysetRecord = await idbApiLayer.getStudysetById(
                 data.localId,
                 { terms: true }
             );
             if (studysetRecord) {
                 document.getElementById("edit-title").value = studysetRecord.title;
                 if (studysetRecord.terms != null) {
-                    studyset.terms.forEach((t) => {
+                    studysetRecord.terms.forEach((t) => {
                         addTerm(
                             t.term,
                             t.def,
@@ -508,7 +508,7 @@
             {/if}
 
             <div id="edit-terms-rows">
-              {#each terms as term, index (term.id)}
+              {#each terms as term, index (term.key)}
               <div class="grid box term-row-box" animate:flip={{ duration: 400 }} in:scale={{ duration: 400 }} out:scale={{ duration: 400 }}>
                   <AutoResizeTextarea
                     div={{

@@ -22,24 +22,29 @@ function isTitleValid(newTitle) {
 
 export default {
     getStudysetById: async function (id, resolveProps) {
-        const studyset = await db.studysets.where("id").equals(id).toArray();
+        const studysets = await db.studysets.where("id").equals(id).toArray();
+        if (studysets.length == 0) {
+            return null;
+        }
         
         if (resolveProps?.terms) {
-            studyset.terms = await this.getTermsByStudysetId(
+            studysets[0].terms = await this.getTermsByStudysetId(
                 id,
                 resolveProps.terms
             );
         }
 
-        return studyset;
+        return studysets[0];
     },
     getTermsByStudysetId: async function (studyset_id, resolveProps) {
         const terms = await db.terms.where("studyset_id").equals(studyset_id).toArray();
 
         if (resolveProps?.progress) {
-            await terms.forEach(async term => {
-                term.progress = await db.term_progress.where("term_id").equals(term.id).toArray();
-            });
+            await Promise.all(
+                terms.map(async term => {
+                    term.progress = await db.term_progress.where("term_id").equals(term.id).toArray();
+                })
+            );
         }
 
         return terms;
@@ -92,7 +97,7 @@ export default {
         }
 
         let bulkAddNewTerms = [];
-        terms.forEach(term => {
+        newTerms.forEach(term => {
             bulkAddNewTerms.push({
                 term: term.term,
                 def: term.def,
