@@ -29,8 +29,10 @@ if (searchQuery.length >= 1) {
             searchStudysets(q: $q) {
               id
               title
-              user_id
-              user_display_name
+              user {
+                id
+                display_name
+              }
               terms_count
             }
           }`,
