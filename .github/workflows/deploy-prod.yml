@@ -25,6 +25,7 @@ jobs:
             --include='build/***' \
             --include='package.json' \
             --include='package-lock.json' \
+            --include='.env.example' \
             --exclude="*" \
             -e "ssh -i ~/.ssh/id_ed25519" \
             web/ quizfreely@server.quizfreely.org:/home/quizfreely/web/
