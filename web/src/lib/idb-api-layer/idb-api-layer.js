@@ -110,5 +110,56 @@ export default {
         await db.terms.bulkAdd(bulkAddNewTerms);
 
         await db.terms.bulkDelete(deleteTermIDs);
+    },
+    updateTermProgress: async function ({ term_id, term_reviewed_at, def_reviewed_at, term_leitner_system_box, def_leitner_system_box }) {
+        if (term_reviewed_at != null && !(
+            term_reviewed_at instanceof Date && !isNaN(term_reviewed_at)
+        )) {
+            console.error("(idb-api-layer: updateTermProgress) term_reviewed_at is not a valid Date object and not null")
+            return false;
+        }
+        if (def_reviewed_at != null && !(
+            def_reviewed_at instanceof Date && !isNaN(def_reviewed_at)
+        )) {
+            console.error("(idb-api-layer: updateTermProgress) def_reviewed_at is not a valid Date object and not null")
+            return false;
+        }
+
+        existingProgress = await db.term_progress.where("term_id").equals(term_id);
+        if (existingProgress?.length > 0) {
+            await db.term_progress.update(
+                existingProgress[0].id,
+                {
+                    term_last_reviewed_at: term_reviewed_at != null ?
+                        term_reviewed_at.toISOString() : existingProgress[0].term_last_reviewed_at,
+                    term_review_count: term_reviewed_at != null ?
+                        (existingProgress[0]?.term_review_count ?? 0) + 1 :
+                        existingProgress[0]?.term_review_count,
+                    def_last_reviewed_at: def_reviewed_at != null ?
+                        def_reviewed_at.toISOString() : existingProgress[0].def_last_reviewed_at,
+                    def_review_count: def_reviewed_at != null ?
+                        (existingProgress[0]?.def_review_count ?? 0) + 1 :
+                        existingProgress[0]?.def_review_count,
+                    term_leitner_system_box: term_leitner_system_box ?? existingProgress[0].term_leitner_system_box,
+                    def_leitner_system_box: def_leitner_system_box ?? existingProgress[0].def_leitner_system_box
+                }
+            );
+            return existingProgress[0].id;
+        } else {
+            const newProgressId = await db.term_progress.add({
+                term_id: term_id,
+                term_first_reviewed_at: term_reviewed_at?.toISOString(),
+                term_last_reviewed_at: term_reviewed_at?.toISOString(),
+                term_review_count: term_reviewed_at != null ?
+                    1 : 0,
+                def_first_reviewed_at: def_reviewed_at?.toISOString(),
+                def_last_reviewed_at: def_reviewed_at?.toISOString(),
+                def_review_count: def_reviewed_at != null ?
+                    1 : 0,
+                term_leitner_system_box: term_leitner_system_box,
+                def_leitner_system_box: def_leitner_system_box
+            });
+            return newProgressId;
+        }
     }
 }
