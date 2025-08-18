@@ -612,7 +612,10 @@
                   <IconMoreDotsV />
                 </button>
                 <div class="content">
-                  <button data-sveltekit-preload-data="false" onclick={createLocalStudyset}>
+                  <button data-sveltekit-preload-data="false" onclick={() => {
+                    bypassUnsavedChangesConfirmation = true;
+                    createLocalStudyset()
+                  }}>
                     <IconLocal />
                     Save Locally
                   </button>
