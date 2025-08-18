@@ -22,8 +22,10 @@ export async function load({ cookies }) {
         featuredStudysets {
           id
           title
-          user_id
-          user_display_name
+          user {
+            id
+            display_name
+          }
           terms_count
           updated_at
         }

@@ -95,7 +95,7 @@
               { featuredStudyset.title }
             </a>
             <p class="h6" style="margin-top:0.4rem;margin-bottom:0px">
-              { featuredStudyset.user_display_name }
+              { featuredStudyset.user.display_name }
             </p>
             {#if featuredStudyset.terms_count >= 1}
             <p class="h6" style="margin-top:0.2rem;margin-bottom:0.2rem">
