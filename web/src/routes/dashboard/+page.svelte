@@ -3,69 +3,60 @@
     let { data } = $props();
 
     import { fancyTimestamp } from "$lib/fancyTimestamp";
-    import { openIndexedDB } from "$lib/indexedDB";
+    import db from "$lib/idb-api-layer/db.js";
     import { onMount } from "svelte";
 
     import IconPlus from "$lib/icons/Plus.svelte";
 
-    onMount(function () {
-      if (data?.settingsDateTimeFormatHours == "24h") {
-        fancyTimestamp.hours = 24;
-      } else if (data?.settingsDateTimeFormatHours == "12h") {
-        fancyTimestamp.hours = 12;
-      }
-
-      if (data.authed) {
-        for (var i = 0; i < document.getElementById("studyset-list").children.length; i++) {
-          var timestampElement = document.getElementById("studyset-list").children[i].children[1]
-          if (timestampElement) {
-            timestampElement.innerText = fancyTimestamp.format(timestampElement.dataset.timestamp);
-          }
+    onMount(async function () {
+        if (data?.settingsDateTimeFormatHours == "24h") {
+            fancyTimestamp.hours = 24;
+        } else if (data?.settingsDateTimeFormatHours == "12h") {
+            fancyTimestamp.hours = 12;
         }
-      }
 
-      openIndexedDB(function (db) {
-        var studysetsObjectStore = db.transaction(["studysets"], "readonly").objectStore("studysets");
-        var dbStudysetsReq = studysetsObjectStore.getAll();
-        dbStudysetsReq.onsuccess = function (event) {
-          var studysets = dbStudysetsReq.result;
-          if (studysets.length >= 1) {
+        if (data.authed) {
+            for (var i = 0; i < document.getElementById("studyset-list").children.length; i++) {
+                var timestampElement = document.getElementById("studyset-list").children[i].children[1]
+                if (timestampElement) {
+                  timestampElement.innerText = fancyTimestamp.format(timestampElement.dataset.timestamp);
+                }
+            }
+        }
+
+        const studysets = await db.studysets.orderBy("updated_at").toArray();
+        console.log(studysets)
+        if (studysets.length >= 1) {
             var localListTitleElement = document.getElementById("local-list-title");
             if (localListTitleElement) {
-              localListTitleElement.classList.remove("hide");
+                localListTitleElement.classList.remove("hide");
             }
             document.getElementById("local-list").classList.remove("hide");
             studysets.sort(function (a, b) {
-              return Date.parse(b.updated_at) - Date.parse(a.updated_at)
+                return Date.parse(b.updated_at) - Date.parse(a.updated_at)
             })
             for (var i = 0; i < studysets.length; i++) {
-              var div = document.createElement("div");
-              div.classList.add("box");
-              var title = document.createElement("a");
-              title.innerText = studysets[i].title;
-              title.href = "/studyset/local?id=" + studysets[i].id;
-              div.appendChild(title);
-              if (studysets[i].updated_at) {
-                var timestamp = document.createElement("p");
-                timestamp.classList.add("h6");
-                timestamp.innerText = fancyTimestamp.format(studysets[i].updated_at);
-                div.appendChild(timestamp);
-              }
-              document.getElementById("local-list").appendChild(div);
+                var div = document.createElement("div");
+                div.classList.add("box");
+                var title = document.createElement("a");
+                title.innerText = studysets[i].title;
+                title.href = "/studyset/local?id=" + studysets[i].id;
+                div.appendChild(title);
+                if (studysets[i].updated_at) {
+                    var timestamp = document.createElement("p");
+                    timestamp.classList.add("h6");
+                    timestamp.innerText = fancyTimestamp.format(studysets[i].updated_at);
+                    div.appendChild(timestamp);
+                }
+                document.getElementById("local-list").appendChild(div);
             }
-          } else {
+        } else {
             var emptyMessageElement = document.getElementById("local-list-empty");
             if (emptyMessageElement) {
-              document.getElementById("local-list").classList.remove("hide");
-              emptyMessageElement.classList.remove("hide");
+                document.getElementById("local-list").classList.remove("hide");
+                emptyMessageElement.classList.remove("hide");
             }
-          }
         }
-        dbStudysetsReq.onerror = function (error) {
-          alert("error getting local studysets list from indexeddb");
-          console.error(error);
-        }
-      })
     })
 </script>
 
