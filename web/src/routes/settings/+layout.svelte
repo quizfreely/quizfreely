@@ -72,9 +72,6 @@
             <a href="/settings/account" class="settings-menu-link {page.data.settingsSection == "account" ? "current" : ""}">
                 Account
             </a>
-            <a href="/settings/studying-algorithm" class="settings-menu-link {page.data.settingsSection == "studying_algorithm" ? "current" : ""}">
-                Studying Algorithm
-            </a>
         </div>
     </div>
     <div style="margin-top:0px">
