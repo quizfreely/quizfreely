@@ -118,14 +118,16 @@
     </div>
   </div>
     {#if data.authed}
-    <div id="signedin-div" class="grid page">
-      <div class="content">
-        <h2>You're signed in!</h2>
-        <div class="flex">
-          <a href="/dashboard" class="button yay large">Dashboard</a>
-          <a href="/settings" class="button yay large alt">Settings</a>
-        </div>
-      </div>
+    <div id="signedin-div" class="grid thin-centered">
+          <div class="content">
+            <div class="box" style="margin-top: 6rem;">
+                <p class="h3">You're signed in!</p>
+                <div class="flex">
+                  <a href="/dashboard" class="button yay">Dashboard</a>
+                  <a href="/settings" class="button yay alt">Settings</a>
+                </div>
+            </div>
+          </div>
     </div>
     {:else}
       <div id="account-div">
