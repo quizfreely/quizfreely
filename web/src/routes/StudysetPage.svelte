@@ -38,8 +38,9 @@
         }
     }
 
-    onMount(async function () {
+    onMount(function () {
         if (data.local) {
+            (async () => {
             const localStudyset = await idbApiLayer.getStudysetById(
                 data.localId,
                 {
@@ -50,19 +51,9 @@
             );
             title = localStudyset?.title;
             terms = localStudyset?.terms;
+            })();
         }
 
-        document.getElementById("flashcard").addEventListener("click", flashcardsFlip);
-        document.getElementById("flashcards-flip-button").addEventListener("click", flashcardsFlip);
-        document.getElementById("flashcards-prev-button").addEventListener("click", flashcardsPrev);
-        document.getElementById("flashcards-next-button").addEventListener("click", flashcardsNext);
-
-        /* the modal's html is the same for local and authed */
-        if (document.getElementById("delete-button")) {
-          document.getElementById("delete-button").addEventListener("click", function () {
-            showDeleteConfirmationModal = true
-          })
-        }
         function maximizeFlashcards() {
             document.getElementById("title-and-menu-outer-div").classList.add("hide");
             document.getElementById("terms-and-stuff-outer-div").classList.add("hide");
@@ -79,10 +70,8 @@
 
             document.getElementById("flashcards-unmaximize").classList.add("hide");
         }
-        document.getElementById("flashcards-maximize").addEventListener("click", maximizeFlashcards);
-        document.getElementById("flashcards-unmaximize").addEventListener("click", unmaximizeFlashcards);
 
-        window.addEventListener("keydown", e => {
+        function flashcardsOnKeyDown(e) {
             switch (e.key) {
                 case "ArrowLeft":
                     e.preventDefault(); /* prevent scrolling */
@@ -101,14 +90,31 @@
                 /* next/prev is in keydown to allow spamming to move quickly,
                 flip is in keyup to prevent spam reflipping */
             }
-        })
-        window.addEventListener("keyup", e => {
+        }
+        function flashcardsOnKeyUp(e) {
             if (e.key == " ") {
                 /* flip in keyup to only flip once */
                 e.preventDefault();
                 flashcardsFlip();
             }
-        })
+        }
+
+        window.addEventListener(
+            "keydown", flashcardsOnKeyDown
+        );
+        window.addEventListener(
+            "keyup", flashcardsOnKeyUp
+        );
+
+        /* return cleanup function to remove eventlisteners */
+        return () => {
+            window.removeEventListener(
+                "keydown", flashcardsOnKeyDown
+            );
+            window.removeEventListener(
+                "keyup", flashcardsOnKeyUp
+            );
+        }
     })
     async function deleteConfirmButtonClicked() {
         if (data.local) {
@@ -189,7 +195,7 @@
               <IconMoreDotsV />
             </button>
             <div class="content">
-              <button class="ohno" id="delete-button"><IconTrash /> Delete </button>
+              <button class="ohno" id="delete-button" onclick={() => {showDeleteConfirmationModal = true}}><IconTrash /> Delete </button>
             </div>
           </div>
         </div>
@@ -211,13 +217,14 @@
         {/if}
       </div>
       <div id="flashcards-outer-div">
-        <button id="flashcards-unmaximize" class="faint hide">
+        <button id="flashcards-unmaximize" class="faint hide" onclick={unmaximizeFlashcards}>
           <IconBackArrow /> Back
         </button>
         <div>
           <div
             class="card double"
             id="flashcard"
+            onclick={flashcardsFlip}
           >
             <div class="content">
               <div class="front" id="flashcard-front" style="white-space:pre-wrap">{ terms?.[flashcardsIndex]?.term ?? "term" }</div>
@@ -241,14 +248,16 @@
                 id="flashcards-prev-button"
                 class="faint"
                 aria-label="Previous Card"
+                onclick={flashcardsPrev}
               >
               <IconArrowLeft />
               </button>
-              <button id="flashcards-flip-button" class="faint">Flip</button>
+              <button id="flashcards-flip-button" class="faint" onclick={flashcardsFlip}>Flip</button>
               <button
                 id="flashcards-next-button"
                 class="faint"
                 aria-label="Next Card"
+                onclick={flashcardsNext}
               >
               <IconArrowRight />
               </button>
@@ -266,7 +275,7 @@
       </div>
       <div id="terms-and-stuff-outer-div">
         <div class="caption grid list">
-          <button id="flashcards-maximize" class="alt">
+          <button id="flashcards-maximize" class="alt" onclick={maximizeFlashcards}>
             <IconFlashcards />
             Flashcards
           </button>
