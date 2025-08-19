@@ -95,6 +95,34 @@
         }
         document.getElementById("flashcards-maximize").addEventListener("click", maximizeFlashcards);
         document.getElementById("flashcards-unmaximize").addEventListener("click", unmaximizeFlashcards);
+
+        window.addEventListener("keydown", e => {
+            switch (e.key) {
+                case "ArrowLeft":
+                    e.preventDefault(); /* prevent scrolling */
+                    flashcardsPrev();
+                    break;
+                case "ArrowRight":
+                    e.preventDefault(); /* prevent scrolling */
+                    flashcardsNext();
+                    break;
+                case " ": /* space */
+                    /* prevent scrolling,
+                    but don't flip here in keydown,
+                    to avoid spam-flipping */
+                    e.preventDefault();
+
+                /* next/prev is in keydown to allow spamming to move quickly,
+                flip is in keyup to prevent spam reflipping */
+            }
+        })
+        window.addEventListener("keyup", e => {
+            if (e.key == " ") {
+                /* flip in keyup to only flip once */
+                e.preventDefault();
+                flashcardsFlip();
+            }
+        })
     })
     async function deleteConfirmButtonClicked() {
         if (data.local) {
