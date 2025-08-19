@@ -111,6 +111,12 @@ export default {
 
         await db.terms.bulkDelete(deleteTermIDs);
     },
+    deleteStudyset: async function (id) {
+        const termIds = await db.terms.where("studyset_id").equals(id).primaryKeys(); /* get term IDs using studyset ID */
+        await db.term_progress.where("term_id").anyOf(termIds).delete(); /* delete progress using term IDs */
+        await db.terms.where("studyset_id").equals(id).delete(); /* delete terms using studyset ID */
+        await db.studysets.delete(id); /* delete studyset */
+    },
     updateTermProgress: async function ({ term_id, term_reviewed_at, def_reviewed_at, term_leitner_system_box, def_leitner_system_box }) {
         if (term_reviewed_at != null && !(
             term_reviewed_at instanceof Date && !isNaN(term_reviewed_at)

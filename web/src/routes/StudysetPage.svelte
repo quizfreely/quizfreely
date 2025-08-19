@@ -1,7 +1,6 @@
 <script>
     import Noscript from "$lib/components/Noscript.svelte";
     import { onMount } from "svelte";
-    import db from "$lib/idb-api-layer/db.js";
     import idbApiLayer from "$lib/idb-api-layer/idb-api-layer.js";
     import { goto } from "$app/navigation";
     import { fade } from "svelte/transition";
@@ -90,7 +89,7 @@
     })
     async function deleteConfirmButtonClicked() {
         if (data.local) {
-            await db.studysets.delete(data.localId);
+            await idbApiLayer.deleteStudyset(data.localId);
             goto("/dashboard");
         } else {
             fetch("/api/graphql", {
