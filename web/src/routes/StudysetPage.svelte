@@ -20,32 +20,23 @@
     import IconSettingsGear from "$lib/icons/SettingsGear.svelte";
 
     var showDeleteConfirmationModal = $state(false);
-    let studyset = $state(data?.studyset);
+    let title = $state(data?.studyset?.title);
+    let terms = $state(data?.studyset?.terms);
+    let flashcardsIndex = $state(0);
 
-    let flashcardsIndex = 0;
     function flashcardsFlip() {
         document.getElementById("flashcard").classList.toggle("flip");
-    }
-    function flashcardsChange() {
-        document.getElementById("flashcard-front").innerText = studyset.terms[flashcardsIndex].term;
-        document.getElementById("flashcard-back").innerText = studyset.terms[flashcardsIndex].def;
-        document.getElementById("flashcards-count").innerText = (flashcardsIndex + 1) + "/" + (studyset.terms.length);
-        progressBarInnerDiv.style.width = (((flashcardsIndex + 1) / studyset.terms.length) * 100) + "%";
     }
     function flashcardsPrev() {
         if (flashcardsIndex > 0) {
             flashcardsIndex -= 1
-            flashcardsChange()
         }
     }
     function flashcardsNext() {
-        if (flashcardsIndex < (studyset.terms.length - 1)) {
+        if (flashcardsIndex < (terms.length - 1)) {
             flashcardsIndex += 1
-            flashcardsChange()
         }
     }
-
-    let progressBarInnerDiv;
 
     onMount(async function () {
         if (data.local) {
@@ -57,14 +48,8 @@
                     }
                 }
             );
-            studyset = localStudyset;
-            /* run flashcardsChange AFTER await-ing */
-            flashcardsChange();
-        }
-        if (data.studyset) {
-            /* cloud studysets don't wait/`await` the same way local studysets do,
-            but it still needs the DOM on a browser for flashcardsChange, so its inside of onMount */
-            flashcardsChange();
+            title = localStudyset?.title;
+            terms = localStudyset?.terms;
         }
 
         document.getElementById("flashcard").addEventListener("click", flashcardsFlip);
@@ -162,8 +147,8 @@
 </script>
 
 <svelte:head>
-    {#if studyset}
-        <title>{studyset.title} - Quizfreely</title>
+    {#if title}
+        <title>{title} - Quizfreely</title>
     {:else}
         <title>Quizfreely</title>
     {/if}
@@ -176,11 +161,7 @@
   <div class="grid page">
     <div class="content">
       <div id="title-and-menu-outer-div">
-        {#if studyset}
-            <h2 class="caption" style="overflow-wrap:anywhere">{ studyset.title }</h2>
-        {:else}
-            <h2 id="studyset-title" class="caption" style="overflow-wrap:anywhere">Title</h2>
-        {/if}
+        <h2 class="caption" style="overflow-wrap:anywhere">{ title ?? "Title" }</h2>
         {#if data.local}
         <p class="fg0">
           <IconLocal /> Local Studyset
@@ -238,37 +219,23 @@
             class="card double"
             id="flashcard"
           >
-            {#if (data.studyset?.terms != null && data.studyset.terms.length > 0) }
             <div class="content">
-              <div class="front" id="flashcard-front" style="white-space:pre-wrap">{ data.studyset.terms[0].term }</div>
-              <div class="back" id="flashcard-back" style="white-space:pre-wrap">{ data.studyset.terms[0].def }</div>
+              <div class="front" id="flashcard-front" style="white-space:pre-wrap">{ terms?.[flashcardsIndex]?.term ?? "term" }</div>
+              <div class="back" id="flashcard-back" style="white-space:pre-wrap">{ terms?.[flashcardsIndex]?.def ?? "definition" }</div>
             </div>
-            {:else}
-            <div class="content">
-              <div class="front" id="flashcard-front" style="white-space:pre-wrap">
-                ...
-              </div>
-              <div class="back" id="flashcard-back" style="white-space:pre-wrap">
-                ...
-              </div>
-            </div>
-            {/if}
           </div>
           <div class="caption">
             <div class="progress-bar thin yay" style="margin-left: 0.4rem; margin-right: 0.4rem;">
-              <div style="width: 1%" bind:this={progressBarInnerDiv}></div>
+              <div style="width: {terms != null ?
+                  ((flashcardsIndex + 1) / terms?.length) * 100 :
+                  "20"
+              }%"></div>
             </div>
           </div>
           <div class="caption centerThree">
-            {#if (data.studyset?.terms != null) }
             <p id="flashcards-count">
-              1/{ data.studyset.terms.length }
+                {flashcardsIndex + 1}/{ terms?.length ?? "?" }
             </p>
-            {:else}
-            <p id="flashcards-count">
-              ...
-            </p>
-            {/if}
             <div class="flex justifyselfcenter compact-gap">
               <button
                 id="flashcards-prev-button"
@@ -331,8 +298,8 @@
               <th>Term</th>
               <th>Definition</th>
             </tr>
-            {#if (studyset?.terms != null) }
-                {#each studyset.terms as term }
+            {#if terms != null}
+                {#each terms as term }
                     <tr>
                       <td style="white-space:pre-wrap">{ term.term }</td>
                       <td style="white-space:pre-wrap">{ term.def }</td>
