@@ -255,7 +255,7 @@
             {/if}
           </div>
           <div class="caption">
-            <div class="progress-bar thin" style="margin-left: 0.4rem; margin-right: 0.4rem;">
+            <div class="progress-bar thin yay" style="margin-left: 0.4rem; margin-right: 0.4rem;">
               <div style="width: 1%" bind:this={progressBarInnerDiv}></div>
             </div>
           </div>
@@ -269,16 +269,18 @@
               ...
             </p>
             {/if}
-            <div class="flex justifyselfcenter">
+            <div class="flex justifyselfcenter compact-gap">
               <button
                 id="flashcards-prev-button"
+                class="faint"
                 aria-label="Previous Card"
               >
               <IconArrowLeft />
               </button>
-              <button id="flashcards-flip-button">Flip</button>
+              <button id="flashcards-flip-button" class="faint">Flip</button>
               <button
                 id="flashcards-next-button"
+                class="faint"
                 aria-label="Next Card"
               >
               <IconArrowRight />
