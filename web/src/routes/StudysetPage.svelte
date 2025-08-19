@@ -57,9 +57,12 @@
                 }
             );
             studyset = localStudyset;
+            /* run flashcardsChange AFTER await-ing */
             flashcardsChange();
         }
         if (data.studyset) {
+            /* cloud studysets don't wait/`await` the same way local studysets do,
+            but it still needs the DOM on a browser for flashcardsChange, so its inside of onMount */
             flashcardsChange();
         }
 
