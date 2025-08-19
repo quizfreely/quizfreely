@@ -29,6 +29,7 @@
         document.getElementById("flashcard-front").innerText = studyset.terms[flashcardsIndex].term;
         document.getElementById("flashcard-back").innerText = studyset.terms[flashcardsIndex].def;
         document.getElementById("flashcards-count").innerText = (flashcardsIndex + 1) + "/" + (studyset.terms.length);
+        progressBarInnerDiv.style.width = (((flashcardsIndex + 1) / studyset.terms.length) * 100) + "%";
     }
     function flashcardsPrev() {
         if (flashcardsIndex > 0) {
@@ -43,6 +44,8 @@
         }
     }
 
+    let progressBarInnerDiv;
+
     onMount(async function () {
         if (data.local) {
             const localStudyset = await idbApiLayer.getStudysetById(
@@ -54,6 +57,9 @@
                 }
             );
             studyset = localStudyset;
+            flashcardsChange();
+        }
+        if (data.studyset) {
             flashcardsChange();
         }
 
@@ -215,6 +221,11 @@
               </div>
             </div>
             {/if}
+          </div>
+          <div class="caption">
+            <div class="progress-bar thin yay" style="margin-left: 0.4rem; margin-right: 0.4rem;">
+              <div style="width: 1%" bind:this={progressBarInnerDiv}></div>
+            </div>
           </div>
           <div class="caption centerThree">
             {#if (data.studyset?.terms != null) }
