@@ -15,6 +15,7 @@
     import IconArrowRight from "$lib/icons/ArrowRight.svelte";
     import IconMoreDotsV from "$lib/icons/MoreDotsVertical.svelte";
     import IconReviewModeBook from "$lib/icons/ReviewModeBook.svelte";
+    import IconPracticeTestChecklist from "$lib/icons/PracticeTestChecklist.svelte";
     import IconFlashcards from "$lib/icons/Flashcards.svelte";
     import IconSettingsGear from "$lib/icons/SettingsGear.svelte";
 
@@ -305,19 +306,19 @@
             <IconReviewModeBook />
             Review Mode
           </a>
-          <!--<a href="/studyset/local/quiz?id=<eta>= data.localId </eta>" class="button alt">
-            <IconCheckXMark />
+          <a href="/studyset/local/practice-test?id={data.localId}" class="button alt">
+            <IconPracticeTestChecklist />
             Practice Test
-          </a>-->
+          </a>
           {:else if (data.studyset) }
             <a href="/studysets/{ data.studyset.id }/review-mode" class="button alt">
               <IconReviewModeBook />
               Review Mode
             </a>
-            <!--<a href="/studysets/<eta>= data.studyset.id </eta>/test" class="button alt">
-              <IconCheckXMark />
+            <a href="/studysets/{data.studyset.id}/practice-test" class="button alt">
+              <IconPracticeTestChecklist />
               Practice Test
-            </a>-->
+            </a>
           {/if}
           
         </div>
