@@ -226,7 +226,7 @@
             {/if}
           </div>
           <div class="caption">
-            <div class="progress-bar thin yay" style="margin-left: 0.4rem; margin-right: 0.4rem;">
+            <div class="progress-bar thin" style="margin-left: 0.4rem; margin-right: 0.4rem;">
               <div style="width: 1%" bind:this={progressBarInnerDiv}></div>
             </div>
           </div>
