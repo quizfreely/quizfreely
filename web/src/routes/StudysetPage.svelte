@@ -57,10 +57,12 @@
         function flashcardsOnKeyDown(e) {
             switch (e.key) {
                 case "ArrowLeft":
+                case "h":
                     e.preventDefault(); /* prevent scrolling */
                     flashcardsPrev();
                     break;
                 case "ArrowRight":
+                case "l":
                     e.preventDefault(); /* prevent scrolling */
                     flashcardsNext();
                     break;
