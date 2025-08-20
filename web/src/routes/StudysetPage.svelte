@@ -54,23 +54,6 @@
             })();
         }
 
-        function maximizeFlashcards() {
-            document.getElementById("title-and-menu-outer-div").classList.add("hide");
-            document.getElementById("terms-and-stuff-outer-div").classList.add("hide");
-            document.getElementById("footer-wave").classList.add("hide");
-            document.getElementById("footer").classList.add("hide");
-
-            document.getElementById("flashcards-unmaximize").classList.remove("hide");
-        }
-        function unmaximizeFlashcards() {
-            document.getElementById("title-and-menu-outer-div").classList.remove("hide");
-            document.getElementById("terms-and-stuff-outer-div").classList.remove("hide");
-            document.getElementById("footer-wave").classList.remove("hide");
-            document.getElementById("footer").classList.remove("hide");
-
-            document.getElementById("flashcards-unmaximize").classList.add("hide");
-        }
-
         function flashcardsOnKeyDown(e) {
             switch (e.key) {
                 case "ArrowLeft":
@@ -149,6 +132,23 @@
                 alert("Network error while deleting studyset");
             });
         }
+    }
+
+    function maximizeFlashcards() {
+        document.getElementById("title-and-menu-outer-div").classList.add("hide");
+        document.getElementById("terms-and-stuff-outer-div").classList.add("hide");
+        document.getElementById("footer-wave").classList.add("hide");
+        document.getElementById("footer").classList.add("hide");
+
+        document.getElementById("flashcards-unmaximize").classList.remove("hide");
+    }
+    function unmaximizeFlashcards() {
+        document.getElementById("title-and-menu-outer-div").classList.remove("hide");
+        document.getElementById("terms-and-stuff-outer-div").classList.remove("hide");
+        document.getElementById("footer-wave").classList.remove("hide");
+        document.getElementById("footer").classList.remove("hide");
+
+        document.getElementById("flashcards-unmaximize").classList.add("hide");
     }
 </script>
 
