@@ -47,7 +47,7 @@
       <!--   v0.32.1 · <a href="https://codeberg.org/quizfreely/quizfreely/releases">Changelog (on Codeberg)</a> or <a href="https://github.com/quizfreely/quizfreely/releases">on GitHub</a> -->
       <!-- </p> -->
       <p>
-        Copyright © 2022-2025 Ehan Ahamed and contributors
+        © 2022-2025 Ehan Ahamed and contributors
         <br />
         <!--<a href="/license">License</a>-->
       </p>
