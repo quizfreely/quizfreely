@@ -7,15 +7,6 @@
     let { data } = $props();
     let terms = $state();
 
-    function shuffleArray(ogArray) {
-        let arr = [...ogArray];
-        for (let index = arr.length - 1; index > 0; index--) {
-            const randomIndex = Math.floor(Math.random() * (index + 1));
-            [arr[index], arr[randomIndex]] = [arr[randomIndex], arr[index]];
-        }
-        return arr;
-    }
-
     if (!data.local) {
         terms = data?.studyset?.terms;
     }
@@ -51,6 +42,8 @@
         e.target.classList.add("selected");
     }
 
+    let questionsCountEntered;
+
     let defaultQuestionsCount = $derived.by(() => {
         if (terms == null) {
             return 10;
@@ -64,7 +57,34 @@
         return terms.length;
     });
 
+    function shuffleArray(ogArray) {
+        let arr = [...ogArray];
+        for (let index = arr.length - 1; index > 0; index--) {
+            const randomIndex = Math.floor(Math.random() * (index + 1));
+            [arr[index], arr[randomIndex]] = [arr[randomIndex], arr[index]];
+        }
+        return arr;
+    }
+
     let showSetup = $state(true);
+    let questions = $state([]);
+    function setupStart() {
+        if (terms == null || terms.length < 1) {
+            alert("oops, not enough terms");
+            console.log("Terms array: ", terms);
+            return;
+        }
+
+        let questionsCount = defaultQuestionsCount;
+        if (!isNaN(parseInt(questionsCountEntered))) {
+            questionsCount = questionsCountEntered;
+        }
+        
+        while (questions.length < questionsCount) {
+            random = Math.random() * terms.length;
+        }
+        showSetup = false;
+    }
 </script>
 <div class="grid page">
     <div class="content">
@@ -79,7 +99,7 @@
                 <p class="h4">Practice Test</p>
                 <p style="margin-top: 1rem;">Questions:</p>
                 <div style="margin-top: 0.4rem;">
-                <input type="text" placeholder={defaultQuestionsCount} style="max-width: 4rem;">
+                <input type="text" placeholder={defaultQuestionsCount} style="max-width: 4rem;" bind:value={questionsCountEntered}>
                 </div>
                 <p class="fg0" style="margin-top: 0.4rem;">({terms?.length ?? "?"} total terms in this studyset)</p>
                 <p style="margin-top: 2rem;">Answer with:</p>
@@ -117,7 +137,7 @@
                     </button>
                 </div>
                 <div class="flex" style="margin-top: 2rem;">
-                    <button onclick={() => showSetup = false}><CheckmarkIcon></CheckmarkIcon> Start</button>
+                    <button onclick={setupStart}><CheckmarkIcon></CheckmarkIcon> Start</button>
                 </div>
             </div>
         {/if}
