@@ -537,7 +537,7 @@
                     bind:value={term.def}
                   />
                   <div class="flex center term-row-box-actions">
-                      <div class="dropdown left">
+                      <div class="dropdown left" tabindex="0">
                           <button class="dropdown-toggle" aria-label="Actions dropdown menu">
                               <IconMoreDotsV />
                           </button>
@@ -607,7 +607,7 @@
                 Cancel
               </a>
               {#if data.new && data.authed}
-              <div class="dropdown">
+              <div class="dropdown" tabindex="0">
                 <button class="dropdown-toggle" aria-label="saving options dropdown">
                   <IconMoreDotsV />
                 </button>

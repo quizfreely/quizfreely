@@ -63,7 +63,7 @@
     {/if}
     <div class="status">
         {#if page.data?.authed }
-            <!--<div class="dropdown" style="margin-top:0px;margin-bottom:0px;margin-left:1rem;margin-right:1rem">
+            <!--<div class="dropdown" tabindex="0" style="margin-top:0px;margin-bottom:0px;margin-left:1rem;margin-right:1rem">
                 {#if page.data.authedUser.display_name.length < 10 }
                     <button class="faint">
                       <IconUser />

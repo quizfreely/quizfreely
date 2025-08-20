@@ -190,7 +190,7 @@
             <IconPencil />
             Edit
           </a>
-          <div class="dropdown">
+          <div class="dropdown" tabindex="0">
             <button class="dropdown-toggle" aria-label="More Options Dropdown">
               <IconMoreDotsV />
             </button>
@@ -205,7 +205,7 @@
             <IconPencil />
             Edit
           </a>
-          <div class="dropdown">
+          <div class="dropdown" tabindex="0">
             <button class="dropdown-toggle" aria-label="More Options Dropdown">
               <IconMoreDotsV />
             </button>
