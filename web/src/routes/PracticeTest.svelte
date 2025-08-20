@@ -36,6 +36,19 @@
         eachRandom = Math.random();
         return eachRandom;
     }
+
+    function buttonBoxMultiSelectOnClick(e) {
+        e.target.classList.toggle("selected");
+    }
+    let answerWithDef;
+    let answerWithTerm;
+    let answerWithBoth;
+    function answerWithOnClick(e) {
+        answerWithDef.classList.remove("selected");
+        answerWithTerm.classList.remove("selected");
+        answerWithBoth.classList.remove("selected");
+        e.target.classList.add("selected");
+    }
 </script>
 <div class="grid page">
     <div class="content">
@@ -45,34 +58,43 @@
                 `/studysets/${data.studysetId}`
             }><BackIcon></BackIcon> Back</a>
         </div>
-        <p class="h3" style="margin-top: 1rem;">Practice Test</p>
-        <p>There are {terms?.length} total terms</p>
-        <div class="flex" style="align-content: center; align-items: center;">
-            <span>Questions:</span>
-            <input type="text" placeholder={terms?.length} style="max-width: 4rem;">
+        <p class="h4" style="margin-top: 1rem;">Practice Test</p>
+        <p style="margin-top: 2rem;">Questions:</p>
+        <div style="margin-top: 0.4rem;">
+        <input type="text" placeholder={terms?.length} style="max-width: 4rem;">
         </div>
-        <p>Answer with:</p>
-        <div class="flex">
-            <button class="button-box selected">Definition</button>
-            <button class="button-box"> Term</button>
-            <button class="button-box">Both</button>
+        <p class="fg0" style="margin-top: 0.4rem;">({terms?.length} total terms in this studyset)</p>
+        <p style="margin-top: 2rem;">Answer with:</p>
+        <div class="flex" style="margin-top: 0.6rem;">
+            <button class="button-box selected" style="display: flex;" bind:this={answerWithDef} onclick={answerWithOnClick}>
+                <CheckmarkIcon class="button-box-selected-icon"></CheckmarkIcon>
+                Definition
+            </button>
+            <button class="button-box" style="display: flex;" bind:this={answerWithTerm} onclick={answerWithOnClick}>
+                <CheckmarkIcon class="button-box-selected-icon"></CheckmarkIcon>
+                Term
+            </button>
+            <button class="button-box" style="display: flex;" bind:this={answerWithBoth} onclick={answerWithOnClick}>
+                <CheckmarkIcon class="button-box-selected-icon"></CheckmarkIcon>
+                Both
+            </button>
         </div>
-        <p>Question types:</p>
-        <div style="display: grid; grid-template-columns: auto; justify-content: start;">
-            <button class="button-box selected" style="display: flex;">
-                <CheckmarkIcon></CheckmarkIcon>
+        <p style="margin-top: 2rem;">Question types:</p>
+        <div style="display: grid; grid-template-columns: auto; justify-content: start; margin-top: 0.6rem;">
+            <button class="button-box selected" style="display: flex;" onclick={buttonBoxMultiSelectOnClick}>
+                <CheckmarkIcon class="button-box-selected-icon"></CheckmarkIcon>
                 Multiple Choice
             </button>
-            <button class="button-box selected" style="display: flex;">
-                <CheckmarkIcon></CheckmarkIcon>
+            <button class="button-box" style="display: flex; margin-top: 0.4rem;" onclick={buttonBoxMultiSelectOnClick}>
+                <CheckmarkIcon class="button-box-selected-icon"></CheckmarkIcon>
                 True/False
             </button>
-            <button class="button-box selected" style="display: flex;">
-                <CheckmarkIcon></CheckmarkIcon>
+            <button class="button-box selected" style="display: flex; margin-top: 0.4rem;" onclick={buttonBoxMultiSelectOnClick}>
+                <CheckmarkIcon class="button-box-selected-icon"></CheckmarkIcon>
                 Matching
             </button>
-            <button class="button-box selected" style="display: flex;">
-                <CheckmarkIcon></CheckmarkIcon>
+            <button class="button-box" style="display: flex; margin-top: 0.4rem;" onclick={buttonBoxMultiSelectOnClick}>
+                <CheckmarkIcon class="button-box-selected-icon"></CheckmarkIcon>
                 Free Response
             </button>
         </div>
