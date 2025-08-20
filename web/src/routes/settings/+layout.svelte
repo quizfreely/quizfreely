@@ -1,6 +1,7 @@
 <script>
     import { page } from "$app/state";
     import { fade } from "svelte/transition";
+    import { sineIn, sineOut } from "svelte/easing";
     import Noscript from "$lib/components/Noscript.svelte";
     import IconBackArrow from "$lib/icons/BackArrow.svelte";
     let { children, data } = $props();
@@ -76,7 +77,7 @@
     </div>
     <div style="margin-top:0px">
         {#key data.settingsTransPageKey}
-            <div in:fade={{ duration: 140, delay: 140 }} out:fade={{ duration: 140 }}>
+            <div in:fade={{ duration: 140, delay: 140, easing: sineIn }} out:fade={{ duration: 140, easing: sineOut }}>
                 {@render children()}
             </div>
         {/key}
