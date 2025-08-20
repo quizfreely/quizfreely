@@ -29,20 +29,15 @@
         return eachRandom;
     }
 
-    function buttonBoxMultiSelectOnClick(e) {
-        e.target.classList.toggle("selected");
-    }
-    let answerWithDef;
-    let answerWithTerm;
-    let answerWithBoth;
-    function answerWithOnClick(e) {
-        answerWithDef.classList.remove("selected");
-        answerWithTerm.classList.remove("selected");
-        answerWithBoth.classList.remove("selected");
-        e.target.classList.add("selected");
-    }
+    let answerWith = $state("DEF"); // "TERM", "DEF", or "BOTH"
+    let questionTypesEnabled = $state({
+        mcq: true,
+        trueFalse: false,
+        match: true,
+        frq: false
+    });
 
-    let questionsCountEntered;
+    let questionsCountEntered = $state();
 
     let defaultQuestionsCount = $derived.by(() => {
         if (terms == null) {
@@ -104,34 +99,42 @@
                 <p class="fg0" style="margin-top: 0.4rem;">({terms?.length ?? "?"} total terms in this studyset)</p>
                 <p style="margin-top: 2rem;">Answer with:</p>
                 <div class="flex" style="margin-top: 0.6rem;">
-                    <button class="button-box selected" style="display: flex;" bind:this={answerWithDef} onclick={answerWithOnClick}>
+                    <button class="button-box {answerWith == "DEF" ? "selected" : ""}" style="display: flex;" onclick={() => answerWith = "DEF"}>
                         <CheckmarkIcon class="button-box-selected-icon"></CheckmarkIcon>
                         Definition
                     </button>
-                    <button class="button-box" style="display: flex;" bind:this={answerWithTerm} onclick={answerWithOnClick}>
+                    <button class="button-box {answerWith == "TERM" ? "selected" : ""}" style="display: flex;" onclick={() => answerWith = "TERM"}>
                         <CheckmarkIcon class="button-box-selected-icon"></CheckmarkIcon>
                         Term
                     </button>
-                    <button class="button-box" style="display: flex;" bind:this={answerWithBoth} onclick={answerWithOnClick}>
+                    <button class="button-box {answerWith == "BOTH" ? "selected" : ""}" style="display: flex;" onclick={() => answerWith = "BOTH"}>
                         <CheckmarkIcon class="button-box-selected-icon"></CheckmarkIcon>
                         Both
                     </button>
                 </div>
                 <p style="margin-top: 2rem;">Question types:</p>
                 <div style="display: grid; grid-template-columns: auto; justify-content: start; margin-top: 0.6rem;">
-                    <button class="button-box selected" style="display: flex;" onclick={buttonBoxMultiSelectOnClick}>
+                    <button class="button-box { questionTypesEnabled.mcq ?
+                        "selected" : ""
+                    }" style="display: flex;" onclick={() => questionTypesEnabled.mcq = !questionTypesEnabled.mcq }>
                         <CheckmarkIcon class="button-box-selected-icon"></CheckmarkIcon>
                         Multiple Choice
                     </button>
-                    <button class="button-box" style="display: flex; margin-top: 0.4rem;" onclick={buttonBoxMultiSelectOnClick}>
+                    <button class="button-box { questionTypesEnabled.trueFalse ?
+                        "selected" : ""
+                    }" style="display: flex; margin-top: 0.4rem;" onclick={() => questionTypesEnabled.trueFalse = !questionTypesEnabled.trueFalse}>
                         <CheckmarkIcon class="button-box-selected-icon"></CheckmarkIcon>
                         True/False
                     </button>
-                    <button class="button-box selected" style="display: flex; margin-top: 0.4rem;" onclick={buttonBoxMultiSelectOnClick}>
+                    <button class="button-box { questionTypesEnabled.match ?
+                        "selected" : ""
+                    }" style="display: flex; margin-top: 0.4rem;" onclick={() => questionTypesEnabled.match = !questionTypesEnabled.match}>
                         <CheckmarkIcon class="button-box-selected-icon"></CheckmarkIcon>
                         Matching
                     </button>
-                    <button class="button-box" style="display: flex; margin-top: 0.4rem;" onclick={buttonBoxMultiSelectOnClick}>
+                    <button class="button-box { questionTypesEnabled.frq ?
+                        "selected" : ""
+                    }" style="display: flex; margin-top: 0.4rem;" onclick={() => questionTypesEnabled.frq = !questionTypesEnabled.frq}>
                         <CheckmarkIcon class="button-box-selected-icon"></CheckmarkIcon>
                         Free Response
                     </button>
