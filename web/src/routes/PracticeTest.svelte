@@ -3,8 +3,18 @@
     import idbApiLayer from "$lib/idb-api-layer/idb-api-layer.js";
     let { data } = $props();
     let terms = $state();
+
+    function shuffleArray(ogArray) {
+        let arr = [...ogArray];
+        for (let index = arr.length - 1; index > 0; index--) {
+            const randomIndex = Math.floor(Math.random() * (index + 1));
+            [arr[index], arr[randomIndex]] = [arr[randomIndex], arr[index]];
+        }
+        return arr;
+    }
+
     if (!data.local) {
-        terms = data?.studyset?.terms;
+        terms = shuffleArray(data?.studyset?.terms);
     }
     onMount(() => {
         if (data.local) {
@@ -14,9 +24,22 @@
                         progress: true
                     }
                 })
-                terms = studyset.terms;
+                terms = shuffleArray(studyset.terms);
             })();
         }
     })
+
+    let eachRandom;
+    function newEachRandom() {
+        eachRandom = Math.random();
+        return eachRandom;
+    }
 </script>
 <p style="white-space: pre-wrap">{JSON.stringify(terms, null, 4)}</p>
+{#each terms as term}
+    {#if newEachRandom() < 0.5}
+        e
+    {:else}
+        a
+    {/if}
+{/each}
