@@ -42,7 +42,8 @@ export default {
         if (resolveProps?.progress) {
             await Promise.all(
                 terms.map(async term => {
-                    term.progress = await db.term_progress.where("term_id").equals(term.id).toArray();
+                    const progressArray = await db.term_progress.where("term_id").equals(term.id).toArray();
+                    term.progress = progressArray?.[0] ?? null;
                 })
             );
         }
