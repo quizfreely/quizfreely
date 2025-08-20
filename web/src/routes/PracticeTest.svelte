@@ -68,7 +68,7 @@
 </script>
 <div class="grid page">
     <div class="content">
-        <div class="flex" style="margin-top: 1rem;">
+        <div class="flex">
             <a class="button faint" href={data.local ?
                 `/studyset/local?id=${data.localId}` :
                 `/studysets/${data.studysetId}`
