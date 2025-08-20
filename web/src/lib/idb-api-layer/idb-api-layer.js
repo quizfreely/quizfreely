@@ -117,7 +117,13 @@ export default {
         await db.terms.where("studyset_id").equals(id).delete(); /* delete terms using studyset ID */
         await db.studysets.delete(id); /* delete studyset */
     },
-    updateTermProgress: async function ({ term_id, term_reviewed_at, def_reviewed_at, term_leitner_system_box, def_leitner_system_box }) {
+    updateTermProgress: async function ({
+        term_id,
+        term_reviewed_at, def_reviewed_at,
+        term_leitner_system_box, def_leitner_system_box,
+        term_correct_increase, term_incorrect_increase,
+        def_correct_increase, def_incorrect_increase
+    }) {
         if (term_reviewed_at != null && !(
             term_reviewed_at instanceof Date && !isNaN(term_reviewed_at)
         )) {
@@ -147,7 +153,11 @@ export default {
                         (existingProgress[0]?.def_review_count ?? 0) + 1 :
                         existingProgress[0]?.def_review_count,
                     term_leitner_system_box: term_leitner_system_box ?? existingProgress[0].term_leitner_system_box,
-                    def_leitner_system_box: def_leitner_system_box ?? existingProgress[0].def_leitner_system_box
+                    def_leitner_system_box: def_leitner_system_box ?? existingProgress[0].def_leitner_system_box,
+                    term_correct_count: (existingProgress[0].term_correct_count) + (term_correct_increase ?? 0),
+                    term_incorrect_count: (existingProgress[0].term_incorrect_count) + (term_incorrect_increase ?? 0),
+                    def_correct_count: (existingProgress[0].def_correct_count) + (def_correct_increase ?? 0),
+                    def_incorrect_count: (existingProgress[0].def_incorrect_count) + (def_incorrect_increase ?? 0)
                 }
             );
             return existingProgress[0].id;
@@ -163,7 +173,11 @@ export default {
                 def_review_count: def_reviewed_at != null ?
                     1 : 0,
                 term_leitner_system_box: term_leitner_system_box,
-                def_leitner_system_box: def_leitner_system_box
+                def_leitner_system_box: def_leitner_system_box,
+                term_correct_count: term_correct_increase ?? 0,
+                term_incorrect_count: term_incorrect_increase ?? 0,
+                def_correct_count: def_correct_increase ?? 0,
+                def_incorrect_count: def_incorrect_increase ?? 0
             });
             return newProgressId;
         }
