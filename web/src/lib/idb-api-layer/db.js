@@ -46,6 +46,27 @@ db.version(6).stores({
             await tx.table("studysets").put(studyset);
         }
     }
+});
+db.version(7).stores({
+    studysets: '++id, title, updated_at',
+    term_progress: "++id, term_id, term_first_reviewed_at, term_last_reviewed_at, " +
+        "term_review_count, def_first_reviewed_at, def_last_reviewed_at, " +
+        "def_review_count, term_leitner_system_box, def_leitner_system_box, " +
+        "term_correct_count, term_incorrect_count, def_correct_count, def_incorrect_count",
+}).upgrade((tx) => {
+    return tx.table("term_progress").toCollection().modify(row => {
+        if (row.term_correct_count == null) {
+            row.term_correct_count = 0;
+        }
+        if (row.term_incorrect_count == null) {
+            row.term_incorrect_count = 0;
+        }
+        if (row.def_correct_count == null) {
+            row.def_correct_count = 0;
+        }
+        if (row.def_incorrect_count == null) {
+            row.def_incorrect_count = 0;
+        }
+    });
 })
-
 export default db;
