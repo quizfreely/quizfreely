@@ -17,7 +17,7 @@ export async function load({ cookies, params}) {
         username
         display_name
     }
-    studyset(id: $id) {
+    studyset(id: $studysetId) {
         id
         title
         updated_at
@@ -39,6 +39,9 @@ export async function load({ cookies, params}) {
             })
         });
         const resp = await respRaw.json();
+        if (resp?.data == null || resp?.errors != null) {
+            console.log("Error in cloud studyset practice test load func api request. Response: ", resp);
+        }
         return {
             studysetId: params.id,
             studyset: resp?.data?.studyset,
