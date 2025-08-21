@@ -68,5 +68,9 @@ db.version(7).stores({
             row.def_incorrect_count = 0;
         }
     });
-})
+});
+db.version(8).stores({
+    term_confusion_pairs: "++id, term_id, confused_term_id, answered_with, confused_count, last_confused_at",
+    practice_tests: "++id, timestamp, studyset_id, questions_correct, questions_total, questions"
+});
 export default db;
