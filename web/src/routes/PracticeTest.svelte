@@ -74,10 +74,58 @@
         if (!isNaN(parseInt(questionsCountEntered))) {
             questionsCount = questionsCountEntered;
         }
-        
-        while (questions.length < questionsCount) {
-            random = Math.random() * terms.length;
+
+        questionTypesEnabledArray = [];
+        Object.entries(questionTypesEnabled).forEach(
+            ([questionType, enabled]) => {
+                if (enabled) {
+                    questionTypesEnabledArray.push(questionType);
+                }
+            }
+        )
+
+
+        function pickNewRandomTerm(termsArray) {
+            if (termsArray.length == 0) {
+                pickRepeatedRandomTerm();
+                return;
+            }
+            random = Math.random() * termsArray.length;
+            
+            questions.push({
+
+            })
+            pickNewRandomTerm(termsArray.splice(random, 1))
         }
+
+        function pickRepeatedRandomTerm() {
+            random = Math.random() * terms.length;
+            questionsWSameTerm = questions.filter(
+                q => q.termId == terms[random].id
+            );
+            unusedQuestionTypes = [...questionTypesEnabledArray];
+            questionsWSameTerm.forEach(q => {
+                const index = unusedQuestionTypes.indexOf(q.questionType);
+                if (index > -1) {
+                    unusedQuestionTypes.splice(index, 1);
+                }
+            });
+            if (unusedQuestionTypes.length > 0) {
+                
+            } else {
+
+            }
+        }
+
+        function addMCQFromTerm(term) {
+            if (term.progress == null) {
+                
+            } else {
+
+            }
+        }
+        
+        pickNewRandomTerm(terms);
         showSetup = false;
     }
 </script>
