@@ -30,6 +30,24 @@ export async function load({ cookies, params}) {
             id
             term
             def
+            top_confusion_pairs {
+                confused_term {
+                    id
+                    term
+                    def
+                }
+                answered_with
+                confused_count
+            }
+            top_reverse_confusion_pairs {
+                confused_term {
+                    id
+                    term
+                    def
+                }
+                answered_with
+                confused_count
+            }
         }
     }
 }`,
