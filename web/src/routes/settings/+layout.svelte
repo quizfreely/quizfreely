@@ -77,7 +77,7 @@
     </div>
     <div style="margin-top:0px">
         {#key data.settingsTransPageKey}
-            <div in:fade={{ duration: 140, delay: 140, easing: sineIn }} out:fade={{ duration: 140, easing: sineOut }}>
+            <div in:fade={{ duration: 120, delay: 120, easing: sineIn }} out:fade={{ duration: 120, easing: sineOut }}>
                 {@render children()}
             </div>
         {/key}
