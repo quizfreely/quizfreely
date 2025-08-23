@@ -22,18 +22,18 @@ if (searchQuery.length >= 1) {
             authedUser {
               id
               username
-              display_name
-              auth_type
-              oauth_google_email
+              displayName
+              authType
+              oauthGoogleEmail
             }
             searchStudysets(q: $q) {
               id
               title
               user {
                 id
-                display_name
+                displayName
               }
-              terms_count
+              termsCount
             }
           }`,
           variables: {

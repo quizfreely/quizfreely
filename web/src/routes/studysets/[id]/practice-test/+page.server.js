@@ -15,38 +15,38 @@ export async function load({ cookies, params}) {
     authedUser {
         id
         username
-        display_name
+        displayName
     }
     studyset(id: $studysetId) {
         id
         title
-        updated_at
+        updatedAt
         user {
             id
-            display_name
+            displayName
         }
         private
         terms {
             id
             term
             def
-            top_confusion_pairs {
-                confused_term {
+            topConfusionPairs {
+                confusedTerm {
                     id
                     term
                     def
                 }
-                answered_with
-                confused_count
+                answeredWith
+                confusedCount
             }
-            top_reverse_confusion_pairs {
-                confused_term {
+            topReverseConfusionPairs {
+                confusedTerm {
                     id
                     term
                     def
                 }
-                answered_with
-                confused_count
+                answeredWith
+                confusedCount
             }
         }
     }

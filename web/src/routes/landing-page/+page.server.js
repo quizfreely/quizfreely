@@ -17,17 +17,17 @@ export async function load({ cookies }) {
         authedUser {
           id
           username
-          display_name
+          displayName
         }
         featuredStudysets {
           id
           title
           user {
             id
-            display_name
+            displayName
           }
-          terms_count
-          updated_at
+          termsCount
+          updatedAt
         }
       }`
     })

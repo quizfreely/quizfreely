@@ -21,15 +21,15 @@ export async function load({ params, cookies }) {
               authedUser {
                 id
                 username
-                display_name
+                displayName
               }
               studyset(id: $id) {
                 id
                 title
-                updated_at
+                updatedAt
                 user {
                     id
-                    display_name
+                    displayName
                 }
                 private
                 terms {

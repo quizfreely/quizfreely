@@ -67,14 +67,14 @@ export async function load({ cookies, locals }) {
           authedUser {
             id
             username
-            display_name
+            displayName
           }
           myStudysets {
             id
             title
             private
-            terms_count
-            updated_at
+            termsCount
+            updatedAt
           }
         }`
       })

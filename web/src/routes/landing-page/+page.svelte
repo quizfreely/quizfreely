@@ -95,11 +95,11 @@
               { featuredStudyset.title }
             </a>
             <p class="h6" style="margin-top:0.4rem;margin-bottom:0px">
-              { featuredStudyset.user.display_name }
+              { featuredStudyset.user.displayName }
             </p>
-            {#if featuredStudyset.terms_count >= 1}
+            {#if featuredStudyset.termsCount >= 1}
             <p class="h6" style="margin-top:0.2rem;margin-bottom:0.2rem">
-              { featuredStudyset.terms_count } Terms
+              { featuredStudyset.termsCount } Terms
             </p>
             {/if}
           </div>

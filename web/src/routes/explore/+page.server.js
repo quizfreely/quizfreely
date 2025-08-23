@@ -14,27 +14,27 @@ export async function load({ cookies }) {
               authedUser {
                 id
                 username
-                display_name
-                auth_type
-                oauth_google_email
+                displayName
+                authType
+                oauthGoogleEmail
               }
               featuredStudysets {
                 id
                 title
                 user {
-                    display_name
+                    displayName
                 }
-                terms_count
-                updated_at
+                termsCount
+                updatedAt
               }
               recentStudysets {
                 id
                 title
                 user {
-                    display_name
+                    displayName
                 }
-                terms_count
-                updated_at
+                termsCount
+                updatedAt
               }
             }`
           })

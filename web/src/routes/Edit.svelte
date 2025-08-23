@@ -182,13 +182,13 @@
                     id: terms[index].id,
                     term: terms[index].term,
                     def: terms[index].def,
-                    sort_order: index
+                    sortOrder: index
                 });
             } else {
                 newTerms.push({
                     term: terms[index].term,
                     def: terms[index].def,
-                    sort_order: index
+                    sortOrder: index
                 });
             }
         }
@@ -221,7 +221,7 @@
             newTerms.push({
                 term: terms[index].term,
                 def: terms[index].def,
-                sort_order: index
+                sortOrder: index
             });
         }
 
@@ -252,13 +252,13 @@
                     id: terms[index].id,
                     term: terms[index].term,
                     def: terms[index].def,
-                    sort_order: index
+                    sortOrder: index
                 });
             } else {
                 newTerms.push({
                     term: terms[index].term,
                     def: terms[index].def,
-                    sort_order: index
+                    sortOrder: index
                 });
             }
         }
@@ -317,7 +317,7 @@
             newTerms.push({
                 term: terms[index].term,
                 def: terms[index].def,
-                sort_order: index
+                sortOrder: index
             });
         }
         const query = `

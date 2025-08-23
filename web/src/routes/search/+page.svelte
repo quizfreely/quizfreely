@@ -27,9 +27,9 @@
           <a href="/studysets/{ studyset.id }">
             { studyset.title }
           </a>
-          {#if (studyset.terms_count >= 1) }
+          {#if (studyset.termsCount >= 1) }
           <p class="h6">
-            { studyset.terms_count } Terms
+            { studyset.termsCount } Terms
           </p>
           {/if}
         </div>

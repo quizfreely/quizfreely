@@ -24,14 +24,14 @@
         },
         body: JSON.stringify({
             query: `
-                mutation UpdateDisplayName($display_name: String) {
-                    updateUser(display_name: $display_name) {
-                        display_name
+                mutation UpdateDisplayName($displayName: String) {
+                    updateUser(displayName: $displayName) {
+                        displayName
                     }
                 }
             `,
             variables: {
-                display_name: displayName
+                displayName: displayName
             }
         })
     }).then(response => response.json())
@@ -39,7 +39,7 @@
         if (result.errors) {
             console.error(result.errors);
         } else if (result.data?.updateUser) {
-            document.getElementById("account-display-name").innerText = result.data.updateUser.display_name;
+            document.getElementById("account-display-name").innerText = result.data.updateUser.displayName;
         }
         document.getElementById("display-name-view-div").classList.remove("hide");
         document.getElementById("display-name-edit-div").classList.add("hide");
@@ -81,11 +81,11 @@
                 document.getElementById("delete-account-delete-all-my-studysets-false").classList.remove("selected");
             })
             document.getElementById("delete-account-confirm-button").addEventListener("click", function () {
-                if (data.authedUser.auth_type == "OAUTH_GOOGLE" || document.getElementById("delete-account-confirm-password-input").value.length > 0) {
+                if (data.authedUser.authType == "OAUTH_GOOGLE" || document.getElementById("delete-account-confirm-password-input").value.length > 0) {
                     var reqBody = {
                         deleteAllMyStudysets: document.getElementById("delete-account-delete-all-my-studysets-true").classList.contains("selected"),
                     };
-                    if (data.authedUser.auth_type != "OAUTH_GOOGLE") {
+                    if (data.authedUser.authType != "OAUTH_GOOGLE") {
                         reqBody.confirmPassword = document.getElementById("delete-account-confirm-password-input").value
                     };
                     fetch("/api/v0/auth/delete-account", {
@@ -98,7 +98,7 @@
                         response.json().then(function (responseJSON) {
                             if (responseJSON.error) {
                                 console.error(responseJSON.error);
-                                if (data.authedUser.auth_type == "OAUTH_GOOGLE") {
+                                if (data.authedUser.authType == "OAUTH_GOOGLE") {
                                     alert("API Error, idk why skull emoji")
                                 } else {
                                     alert("API Errored (but nicely), check your password mabye?");
@@ -123,26 +123,26 @@
   <div class="flex compact-gap align-end" id="display-name-view-div">
     <p>
       <span class="h6">Display name:</span><br />
-      <span id="account-display-name">{ data.authedUser.display_name }</span>
+      <span id="account-display-name">{ data.authedUser.displayName }</span>
     </p>
     <button class="icon-only-button" id="display-name-edit-button" aria-label="Edit"><IconPencil /></button>
   </div>
   <div id="display-name-edit-div" class="hide" style="margin-top:0px">
     <p class="h6" style="margin-bottom:0.6rem">Display Name:</p>
     <div class="flex" style="margin-top:0px">
-      <input type="text" id="display-name-edit" placeholder="Display Name" value={ data.authedUser.display_name } />
+      <input type="text" id="display-name-edit" placeholder="Display Name" value={ data.authedUser.displayName } />
     </div>
     <div class="flex">
       <button id="display-name-edit-save-button">Save</button>
       <button id="display-name-edit-cancel-button" class="alt">Cancel</button>
     </div>
   </div>
-  {#if data.authedUser.auth_type == "OAUTH_GOOGLE"}
+  {#if data.authedUser.authType == "OAUTH_GOOGLE"}
   <div id="account-oauth-google-div">
       <p class="fg0">Signed in with Google</p>
       <p>
         <span class="h6">Google account:</span><br />
-        <span id="account-oauth-google-email">{ data.authedUser.oauth_google_email }</span>
+        <span id="account-oauth-google-email">{ data.authedUser.oauthGoogleEmail }</span>
       </p>
     </div>
   {:else}
@@ -189,7 +189,7 @@
       </div>
       <br>
       <p class="fg0">This will delete all data/content in your account. <br>Even if you keep your public studysets, all your account/profile info will be deleted.</p>
-      {#if !(data.authedUser.auth_type == "OAUTH_GOOGLE") }
+      {#if !(data.authedUser.authType == "OAUTH_GOOGLE") }
           <div><input type="password" placeholder="Enter password to confirm" id="delete-account-confirm-password-input"></div>
       {/if}
       <div class="flex">

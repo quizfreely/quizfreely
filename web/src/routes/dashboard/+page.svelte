@@ -24,7 +24,7 @@
             }
         }
 
-        const studysets = await db.studysets.orderBy("updated_at").toArray();
+        const studysets = await db.studysets.orderBy("updatedAt").toArray();
         console.log(studysets)
         if (studysets.length >= 1) {
             var localListTitleElement = document.getElementById("local-list-title");
@@ -33,7 +33,7 @@
             }
             document.getElementById("local-list").classList.remove("hide");
             studysets.sort(function (a, b) {
-                return Date.parse(b.updated_at) - Date.parse(a.updated_at)
+                return Date.parse(b.updatedAt) - Date.parse(a.updatedAt)
             })
             for (var i = 0; i < studysets.length; i++) {
                 var div = document.createElement("div");
@@ -42,10 +42,10 @@
                 title.innerText = studysets[i].title;
                 title.href = "/studyset/local?id=" + studysets[i].id;
                 div.appendChild(title);
-                if (studysets[i].updated_at) {
+                if (studysets[i].updatedAt) {
                     var timestamp = document.createElement("p");
                     timestamp.classList.add("h6");
-                    timestamp.innerText = fancyTimestamp.format(studysets[i].updated_at);
+                    timestamp.innerText = fancyTimestamp.format(studysets[i].updatedAt);
                     div.appendChild(timestamp);
                 }
                 document.getElementById("local-list").appendChild(div);
@@ -86,7 +86,7 @@
             {#each data.studysetList as studyset}
               <div class="box">
                 <a href="/studysets/{ studyset.id }">{ studyset.title }</a>
-                <p class="h6" data-timestamp={ studyset.updated_at }>...</p>
+                <p class="h6" data-timestamp={ studyset.updatedAt }>...</p>
               </div>
             {/each}
           {:else}
