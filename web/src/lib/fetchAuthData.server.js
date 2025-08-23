@@ -18,9 +18,9 @@ export default async function ({ cookies }) {
             authedUser {
               id
               username
-              display_name
-              auth_type
-              oauth_google_email
+              displayName
+              authType
+              oauthGoogleEmail
             }
           }`
         })
