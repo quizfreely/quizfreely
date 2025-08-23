@@ -25,7 +25,6 @@
         }
 
         const studysets = await db.studysets.orderBy("updatedAt").toArray();
-        console.log(studysets)
         if (studysets.length >= 1) {
             var localListTitleElement = document.getElementById("local-list-title");
             if (localListTitleElement) {
