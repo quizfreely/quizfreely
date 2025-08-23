@@ -33,16 +33,19 @@ export default {
                 resolveProps.terms
             );
         }
+        if (resolveProps?.practiceTests) {
+            studysets[0].practiceTests = await db.practiceTests.where("studysetId").equals(id).toArray();
+        }
 
         return studysets[0];
     },
-    getTermsByStudysetId: async function (studyset_id, resolveProps) {
-        const terms = await db.terms.where("studyset_id").equals(studyset_id).toArray();
+    getTermsByStudysetId: async function (studysetId, resolveProps) {
+        const terms = await db.terms.where("studysetId").equals(studysetId).toArray();
 
         if (resolveProps?.progress) {
             await Promise.all(
                 terms.map(async term => {
-                    const progressArr = await db.term_progress.where("term_id").equals(term.id).toArray();
+                    const progressArr = await db.termProgress.where("termId").equals(term.id).toArray();
                     term.progress = progressArr?.[0] ?? null;
                 })
             );
@@ -55,8 +58,8 @@ export default {
         const newId = await db.studysets.add({
             title: isTitleValid(title) ?
                 title : "Untitled Studyset",
-            created_at: rnISOString,
-            updated_at: rnISOString
+            createdAt: rnISOString,
+            updatedAt: rnISOString
         });
         
         let newTerms = [];
@@ -64,10 +67,10 @@ export default {
             newTerms.push({
                 term: term.term,
                 def: term.def,
-                studyset_id: newId,
-                sort_order: term.sort_order,
-                created_at: rnISOString,
-                updated_at: rnISOString,
+                studysetId: newId,
+                sortOrder: term.sortOrder,
+                createdAt: rnISOString,
+                updatedAt: rnISOString,
             })
         })
         await db.terms.bulkAdd(newTerms);
@@ -78,7 +81,7 @@ export default {
         await db.studysets.update(id, {
             title: isTitleValid(title) ?
                 title : "Untitled Studyset",
-            updated_at: rnISOString
+            updatedAt: rnISOString
         });
 
         let bulkUpdateTerms = [];
@@ -88,8 +91,8 @@ export default {
                 changes: {
                     term: term.term,
                     def: term.def,
-                    sort_order: term.sort_order,
-                    updated_at: rnISOString,
+                    sortOrder: term.sortOrder,
+                    updatedAt: rnISOString,
                 }
             });
         })
@@ -102,10 +105,10 @@ export default {
             bulkAddNewTerms.push({
                 term: term.term,
                 def: term.def,
-                studyset_id: id,
-                sort_order: term.sort_order,
-                created_at: rnISOString,
-                updated_at: rnISOString,
+                studysetId: id,
+                sortOrder: term.sortOrder,
+                createdAt: rnISOString,
+                updatedAt: rnISOString,
             })
         })
         await db.terms.bulkAdd(bulkAddNewTerms);
@@ -113,72 +116,72 @@ export default {
         await db.terms.bulkDelete(deleteTermIDs);
     },
     deleteStudyset: async function (id) {
-        const termIds = await db.terms.where("studyset_id").equals(id).primaryKeys(); /* get term IDs using studyset ID */
-        await db.term_progress.where("term_id").anyOf(termIds).delete(); /* delete progress using term IDs */
-        await db.terms.where("studyset_id").equals(id).delete(); /* delete terms using studyset ID */
+        const termIds = await db.terms.where("studysetId").equals(id).primaryKeys(); /* get term IDs using studyset ID */
+        await db.termProgress.where("termId").anyOf(termIds).delete(); /* delete progress using term IDs */
+        await db.terms.where("studysetId").equals(id).delete(); /* delete terms using studyset ID */
         await db.studysets.delete(id); /* delete studyset */
     },
     updateTermProgress: async function ({
-        term_id,
-        term_reviewed_at, def_reviewed_at,
-        term_leitner_system_box, def_leitner_system_box,
-        term_correct_increase, term_incorrect_increase,
-        def_correct_increase, def_incorrect_increase
+        termId,
+        termReviewedAt, defReviewedAt,
+        termLeitnerSystemBox, defLeitnerSystemBox,
+        termCorrectIncrease, termIncorrectIncrease,
+        defCorrectIncrease, defIncorrectIncrease
     }) {
-        if (term_reviewed_at != null && !(
-            term_reviewed_at instanceof Date && !isNaN(term_reviewed_at)
+        if (termReviewedAt != null && !(
+            termReviewedAt instanceof Date && !isNaN(termReviewedAt)
         )) {
-            console.error("(idb-api-layer: updateTermProgress) term_reviewed_at is not a valid Date object and not null")
+            console.error("(idb-api-layer: updateTermProgress) termReviewedAt is not a valid Date object and not null")
             return false;
         }
-        if (def_reviewed_at != null && !(
-            def_reviewed_at instanceof Date && !isNaN(def_reviewed_at)
+        if (defReviewedAt != null && !(
+            defReviewedAt instanceof Date && !isNaN(defReviewedAt)
         )) {
-            console.error("(idb-api-layer: updateTermProgress) def_reviewed_at is not a valid Date object and not null")
+            console.error("(idb-api-layer: updateTermProgress) defReviewedAt is not a valid Date object and not null")
             return false;
         }
 
-        existingProgress = await db.term_progress.where("term_id").equals(term_id);
+        existingProgress = await db.termProgress.where("termId").equals(termId);
         if (existingProgress?.length > 0) {
-            await db.term_progress.update(
+            await db.termProgress.update(
                 existingProgress[0].id,
                 {
-                    term_last_reviewed_at: term_reviewed_at != null ?
-                        term_reviewed_at.toISOString() : existingProgress[0].term_last_reviewed_at,
-                    term_review_count: term_reviewed_at != null ?
-                        (existingProgress[0]?.term_review_count ?? 0) + 1 :
-                        existingProgress[0]?.term_review_count,
-                    def_last_reviewed_at: def_reviewed_at != null ?
-                        def_reviewed_at.toISOString() : existingProgress[0].def_last_reviewed_at,
-                    def_review_count: def_reviewed_at != null ?
-                        (existingProgress[0]?.def_review_count ?? 0) + 1 :
-                        existingProgress[0]?.def_review_count,
-                    term_leitner_system_box: term_leitner_system_box ?? existingProgress[0].term_leitner_system_box,
-                    def_leitner_system_box: def_leitner_system_box ?? existingProgress[0].def_leitner_system_box,
-                    term_correct_count: (existingProgress[0].term_correct_count) + (term_correct_increase ?? 0),
-                    term_incorrect_count: (existingProgress[0].term_incorrect_count) + (term_incorrect_increase ?? 0),
-                    def_correct_count: (existingProgress[0].def_correct_count) + (def_correct_increase ?? 0),
-                    def_incorrect_count: (existingProgress[0].def_incorrect_count) + (def_incorrect_increase ?? 0)
+                    termLastReviewedAt: termReviewedAt != null ?
+                        termReviewedAt.toISOString() : existingProgress[0].termLastReviewedAt,
+                    termReviewCount: termReviewedAt != null ?
+                        (existingProgress[0]?.termReviewCount ?? 0) + 1 :
+                        existingProgress[0]?.termReviewCount,
+                    defLastReviewedAt: defReviewedAt != null ?
+                        defReviewedAt.toISOString() : existingProgress[0].defLastReviewedAt,
+                    defReviewCount: defReviewedAt != null ?
+                        (existingProgress[0]?.defReviewCount ?? 0) + 1 :
+                        existingProgress[0]?.defReviewCount,
+                    termLeitnerSystemBox: termLeitnerSystemBox ?? existingProgress[0].termLeitnerSystemBox,
+                    defLeitnerSystemBox: defLeitnerSystemBox ?? existingProgress[0].defLeitnerSystemBox,
+                    termCorrectCount: (existingProgress[0].termCorrectCount) + (termCorrectIncrease ?? 0),
+                    termIncorrectCount: (existingProgress[0].termIncorrectCount) + (termIncorrectIncrease ?? 0),
+                    defCorrectCount: (existingProgress[0].defCorrectCount) + (defCorrectIncrease ?? 0),
+                    defIncorrectCount: (existingProgress[0].defIncorrectCount) + (defIncorrectIncrease ?? 0)
                 }
             );
             return existingProgress[0].id;
         } else {
-            const newProgressId = await db.term_progress.add({
-                term_id: term_id,
-                term_first_reviewed_at: term_reviewed_at?.toISOString(),
-                term_last_reviewed_at: term_reviewed_at?.toISOString(),
-                term_review_count: term_reviewed_at != null ?
+            const newProgressId = await db.termProgress.add({
+                termId: termId,
+                termFirstReviewedAt: termReviewedAt?.toISOString(),
+                termLastReviewedAt: termReviewedAt?.toISOString(),
+                termReviewCount: termReviewedAt != null ?
                     1 : 0,
-                def_first_reviewed_at: def_reviewed_at?.toISOString(),
-                def_last_reviewed_at: def_reviewed_at?.toISOString(),
-                def_review_count: def_reviewed_at != null ?
+                defFirstReviewedAt: defReviewedAt?.toISOString(),
+                defLastReviewedAt: defReviewedAt?.toISOString(),
+                defReviewCount: defReviewedAt != null ?
                     1 : 0,
-                term_leitner_system_box: term_leitner_system_box,
-                def_leitner_system_box: def_leitner_system_box,
-                term_correct_count: term_correct_increase ?? 0,
-                term_incorrect_count: term_incorrect_increase ?? 0,
-                def_correct_count: def_correct_increase ?? 0,
-                def_incorrect_count: def_incorrect_increase ?? 0
+                termLeitnerSystemBox: termLeitnerSystemBox,
+                defLeitnerSystemBox: defLeitnerSystemBox,
+                termCorrectCount: termCorrectIncrease ?? 0,
+                termIncorrectCount: termIncorrectIncrease ?? 0,
+                defCorrectCount: defCorrectIncrease ?? 0,
+                defIncorrectCount: defIncorrectIncrease ?? 0
             });
             return newProgressId;
         }
