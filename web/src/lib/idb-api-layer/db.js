@@ -142,4 +142,7 @@ db.version(10).stores({
     term_confusion_pairs: null,
     practice_tests: null
 })
+db.version(11).stores({
+    termConfusionPairs: "++id, termId, confusedTermId, [termId+confusedTermId], answeredWith, confusedCount, lastConfusedAt"
+})
 export default db;
