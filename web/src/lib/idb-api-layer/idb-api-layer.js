@@ -267,7 +267,7 @@ export default {
             }
         }
         return true;
-    }
+    },
     recordPracticeTest: async function (practiceTest) {
         /* returns id after inserting */
         return await db.practiceTests.add(practiceTest);
