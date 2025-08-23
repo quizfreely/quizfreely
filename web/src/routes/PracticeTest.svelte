@@ -15,7 +15,13 @@
             (async () => {
                 const studyset = await idbApiLayer.getStudysetById(data.localId, {
                     terms: {
-                        progress: true
+                        progress: true,
+                        topConfusionPairs: {
+                            confusedTerm: true
+                        },
+                        topReverseConfusionPairs: {
+                            confusedTerm: true
+                        }
                     }
                 })
                 terms = studyset.terms;
