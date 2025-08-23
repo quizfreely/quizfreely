@@ -5,6 +5,7 @@
  * https://codeberg.org/quizfreely/idb-api-layer
  * https://github.com/quizfreely/idb-api-layer
  */
+import Dexie from 'dexie';
 import db from "./db.js";
 
 function isTitleValid(newTitle) {
@@ -40,8 +41,14 @@ export default {
         return studysets[0];
     },
     getTermsByStudysetId: async function (studysetId, resolveProps) {
-        const terms = await db.terms.where("studysetId").equals(studysetId).toArray();
-
+        const terms = await db.terms
+            .where("[studysetId+sortOrder]")
+            .between(
+                [studysetId, Dexie.minKey],
+                [studysetId, Dexie.maxKey],
+                true,
+                true
+            ).toArray();
         if (resolveProps?.progress || resolveProps?.topConfusionPairs || resolveProps?.topReverseConfusionPairs) {
             await Promise.all(
                 terms.map(async term => {
@@ -215,7 +222,16 @@ export default {
         }
     },
     getTopConfusionPairs: async function (termId, resolveProps) {
-        const confusionPairs = db.termConfusionPairs.where("termId").equals(termId).orderBy("confusedCount").limit(3).toArray();
+        const confusionPairs = db.termConfusionPairs
+            .where("[termId+confusedCount]")
+            .between(
+                [termId, Dexie.minKey],
+                [termId, Dexie.maxKey],
+                true,
+                true
+            ).reverse()
+            .limit(3)
+            .toArray();
         if (resolveProps?.confusedTerm) {
             await Promise.all(
                 confusionPairs.map(async confusionPair => {
@@ -227,7 +243,16 @@ export default {
         return confusionPairs;
     },
     getTopReverseConfusionPairs: async function (confusedTermId, resolveProps) {
-        const confusionPairs = db.termConfusionPairs.where("confusedTermId").equals(confusedTermId).orderBy("confusedCount").limit(3).toArray();
+        const confusionPairs = db.termConfusionPairs
+            .where("[confusedTermId+confusedCount]")
+            .between(
+                [confusedTermId, Dexie.minKey],
+                [confusedTermId, Dexie.maxKey],
+                true,
+                true
+            ).reverse()
+            .limit(3)
+            .toArray();
         if (resolveProps?.confusedTerm) {
             await Promise.all(
                 confusionPairs.map(async confusionPair => {

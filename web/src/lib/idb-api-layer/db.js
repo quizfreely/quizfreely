@@ -149,4 +149,7 @@ db.version(12).stores({
     termConfusionPairs: "++id, termId, confusedTermId, [termId+confusedTermId], " +
         "answeredWith, confusedCount, [termId+confusedCount], [confusedTermId+confusedCount], lastConfusedAt"
 })
+db.version(13).stores({
+    terms: "++id, studysetId, sortOrder, [studysetId+sortOrder], createdAt, updatedAt"
+})
 export default db;
