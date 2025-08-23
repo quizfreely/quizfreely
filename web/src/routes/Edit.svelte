@@ -628,51 +628,65 @@
               <div class="content">
                 <div class="grid import-terms-split">
                   <div>
-                    <p>Separating term & definition</p>
-                    <div class="radio">
-                      <label>
-                        <input type="radio" name="import-terms-termdef-delimiter" bind:group={importTermsTermDefDelimiterRadioSelect} value="tab" checked>
-                        <span>tab</span>
-                      </label>
-                    </div>
-                    <div class="radio">
-                      <label>
-                        <input type="radio" name="import-terms-termdef-delimiter" bind:group={importTermsTermDefDelimiterRadioSelect} value="comma">
-                        <span>comma <code>,</code></span>
-                      </label>
-                    </div>
-                    <div class="radio">
-                      <label>
-                        <input type="radio" name="import-terms-termdef-delimiter" bind:group={importTermsTermDefDelimiterRadioSelect} value="custom">
-                        <span>custom</span>
-                      </label>
+                    <p>Between term & definition</p>
+                    <div class="flex compact-gap nowrap" style="flex-direction: column; align-items: start; align-content: start;">
+                        <div class="flex compact-gap nowrap" style="flex-direction: column; align-content: start;">
+                            <button class="button-box {
+                                importTermsTermDefDelimiterRadioSelect == "tab" ?
+                                    "selected" : ""
+                            }" onclick={() => importTermsTermDefDelimiterRadioSelect = "tab"}>
+                                <IconCheckmark class="button-box-selected-icon"></IconCheckmark>
+                                Tab
+                            </button>
+                            <button class="button-box {
+                                importTermsTermDefDelimiterRadioSelect == "comma" ?
+                                    "selected" : ""
+                            }" onclick={() => importTermsTermDefDelimiterRadioSelect = "comma"}>
+                                <IconCheckmark class="button-box-selected-icon"></IconCheckmark>
+                                Comma <code>,</code>
+                            </button>
+                            <button class="button-box {
+                                importTermsTermDefDelimiterRadioSelect == "custom" ?
+                                    "selected" : ""
+                            }" onclick={() => importTermsTermDefDelimiterRadioSelect = "custom"}>
+                                <IconCheckmark class="button-box-selected-icon"></IconCheckmark>
+                                Custom
+                            </button>
+                        </div>
                     </div>
                     {#if importTermsTermDefDelimiterRadioSelect == "custom"}
-                    <input type="text" placeholder="Term/def delimiter" id="import-terms-custom-termdef-delimiter-input" class="slightly-smaller-textbox" transition:scale={{duration:400}}>
+                    <input type="text" placeholder="Term Delimiter" id="import-terms-custom-termdef-delimiter-input" class="slightly-smaller-textbox" transition:scale={{duration:400}}>
                     {/if}
                   </div>
                   <div>
-                    <p>Separating rows</p>
-                    <div class="radio">
-                      <label>
-                        <input type="radio" name="import-terms-row-delimiter" bind:group={importTermsRowDelimiterRadioSelect} value="newline" checked>
-                        <span>new line (enter)</span>
-                      </label>
-                    </div>
-                    <div class="radio">
-                      <label>
-                        <input type="radio" name="import-terms-row-delimiter" bind:group={importTermsRowDelimiterRadioSelect} value="semicolon">
-                        <span>semicolon <code>;</code></span>
-                      </label>
-                    </div>
-                    <div class="radio">
-                      <label>
-                        <input type="radio" name="import-terms-row-delimiter" bind:group={importTermsRowDelimiterRadioSelect} value="custom">
-                        <span>custom</span>
-                      </label>
+                    <p>Between rows</p>
+                    <div class="flex compact-gap nowrap" style="flex-direction: column; align-items: start; align-content: start;">
+                        <div class="flex compact-gap nowrap" style="flex-direction: column; align-content: start;">
+                            <button class="button-box {
+                                importTermsRowDelimiterRadioSelect == "newline" ?
+                                    "selected" : ""
+                            }" onclick={() => importTermsRowDelimiterRadioSelect = "newline"}>
+                                <IconCheckmark class="button-box-selected-icon"></IconCheckmark>
+                                New line
+                            </button>
+                            <button class="button-box {
+                                importTermsRowDelimiterRadioSelect == "semicolon" ?
+                                    "selected" : ""
+                            }" onclick={() => importTermsRowDelimiterRadioSelect = "semicolon"}>
+                                <IconCheckmark class="button-box-selected-icon"></IconCheckmark>
+                                Semicolon <code>;</code>
+                            </button>
+                            <button class="button-box {
+                                importTermsRowDelimiterRadioSelect == "custom" ?
+                                    "selected" : ""
+                            }" onclick={() => importTermsRowDelimiterRadioSelect = "custom"}>
+                                <IconCheckmark class="button-box-selected-icon"></IconCheckmark>
+                                Custom
+                            </button>
+                        </div>
                     </div>
                     {#if importTermsRowDelimiterRadioSelect == "custom"}
-                    <input type="text" placeholder="Row delimiter" id="import-terms-custom-row-delimiter-input" class="slightly-smaller-textbox" transition:scale={{duration:400}}>
+                    <input type="text" placeholder="Row Delimiter" id="import-terms-custom-row-delimiter-input" class="slightly-smaller-textbox" transition:scale={{duration:400}}>
                     {/if}
                   </div>
                 </div>
