@@ -36,8 +36,8 @@
         {/each}
         </div>
       {:else}
-        <h2 style="text-align:center;margin-top:4rem;margin-bottom:0px">Google 2</h2>
-        <p class="fg0" style="text-align:center;margin-top:0.2rem">The Sequel</p>
+        <h2 style="text-align:center;margin-top:4rem;margin-bottom:0px">Quizfreely</h2>
+        <p class="fg0" style="text-align:center;margin-top:0.2rem">Search for resources for any topic</p>
         <Searchbar />
         <div style="margin-bottom:20rem"></div>
       {/if}
