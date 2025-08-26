@@ -90,6 +90,14 @@
             }
         )
 
+        let numMCQs = 0;
+        let numTrueFalseQs = 0;
+        let numMatchQs = 0;
+        let numFRQs = 0;
+        let unassignedQuestionsCount = questionsCount;
+        if (questionsCount > 4 && questionTypesEnabled.match) {
+            numMatchQs = unassignedQuestionsCount * 
+        }
 
         function pickNewRandomTerm(termsArray) {
             if (termsArray.length == 0) {
