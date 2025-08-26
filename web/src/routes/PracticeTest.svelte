@@ -3,6 +3,7 @@
     import idbApiLayer from "$lib/idb-api-layer/idb-api-layer.js";
     import BackIcon from "$lib/icons/BackArrow.svelte";
     import CheckmarkIcon from "$lib/icons/Checkmark.svelte";
+    import MCQ from "$lib/questionComponents/MCQ.svelte"
     import { slide } from "svelte/transition";
     let { data } = $props();
     let terms = $state();
@@ -250,6 +251,9 @@ FRQs: ${numFRQsToAssign}`
             </div>
         {/if}
         <p style="white-space: pre-wrap">{JSON.stringify(terms, null, 4)}</p>
+        <div class="box">
+            <MCQ term={terms[0]} answerWith="DEF" distractors={[terms[1],terms[2],terms[3]]} bind:this={testelem}></MCQ>
+        </div>
         {#each terms as term}
             {#if newEachRandom() < 0.5}
                 e
