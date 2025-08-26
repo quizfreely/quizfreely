@@ -81,7 +81,7 @@
             questionsCount = questionsCountEntered;
         }
 
-        questionTypesEnabledArray = [];
+        let questionTypesEnabledArray = [];
         Object.entries(questionTypesEnabled).forEach(
             ([questionType, enabled]) => {
                 if (enabled) {
@@ -90,14 +90,57 @@
             }
         )
 
-        let numMCQs = 0;
-        let numTrueFalseQs = 0;
-        let numMatchQs = 0;
-        let numFRQs = 0;
+        let numMCQsToAssign = 0;
+        let numTrueFalseQsToAssign = 0;
+        let numMatchQsToAssign = 0;
+        let numFRQsToAssign = 0;
         let unassignedQuestionsCount = questionsCount;
-        if (questionsCount > 4 && questionTypesEnabled.match) {
-            numMatchQs = unassignedQuestionsCount * 
+
+        let unassignedQuestionTypesCount = questionTypesEnabledArray.length;
+
+        if (questionTypesEnabled.match) {
+            if (unassignedQuestionsCount >= 20) {
+                numMatchQsToAssign = 10;
+            } else if (unassignedQuestionsCount >= 10) {
+                numMatchQsToAssign = 5;
+            } else if (unassignedQuestionsCount >= 8) {
+                numMatchQsToAssign = 4;
+            }
+            unassignedQuestionsCount -= numMatchQsToAssign;
+
+            unassignedQuestionTypesCount--;
         }
+        if (questionTypesEnabled.frq) {
+            numFRQsToAssign = Math.floor(
+                unassignedQuestionsCount /
+                unassignedQuestionTypesCount
+            );
+            unassignedQuestionsCount -= numFRQsToAssign;
+
+            unassignedQuestionTypesCount--;
+        }
+        if (questionTypesEnabled.trueFalse) {
+            numTrueFalseQsToAssign = Math.floor(
+                unassignedQuestionsCount /
+                unassignedQuestionTypesCount
+            );
+            unassignedQuestionsCount -= numTrueFalseQsToAssign;
+
+            unassignedQuestionTypesCount--;
+        }
+        if (questionTypesEnabled.mcq) {
+            numMCQsToAssign = unassignedQuestionsCount;
+            unassignedQuestionsCount = 0;
+            unassignedQuestionTypesCount--;
+        }
+        console.log(
+            `Total: ${questionsCount},
+MCQs: ${numMCQsToAssign},
+True/False: ${numTrueFalseQsToAssign},
+Matching: ${numMatchQsToAssign},
+FRQs: ${numFRQsToAssign}`
+        );
+
 
         function pickNewRandomTerm(termsArray) {
             if (termsArray.length == 0) {
@@ -139,7 +182,7 @@
             }
         }
         
-        pickNewRandomTerm(terms);
+        // pickNewRandomTerm(terms);
         showSetup = false;
     }
 </script>
