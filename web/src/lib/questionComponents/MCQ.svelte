@@ -1,7 +1,6 @@
 <script>
     import CheckmarkIcon from "$lib/icons/Checkmark.svelte";
     let { term, answerWith, distractors } = $props();
-    let answers = [...distractors, term];
     function shuffleArray(ogArray) {
         let arr = [...ogArray];
         for (let index = arr.length - 1; index > 0; index--) {
@@ -10,7 +9,7 @@
         }
         return arr;
     }
-    answers = shuffleArray(answers);
+    let answers = $state(shuffleArray([...distractors, term]));
     let answeredIndex = $state(-1);
     let correctAnswerIndex = answers.findIndex(
         answer => term.id == answer.id

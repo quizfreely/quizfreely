@@ -4,9 +4,13 @@
     import BackIcon from "$lib/icons/BackArrow.svelte";
     import CheckmarkIcon from "$lib/icons/Checkmark.svelte";
     import MCQ from "$lib/questionComponents/MCQ.svelte"
+    import FRQ from "$lib/questionComponents/FRQ.svelte"
     import { slide } from "svelte/transition";
     let { data } = $props();
     let terms = $state();
+
+    let testelem;
+    let testelem2;
 
     if (!data.local) {
         terms = data?.studyset?.terms;
@@ -182,6 +186,9 @@ FRQs: ${numFRQsToAssign}`
 
             }
         }
+
+        console.log(testelem.getQuestion())
+        console.log(testelem2.getQuestion())
         
         // pickNewRandomTerm(terms);
         showSetup = false;
@@ -197,12 +204,12 @@ FRQs: ${numFRQsToAssign}`
         </div>
         {#if showSetup}
             <div id="setup" transition:slide={{duration:400}}>
-                <p class="h4">Practice Test</p>
+                <p class="h3">Practice Test</p>
+                <p>There {terms?.length == 1 ? "is" : "are"} {terms?.length ?? "?"} {terms?.length == 1 ? "term" : "terms"} in this studyset</p>
                 <p style="margin-top: 1rem;">Questions:</p>
                 <div style="margin-top: 0.4rem;">
                 <input type="text" placeholder={defaultQuestionsCount} style="max-width: 4rem;" bind:value={questionsCountEntered}>
                 </div>
-                <p class="fg0" style="margin-top: 0.4rem;">({terms?.length ?? "?"} total terms in this studyset)</p>
                 <p style="margin-top: 2rem;">Answer with:</p>
                 <div class="flex" style="margin-top: 0.6rem;">
                     <button class="button-box {answerWith == "DEF" ? "selected" : ""}" style="display: flex;" onclick={() => answerWith = "DEF"}>
@@ -253,6 +260,9 @@ FRQs: ${numFRQsToAssign}`
         <p style="white-space: pre-wrap">{JSON.stringify(terms, null, 4)}</p>
         <div class="box">
             <MCQ term={terms[0]} answerWith="DEF" distractors={[terms[1],terms[2],terms[3]]} bind:this={testelem}></MCQ>
+        </div>
+        <div class="box">
+            <FRQ term={terms[0]} answerWith="DEF" bind:this={testelem2}></FRQ>
         </div>
         {#each terms as term}
             {#if newEachRandom() < 0.5}
