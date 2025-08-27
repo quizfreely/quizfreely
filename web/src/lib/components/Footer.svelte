@@ -46,10 +46,12 @@
       <!-- <p> -->
       <!--   v0.32.1 · <a href="https://codeberg.org/quizfreely/quizfreely/releases">Changelog (on Codeberg)</a> or <a href="https://github.com/quizfreely/quizfreely/releases">on GitHub</a> -->
       <!-- </p> -->
-      <p>
-        © 2022-2025 Ehan Ahamed and contributors
-        <br />
-        <!--<a href="/license">License</a>-->
+      <p class="fg0">
+        © 2022-2025 Ehan Ahamed & contributors<br>
+        Licensed under AGPL-3.0
+      </p>
+      <p class="fg0">
+        Quizfreely is fiscally sponsored by The Hack Foundation, a 501(c)(3) nonprofit.
       </p>
     </div>
 </footer>
