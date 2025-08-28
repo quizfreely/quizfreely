@@ -68,6 +68,7 @@
 
     let showSetup = $state(true);
     let questions = $state([]);
+    let questionComponents = $state([]);
     function setupStart() {
         if (terms == null || terms.length < 1) {
             alert("oops, not enough terms");
@@ -419,10 +420,20 @@ FRQs: ${numFRQsToAssign}`
             {#each questions as question, index}
                 {#if question.type == "MCQ"}
                 <div class="box">
-                    <MCQ term={question.term} answerWith={question.answerWith} distractors={question.distractors}></MCQ>
+                    <MCQ term={question.term} answerWith={question.answerWith} distractors={question.distractors} bind:this={questionComponents[index]}></MCQ>
                 </div>
                 {/if}
             {/each}
+            <div class="flex">
+                <button class="yay" onclick={() => {
+                    questionComponents.forEach(questionComponent => {
+                        console.log(questionComponent.getQuestion());
+                    })
+                }}>
+                    <CheckmarkIcon></CheckmarkIcon>
+                    Submit
+                </button>
+            </div>
         {/if}
         <!-- <p style="white-space: pre-wrap">{JSON.stringify(terms, null, 4)}</p> -->
         {#if showExitConfirmationModal}
