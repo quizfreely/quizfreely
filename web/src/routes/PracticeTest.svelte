@@ -2,11 +2,14 @@
     import { onMount } from "svelte";
     import idbApiLayer from "$lib/idb-api-layer/idb-api-layer.js";
     import BackIcon from "$lib/icons/BackArrow.svelte";
+    import ExitIcon from "$lib/icons/Exit.svelte";
     import CheckmarkIcon from "$lib/icons/Checkmark.svelte";
     import MCQ from "$lib/questionComponents/MCQ.svelte"
     import FRQ from "$lib/questionComponents/FRQ.svelte"
     import TrueFalseQuestion from "$lib/questionComponents/TrueFalseQuestion.svelte"
-    import { slide } from "svelte/transition";
+    import { slide, fade } from "svelte/transition";
+    import { goto, beforeNavigate } from "$app/navigation";
+    import { cancelNprogressTimeout } from "$lib/stores/nprogressTimeout.js";
     let { data } = $props();
     let terms = $state();
 
@@ -314,8 +317,38 @@ FRQs: ${numFRQsToAssign}`
 
         pickNewRandomTerm(terms);
         showSetup = false;
+        takingActualPracticeTest = true;
+        
         console.log([...questions])
     }
+
+    var showExitConfirmationModal = $state(false);
+    var takingActualPracticeTest = false;
+    var bypassExitConfirmation = false;
+    beforeNavigate(function (navigation) {
+        if (takingActualPracticeTest && !bypassExitConfirmation) {
+            if (navigation.type !== "leave") {
+                /* when navigation.type is NOT "leave",
+                it's controlled by SvelteKit, so we can
+                show our js confirmation modal */
+                showExitConfirmationModal = true;
+            }
+            /* our routes/+layout.svelte shows a progress bar
+            if navigation takes too long, so we cancel the timer
+            when we cancel navigation, so that it doesn't show */
+            cancelNprogressTimeout();
+
+            /* run it again a little delayed to make sure it cancels the timeout after layout actually finishes creating the timeout */
+            setTimeout(cancelNprogressTimeout, 50);
+
+            /* if navigation.type is "leave",
+            then its controlled by the browser &
+            the browser shows it's own native modal
+            when we use `.cancel()` */
+            navigation.cancel();
+
+        }
+    })
 </script>
 <div class="grid page">
     <div class="content">
@@ -379,7 +412,8 @@ FRQs: ${numFRQsToAssign}`
                     <button onclick={setupStart}><CheckmarkIcon></CheckmarkIcon> Start</button>
                 </div>
             </div>
-        {:else}
+        {/if}
+        {#if takingActualPracticeTest}
             {#each questions as question, index}
                 {#if question.type == "MCQ"}
                 <div class="box">
@@ -389,5 +423,26 @@ FRQs: ${numFRQsToAssign}`
             {/each}
         {/if}
         <p style="white-space: pre-wrap">{JSON.stringify(terms, null, 4)}</p>
+        {#if showExitConfirmationModal}
+        <div class="modal" transition:fade={{ duration: 200 }}>
+          <div class="content">
+            <h4>Are you sure you want to exit?</h4>
+            <p>You need to finish &amp; submit this practice test to save your answers.</p>
+            <div class="flex">
+              <button class="alt" onclick={function () { showExitConfirmationModal = false; }}>Continue Practicing</button>
+              <button class="button ohno alt" data-sveltekit-preload-data="false" onclick={function () {
+                bypassExitConfirmation = true;
+                goto(data.local ?
+                    "/studyset/local?id=" + data.localId :
+                    "/studysets/" + data.studysetId
+                );
+              }}>
+                <ExitIcon />
+                Exit
+              </button>
+            </div>
+          </div>
+        </div>
+        {/if}
     </div>
 </div>
