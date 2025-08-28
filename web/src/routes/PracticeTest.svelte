@@ -221,15 +221,17 @@ FRQs: ${numFRQsToAssign}`
             }
             question.distractors = [];
             if (question?.topConfusionPairs != null) {
-                question.topConfusionPairs.forEach()
+                question.topConfusionPairs.forEach(confusionPair => {
+                    if (confusionPair.confusedCount > )
+                })
             }
             if (question?.topReverseConfusionPairs != null) {
                 question.distractors = [...question.distractors, ...topReverseConfusionPairs];
             }
             if (question.distractors.length > 0) {
-                question.distractors.sort((a, b) => {
-                    a.
-                })
+                question.distractors.sort(
+                    (a, b) => b.confusedCount - a.confusedCount
+                )
             } else {
 
             }
