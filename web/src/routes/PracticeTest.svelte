@@ -287,7 +287,7 @@ FRQs: ${numFRQsToAssign}`
             if (confusionPairDistractors.length > 0) {
                 /* remove duplicates by making a map and then putting it back into the same array */
                 confusionPairDistractors = [
-                    ...((new Map(
+                    ...(new Map(
                         confusionPairDistractors.map(
                             obj => [obj.id, obj]
                         )
@@ -332,7 +332,7 @@ FRQs: ${numFRQsToAssign}`
                     def: randomTerm?.def
                 });
             }
-            if (attempts > 99) {
+            if (iterations > 99) {
                 console.error("(addMCQ) Took more than 99 iterations to pick random term that wasn't a duplicate")
             }
 
