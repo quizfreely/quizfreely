@@ -40,7 +40,7 @@ export async function load({ cookies, params}) {
                 confusedCount
             }
             topReverseConfusionPairs {
-                confusedTerm {
+                term {
                     id
                     term
                     def
