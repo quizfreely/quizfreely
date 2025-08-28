@@ -285,6 +285,14 @@ FRQs: ${numFRQsToAssign}`
                 })
             }
             if (confusionPairDistractors.length > 0) {
+                /* remove duplicates by making a map and then putting it back into the same array */
+                confusionPairDistractors = [
+                    ...((new Map(
+                        confusionPairDistractors.map(
+                            obj => [obj.id, obj]
+                        )
+                    )).values()
+                ];
                 confusionPairDistractors.sort(
                     (a, b) => b.priority - a.priority
                 )
@@ -303,16 +311,31 @@ FRQs: ${numFRQsToAssign}`
                     });
                 }
             }
-            while (question.distractors.length < 3) {
+            let iterations = 0;
+            while (question.distractors.length < 3 && iterations <= 99) {
+                iterations++;
+
                 const randomTerm = terms[Math.floor(
                     Math.random() * terms.length
                 )];
+
+                if (question.distractors.some(d => {
+                    randomTerm.id == d.id 
+                })) {
+                    /* try again if that term already exists */
+                    continue;
+                }
+
                 question.distractors.push({
                     id: randomTerm?.id,
                     term: randomTerm?.term,
                     def: randomTerm?.def
                 });
             }
+            if (attempts > 99) {
+                console.error("(addMCQ) Took more than 99 iterations to pick random term that wasn't a duplicate")
+            }
+
             questions.push(question)
         }
 
