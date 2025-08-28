@@ -21,7 +21,7 @@
 </script>
 <div>
     <p class="fg0">Type the { answerWith == "DEF" ? "definition" : "term"}</p>
-    <p class="h4" style="margin-bottom: 0px;">{ answerWith == "DEF" ?
+    <p class="h4" style="white-space: pre-wrap; margin-bottom: 0px;">{ answerWith == "DEF" ?
         term.term : term.def
     }</p>
     <input type="text" placeholder="{answerWith == "DEF" ?

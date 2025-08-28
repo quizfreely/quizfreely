@@ -48,7 +48,7 @@
                     "term" : "def"
                 ]?.length < 20 ?
                     "h4" : ""
-            }" style="margin-top: 0.2rem;">{answerWith == "DEF" ?
+            }" style="white-space: pre-wrap; margin-top: 0.2rem;">{answerWith == "DEF" ?
                 term.term : term.def
             }</p>
         </div>
@@ -61,7 +61,7 @@
                     "def" : "term"
                 ]?.length < 20 ?
                     "h4" : ""
-            }" style="margin-top: 0.2rem;">{answerWith == "DEF" ?
+            }" style="white-space: pre-wrap; margin-top: 0.2rem;">{answerWith == "DEF" ?
                 presentedAnswer.def : presentedAnswer.term
             }</p>
         </div>

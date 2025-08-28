@@ -34,16 +34,17 @@
 </script>
 <div>
     <p class="fg0">Select the matching { answerWith == "DEF" ? "definition" : "term"}</p>
-    <p class="h4">{ answerWith == "DEF" ?
+    <p class="h4" style="white-space: pre-wrap;">{ answerWith == "DEF" ?
         term.term : term.def
     }</p>
     <div style="display: grid; gap: 0.2rem; grid-template-columns: auto; justify-content: start; margin-top: 0.6rem;">
         {#each answers as answer, index}
             <button style="display: flex; justify-items: start; justify-content: start; text-align: start; margin-top: 0px;" class="button-box with-bordercolor-border { answeredIndex == index ? "selected" : ""}" onclick={() => answeredIndex = index}>
-                <CheckmarkIcon class="button-box-selected-icon"></CheckmarkIcon> {
+                <CheckmarkIcon class="button-box-selected-icon"></CheckmarkIcon>
+                <span style="white-space: pre-wrap; margin-top: 0px;">{
                     answerWith == "DEF" ?
                         answer.def : answer.term
-                }
+                }</span>
             </button>
         {/each}
     </div>
