@@ -323,10 +323,12 @@ FRQs: ${numFRQsToAssign}`
     }
 
     var showExitConfirmationModal = $state(false);
-    var takingActualPracticeTest = false;
+    var takingActualPracticeTest = $state(false);
     var bypassExitConfirmation = false;
+    let navigatingToURL = $state("");
     beforeNavigate(function (navigation) {
         if (takingActualPracticeTest && !bypassExitConfirmation) {
+            navigatingToURL = navigation?.to?.url;
             if (navigation.type !== "leave") {
                 /* when navigation.type is NOT "leave",
                 it's controlled by SvelteKit, so we can
@@ -422,7 +424,7 @@ FRQs: ${numFRQsToAssign}`
                 {/if}
             {/each}
         {/if}
-        <p style="white-space: pre-wrap">{JSON.stringify(terms, null, 4)}</p>
+        <!-- <p style="white-space: pre-wrap">{JSON.stringify(terms, null, 4)}</p> -->
         {#if showExitConfirmationModal}
         <div class="modal" transition:fade={{ duration: 200 }}>
           <div class="content">
@@ -432,10 +434,7 @@ FRQs: ${numFRQsToAssign}`
               <button class="alt" onclick={function () { showExitConfirmationModal = false; }}>Continue Practicing</button>
               <button class="button ohno alt" data-sveltekit-preload-data="false" onclick={function () {
                 bypassExitConfirmation = true;
-                goto(data.local ?
-                    "/studyset/local?id=" + data.localId :
-                    "/studysets/" + data.studysetId
-                );
+                goto(navigatingToURL);
               }}>
                 <ExitIcon />
                 Exit
