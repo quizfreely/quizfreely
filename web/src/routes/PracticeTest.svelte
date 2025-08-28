@@ -296,14 +296,14 @@ FRQs: ${numFRQsToAssign}`
                 confusionPairDistractors.sort(
                     (a, b) => b.priority - a.priority
                 )
-                if (confusionPairDistractors.length >= 1) {
+                if (confusionPairDistractors.length >= 1 && Math.random() < 0.8) {
                     question.distractors.push({
                         id: confusionPairDistractors[0].id,
                         term: confusionPairDistractors[0].term,
                         def: confusionPairDistractors[0].def
                     });
                 }
-                if (confusionPairDistractors.length >= 2) {
+                if (confusionPairDistractors.length >= 2 && Math.random() < 0.4) {
                     question.distractors.push({
                         id: confusionPairDistractors[1].id,
                         term: confusionPairDistractors[1].term,
@@ -311,18 +311,37 @@ FRQs: ${numFRQsToAssign}`
                     });
                 }
             }
+
+            function avgDistractorAnswerLength() {
+                if (question?.distractors == null || question?.distractors?.length == 0) {
+                    return 0;
+                }
+
+                let sum = 0;
+                question.distractors.forEach(d => {
+                    sum += d?.[pickedAnswerWith.toLowerCase()]?.length ?? 0;
+                })
+                return sum / question?.distractors?.length;
+            }
+
+            let ogDistractorsCount = 3;
+            let distractorsCount = 3;
             let iterations = 0;
-            while (question.distractors.length < 3 && iterations <= 99) {
+            while (question.distractors.length < distractorsCount && iterations <= 99) {
                 iterations++;
 
                 const randomTerm = terms[Math.floor(
                     Math.random() * terms.length
                 )];
 
-                if (question.distractors.some(d => {
-                    randomTerm.id == d.id 
-                })) {
-                    /* try again if that term already exists */
+                if (
+                    randomTerm.id == term.id || /* if random term is correct answer */
+                    question.distractors.some( /* or if it's already an answer choice */
+                        d => randomTerm.id == d.id 
+                    )
+                ) {
+                    /* loop again without adding this random term
+                    if this term already exists */
                     continue;
                 }
 
@@ -331,6 +350,14 @@ FRQs: ${numFRQsToAssign}`
                     term: randomTerm?.term,
                     def: randomTerm?.def
                 });
+
+                if (
+                    question.distractors.length == ogDistractorsCount &&
+                    avgDistractorAnswerLength() < 20 &&
+                    Math.random() < 0.5
+                ) {
+                    distractorsCount++;
+                }
             }
             if (iterations > 99) {
                 console.error("(addMCQ) Took more than 99 iterations to pick random term that wasn't a duplicate")
@@ -344,6 +371,10 @@ FRQs: ${numFRQsToAssign}`
         takingActualPracticeTest = true;
         
         console.log([...questions])
+    }
+
+    function addTrueFalseQuestion() {
+
     }
 
     var showExitConfirmationModal = $state(false);
@@ -444,6 +475,14 @@ FRQs: ${numFRQsToAssign}`
                 {#if question.type == "MCQ"}
                 <div class="box">
                     <MCQ term={question.term} answerWith={question.answerWith} distractors={question.distractors} bind:this={questionComponents[index]}></MCQ>
+                </div>
+                {:else if question.type == "TRUE_FALSE"}
+                <div class="box">
+                    <TrueFalseQuestion term={question.term} answerWith={question.answerWith} distractor={question.distractor} bind:this={questionComponents[index]}></TrueFalseQuestion>
+                </div>
+                {:else if question.type == "FRQ"}
+                <div class="box">
+                    <FRQ term={question.term} answerWith={question.answerWith} bind:this={questionComponents[index]}></FRQ>
                 </div>
                 {/if}
             {/each}
