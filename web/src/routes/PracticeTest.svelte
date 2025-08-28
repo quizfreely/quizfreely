@@ -5,12 +5,14 @@
     import CheckmarkIcon from "$lib/icons/Checkmark.svelte";
     import MCQ from "$lib/questionComponents/MCQ.svelte"
     import FRQ from "$lib/questionComponents/FRQ.svelte"
+    import TrueFalseQuestion from "$lib/questionComponents/TrueFalseQuestion.svelte"
     import { slide } from "svelte/transition";
     let { data } = $props();
     let terms = $state();
 
     let testelem;
     let testelem2;
+    let testelem3;
 
     if (!data.local) {
         terms = data?.studyset?.terms;
@@ -189,6 +191,7 @@ FRQs: ${numFRQsToAssign}`
 
         console.log(testelem.getQuestion())
         console.log(testelem2.getQuestion())
+        console.log(testelem3.getQuestion())
         
         // pickNewRandomTerm(terms);
         showSetup = false;
@@ -263,6 +266,9 @@ FRQs: ${numFRQsToAssign}`
         </div>
         <div class="box">
             <FRQ term={terms[0]} answerWith="DEF" bind:this={testelem2}></FRQ>
+        </div>
+        <div class="box">
+            <TrueFalseQuestion term={terms[0]} answerWith="DEF" distractor={terms[1]} bind:this={testelem3}></TrueFalseQuestion>
         </div>
         {#each terms as term}
             {#if newEachRandom() < 0.5}

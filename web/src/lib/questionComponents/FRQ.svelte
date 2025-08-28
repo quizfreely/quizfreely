@@ -20,7 +20,7 @@
     let answer = $state("");
 </script>
 <div>
-    <p class="fg0">Type the matching { answerWith == "DEF" ? "definition" : "term"}</p>
+    <p class="fg0">Type the { answerWith == "DEF" ? "definition" : "term"}</p>
     <p class="h4" style="margin-bottom: 0px;">{ answerWith == "DEF" ?
         term.term : term.def
     }</p>
