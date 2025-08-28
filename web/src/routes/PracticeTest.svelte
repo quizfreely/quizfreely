@@ -10,10 +10,6 @@
     let { data } = $props();
     let terms = $state();
 
-    let testelem;
-    let testelem2;
-    let testelem3;
-
     if (!data.local) {
         terms = data?.studyset?.terms;
     }
@@ -36,12 +32,6 @@
         }
     })
 
-    let eachRandom;
-    function newEachRandom() {
-        eachRandom = Math.random();
-        return eachRandom;
-    }
-
     let answerWith = $state("DEF"); // "TERM", "DEF", or "BOTH"
     let questionTypesEnabled = $state({
         mcq: true,
@@ -53,16 +43,15 @@
     let questionsCountEntered = $state();
 
     let defaultQuestionsCount = $derived.by(() => {
-        if (terms == null) {
-            return 10;
-        }
-        if (terms.length >= 20) {
+        if (terms?.length > 20) {
+            return 25;
+        } else if (terms?.length > 15) {
             return 20;
-        }
-        if (terms.length >= 10) {
+        } else if (terms.length > 10) {
+            return 15;
+        } else {
             return 10;
         }
-        return terms.length;
     });
 
     function shuffleArray(ogArray) {
@@ -148,21 +137,26 @@ Matching: ${numMatchQsToAssign},
 FRQs: ${numFRQsToAssign}`
         );
 
-
         function pickNewRandomTerm(termsArray) {
             if (termsArray.length == 0) {
                 pickRepeatedRandomTerm();
                 return;
             }
+            if (questions.length >= questionsCount) {
+                return;
+            }
             random = Math.random() * termsArray.length;
             
-            questions.push({
+            pickQuestionType(terms[random], questionTypesEnabledArray)
 
-            })
             pickNewRandomTerm(termsArray.splice(random, 1))
         }
 
         function pickRepeatedRandomTerm() {
+            if (questions.length >= questionsCount) {
+                return;
+            }
+
             random = Math.random() * terms.length;
             questionsWSameTerm = questions.filter(
                 q => q.termId == terms[random].id
@@ -175,25 +169,73 @@ FRQs: ${numFRQsToAssign}`
                 }
             });
             if (unusedQuestionTypes.length > 0) {
-                
+                pickQuestionType(terms[random], questionTypesEnabledArray);
+            } else {
+                pickQuestionType(terms[random], unusedQuestionTypes);
+            }
+
+            pickRepeatedRandomTerm();
+        }
+
+        function pickQuestionType(term, questionTypes) {
+            if (questionTypes == null || questionTypes?.length == 0) {
+                console.error("pickQuestionType(term, questionTypes) needs a questionTypes array that's not null & not empty")
+                return;
+            }
+
+            let questionType;
+            if (questionTypes.length = 1) {
+                questionType = questionTypes[0];
+            } else {
+                questionType = questionTypes[Math.random() * questionTypes.length];
+            }
+            switch (questionType) {
+                case "mcq":
+                    addMCQ(term);
+                    break;
+                case "trueFalse":
+                    addTrueFalseQuestion(term);
+                    break;
+                case "match":
+                    addMatchQuestion(term);
+                    break;
+                case "frq":
+                    addFRQ(term);
+                    break;
+                default:
+                    console.error("(pickQuestionType) Unknown question type: ", questionType);
+            }
+        }
+
+        function addMCQ(term) {
+            let question = {
+                type: "MCQ",
+                term: {
+                    id: term.id,
+                    term: term.term,
+                    def: term.def,
+                },
+                answerWith: answerWith == "BOTH" ?
+                    (Math.random() < 0.5 ? "TERM" : "DEF") :
+                    answerWith
+            }
+            question.distractors = [];
+            if (question?.topConfusionPairs != null) {
+                question.topConfusionPairs.forEach()
+            }
+            if (question?.topReverseConfusionPairs != null) {
+                question.distractors = [...question.distractors, ...topReverseConfusionPairs];
+            }
+            if (question.distractors.length > 0) {
+                question.distractors.sort((a, b) => {
+                    a.
+                })
             } else {
 
             }
         }
 
-        function addMCQFromTerm(term) {
-            if (term.progress == null) {
-                
-            } else {
-
-            }
-        }
-
-        console.log(testelem.getQuestion())
-        console.log(testelem2.getQuestion())
-        console.log(testelem3.getQuestion())
-        
-        // pickNewRandomTerm(terms);
+        pickNewRandomTerm(terms);
         showSetup = false;
     }
 </script>
@@ -261,21 +303,5 @@ FRQs: ${numFRQsToAssign}`
             </div>
         {/if}
         <p style="white-space: pre-wrap">{JSON.stringify(terms, null, 4)}</p>
-        <div class="box">
-            <MCQ term={terms[0]} answerWith="DEF" distractors={[terms[1],terms[2],terms[3]]} bind:this={testelem}></MCQ>
-        </div>
-        <div class="box">
-            <FRQ term={terms[0]} answerWith="DEF" bind:this={testelem2}></FRQ>
-        </div>
-        <div class="box">
-            <TrueFalseQuestion term={terms[0]} answerWith="DEF" distractor={terms[1]} bind:this={testelem3}></TrueFalseQuestion>
-        </div>
-        {#each terms as term}
-            {#if newEachRandom() < 0.5}
-                e
-            {:else}
-                a
-            {/if}
-        {/each}
     </div>
 </div>
