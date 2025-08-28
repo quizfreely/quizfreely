@@ -413,6 +413,7 @@
 </svelte:head>
 
 <style>
+
   .term-row-box {
     gap: 1rem;
     grid-template-rows: auto;
@@ -432,7 +433,16 @@
     grid-area: actions;
   }
 
+  .flexcolonmobile {
+    flex-direction: row;
+    align-content: center;
+  }
   @media only screen and (max-width: 800px) {
+    .flexcolonmobile {
+      flex-direction: column;
+      align-content: start;
+    }
+
     .term-row-box {
       grid-template-rows: auto auto;
       grid-template-columns: 1fr auto;
@@ -754,13 +764,13 @@
             <div class="modal" transition:fade={{ duration: 200 }}>
               <div class="content">
                 <h4>Save changes?</h4>
-                <div class="flex">
-                  <button data-sveltekit-preload-data="false" onclick={saveButtonOrCreateButton}>
+                <div class="flex flexcolonmobile">
+                  <button data-sveltekit-preload-data="false" onclick={saveButtonOrCreateButton} class="yay alt">
                     <IconCheckmark />
                     Save
                   </button>
-                  <button onclick={function () { showExitConfirmationModal = false; }}>Keep Editing</button>
-                  <button class="button ohno" data-sveltekit-preload-data="false" onclick={function () {
+                  <button class="alt" onclick={function () { showExitConfirmationModal = false; }}>Keep Editing</button>
+                  <button class="button ohno alt" data-sveltekit-preload-data="false" onclick={function () {
                     bypassUnsavedChangesConfirmation = true;
                     goto(data.new ?
                       "/dashboard" :
@@ -771,7 +781,7 @@
                     );
                   }}>
                     <IconTrash />
-                    Discard
+                    Discard Changes
                   </button>
                 </div>
               </div>
