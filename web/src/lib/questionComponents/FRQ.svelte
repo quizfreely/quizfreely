@@ -26,5 +26,5 @@
     }</p>
     <input type="text" placeholder="{answerWith == "DEF" ?
         "Definition" : "Term"
-    }" bind:value={answer}>
+    }" bind:value={answer} style="min-width: 16rem; field-sizing: content;">
 </div>
