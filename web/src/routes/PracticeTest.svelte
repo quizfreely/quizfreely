@@ -137,7 +137,8 @@ Matching: ${numMatchQsToAssign},
 FRQs: ${numFRQsToAssign}`
         );
 
-        function pickNewRandomTerm(termsArray) {
+        function pickNewRandomTerm(ogTermsArray) {
+            let termsArray = [...ogTermsArray];
             if (termsArray.length == 0) {
                 pickRepeatedRandomTerm();
                 return;
@@ -145,11 +146,12 @@ FRQs: ${numFRQsToAssign}`
             if (questions.length >= questionsCount) {
                 return;
             }
-            random = Math.random() * termsArray.length;
+            const random = Math.floor(Math.random() * termsArray.length);
             
-            pickQuestionType(terms[random], questionTypesEnabledArray)
+            pickQuestionType(termsArray[random], questionTypesEnabledArray)
 
-            pickNewRandomTerm(termsArray.splice(random, 1))
+            termsArray.splice(random, 1);
+            pickNewRandomTerm(termsArray)
         }
 
         function pickRepeatedRandomTerm() {
@@ -157,11 +159,11 @@ FRQs: ${numFRQsToAssign}`
                 return;
             }
 
-            random = Math.random() * terms.length;
-            questionsWSameTerm = questions.filter(
+            const random = Math.floor(Math.random() * terms.length);
+            let questionsWSameTerm = questions.filter(
                 q => q.termId == terms[random].id
             );
-            unusedQuestionTypes = [...questionTypesEnabledArray];
+            let unusedQuestionTypes = [...questionTypesEnabledArray];
             questionsWSameTerm.forEach(q => {
                 const index = unusedQuestionTypes.indexOf(q.questionType);
                 if (index > -1) {
@@ -187,7 +189,9 @@ FRQs: ${numFRQsToAssign}`
             if (questionTypes.length = 1) {
                 questionType = questionTypes[0];
             } else {
-                questionType = questionTypes[Math.random() * questionTypes.length];
+                questionType = questionTypes[Math.floor(
+                    Math.random() * questionTypes.length
+                )];
             }
             switch (questionType) {
                 case "mcq":
@@ -207,7 +211,20 @@ FRQs: ${numFRQsToAssign}`
             }
         }
 
+        // returns a number; higher = more priority
+        function confusionPairPriority(count, lastConfusedAtDate) {
+            const now = Date.now();
+            const decayDays = 7;
+            const msPerDay = 1000 * 60 * 60 * 24;
+            const daysSince = (now - lastConfusedAtDate.getTime()) / msPerDay;
+            // log1p to get diminishing returns on count; exp for recency decay
+            return Math.log1p(count) * Math.exp(-daysSince / decayDays);
+        }
+
         function addMCQ(term) {
+            const pickedAnswerWith = answerWith == "BOTH" ?
+                (Math.random() < 0.5 ? "TERM" : "DEF") :
+                answerWith
             let question = {
                 type: "MCQ",
                 term: {
@@ -215,30 +232,85 @@ FRQs: ${numFRQsToAssign}`
                     term: term.term,
                     def: term.def,
                 },
-                answerWith: answerWith == "BOTH" ?
-                    (Math.random() < 0.5 ? "TERM" : "DEF") :
-                    answerWith
+                answerWith: pickedAnswerWith
             }
             question.distractors = [];
-            if (question?.topConfusionPairs != null) {
-                question.topConfusionPairs.forEach(confusionPair => {
-                    if (confusionPair.confusedCount > )
+            let confusionPairDistractors = [];
+            if (term?.topConfusionPairs != null) {
+                term.topConfusionPairs.forEach(confusionPair => {
+                    if (
+                        confusionPair.answeredWith == pickedAnswerWith &&
+                        confusionPair.confusedCount >= 2 &&
+                        (
+                            term.progress != null &&
+                            confusionPair.confusedCount > 0.25 * term.progress[
+                                pickedAnswerWith.toLowerCase()+"IncorrectCount"
+                            ]
+                        )
+                    ) {
+                        confusionPairDistractors.push({
+                            ...confusionPair.confusedTerm,
+                            priority: confusionPairPriority(
+                                confusionPair.confusedCount,
+                                new Date(confusionPair.lastConfusedAt)
+                            )
+                        });
+                    }
                 })
             }
-            if (question?.topReverseConfusionPairs != null) {
-                question.distractors = [...question.distractors, ...topReverseConfusionPairs];
+            if (term?.topReverseConfusionPairs != null) {
+                term.topReverseConfusionPairs.forEach(confusionPair => {
+                    if (
+                        confusionPair.answeredWith != pickedAnswerWith &&
+                        confusionPair.confusedCount >= 2 &&
+                        (
+                            term.progress != null &&
+                            confusionPair.confusedCount > 0.25 * term.progress[
+                                pickedAnswerWith.toLowerCase()+"IncorrectCount"
+                            ]
+                        )
+                    ) {
+                        confusionPairDistractors.push({
+                            ...confusionPair.term,
+                            priority: confusionPairPriority(
+                                confusionPair.confusedCount,
+                                new Date(confusionPair.lastConfusedAt)
+                            )
+                        });
+                    }
+                })
             }
-            if (question.distractors.length > 0) {
-                question.distractors.sort(
-                    (a, b) => b.confusedCount - a.confusedCount
+            if (confusionPairDistractors.length > 0) {
+                confusionPairDistractors.sort(
+                    (a, b) => b.priority - a.priority
                 )
-            } else {
-
+                question.distractors.push({
+                    id: confusionPairDistractors[0]?.id,
+                    term: confusionPairDistractors[0]?.term,
+                    def: confusionPairDistractors[0]?.def
+                });
+                question.distractors.push({
+                    id: confusionPairDistractors[1]?.id,
+                    term: confusionPairDistractors[1]?.term,
+                    def: confusionPairDistractors[1]?.def
+                });
             }
+            while (question.distractors.length < 3) {
+                const randomTerm = terms[Math.floor(
+                    Math.random() * terms.length
+                )];
+                question.distractors.push({
+                    id: randomTerm?.id,
+                    term: randomTerm?.term,
+                    def: randomTerm?.def
+                });
+            }
+            questions.push(question)
         }
 
         pickNewRandomTerm(terms);
         showSetup = false;
+        console.log([...questions])
     }
 </script>
 <div class="grid page">
@@ -303,6 +375,14 @@ FRQs: ${numFRQsToAssign}`
                     <button onclick={setupStart}><CheckmarkIcon></CheckmarkIcon> Start</button>
                 </div>
             </div>
+        {:else}
+            {#each questions as question, index}
+                {#if question.type == "MCQ"}
+                <div class="box">
+                    <MCQ term={question.term} answerWith={question.answerWith} distractors={question.distractors}></MCQ>
+                </div>
+                {/if}
+            {/each}
         {/if}
         <p style="white-space: pre-wrap">{JSON.stringify(terms, null, 4)}</p>
     </div>
