@@ -383,8 +383,10 @@
     let importTermsTermDefDelimiterRadioSelect = $state("tab");
     let importTermsRowDelimiterRadioSelect = $state("newline");
 
+    let navigatingToURL = $state("");
     beforeNavigate(function (navigation) {
         if (unsavedChanges && !bypassUnsavedChangesConfirmation) {
+            navigatingToURL = navigation?.to?.url;
             if (navigation.type !== "leave") {
                 /* when navigation.type is NOT "leave",
                 it's controlled by SvelteKit, so we can
@@ -769,16 +771,10 @@
                     <IconCheckmark />
                     Save
                   </button>
-                  <button class="alt" onclick={function () { showExitConfirmationModal = false; }}>Keep Editing</button>
+                  <button class="alt" onclick={function () { showExitConfirmationModal = false; }}>Continue Editing</button>
                   <button class="button ohno alt" data-sveltekit-preload-data="false" onclick={function () {
                     bypassUnsavedChangesConfirmation = true;
-                    goto(data.new ?
-                      "/dashboard" :
-                      (data.local ?
-                        "/studyset/local?id=" + data.localId :
-                        "/studysets/" + data.studysetId
-                      )
-                    );
+                    goto(navigatingToURL);
                   }}>
                     <IconTrash />
                     Discard Changes
