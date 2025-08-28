@@ -353,7 +353,7 @@ FRQs: ${numFRQsToAssign}`
 
                 if (
                     question.distractors.length == ogDistractorsCount &&
-                    avgDistractorAnswerLength() < 20 &&
+                    avgDistractorAnswerLength() < 40 &&
                     Math.random() < 0.5
                 ) {
                     distractorsCount++;
@@ -366,15 +366,15 @@ FRQs: ${numFRQsToAssign}`
             questions.push(question)
         }
 
+        function addTrueFalseQuestion() {
+            
+        }
+
         pickNewRandomTerm(terms);
         showSetup = false;
         takingActualPracticeTest = true;
         
         console.log([...questions])
-    }
-
-    function addTrueFalseQuestion() {
-
     }
 
     var showExitConfirmationModal = $state(false);
