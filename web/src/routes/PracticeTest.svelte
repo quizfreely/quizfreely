@@ -23,7 +23,7 @@
                             confusedTerm: true
                         },
                         topReverseConfusionPairs: {
-                            confusedTerm: true
+                            term: true
                         }
                     }
                 })
