@@ -253,11 +253,11 @@ export default {
             ).reverse()
             .limit(3)
             .toArray();
-        if (resolveProps?.confusedTerm) {
+        if (resolveProps?.term) {
             await Promise.all(
                 confusionPairs.map(async confusionPair => {
                     const term = await db.terms.where("id").equals(confusionPair.termId);
-                    confusionPair.confusedTerm = term?.[0] ?? null;
+                    confusionPair.term = term?.[0] ?? null;
                 })
             );
         }
