@@ -141,6 +141,13 @@ Matching: ${numMatchQsToAssign},
 FRQs: ${numFRQsToAssign}`
         );
 
+        let remainingCounts = {
+            mcq: numMCQsToAssign,
+            trueFalse: numTrueFalseQsToAssign,
+            match: numMatchQsToAssign,
+            frq: numFRQsToAssign
+        };
+
         function pickNewRandomTerm(ogTermsArray) {
             let termsArray = [...ogTermsArray];
             if (termsArray.length == 0) {
@@ -152,7 +159,7 @@ FRQs: ${numFRQsToAssign}`
             }
             const random = Math.floor(Math.random() * termsArray.length);
             
-            pickQuestionType(termsArray[random], questionTypesEnabledArray)
+            pickQuestionType(termsArray[random], remainingCounts)
 
             termsArray.splice(random, 1);
             pickNewRandomTerm(termsArray)
@@ -175,44 +182,36 @@ FRQs: ${numFRQsToAssign}`
                 }
             });
             if (unusedQuestionTypes.length > 0) {
-                pickQuestionType(terms[random], questionTypesEnabledArray);
+                pickQuestionType(terms[random], remainingCounts);
             } else {
-                pickQuestionType(terms[random], unusedQuestionTypes);
+                pickQuestionType(terms[random], remainingCounts);
             }
 
             pickRepeatedRandomTerm();
         }
 
-        function pickQuestionType(term, questionTypes) {
-            if (questionTypes == null || questionTypes?.length == 0) {
-                console.error("pickQuestionType(term, questionTypes) needs a questionTypes array that's not null & not empty")
-                return;
-            }
-
+        function pickQuestionType(term, remainingCounts) {
+            const availableTypes = Object.entries(remainingCounts)
+                .filter(([type, count]) => count > 0)
+                .map(([type]) => type);
+        
+            if (availableTypes.length === 0) return;
+        
             let questionType;
-            if (questionTypes.length = 1) {
-                questionType = questionTypes[0];
+            if (availableTypes.length === 1) {
+                questionType = availableTypes[0];
             } else {
-                questionType = questionTypes[Math.floor(
-                    Math.random() * questionTypes.length
-                )];
+                questionType = availableTypes[Math.floor(Math.random() * availableTypes.length)];
             }
+        
             switch (questionType) {
-                case "mcq":
-                    addMCQ(term);
-                    break;
-                case "trueFalse":
-                    addTrueFalseQuestion(term);
-                    break;
-                case "match":
-                    addMatchQuestion(term);
-                    break;
-                case "frq":
-                    addFRQ(term);
-                    break;
-                default:
-                    console.error("(pickQuestionType) Unknown question type: ", questionType);
+                case "mcq": addMCQ(term); break;
+                case "trueFalse": addTrueFalseQuestion(term); break;
+                case "match": addMatchQuestion(term); break;
+                case "frq": addFRQ(term); break;
             }
+        
+            remainingCounts[questionType]--;
         }
 
         // returns a number; higher = more priority
@@ -366,8 +365,18 @@ FRQs: ${numFRQsToAssign}`
             questions.push(question)
         }
 
-        function addTrueFalseQuestion() {
-            
+        function addTrueFalseQuestion(term) {
+            if (term.)
+        }
+
+        function addFRQ(term) {
+            questions.push({
+                type: "FRQ",
+                term: term,
+                answerWith: answerWith == "BOTH" ?
+                    (Math.random() < 0.5 ? "TERM" : "DEF") :
+                    answerWith
+            })
         }
 
         pickNewRandomTerm(terms);
