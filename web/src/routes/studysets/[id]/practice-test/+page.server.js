@@ -30,6 +30,18 @@ export async function load({ cookies, params}) {
             id
             term
             def
+            progress {
+                termFirstReviewedAt
+                termLastReviewedAt
+                termReviewCount
+                defFirstReviewedAt
+                defLastReviewedAt
+                defReviewCount
+                termCorrectCount
+                termIncorrectCount
+                defCorrectCount
+                defIncorrectCount
+            }
             topConfusionPairs {
                 confusedTerm {
                     id
