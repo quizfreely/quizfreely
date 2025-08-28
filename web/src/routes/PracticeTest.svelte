@@ -284,16 +284,20 @@ FRQs: ${numFRQsToAssign}`
                 confusionPairDistractors.sort(
                     (a, b) => b.priority - a.priority
                 )
-                question.distractors.push({
-                    id: confusionPairDistractors[0]?.id,
-                    term: confusionPairDistractors[0]?.term,
-                    def: confusionPairDistractors[0]?.def
-                });
-                question.distractors.push({
-                    id: confusionPairDistractors[1]?.id,
-                    term: confusionPairDistractors[1]?.term,
-                    def: confusionPairDistractors[1]?.def
-                });
+                if (confusionPairDistractors.length >= 1) {
+                    question.distractors.push({
+                        id: confusionPairDistractors[0].id,
+                        term: confusionPairDistractors[0].term,
+                        def: confusionPairDistractors[0].def
+                    });
+                }
+                if (confusionPairDistractors.length >= 2) {
+                    question.distractors.push({
+                        id: confusionPairDistractors[1].id,
+                        term: confusionPairDistractors[1].term,
+                        def: confusionPairDistractors[1].def
+                    });
+                }
             }
             while (question.distractors.length < 3) {
                 const randomTerm = terms[Math.floor(
