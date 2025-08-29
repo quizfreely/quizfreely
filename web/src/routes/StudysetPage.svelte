@@ -58,12 +58,12 @@
             switch (e.key) {
                 case "ArrowLeft":
                 case "h":
-                    e.preventDefault(); /* prevent scrolling */
+                case "k":
                     flashcardsPrev();
                     break;
                 case "ArrowRight":
                 case "l":
-                    e.preventDefault(); /* prevent scrolling */
+                case "j":
                     flashcardsNext();
                     break;
                 case " ": /* space */
