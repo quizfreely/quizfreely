@@ -1,5 +1,6 @@
 <script>
     import CheckmarkIcon from "$lib/icons/Checkmark.svelte";
+    import XMarkIcon from "$lib/icons/CloseXMark.svelte";
     let { term, answerWith, distractor } = $props();
     let correctAnswerBool = Math.random() < 0.5;
     let answeredBool = $state(null);
@@ -68,13 +69,31 @@
     <div class="flex">
         <button style="display: flex; justify-items: start; justify-content: start; text-align: start;" class="button-box with-bordercolor-border {
             answeredBool === true ? "selected" : ""
+        } {answeredBool === true ?
+            (answeredBool == correctAnswerBool ?
+                "yay" : "ohno"
+            ) : ""
         }" onclick={() => answeredBool = true}>
-            <CheckmarkIcon class="button-box-selected-icon"></CheckmarkIcon> True
+            {#if answeredBool === true && answeredBool != correctAnswerBool}
+                <XMarkIcon class="button-box-selected-icon"></XMarkIcon>
+            {:else}
+                <CheckmarkIcon class="button-box-selected-icon"></CheckmarkIcon>
+            {/if}
+            True
         </button>
         <button style="display: flex; justify-items: start; justify-content: start; text-align: start;" class="button-box with-bordercolor-border {
             answeredBool === false ? "selected" : ""
+        } {answeredBool === false ?
+            (answeredBool == correctAnswerBool ?
+                "yay" : "ohno"
+            ) : ""
         }" onclick={() => answeredBool = false}>
-            <CheckmarkIcon class="button-box-selected-icon"></CheckmarkIcon> False
+            {#if answeredBool === false && answeredBool != correctAnswerBool}
+                <XMarkIcon class="button-box-selected-icon"></XMarkIcon>
+            {:else}
+                <CheckmarkIcon class="button-box-selected-icon"></CheckmarkIcon>
+            {/if}
+            False
         </button>
     </div>
 </div>

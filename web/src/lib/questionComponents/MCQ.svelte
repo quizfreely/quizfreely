@@ -1,5 +1,6 @@
 <script>
     import CheckmarkIcon from "$lib/icons/Checkmark.svelte";
+    import XMarkIcon from "$lib/icons/CloseXMark.svelte";
     let { term, answerWith, distractors, viewOnly, showAccuracy } = $props();
     function shuffleArray(ogArray) {
         let arr = [...ogArray];
