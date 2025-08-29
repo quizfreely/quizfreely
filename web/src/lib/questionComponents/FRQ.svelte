@@ -1,7 +1,7 @@
 <script>
     import CheckmarkIcon from "$lib/icons/Checkmark.svelte";
     import XMarkIcon from "$lib/icons/CloseXMark.svelte";
-    let { term, answerWith, viewOnly, showAccuracy, questionUpdateCallback } = $props();
+    let { term, answerWith, viewOnly, showAccuracy, answerUpdateCallback, userMarkedCorrectCallback } = $props();
     let manuallyMarkedCorrect = $state(false);
     export function getQuestion() {
         if (answer == "") {
@@ -21,6 +21,9 @@
             }
         }
     }
+    export function isAnswered() {
+        return answer != "";
+    }
     let answer = $state("");
 </script>
 <div>
@@ -34,7 +37,7 @@
         }" bind:value={answer} style="min-width: 16rem; field-sizing: content;" class="{showAccuracy ? (
             getQuestion().frq.correct ?
                 "yay" : "ohno"
-        ) : ""}" disabled={viewOnly}>
+        ) : ""}" disabled={viewOnly} oninput={answerUpdateCallback}>
         {#if showAccuracy && getQuestion().frq.correct}
             <span class="yay"><CheckmarkIcon width="1.4rem" height="1.4rem"></CheckmarkIcon></span>
         {:else if showAccuracy}

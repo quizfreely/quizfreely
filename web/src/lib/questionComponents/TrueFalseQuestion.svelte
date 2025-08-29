@@ -1,7 +1,7 @@
 <script>
     import CheckmarkIcon from "$lib/icons/Checkmark.svelte";
     import XMarkIcon from "$lib/icons/CloseXMark.svelte";
-    let { term, answerWith, distractor, viewOnly, showAccuracy } = $props();
+    let { term, answerWith, distractor, viewOnly, showAccuracy, answerUpdateCallback } = $props();
     let correctAnswerBool = Math.random() < 0.5;
     let answeredBool = $state(null);
 
@@ -19,6 +19,9 @@
                 distractor: distractor
             }
         }
+    }
+    export function isAnswered() {
+        return answeredBool != null;
     }
     let presentedAnswer = correctAnswerBool ?
         term : distractor;
@@ -73,7 +76,10 @@
             (answeredBool == correctAnswerBool ?
                 "yay" : "ohno"
             ) : ""
-        }" onclick={() => answeredBool = true}>
+        }" onclick={() => {
+            answeredBool = true;
+            answerUpdateCallback();
+        }}>
             {#if showAccuracy && answeredBool != correctAnswerBool}
                 <XMarkIcon class="button-box-selected-icon"></XMarkIcon>
             {:else}
@@ -87,7 +93,10 @@
             (answeredBool == correctAnswerBool ?
                 "yay" : "ohno"
             ) : ""
-        }" onclick={() => answeredBool = false}>
+        }" onclick={() => {
+            answeredBool = false;
+            answerUpdateCallback();
+        }}>
             {#if showAccuracy && answeredBool != correctAnswerBool}
                 <XMarkIcon class="button-box-selected-icon"></XMarkIcon>
             {:else}

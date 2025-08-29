@@ -445,17 +445,19 @@ FRQs: ${numFRQsToAssign}`
 
         pickNewRandomTerm(terms);
         showSetup = false;
+        showTest = true;
         takingActualPracticeTest = true;
         
         console.log([...questions])
     }
 
     var showExitConfirmationModal = $state(false);
+    var showTest = $state(false);
     var takingActualPracticeTest = $state(false);
     var bypassExitConfirmation = false;
     let navigatingToURL = $state("");
     beforeNavigate(function (navigation) {
-        if (takingActualPracticeTest && !bypassExitConfirmation) {
+        if (takingActualPracticeTest && questionsAnswered > 0 && !bypassExitConfirmation) {
             navigatingToURL = navigation?.to?.url;
             if (navigation.type !== "leave") {
                 /* when navigation.type is NOT "leave",
@@ -482,6 +484,15 @@ FRQs: ${numFRQsToAssign}`
 
     let questionsViewOnly = $state(false);
     let questionsShowAccuracy = $state(false);
+    let questionsAnswered = $state(0);
+    function answerUpdateCallback() {
+        questionsAnswered = 0;
+        questionComponents.forEach(q => {
+            if (q.isAnswered()) {
+                questionsAnswered++;
+            }
+        })
+    }
 </script>
 <div class="grid page">
     <div class="content">
@@ -491,6 +502,14 @@ FRQs: ${numFRQsToAssign}`
                 `/studysets/${data.studysetId}`
             }><BackIcon></BackIcon> Back</a>
         </div>
+        {#if takingActualPracticeTest}
+            <div style="position: sticky; top: 0px; padding: 1rem; margin-top: 0px; background: var(--bg-1);" transition:slide={{ duration:400 }}>
+                <p class="center">{questionsAnswered}/{questions.length} Answered</p>
+                <div class="progress-bar yay thin" style="margin-top: 0.4rem;">
+                    <div style="width: {(questionsAnswered / questions.length) * 100}%"></div>
+                </div>
+            </div>
+        {/if}
         {#if showSetup}
             <div id="setup" transition:slide={{duration:400}}>
                 <p class="h3">Practice Test</p>
@@ -546,19 +565,19 @@ FRQs: ${numFRQsToAssign}`
                 </div>
             </div>
         {/if}
-        {#if takingActualPracticeTest}
+        {#if showTest}
             {#each questions as question, index}
                 {#if question.type == "MCQ"}
                 <div class="box">
-                    <MCQ term={question.term} answerWith={question.answerWith} distractors={question.distractors} viewOnly={questionsViewOnly} showAccuracy={questionsShowAccuracy} bind:this={questionComponents[index]}></MCQ>
+                    <MCQ term={question.term} answerWith={question.answerWith} distractors={question.distractors} viewOnly={questionsViewOnly} showAccuracy={questionsShowAccuracy} answerUpdateCallback={answerUpdateCallback} bind:this={questionComponents[index]}></MCQ>
                 </div>
                 {:else if question.type == "TRUE_FALSE"}
                 <div class="box">
-                    <TrueFalseQuestion term={question.term} answerWith={question.answerWith} distractor={question.distractor} viewOnly={questionsViewOnly} showAccuracy={questionsShowAccuracy} bind:this={questionComponents[index]}></TrueFalseQuestion>
+                    <TrueFalseQuestion term={question.term} answerWith={question.answerWith} distractor={question.distractor} viewOnly={questionsViewOnly} showAccuracy={questionsShowAccuracy} answerUpdateCallback={answerUpdateCallback} bind:this={questionComponents[index]}></TrueFalseQuestion>
                 </div>
                 {:else if question.type == "FRQ"}
                 <div class="box">
-                    <FRQ term={question.term} answerWith={question.answerWith} viewOnly={questionsViewOnly} showAccuracy={questionsShowAccuracy} index={index} bind:this={questionComponents[index]}></FRQ>
+                    <FRQ term={question.term} answerWith={question.answerWith} viewOnly={questionsViewOnly} showAccuracy={questionsShowAccuracy} index={index} answerUpdateCallback={answerUpdateCallback} bind:this={questionComponents[index]}></FRQ>
                 </div>
                 {/if}
             {/each}
@@ -566,6 +585,7 @@ FRQs: ${numFRQsToAssign}`
                 <button class="yay" onclick={() => {
                     questionsViewOnly = true;
                     questionsShowAccuracy = true;
+                    takingActualPracticeTest = false;
                     questionComponents.forEach(questionComponent => {
                         console.log(questionComponent.getQuestion());
                     })

@@ -1,7 +1,7 @@
 <script>
     import CheckmarkIcon from "$lib/icons/Checkmark.svelte";
     import XMarkIcon from "$lib/icons/CloseXMark.svelte";
-    let { term, answerWith, distractors, viewOnly, showAccuracy } = $props();
+    let { term, answerWith, distractors, viewOnly, showAccuracy, answerUpdateCallback } = $props();
     function shuffleArray(ogArray) {
         let arr = [...ogArray];
         for (let index = arr.length - 1; index > 0; index--) {
@@ -32,6 +32,9 @@
             }
         }
     }
+    export function isAnswered() {
+        return answeredIndex >= 0;
+    }
 </script>
 <div>
     <p class="fg0">Select the matching { answerWith == "DEF" ? "definition" : "term"}</p>
@@ -45,7 +48,10 @@
                     (answeredIndex == correctAnswerIndex ?
                         "yay" : "ohno"
                     ) : ""
-            }" onclick={() => answeredIndex = index} disabled={viewOnly}>
+            }" onclick={() => {
+                answeredIndex = index;
+                answerUpdateCallback()
+            }} disabled={viewOnly}>
                 {#if showAccuracy && index != correctAnswerIndex}
                     <XMarkIcon class="button-box-selected-icon"></XMarkIcon>
                 {:else}
