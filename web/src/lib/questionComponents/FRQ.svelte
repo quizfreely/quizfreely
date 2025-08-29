@@ -1,7 +1,7 @@
 <script>
     import CheckmarkIcon from "$lib/icons/Checkmark.svelte";
     import XMarkIcon from "$lib/icons/CloseXMark.svelte";
-    let { term, answerWith, showAccuracy } = $props();
+    let { term, answerWith, viewOnly, showAccuracy } = $props();
     export function getQuestion() {
         if (answer == "") {
             console.log("Possibly Unanswered FRQ")
@@ -31,7 +31,7 @@
         }" bind:value={answer} style="min-width: 16rem; field-sizing: content;" class="{showAccuracy ? (
             getQuestion().frq.correct ?
                 "yay" : "ohno"
-        ) : ""}">
+        ) : ""}" disabled={viewOnly}>
         {#if showAccuracy && getQuestion().frq.correct}
             <CheckmarkIcon class="yay"></CheckmarkIcon>
         {:else if showAccuracy}

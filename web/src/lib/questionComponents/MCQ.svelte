@@ -1,6 +1,6 @@
 <script>
     import CheckmarkIcon from "$lib/icons/Checkmark.svelte";
-    let { term, answerWith, distractors } = $props();
+    let { term, answerWith, distractors, viewOnly, showAccuracy } = $props();
     function shuffleArray(ogArray) {
         let arr = [...ogArray];
         for (let index = arr.length - 1; index > 0; index--) {
@@ -39,8 +39,17 @@
     }</p>
     <div style="display: grid; gap: 0.2rem; grid-template-columns: auto; justify-content: start; margin-top: 0.6rem;">
         {#each answers as answer, index}
-            <button style="display: flex; justify-items: start; justify-content: start; text-align: start; margin-top: 0px;" class="button-box with-bordercolor-border { answeredIndex == index ? "selected" : ""}" onclick={() => answeredIndex = index}>
-                <CheckmarkIcon class="button-box-selected-icon"></CheckmarkIcon>
+            <button style="display: flex; justify-items: start; justify-content: start; text-align: start; margin-top: 0px;" class="button-box with-bordercolor-border { answeredIndex == index ? "selected" : ""} {
+                showAccuracy && index == answeredIndex ?
+                    (answeredIndex == correctAnswerIndex ?
+                        "yay" : "ohno"
+                    ) : ""
+            }" onclick={() => answeredIndex = index} disabled={viewOnly}>
+                {#if showAccuracy && index != correctAnswerIndex}
+                    <XMarkIcon class="button-box-selected-icon"></XMarkIcon>
+                {:else}
+                    <CheckmarkIcon class="button-box-selected-icon"></CheckmarkIcon>
+                {/if}
                 <span style="white-space: pre-wrap; margin-top: 0px;">{
                     answerWith == "DEF" ?
                         answer.def : answer.term
