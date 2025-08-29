@@ -371,7 +371,65 @@ FRQs: ${numFRQsToAssign}`
         }
 
         function addTrueFalseQuestion(term) {
-            // if (term.)
+            let question = {
+                type: "TRUE_FALSE",
+                term: {
+                    id: term.id,
+                    term: term.term,
+                    def: term.def
+                },
+                answerWith: answerWith == "BOTH" ?
+                    (Math.random() < 0.5 ? "TERM" : "DEF") :
+                    answerWith
+            }
+
+            let confusionPairTerms = [];
+            if (term.topConfusionPairs != null) {
+                term.topConfusionPairs.forEach(p => {
+                    if (p?.confusedCount >= 2) {
+                        confusionPairTerms.push({
+                            id: p.confusedTerm.id,
+                            term: p.confusedTerm.term,
+                            def: p.confusedTerm.def,
+                        })
+                    }
+                })
+            }
+            if (term.topReverseConfusionPairs != null) {
+                term.topReverseConfusionPairs.forEach(p => {
+                    if (p?.confusedCount >= 2) {
+                        confusionPairTerms.push({
+                            id: p.term.id,
+                            term: p.term.term,
+                            def: p.term.def
+                        })
+                    }
+                })
+            }
+
+            question.distractor = null;
+            if (Math.random() < 0.75) {
+                question.distractor = confusionPairTerms[
+                    Math.floor(Math.random() * confusionPairTerms.length)
+                ];
+            } else {
+                let iterations = 0;
+                while (question.distractor == null && iterations <= 99) {
+                    iterations++;
+                    randomTerm = terms[Math.floor(Math.random() * terms.length)];
+                    if (randomTerm.id != term.id) {
+                        question.distractor = {
+                            id: randomTerm.id,
+                            term: randomTerm.term,
+                            def: randomTerm.def
+                        }
+                    }
+                }
+                if (iterations > 99) {
+                    console.error("(addTrueFalseQuestion) Over 99 iterations to pick random distractor term")
+                }
+            }
+            questions.push(question);
         }
 
         function addFRQ(term) {
