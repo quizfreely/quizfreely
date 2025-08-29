@@ -215,11 +215,10 @@ FRQs: ${numFRQsToAssign}`
         }
 
         // returns a number; higher = more priority
-        function confusionPairPriority(count, lastConfusedAtDate) {
-            const now = Date.now();
+        function confusionPairPriority(count, lastConfusedAtDate, lastReviewedAt) {
             const decayDays = 7;
             const msPerDay = 1000 * 60 * 60 * 24;
-            const daysSince = (now - lastConfusedAtDate.getTime()) / msPerDay;
+            const daysSince = (lastReviewedAt.getTime() - lastConfusedAtDate.getTime()) / msPerDay;
             // log1p to get diminishing returns on count; exp for recency decay
             return Math.log1p(count) * Math.exp(-daysSince / decayDays);
         }
@@ -255,7 +254,10 @@ FRQs: ${numFRQsToAssign}`
                             ...confusionPair.confusedTerm,
                             priority: confusionPairPriority(
                                 confusionPair.confusedCount,
-                                new Date(confusionPair.lastConfusedAt)
+                                new Date(confusionPair.lastConfusedAt),
+                                new Date(term?.progress?.[
+                                    pickedAnswerWith.toLowerCase()+"LastReviewedAt"
+                                ] ?? Date.now())
                             )
                         });
                     }
@@ -277,7 +279,10 @@ FRQs: ${numFRQsToAssign}`
                             ...confusionPair.term,
                             priority: confusionPairPriority(
                                 confusionPair.confusedCount,
-                                new Date(confusionPair.lastConfusedAt)
+                                new Date(confusionPair.lastConfusedAt),
+                                new Date(term?.progress?.[
+                                    pickedAnswerWith.toLowerCase()+"LastReviewedAt"
+                                ] ?? Date.now())
                             )
                         });
                     }
@@ -366,7 +371,7 @@ FRQs: ${numFRQsToAssign}`
         }
 
         function addTrueFalseQuestion(term) {
-            if (term.)
+            // if (term.)
         }
 
         function addFRQ(term) {
