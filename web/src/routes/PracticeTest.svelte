@@ -408,7 +408,7 @@ FRQs: ${numFRQsToAssign}`
             }
 
             question.distractor = null;
-            if (Math.random() < 0.75) {
+            if (confusionPairTerms?.length > 0 && Math.random() < 0.75) {
                 question.distractor = confusionPairTerms[
                     Math.floor(Math.random() * confusionPairTerms.length)
                 ];
@@ -416,7 +416,7 @@ FRQs: ${numFRQsToAssign}`
                 let iterations = 0;
                 while (question.distractor == null && iterations <= 99) {
                     iterations++;
-                    randomTerm = terms[Math.floor(Math.random() * terms.length)];
+                    const randomTerm = terms[Math.floor(Math.random() * terms.length)];
                     if (randomTerm.id != term.id) {
                         question.distractor = {
                             id: randomTerm.id,
