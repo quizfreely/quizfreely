@@ -51,7 +51,7 @@
             return 25;
         } else if (terms?.length > 15) {
             return 20;
-        } else if (terms.length > 10) {
+        } else if (terms?.length > 10) {
             return 15;
         } else {
             return 10;
@@ -365,7 +365,7 @@ FRQs: ${numFRQsToAssign}`
                 }
             }
             if (iterations > 99) {
-                console.error("(addMCQ) Took more than 99 iterations to pick random term that wasn't a duplicate")
+                console.log("(addMCQ) Took more than 99 iterations to pick random term that wasn't a duplicate")
             }
 
             questions.push(question)
@@ -427,7 +427,7 @@ FRQs: ${numFRQsToAssign}`
                     }
                 }
                 if (iterations > 99) {
-                    console.error("(addTrueFalseQuestion) Over 99 iterations to pick random distractor term")
+                    console.log("(addTrueFalseQuestion) Over 99 iterations to pick random distractor term")
                 }
             }
             questions.push(question);
