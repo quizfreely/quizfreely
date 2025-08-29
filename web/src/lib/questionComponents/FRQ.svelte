@@ -25,7 +25,7 @@
     <p class="h4" style="white-space: pre-wrap; margin-bottom: 0px;">{ answerWith == "DEF" ?
         term.term : term.def
     }</p>
-    <div class="flex">
+    <div class="flex" style="align-content: center; align-items: center;">
         <input type="text" placeholder="{answerWith == "DEF" ?
             "Definition" : "Term"
         }" bind:value={answer} style="min-width: 16rem; field-sizing: content;" class="{showAccuracy ? (
@@ -33,9 +33,9 @@
                 "yay" : "ohno"
         ) : ""}" disabled={viewOnly}>
         {#if showAccuracy && getQuestion().frq.correct}
-            <CheckmarkIcon class="yay"></CheckmarkIcon>
+            <span class="yay"><CheckmarkIcon width="1.4rem" height="1.4rem"></CheckmarkIcon></span>
         {:else if showAccuracy}
-            <XMarkIcon class="ohno"></XMarkIcon>
+            <span class="ohno"><XMarkIcon width="1.4rem" height="1.4rem"></XMarkIcon></span>
         {/if}
     </div>
 </div>
