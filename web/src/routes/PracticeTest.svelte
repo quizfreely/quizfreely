@@ -39,7 +39,8 @@
     let questionTypesEnabled = $state({
         mcq: true,
         trueFalse: false,
-        match: true,
+        // match: true,
+        match: false,
         frq: false
     });
 
@@ -524,12 +525,12 @@ FRQs: ${numFRQsToAssign}`
                         <CheckmarkIcon class="button-box-selected-icon"></CheckmarkIcon>
                         True/False
                     </button>
-                    <button class="button-box { questionTypesEnabled.match ?
-                        "selected" : ""
-                    }" style="display: flex; margin-top: 0.4rem;" onclick={() => questionTypesEnabled.match = !questionTypesEnabled.match}>
-                        <CheckmarkIcon class="button-box-selected-icon"></CheckmarkIcon>
-                        Matching
-                    </button>
+                    <!-- <button class="button-box { questionTypesEnabled.match ? -->
+                    <!--     "selected" : "" -->
+                    <!-- }" style="display: flex; margin-top: 0.4rem;" onclick={() => questionTypesEnabled.match = !questionTypesEnabled.match}> -->
+                    <!--     <CheckmarkIcon class="button-box-selected-icon"></CheckmarkIcon> -->
+                    <!--     Matching -->
+                    <!-- </button> -->
                     <button class="button-box { questionTypesEnabled.frq ?
                         "selected" : ""
                     }" style="display: flex; margin-top: 0.4rem;" onclick={() => questionTypesEnabled.frq = !questionTypesEnabled.frq}>
