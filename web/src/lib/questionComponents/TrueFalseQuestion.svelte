@@ -74,7 +74,7 @@
                 "yay" : "ohno"
             ) : ""
         }" onclick={() => answeredBool = true}>
-            {#if showAccuracy && answeredBool === true && answeredBool != correctAnswerBool}
+            {#if showAccuracy && answeredBool != correctAnswerBool}
                 <XMarkIcon class="button-box-selected-icon"></XMarkIcon>
             {:else}
                 <CheckmarkIcon class="button-box-selected-icon"></CheckmarkIcon>
@@ -88,7 +88,7 @@
                 "yay" : "ohno"
             ) : ""
         }" onclick={() => answeredBool = false}>
-            {#if showAccuracy && answeredBool === false && answeredBool != correctAnswerBool}
+            {#if showAccuracy && answeredBool != correctAnswerBool}
                 <XMarkIcon class="button-box-selected-icon"></XMarkIcon>
             {:else}
                 <CheckmarkIcon class="button-box-selected-icon"></CheckmarkIcon>
