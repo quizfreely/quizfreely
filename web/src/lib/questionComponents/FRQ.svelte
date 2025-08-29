@@ -1,7 +1,8 @@
 <script>
     import CheckmarkIcon from "$lib/icons/Checkmark.svelte";
     import XMarkIcon from "$lib/icons/CloseXMark.svelte";
-    let { term, answerWith, viewOnly, showAccuracy } = $props();
+    let { term, answerWith, viewOnly, showAccuracy, questionUpdateCallback } = $props();
+    let manuallyMarkedCorrect = $state(false);
     export function getQuestion() {
         if (answer == "") {
             console.log("Possibly Unanswered FRQ")
@@ -11,9 +12,11 @@
             frq: {
                 term: term,
                 answerWith: answerWith,
-                correct: answerWith == "DEF" ?
-                    term.def == answer:
-                    term.term == answer,
+                correct: manuallyMarkedCorrect ||
+                    (answerWith == "DEF" ?
+                        term.def == answer:
+                        term.term == answer),
+                userMarkedCorrect: manuallyMarkedCorrect,
                 answeredString: answer,
             }
         }
@@ -36,6 +39,9 @@
             <span class="yay"><CheckmarkIcon width="1.4rem" height="1.4rem"></CheckmarkIcon></span>
         {:else if showAccuracy}
             <span class="ohno"><XMarkIcon width="1.4rem" height="1.4rem"></XMarkIcon></span>
+        {/if}
+        {#if showAccuracy && !getQuestion().frq.correct}
+            <button class="faint" onclick={() => alert("not implemented yet")}>Manually mark as correct</button>
         {/if}
     </div>
 </div>

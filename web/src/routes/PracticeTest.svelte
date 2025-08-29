@@ -558,7 +558,7 @@ FRQs: ${numFRQsToAssign}`
                 </div>
                 {:else if question.type == "FRQ"}
                 <div class="box">
-                    <FRQ term={question.term} answerWith={question.answerWith} viewOnly={questionsViewOnly} showAccuracy={questionsShowAccuracy} bind:this={questionComponents[index]}></FRQ>
+                    <FRQ term={question.term} answerWith={question.answerWith} viewOnly={questionsViewOnly} showAccuracy={questionsShowAccuracy} index={index} bind:this={questionComponents[index]}></FRQ>
                 </div>
                 {/if}
             {/each}
