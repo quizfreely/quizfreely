@@ -7,7 +7,6 @@
     export function getQuestion() {
         if (answeredBool == null) {
             console.log("Unanswered True/False Question")
-            return null;
         }
         return {
             questionType: "TRUE_FALSE",
