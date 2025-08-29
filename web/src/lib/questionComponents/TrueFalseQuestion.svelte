@@ -1,7 +1,7 @@
 <script>
     import CheckmarkIcon from "$lib/icons/Checkmark.svelte";
     import XMarkIcon from "$lib/icons/CloseXMark.svelte";
-    let { term, answerWith, distractor } = $props();
+    let { term, answerWith, distractor, viewOnly, showAccuracy } = $props();
     let correctAnswerBool = Math.random() < 0.5;
     let answeredBool = $state(null);
 
@@ -67,28 +67,28 @@
         </div>
     </div>
     <div class="flex">
-        <button style="display: flex; justify-items: start; justify-content: start; text-align: start;" class="button-box with-bordercolor-border {
+        <button style="display: flex; justify-items: start; justify-content: start; text-align: start;" disabled={viewOnly} class="button-box with-bordercolor-border {
             answeredBool === true ? "selected" : ""
-        } {answeredBool === true ?
+        } {showAccuracy && answeredBool === true ?
             (answeredBool == correctAnswerBool ?
                 "yay" : "ohno"
             ) : ""
         }" onclick={() => answeredBool = true}>
-            {#if answeredBool === true && answeredBool != correctAnswerBool}
+            {#if showAccuracy && answeredBool === true && answeredBool != correctAnswerBool}
                 <XMarkIcon class="button-box-selected-icon"></XMarkIcon>
             {:else}
                 <CheckmarkIcon class="button-box-selected-icon"></CheckmarkIcon>
             {/if}
             True
         </button>
-        <button style="display: flex; justify-items: start; justify-content: start; text-align: start;" class="button-box with-bordercolor-border {
+        <button style="display: flex; justify-items: start; justify-content: start; text-align: start;" disabled={viewOnly} class="button-box with-bordercolor-border {
             answeredBool === false ? "selected" : ""
-        } {answeredBool === false ?
+        } {showAccuracy && answeredBool === false ?
             (answeredBool == correctAnswerBool ?
                 "yay" : "ohno"
             ) : ""
         }" onclick={() => answeredBool = false}>
-            {#if answeredBool === false && answeredBool != correctAnswerBool}
+            {#if showAccuracy && answeredBool === false && answeredBool != correctAnswerBool}
                 <XMarkIcon class="button-box-selected-icon"></XMarkIcon>
             {:else}
                 <CheckmarkIcon class="button-box-selected-icon"></CheckmarkIcon>
