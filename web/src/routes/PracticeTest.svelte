@@ -479,6 +479,9 @@ FRQs: ${numFRQsToAssign}`
 
         }
     })
+
+    let questionsViewOnly = $state(false);
+    let questionsShowAccuracy = $state(false);
 </script>
 <div class="grid page">
     <div class="content">
@@ -547,20 +550,22 @@ FRQs: ${numFRQsToAssign}`
             {#each questions as question, index}
                 {#if question.type == "MCQ"}
                 <div class="box">
-                    <MCQ term={question.term} answerWith={question.answerWith} distractors={question.distractors} bind:this={questionComponents[index]}></MCQ>
+                    <MCQ term={question.term} answerWith={question.answerWith} distractors={question.distractors} viewOnly={questionsViewOnly} showAccuracy={questionsShowAccuracy} bind:this={questionComponents[index]}></MCQ>
                 </div>
                 {:else if question.type == "TRUE_FALSE"}
                 <div class="box">
-                    <TrueFalseQuestion term={question.term} answerWith={question.answerWith} distractor={question.distractor} bind:this={questionComponents[index]}></TrueFalseQuestion>
+                    <TrueFalseQuestion term={question.term} answerWith={question.answerWith} distractor={question.distractor} viewOnly={questionsViewOnly} showAccuracy={questionsShowAccuracy} bind:this={questionComponents[index]}></TrueFalseQuestion>
                 </div>
                 {:else if question.type == "FRQ"}
                 <div class="box">
-                    <FRQ term={question.term} answerWith={question.answerWith} bind:this={questionComponents[index]}></FRQ>
+                    <FRQ term={question.term} answerWith={question.answerWith} viewOnly={questionsViewOnly} showAccuracy={questionsShowAccuracy} bind:this={questionComponents[index]}></FRQ>
                 </div>
                 {/if}
             {/each}
             <div class="flex">
                 <button class="yay" onclick={() => {
+                    questionsViewOnly = true;
+                    questionsShowAccuracy = true;
                     questionComponents.forEach(questionComponent => {
                         console.log(questionComponent.getQuestion());
                     })
