@@ -18,7 +18,6 @@
     export function getQuestion() {
         if (answeredIndex == -1) {
             console.log("Unanswered MCQ")
-            return null;
         }
         return {
             questionType: "MCQ",
@@ -26,7 +25,8 @@
                 term: term,
                 answerWith: answerWith,
                 correct: answeredIndex == correctAnswerIndex,
-                answeredTerm: answers[answeredIndex],
+                answeredTerm: answeredIndex >= 0 ?
+                    answers[answeredIndex] : null,
                 distractors: distractors
             }
         }
