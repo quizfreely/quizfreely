@@ -674,7 +674,7 @@ FRQs: ${numFRQsToAssign}`
                     } else {
                         await idbApiLayer.recordPracticeTest(JSON.parse(JSON.stringify({
                             timestamp: (new Date()).toISOString(),
-                            studysetId: data.localId,
+                            studysetId: data.localId ?? data.studysetId,
                             questionsCorrect: questionsCorrect,
                             questionsTotal: questions.length,
                             questions: questionDataArray
