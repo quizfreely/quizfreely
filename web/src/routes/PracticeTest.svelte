@@ -497,6 +497,8 @@ FRQs: ${numFRQsToAssign}`
 
     let showScore = $state(false);
     let questionsCorrect = $state(0);
+
+    let recordedPracticeTestId;
 </script>
 <div class="grid page">
     <div class="content">
@@ -603,7 +605,7 @@ FRQs: ${numFRQsToAssign}`
                 {/if}
             {/each}
             <div class="flex">
-                <button class="yay" onclick={() => {
+                <button class="yay" onclick={async () => {
                     questionsViewOnly = true;
                     questionsShowAccuracy = true;
                     takingActualPracticeTest = false;
@@ -611,7 +613,7 @@ FRQs: ${numFRQsToAssign}`
                     let questionDataArray = [];
                     questionComponents.forEach(questionComponent => {
                         const questionData = questionComponent.getQuestion();
-                        console.log(questionData);
+                        questionDataArray.push(questionData);
                         if (questionData.questionType == "MCQ" ?
                             questionData.mcq.correct : (
                             questionData.questionType == "FRQ" ?
@@ -625,8 +627,50 @@ FRQs: ${numFRQsToAssign}`
                         ) {
                             questionsCorrect++;
                         }
-                        questionDataArray.push(questionData);
                     })
+                    if (data.authed && !data.local) {
+                        try {
+                            let raw = await fetch("/api/graphql", {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json"
+                                },
+                                body: JSON.stringify({
+                                    query: `mutation recordPracticeTest($input: PracticeTestInput) {
+    recordPracticeTest(i    nput: $input) {
+        id
+    }
+}`,
+                                    variables: {
+                                        "input": {
+                                            timestamp: (new Date()).toISOString(),
+                                            studysetId: data.studysetId,
+                                            questionsCorrect: questionsCorrect,
+                                            questionsTotal: questions.length,
+                                            questions: questionDataArray
+                                        }
+                                    }
+                                })
+                            });
+                            let resp = await raw.json();
+                            if (resp?.data?.recordPracticeTest?.id) {
+                                recordedPracticeTestId = resp.data.recordPracticeTest.id;
+                            } else {
+                                console.log("(submit button) no id in response: ", resp);
+                            }
+                        } catch (err) {
+                            console.error("(submit button) Error recording cloud practice test: ", err);
+                            
+                        }
+                    } else {
+                        idbApiLayer.recordPracticeTest({
+                            timestamp: (new Date()).toISOString(),
+                            studysetId: data.localId,
+                            questionsCorrect: questionsCorrect,
+                            questionsTotal: questions.length,
+                            questions: questionDataArray
+                        });
+                    }
                 }}>
                     <CheckmarkIcon></CheckmarkIcon>
                     Submit
