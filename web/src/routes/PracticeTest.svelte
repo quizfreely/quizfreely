@@ -617,6 +617,7 @@ FRQs: ${numFRQsToAssign}`
                     takingActualPracticeTest = false;
                     showScore = true;
                     let questionDataArray = [];
+                    questionsCorrect = 0;
                     questionComponents.forEach(questionComponent => {
                         const questionData = questionComponent.getQuestion();
                         questionDataArray.push(questionData);
@@ -671,13 +672,13 @@ FRQs: ${numFRQsToAssign}`
                             alert("idk it kinda couldn't save, check ur internet connection mabye?")
                         }
                     } else {
-                        await idbApiLayer.recordPracticeTest({
+                        await idbApiLayer.recordPracticeTest(JSON.parse(JSON.stringify({
                             timestamp: (new Date()).toISOString(),
                             studysetId: data.localId,
                             questionsCorrect: questionsCorrect,
                             questionsTotal: questions.length,
                             questions: questionDataArray
-                        });
+                        })));
                         submitted = true;
                     }
                 }}>
