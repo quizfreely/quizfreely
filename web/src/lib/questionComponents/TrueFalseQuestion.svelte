@@ -12,7 +12,11 @@
         return {
             questionType: "TRUE_FALSE",
             trueFalseQuestion: {
-                term: term,
+                term: {
+                    id: term.id,
+                    term: term.term,
+                    def: term.def
+                },
                 answerWith: answerWith,
                 correct: answeredBool == correctAnswerBool,
                 answeredBool: answeredBool,

@@ -23,7 +23,11 @@
         return {
             questionType: "MCQ",
             mcq: {
-                term: term,
+                term: {
+                    id: term.id,
+                    term: term.term,
+                    def: term.def
+                },
                 answerWith: answerWith,
                 correct: answeredIndex == correctAnswerIndex,
                 answeredTerm: answeredIndex >= 0 ?

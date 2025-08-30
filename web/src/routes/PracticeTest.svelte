@@ -634,6 +634,7 @@ FRQs: ${numFRQsToAssign}`
                             questionsCorrect++;
                         }
                     })
+                    console.log(questionDataArray)
                     if (data.authed && !data.local) {
                         try {
                             let raw = await fetch("/api/graphql", {
@@ -670,13 +671,14 @@ FRQs: ${numFRQsToAssign}`
                             alert("idk it kinda couldn't save, check ur internet connection mabye?")
                         }
                     } else {
-                        idbApiLayer.recordPracticeTest({
+                        await idbApiLayer.recordPracticeTest({
                             timestamp: (new Date()).toISOString(),
                             studysetId: data.localId,
                             questionsCorrect: questionsCorrect,
                             questionsTotal: questions.length,
                             questions: questionDataArray
                         });
+                        submitted = true;
                     }
                 }}>
                     <CheckmarkIcon></CheckmarkIcon>
