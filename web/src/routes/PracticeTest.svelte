@@ -10,6 +10,7 @@
     import { slide, fade } from "svelte/transition";
     import { goto, beforeNavigate } from "$app/navigation";
     import { cancelNprogressTimeout } from "$lib/stores/nprogressTimeout.js";
+    import { Confetti } from "svelte-confetti";
     let { data } = $props();
     let terms = $state();
 
@@ -496,13 +497,6 @@ FRQs: ${numFRQsToAssign}`
 
     let showScore = $state(false);
     let questionsCorrect = $state(0);
-
-    function snakeCaseToCamelCase(str) {
-        return str.toLowerCase().replace(
-            /(_\w)/g,
-            m => m.toUpperCase().substr(1)
-        );
-    }
 </script>
 <div class="grid page">
     <div class="content">
@@ -523,13 +517,19 @@ FRQs: ${numFRQsToAssign}`
         {#if showScore}
             <div style="position: sticky; top: 0px; padding: 1rem; margin-top: 0px; background: var(--bg-1);" transition:slide={{ duration: 400 }}>
                 <div class="flex" style="justify-content: space-between;">
-                    <span class="{
+                    <span class="b {
                         questionsCorrect / questions.length >= 0.9 ?
                             "yay" : "ohno"
                     }">{questionsCorrect / questions.length * 100}%</span>
                     <span>{questionsCorrect}/{questions.length} Correct</span>
                 </div>
             </div>
+            {#if questionsCorrect / questions.length == 1}
+                <!-- fullscreen confetti if 100% -->
+                <div style="position: fixed; top: -50px; left 0px; margin-top: 0px; height: 100vh; width: 100vw; display: flex; justify-content: center; overflow: hidden; pointer-events: none;">
+                    <Confetti x={[-5, 5]} y={[0, 0.1]} delay={[0, 6000]} duration={4000} amount=1000 fallDistance="200vh"/>
+                </div>
+            {/if}
         {/if}
         {#if showSetup}
             <div id="setup" transition:slide={{duration:400}}>
@@ -612,10 +612,16 @@ FRQs: ${numFRQsToAssign}`
                     questionComponents.forEach(questionComponent => {
                         const questionData = questionComponent.getQuestion();
                         console.log(questionData);
-                        if (
-                            questionData[
-                                snakeCaseToCamelCase(questionData.questionType)
-                            ].correct
+                        if (questionData.questionType == "MCQ" ?
+                            questionData.mcq.correct : (
+                            questionData.questionType == "FRQ" ?
+                                questionData.frq.correct : (
+                                questionData.questionType == "TRUE_FALSE" ?
+                                    questionData.trueFalseQuestion.correct : (
+                                    () => { console.log("(submit button forEach) unknown/unimplemented question type"); return false; }
+                                    )
+                                )
+                            )
                         ) {
                             questionsCorrect++;
                         }
