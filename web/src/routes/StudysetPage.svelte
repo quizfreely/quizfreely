@@ -16,6 +16,7 @@
     import IconMoreDotsV from "$lib/icons/MoreDotsVertical.svelte";
     import IconReviewModeBook from "$lib/icons/ReviewModeBook.svelte";
     import IconPracticeTestChecklist from "$lib/icons/PracticeTestChecklist.svelte";
+    import IconGraph from "$lib/icons/ChartGraphLine.svelte";
     import IconFlashcards from "$lib/icons/Flashcards.svelte";
     import IconSettingsGear from "$lib/icons/SettingsGear.svelte";
 
@@ -281,23 +282,31 @@
             <IconFlashcards />
             Flashcards
           </button>
-          {#if (data.local) }
-          <a href="/studyset/local/review-mode?id={ data.localId }" class="button alt">
-            <IconReviewModeBook />
-            Review Mode
-          </a>
+          {#if data.local}
+          <!-- <a href="/studyset/local/review-mode?id={ data.localId }" class="button alt"> -->
+          <!--   <IconReviewModeBook /> -->
+          <!--   Review Mode -->
+          <!-- </a> -->
           <a href="/studyset/local/practice-test?id={data.localId}" class="button alt">
             <IconPracticeTestChecklist />
             Practice Test
           </a>
-          {:else if (data.studyset) }
-            <a href="/studysets/{ data.studyset.id }/review-mode" class="button alt">
-              <IconReviewModeBook />
-              Review Mode
-            </a>
+          <a href="/studyset/local/stats?id={data.localId}" class="button alt">
+            <IconGraph />
+            Progress &amp; Stats
+          </a>
+          {:else if data.studyset}
+            <!-- <a href="/studysets/{ data.studyset.id }/review-mode" class="button alt"> -->
+            <!--   <IconReviewModeBook /> -->
+            <!--   Review Mode -->
+            <!-- </a> -->
             <a href="/studysets/{data.studyset.id}/practice-test" class="button alt">
               <IconPracticeTestChecklist />
               Practice Test
+            </a>
+            <a href="/studysets/{data.studyset.id}/stats" class="button alt">
+              <IconGraph />
+              Progress &amp; Stats
             </a>
           {/if}
           
