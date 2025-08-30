@@ -44,7 +44,12 @@
             <span class="ohno"><XMarkIcon width="1.4rem" height="1.4rem"></XMarkIcon></span>
         {/if}
         {#if showAccuracy && !getQuestion().frq.correct}
-            <button class="faint" onclick={() => alert("not implemented yet")}>Manually mark as correct</button>
+            <div>
+            <button class="faint" onclick={() => {
+                manuallyMarkedCorrect = true;
+                userMarkedCorrectCallback()
+            }}>Manually mark as correct?</button>
+            </div>
         {/if}
     </div>
 </div>

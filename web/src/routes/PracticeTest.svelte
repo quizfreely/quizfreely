@@ -493,6 +493,16 @@ FRQs: ${numFRQsToAssign}`
             }
         })
     }
+
+    let showScore = $state(false);
+    let questionsCorrect = $state(0);
+
+    function snakeCaseToCamelCase(str) {
+        return str.toLowerCase().replace(
+            /(_\w)/g,
+            m => m.toUpperCase().substr(1)
+        );
+    }
 </script>
 <div class="grid page">
     <div class="content">
@@ -506,7 +516,18 @@ FRQs: ${numFRQsToAssign}`
             <div style="position: sticky; top: 0px; padding: 1rem; margin-top: 0px; background: var(--bg-1);" transition:slide={{ duration:400 }}>
                 <p class="center">{questionsAnswered}/{questions.length} Answered</p>
                 <div class="progress-bar yay thin" style="margin-top: 0.4rem;">
-                    <div style="width: {(questionsAnswered / questions.length) * 100}%"></div>
+                    <div style="width: {Math.floor((questionsAnswered / questions.length) * 100)}%"></div>
+                </div>
+            </div>
+        {/if}
+        {#if showScore}
+            <div style="position: sticky; top: 0px; padding: 1rem; margin-top: 0px; background: var(--bg-1);" transition:slide={{ duration: 400 }}>
+                <div class="flex" style="justify-content: space-between;">
+                    <span class="{
+                        questionsCorrect / questions.length >= 0.9 ?
+                            "yay" : "ohno"
+                    }">{questionsCorrect / questions.length * 100}%</span>
+                    <span>{questionsCorrect}/{questions.length} Correct</span>
                 </div>
             </div>
         {/if}
@@ -586,8 +607,19 @@ FRQs: ${numFRQsToAssign}`
                     questionsViewOnly = true;
                     questionsShowAccuracy = true;
                     takingActualPracticeTest = false;
+                    showScore = true;
+                    let questionDataArray = [];
                     questionComponents.forEach(questionComponent => {
-                        console.log(questionComponent.getQuestion());
+                        const questionData = questionComponent.getQuestion();
+                        console.log(questionData);
+                        if (
+                            questionData[
+                                snakeCaseToCamelCase(questionData.questionType)
+                            ].correct
+                        ) {
+                            questionsCorrect++;
+                        }
+                        questionDataArray.push(questionData);
                     })
                 }}>
                     <CheckmarkIcon></CheckmarkIcon>
