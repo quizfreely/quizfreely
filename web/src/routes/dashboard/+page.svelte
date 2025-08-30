@@ -9,9 +9,9 @@
     import IconPlus from "$lib/icons/Plus.svelte";
 
     onMount(async function () {
-        if (data?.settingsDateTimeFormatHours == "24h") {
+        if (data?.settingsDateTimeFormatHours == "24") {
             fancyTimestamp.hours = 24;
-        } else if (data?.settingsDateTimeFormatHours == "12h") {
+        } else if (data?.settingsDateTimeFormatHours == "12") {
             fancyTimestamp.hours = 12;
         }
 
