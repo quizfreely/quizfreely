@@ -499,6 +499,7 @@ FRQs: ${numFRQsToAssign}`
     let questionsCorrect = $state(0);
 
     let recordedPracticeTestId;
+    let submitted = $state(false);
 </script>
 <div class="grid page">
     <div class="content">
@@ -604,7 +605,12 @@ FRQs: ${numFRQsToAssign}`
                 </div>
                 {/if}
             {/each}
-            <div class="flex">
+            {#if submitted}
+                <div class="flex" transition:slide={{ duration: 400 }}>
+                    <p class="yay"><CheckmarkIcon></CheckmarkIcon> Submitted</p>
+                </div>
+            {:else}
+            <div class="flex" transition:slide={{ duration: 400 }}>
                 <button class="yay" onclick={async () => {
                     questionsViewOnly = true;
                     questionsShowAccuracy = true;
@@ -637,13 +643,12 @@ FRQs: ${numFRQsToAssign}`
                                 },
                                 body: JSON.stringify({
                                     query: `mutation recordPracticeTest($input: PracticeTestInput) {
-    recordPracticeTest(i    nput: $input) {
+    recordPracticeTest(input: $input) {
         id
     }
 }`,
                                     variables: {
                                         "input": {
-                                            timestamp: (new Date()).toISOString(),
                                             studysetId: data.studysetId,
                                             questionsCorrect: questionsCorrect,
                                             questionsTotal: questions.length,
@@ -655,12 +660,14 @@ FRQs: ${numFRQsToAssign}`
                             let resp = await raw.json();
                             if (resp?.data?.recordPracticeTest?.id) {
                                 recordedPracticeTestId = resp.data.recordPracticeTest.id;
+                                submitted = true;
                             } else {
                                 console.log("(submit button) no id in response: ", resp);
+                                alert("idk theres some kind of problem while saving sorry i guess")
                             }
                         } catch (err) {
                             console.error("(submit button) Error recording cloud practice test: ", err);
-                            
+                            alert("idk it kinda couldn't save, check ur internet connection mabye?")
                         }
                     } else {
                         idbApiLayer.recordPracticeTest({
@@ -676,6 +683,7 @@ FRQs: ${numFRQsToAssign}`
                     Submit
                 </button>
             </div>
+            {/if}
         {/if}
         <!-- <p style="white-space: pre-wrap">{JSON.stringify(terms, null, 4)}</p> -->
         {#if showExitConfirmationModal}
