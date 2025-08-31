@@ -743,7 +743,7 @@ FRQs: ${numFRQsToAssign}`
 </div>
 {#if showScore && questionsCorrect / questions.length == 1}
     <!-- fullscreen confetti if 100% -->
-    <div style="position: fixed; top: -50px; left 0px; margin-top: 0px; height: 100vh; width: 100vw; display: flex; justify-content: center; overflow: hidden; pointer-events: none;">
+    <div style="position: fixed; top: -50px; left 0px; margin: 0px; padding: 0px; height: 100vh; width: 100vw; display: flex; justify-content: center; overflow: hidden; pointer-events: none;">
         <Confetti x={[-5, 5]} y={[0, 0.1]} delay={[0, 6000]} duration={4000} amount=1000 fallDistance="200vh"/>
     </div>
 {/if}
