@@ -11,6 +11,7 @@
     import { slide, fade } from "svelte/transition";
     import { goto, beforeNavigate } from "$app/navigation";
     import { cancelNprogressTimeout } from "$lib/stores/nprogressTimeout.js";
+    import { fancyTimestamp } from "$lib/fancyTimestamp";
     import { Confetti } from "svelte-confetti";
     let { data } = $props();
     let terms = $state();
@@ -21,7 +22,15 @@
         terms = data?.studyset?.terms;
         practiceTests = data?.studyset?.practiceTests.slice(0, 4);
     }
+    let mounted = $state(false);
     onMount(() => {
+        mounted = true;
+        if (data?.settingsDateTimeFmtHours == "24") {
+            fancyTimestamp.hours = 24;
+        } else if (data?.settingsDateTimeFmtHours == "12") {
+            fancyTimestamp.hours = 12;
+        }
+
         if (data.local) {
             (async () => {
                 const studyset = await idbApiLayer.getStudysetById(data.localId, {
@@ -602,7 +611,8 @@ FRQs: ${numFRQsToAssign}`
                                     Math.floor((practiceTest.questionsCorrect / practiceTest.questionsTotal) * 100) >= 90 ?
                                         "yay" : "ohno"
                                 }">{Math.floor((practiceTest.questionsCorrect / practiceTest.questionsTotal) * 100)}%</span>
-                                <span>{practiceTest.questionsCorrect}/{practiceTest.questionsTotal} Questions</span>
+                                <span>{practiceTest.questionsCorrect}/{practiceTest.questionsTotal}</span>
+                                <span>{mounted ? fancyTimestamp.format(practiceTest.timestamp) : "..."}</span>
                                 <a href="{
                                     data.local ?
                                         `/practice-test/local?id=${practiceTest.id}` :
