@@ -8,6 +8,7 @@ import "$lib/nprogress/modified-nprogress.css";
 import { beforeNavigate, afterNavigate } from "$app/navigation";
 import { nprogressTimeout, cancelNprogressTimeout } from "$lib/stores/nprogressTimeout.js";
 import { get } from "svelte/store";
+import { footerState } from '$lib/components/footer.svelte.js';
 let { children, data } = $props();
 
 NProgress.configure({
@@ -36,7 +37,9 @@ afterNavigate(function () {
     <div style="min-height: 70vh">
         {@render children()}
     </div>
+    {#if !footerState?.hideFooter}
     <Footer />
+    {/if}
 </div>
 {/key}
 

@@ -3,7 +3,7 @@
     import { onMount } from "svelte";
     import idbApiLayer from "$lib/idb-api-layer/idb-api-layer.js";
     import { goto } from "$app/navigation";
-    import { fade } from "svelte/transition";
+    import { fade, slide } from "svelte/transition";
     let { data } = $props();
 
     import IconLocal from "$lib/icons/Local.svelte";
@@ -20,6 +20,7 @@
     import IconFlashcards from "$lib/icons/Flashcards.svelte";
     import IconSettingsGear from "$lib/icons/SettingsGear.svelte";
     import { Confetti } from "svelte-confetti";
+    import { footerState } from "$lib/components/footer.svelte.js";
 
     var showDeleteConfirmationModal = $state(false);
     let title = $state(data?.studyset?.title);
@@ -54,7 +55,9 @@
         }
     }
 
+    let mounted = $state(false);
     onMount(function () {
+        mounted = true;
         if (data.local) {
             (async () => {
             const localStudyset = await idbApiLayer.getStudysetById(
@@ -152,21 +155,14 @@
         }
     }
 
+    let flashcardsMaximized = $state(false);
     function maximizeFlashcards() {
-        document.getElementById("title-and-menu-outer-div").classList.add("hide");
-        document.getElementById("terms-and-stuff-outer-div").classList.add("hide");
-        document.getElementById("footer-wave").classList.add("hide");
-        document.getElementById("footer").classList.add("hide");
-
-        document.getElementById("flashcards-unmaximize").classList.remove("hide");
+        flashcardsMaximized = true;
+        footerState.hideFooter = true;
     }
     function unmaximizeFlashcards() {
-        document.getElementById("title-and-menu-outer-div").classList.remove("hide");
-        document.getElementById("terms-and-stuff-outer-div").classList.remove("hide");
-        document.getElementById("footer-wave").classList.remove("hide");
-        document.getElementById("footer").classList.remove("hide");
-
-        document.getElementById("flashcards-unmaximize").classList.add("hide");
+        flashcardsMaximized = false;
+        footerState.hideFooter = false;
     }
 </script>
 
@@ -184,6 +180,7 @@
 <main>
   <div class="grid page">
     <div class="content">
+    {#if !flashcardsMaximized}
       <div id="title-and-menu-outer-div">
         <h2 class="caption" style="overflow-wrap:anywhere">{ title ?? "Title" }</h2>
         {#if data.local}
@@ -234,10 +231,15 @@
         </div>
         {/if}
       </div>
+    {/if}
       <div id="flashcards-outer-div">
-        <button id="flashcards-unmaximize" class="faint hide" onclick={unmaximizeFlashcards}>
-          <IconBackArrow /> Back
-        </button>
+        {#if flashcardsMaximized}
+        <div class="flex" transition:slide={{ duration: 400 }}>
+            <button id="flashcards-unmaximize" class="faint" onclick={unmaximizeFlashcards}>
+                <IconBackArrow /> Back
+            </button>
+        </div>
+        {/if}
         <div>
           <div
             class="card double"
@@ -291,6 +293,7 @@
           </div>
         </div>
       </div>
+    {#if !flashcardsMaximized}
       <div id="terms-and-stuff-outer-div">
         <div class="caption grid list">
           <button id="flashcards-maximize" class="alt" onclick={maximizeFlashcards}>
@@ -358,6 +361,7 @@
         </div>
       </div>
       {/if}
+    {/if}
     </div>
   </div>
 </main>
