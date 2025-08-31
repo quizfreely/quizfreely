@@ -82,13 +82,19 @@ export async function load({ cookies, params}) {
             studysetId: params.id,
             studyset: resp?.data?.studyset,
             authed: resp?.data?.authed,
-            authedUser: resp?.data?.authedUser
+            authedUser: resp?.data?.authedUser,
+            settingsDateTimeFmtHours: cookies.get(
+              "settingsdatetimeformathours"
+            )
         }
     } catch (err) {
         console.error("Error in cloud studyset practice test load func: ", err);
         return {
           studysetId: params.id,
-          authed: false
+          authed: false,
+          settingsDateTimeFmtHours: cookies.get(
+            "settingsdatetimeformathours"
+          )
         }
     }
 }

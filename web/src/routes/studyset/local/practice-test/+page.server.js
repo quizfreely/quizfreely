@@ -6,6 +6,9 @@ export async function load({ cookies, url }) {
     return {
       localId: localId,
       authed: userResult.authed,
-      authedUser: userResult?.authedUser
+      authedUser: userResult?.authedUser,
+      settingsDateTimeFmtHours: cookies.get(
+        "settingsdatetimeformathours"
+      )
     }
 }
