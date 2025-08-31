@@ -20,7 +20,7 @@
     if (!data.local) {
         console.log(data.studyset)
         terms = data?.studyset?.terms;
-        practiceTests = data?.studyset?.practiceTests.slice(0, 4);
+        practiceTests = data?.studyset?.practiceTests?.slice(0, 4);
     }
     let mounted = $state(false);
     onMount(() => {
@@ -46,7 +46,7 @@
                     practiceTests: true
                 })
                 terms = studyset.terms;
-                practiceTests = studyset?.practiceTests.slice(0, 4);
+                practiceTests = studyset?.practiceTests?.slice(0, 4);
             })();
         }
     })
@@ -542,12 +542,6 @@ FRQs: ${numFRQsToAssign}`
                     <span>{questionsCorrect}/{questions.length} Correct</span>
                 </div>
             </div>
-            {#if questionsCorrect / questions.length == 1}
-                <!-- fullscreen confetti if 100% -->
-                <div style="position: fixed; top: -50px; left 0px; margin-top: 0px; height: 100vh; width: 100vw; display: flex; justify-content: center; overflow: hidden; pointer-events: none;">
-                    <Confetti x={[-5, 5]} y={[0, 0.1]} delay={[0, 6000]} duration={4000} amount=1000 fallDistance="200vh"/>
-                </div>
-            {/if}
         {/if}
         {#if showSetup}
             <div id="setup" transition:slide={{duration:400}}>
@@ -747,3 +741,9 @@ FRQs: ${numFRQsToAssign}`
         {/if}
     </div>
 </div>
+{#if showScore && questionsCorrect / questions.length == 1}
+    <!-- fullscreen confetti if 100% -->
+    <div style="position: fixed; top: -50px; left 0px; margin-top: 0px; height: 100vh; width: 100vw; display: flex; justify-content: center; overflow: hidden; pointer-events: none;">
+        <Confetti x={[-5, 5]} y={[0, 0.1]} delay={[0, 6000]} duration={4000} amount=1000 fallDistance="200vh"/>
+    </div>
+{/if}
