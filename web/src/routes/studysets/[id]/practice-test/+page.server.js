@@ -60,12 +60,12 @@ export async function load({ cookies, params}) {
                 answeredWith
                 confusedCount
             }
-            practiceTests {
-                id,
-                timestamp,
-                questionsCorrect,
-                questionsTotal
-            }
+        }
+        practiceTests {
+            id
+            timestamp
+            questionsCorrect
+            questionsTotal
         }
     }
 }`,

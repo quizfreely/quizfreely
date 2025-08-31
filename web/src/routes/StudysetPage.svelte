@@ -30,12 +30,14 @@
     /* use a set to track seen flashcards
     so flipping same card does not add a new element
     so we can use the length/size to check how many cards have been seen (both sides) this session */
-    let flashcardsSeen = $state(new Set());
+    let flashcardsSeenWhileMax = $state(new Set());
     let showConfetti = $state(false)
 
     function flashcardsFlip() {
         document.getElementById("flashcard").classList.toggle("flip");
-        flashcardsSeen.add(flashcardsIndex);
+        if (flashcardsMaximized) {
+            flashcardsSeenWhileMax.add(flashcardsIndex);
+        }
     }
     function flashcardsPrev() {
         if (flashcardsIndex > 0) {
@@ -48,8 +50,9 @@
         }
 
         if (
+            flashcardsMaximized == true &&
             flashcardsIndex == terms?.length - 1 &&
-            flashcardsSeen.size == terms?.length - 1
+            flashcardsSeenWhileMax.size == terms?.length - 1
         ) {
             showConfetti = true;
         }

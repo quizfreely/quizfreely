@@ -2,6 +2,7 @@
     import { onMount } from "svelte";
     import idbApiLayer from "$lib/idb-api-layer/idb-api-layer.js";
     import BackIcon from "$lib/icons/BackArrow.svelte";
+    import ForwardLongArrowIcon from "$lib/icons/ForwardRightArrowLong.svelte"
     import ExitIcon from "$lib/icons/Exit.svelte";
     import CheckmarkIcon from "$lib/icons/Checkmark.svelte";
     import MCQ from "$lib/questionComponents/MCQ.svelte"
@@ -13,9 +14,12 @@
     import { Confetti } from "svelte-confetti";
     let { data } = $props();
     let terms = $state();
+    let practiceTests = $state([]);
 
     if (!data.local) {
+        console.log(data.studyset)
         terms = data?.studyset?.terms;
+        practiceTests = data?.studyset?.practiceTests.slice(0, 4);
     }
     onMount(() => {
         if (data.local) {
@@ -29,9 +33,11 @@
                         topReverseConfusionPairs: {
                             term: true
                         }
-                    }
+                    },
+                    practiceTests: true
                 })
                 terms = studyset.terms;
+                practiceTests = studyset?.practiceTests.slice(0, 4);
             })();
         }
     })
@@ -536,13 +542,13 @@ FRQs: ${numFRQsToAssign}`
         {/if}
         {#if showSetup}
             <div id="setup" transition:slide={{duration:400}}>
-                <p class="h3">Practice Test</p>
+                <p class="h4">Practice Test</p>
                 <p>There {terms?.length == 1 ? "is" : "are"} {terms?.length ?? "?"} {terms?.length == 1 ? "term" : "terms"} in this studyset</p>
                 <p style="margin-top: 1rem;">Questions:</p>
                 <div style="margin-top: 0.4rem;">
                 <input type="text" placeholder={defaultQuestionsCount} style="max-width: 4rem;" bind:value={questionsCountEntered}>
                 </div>
-                <p style="margin-top: 2rem;">Answer with:</p>
+                <p style="margin-top: 1rem;">Answer with:</p>
                 <div class="flex" style="margin-top: 0.6rem;">
                     <button class="button-box {answerWith == "DEF" ? "selected" : ""}" style="display: flex;" onclick={() => answerWith = "DEF"}>
                         <CheckmarkIcon class="button-box-selected-icon"></CheckmarkIcon>
@@ -557,7 +563,7 @@ FRQs: ${numFRQsToAssign}`
                         Both
                     </button>
                 </div>
-                <p style="margin-top: 2rem;">Question types:</p>
+                <p style="margin-top: 1rem;">Question types:</p>
                 <div style="display: grid; grid-template-columns: auto; justify-content: start; margin-top: 0.6rem;">
                     <button class="button-box { questionTypesEnabled.mcq ?
                         "selected" : ""
@@ -584,9 +590,31 @@ FRQs: ${numFRQsToAssign}`
                         Free Response
                     </button>
                 </div>
-                <div class="flex" style="margin-top: 2rem;">
+                <div class="flex" style="margin-top: 1rem;">
                     <button onclick={setupStart}><CheckmarkIcon></CheckmarkIcon> Start</button>
                 </div>
+                {#if practiceTests?.length > 0}
+                    <p class="h4" style="margin-top: 2rem;">Completed Practice Tests</p>
+                    {#each practiceTests as practiceTest}
+                        <div class="box">
+                            <div class="flex" style="justify-content: space-between;">
+                                <span class="b {
+                                    Math.floor((practiceTest.questionsCorrect / practiceTest.questionsTotal) * 100) >= 90 ?
+                                        "yay" : "ohno"
+                                }">{Math.floor((practiceTest.questionsCorrect / practiceTest.questionsTotal) * 100)}%</span>
+                                <span>{practiceTest.questionsCorrect}/{practiceTest.questionsTotal} Questions</span>
+                                <a href="{
+                                    data.local ?
+                                        `/practice-test/local?id=${practiceTest.id}` :
+                                        `/practice-tests/${practiceTest.id}`
+                                }" style="display: flex; align-items: center; gap: 0.4rem;">
+                                    <span>View Details</span>
+                                    <ForwardLongArrowIcon class="no-margin-top"></ForwardLongArrowIcon>
+                                </a>
+                            </div>
+                        </div>
+                    {/each}
+                {/if}
             </div>
         {/if}
         {#if showTest}
