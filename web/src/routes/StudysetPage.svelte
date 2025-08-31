@@ -19,14 +19,22 @@
     import IconGraph from "$lib/icons/ChartGraphLine.svelte";
     import IconFlashcards from "$lib/icons/Flashcards.svelte";
     import IconSettingsGear from "$lib/icons/SettingsGear.svelte";
+    import { Confetti } from "svelte-confetti";
 
     var showDeleteConfirmationModal = $state(false);
     let title = $state(data?.studyset?.title);
     let terms = $state(data?.studyset?.terms);
     let flashcardsIndex = $state(0);
 
+    /* use a set to track seen flashcards
+    so flipping same card does not add a new element
+    so we can use the length/size to check how many cards have been seen (both sides) this session */
+    let flashcardsSeen = $state(new Set());
+    let showConfetti = $state(false)
+
     function flashcardsFlip() {
         document.getElementById("flashcard").classList.toggle("flip");
+        flashcardsSeen.add(flashcardsIndex);
     }
     function flashcardsPrev() {
         if (flashcardsIndex > 0) {
@@ -34,8 +42,15 @@
         }
     }
     function flashcardsNext() {
-        if (flashcardsIndex < (terms.length - 1)) {
+        if (flashcardsIndex < (terms?.length - 1)) {
             flashcardsIndex += 1
+        }
+
+        if (
+            flashcardsIndex == terms?.length - 1 &&
+            flashcardsSeen.size == terms?.length - 1
+        ) {
+            showConfetti = true;
         }
     }
 
@@ -346,3 +361,9 @@
     </div>
   </div>
 </main>
+{#if showConfetti}
+    <!-- fullscreen confetti -->
+    <div style="position: fixed; top: -50px; left 0px; margin-top: 0px; height: 100vh; width: 100vw; display: flex; justify-content: center; overflow: hidden; pointer-events: none;">
+        <Confetti x={[-5, 5]} y={[0, 0.1]} delay={[0, 6000]} duration={4000} amount=1000 fallDistance="200vh"/>
+    </div>
+{/if}

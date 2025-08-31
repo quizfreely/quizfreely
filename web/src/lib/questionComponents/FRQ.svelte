@@ -10,7 +10,11 @@
         return {
             questionType: "FRQ",
             frq: {
-                term: term,
+                term: {
+                    id: term.id,
+                    term: term.term,
+                    def: term.def
+                },
                 answerWith: answerWith,
                 correct: manuallyMarkedCorrect ||
                     (answerWith == "DEF" ?
