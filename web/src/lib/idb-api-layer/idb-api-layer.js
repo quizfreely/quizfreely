@@ -36,6 +36,9 @@ export default {
         }
         if (resolveProps?.practiceTests) {
             studysets[0].practiceTests = await db.practiceTests.where("studysetId").equals(id).toArray();
+
+            /* local timestamps are ISO strings in UTC, so alphanumeric/lexical sorting is the same as chronological sorting */
+            studysets[0].practiceTests?.sort()?.reverse();
         }
 
         return studysets[0];
