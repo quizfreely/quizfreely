@@ -574,19 +574,10 @@ FRQs: ${numFRQsToAssign}`
 <div class="grid page">
     <div class="content">
         <div class="flex">
-            {#if takingActualPracticeTest}
-            <button class="button faint" onclick={() => goto(
-                data.local ?
-                    `/studyset/local/practice-test?id=${data.localId}` :
-                    `/studysets/${data.studysetId}/practice-test`,
-                { invalidateAll: true }
-            )}><BackIcon></BackIcon> Back</button>
-            {:else}
             <a class="button faint" href={data.local ?
                 `/studyset/local?id=${data.localId}` :
                 `/studysets/${data.studysetId}`
             }><BackIcon></BackIcon> Back</a>
-            {/if}
         </div>
         {#if takingActualPracticeTest}
             <div style="position: sticky; top: 0px; padding: 1rem; margin-top: 0px; background: var(--bg-1);" transition:slide={{ duration:400 }}>
