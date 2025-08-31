@@ -578,7 +578,8 @@ FRQs: ${numFRQsToAssign}`
             <button class="button faint" onclick={() => goto(
                 data.local ?
                     `/studyset/local/practice-test?id=${data.localId}` :
-                    `/studysets/${data.studysetId}/practice-test`
+                    `/studysets/${data.studysetId}/practice-test`,
+                { invalidateAll: true }
             )}><BackIcon></BackIcon> Back</button>
             {:else}
             <a class="button faint" href={data.local ?
