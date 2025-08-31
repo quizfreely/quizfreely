@@ -637,9 +637,9 @@ FRQs: ${numFRQsToAssign}`
                                 <span>{practiceTest.questionsCorrect}/{practiceTest.questionsTotal}</span>
                                 <span>{mounted ? fancyTimestamp.format(practiceTest.timestamp) : "..."}</span>
                                 <a href="{
-                                    data.local ?
-                                        `/practice-test/local?id=${practiceTest.id}` :
-                                        `/practice-tests/${practiceTest.id}`
+                                    data.authed && !data.local ?
+                                        `/practice-tests/${practiceTest.id}` :
+                                        `/practice-test/local?id=${practiceTest.id}`
                                 }" style="display: flex; align-items: center; gap: 0.4rem;">
                                     <span>View Details</span>
                                     <ForwardLongArrowIcon class="no-margin-top"></ForwardLongArrowIcon>
