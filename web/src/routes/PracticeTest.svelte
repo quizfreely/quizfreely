@@ -545,6 +545,32 @@ FRQs: ${numFRQsToAssign}`
     let recordedPracticeTestId;
     let submitted = $state(false);
 </script>
+<style>
+    .gridfourpartthingrow {
+        display: grid;
+        gap: 1rem;
+        grid-template-columns: 2fr 2fr 3fr 3fr;
+        grid-template-rows: 1fr;
+    }
+    .fourpartthing-three {
+        justify-self: start;
+    }
+    .fourpartthing-four {
+        justify-self: end;
+    }
+    @media only screen and (max-width: 800px) {
+        .gridfourpartthingrow {
+            grid-template-columns: 2fr 2fr 3fr;
+            grid-template-rows: auto auto;
+        }
+        .fourpartthing-three {
+            justify-self: end;
+        }
+        .fourpartthing-four {
+            justify-self: start;
+        }
+    }
+</style>
 <div class="grid page">
     <div class="content">
         <div class="flex">
@@ -629,18 +655,18 @@ FRQs: ${numFRQsToAssign}`
                     <p class="h4" style="margin-top: 2rem;">Completed Practice Tests</p>
                     {#each practiceTests as practiceTest}
                         <div class="box">
-                            <div class="flex" style="justify-content: space-between;">
+                            <div class="grid gridfourpartthingrow">
                                 <span class="b {
                                     Math.floor((practiceTest.questionsCorrect / practiceTest.questionsTotal) * 100) >= 90 ?
                                         "yay" : "ohno"
                                 }">{Math.floor((practiceTest.questionsCorrect / practiceTest.questionsTotal) * 100)}%</span>
                                 <span>{practiceTest.questionsCorrect}/{practiceTest.questionsTotal}</span>
-                                <span>{mounted ? fancyTimestamp.format(practiceTest.timestamp) : "..."}</span>
+                                <span class="fourpartthing-three">{mounted ? fancyTimestamp.format(practiceTest.timestamp) : "..."}</span>
                                 <a href="{
                                     data.authed && !data.local ?
                                         `/practice-tests/${practiceTest.id}` :
                                         `/practice-test/local?id=${practiceTest.id}`
-                                }" style="display: flex; align-items: center; gap: 0.4rem;">
+                                }" class="fourpartthing-four" style="display: flex; align-items: center; gap: 0.4rem;">
                                     <span>View Details</span>
                                     <ForwardLongArrowIcon class="no-margin-top"></ForwardLongArrowIcon>
                                 </a>
