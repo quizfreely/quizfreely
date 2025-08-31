@@ -1,6 +1,7 @@
 <script>
     import { onMount } from "svelte";
     import idbApiLayer from "$lib/idb-api-layer/idb-api-layer.js";
+    import db from "$lib/idb-api-layer/db.js";
     import BackIcon from "$lib/icons/BackArrow.svelte";
     import ForwardLongArrowIcon from "$lib/icons/ForwardRightArrowLong.svelte"
     import ExitIcon from "$lib/icons/Exit.svelte";
