@@ -3,6 +3,8 @@
     import Chart from 'chart.js/auto';
     import 'chartjs-adapter-luxon';
     import { setEhuiChartColors } from "$lib/ehui-chartjs-colors.js";
+    import { fancyTimestamp } from "$lib/fancyTimestamp";
+    import ForwardLongArrowIcon from "$lib/icons/ForwardRightArrowLong.svelte"
     let { data } = $props();
     let terms = $state();
     let practiceTests = $state([]);
@@ -101,6 +103,71 @@
         }
     })
 </script>
+<style>
+    .gridfourpartthingrow {
+        display: grid;
+        gap: 1rem;
+        grid-template-columns: 1fr 1fr 2fr auto;
+        grid-template-rows: 1fr;
+        grid-template-areas: "one two three four";
+    }
+    .fourpartthing-one {
+        grid-area: one;
+    }
+    .fourpartthing-two {
+        grid-area: two;
+    }
+    .fourpartthing-three {
+        grid-area: three;
+        justify-self: start;
+    }
+    .fourpartthing-four {
+        grid-area: four;
+        justify-self: end;
+    }
+    @media only screen and (max-width: 800px) {
+        .gridfourpartthingrow {
+            grid-template-columns: 1fr 1fr 2fr;
+            grid-template-rows: auto auto;
+            grid-template-areas:
+                "one two three"
+                "four four four"
+        }
+        .fourpartthing-three {
+            justify-self: end;
+        }
+        .fourpartthing-four {
+            justify-self: start;
+        }
+    }
+</style>
+<div class="grid page">
+    <div class="content">
 {#if practiceTests?.length > 1}
 <canvas bind:this={chartCanvas}></canvas>
 {/if}
+                {#if practiceTests?.length > 0}
+                    <p class="h4" style="margin-top: 2rem;">Practice Tests</p>
+                    {#each practiceTests as practiceTest}
+                        <div class="box">
+                            <div class="grid gridfourpartthingrow">
+                                <span class="b fourpartthing-one {
+                                    Math.floor((practiceTest.questionsCorrect / practiceTest.questionsTotal) * 100) >= 90 ?
+                                        "yay" : "ohno"
+                                }">{Math.floor((practiceTest.questionsCorrect / practiceTest.questionsTotal) * 100)}%</span>
+                                <span class="fourpartthing-two">{practiceTest.questionsCorrect}/{practiceTest.questionsTotal}</span>
+                                <span class="fourpartthing-three">{mounted ? fancyTimestamp.format(practiceTest.timestamp) : "..."}</span>
+                                <a href="{
+                                    data.authed && !data.local ?
+                                        `/practice-tests/${practiceTest.id}` :
+                                        `/practice-test/local?id=${practiceTest.id}`
+                                }" class="fourpartthing-four" style="display: flex; align-items: center; gap: 0.4rem;">
+                                    <span>View Details</span>
+                                    <ForwardLongArrowIcon class="no-margin-top"></ForwardLongArrowIcon>
+                                </a>
+                            </div>
+                        </div>
+                    {/each}
+                {/if}
+    </div>
+</div>
