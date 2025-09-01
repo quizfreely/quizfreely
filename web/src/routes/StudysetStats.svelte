@@ -73,7 +73,11 @@
             })();
         }
 
-        setEhuiChartColors(Chart);
+        const rootStyles = getComputedStyle(document.documentElement);
+        const mainColor = rootStyles.getPropertyValue("--main").trim();
+        Chart.defaults.backgroundColor = mainColor;
+        Chart.defaults.borderColor = rootStyles.getPropertyValue("--border").trim();
+        Chart.defaults.color = rootStyles.getPropertyValue("--fg-1").trim();
         if (practiceTests?.length > 1) {
             new Chart(
                 chartCanvas,
@@ -82,8 +86,11 @@
                     data: {
                         datasets: [
                             ...(practiceTests?.length > 1 ? [{
+
                                 fill: false,
                                 tension: 0,
+                                borderColor: mainColor,
+                                backgroundColor: mainColor,
                                 data: practiceTests.map(pt => ({
                                     x: Date.parse(pt.timestamp),
                                     y: Math.floor((pt.questionsCorrect / pt.questionsTotal) * 100)
@@ -96,10 +103,15 @@
                             x: {
                                 type: "time"
                             }
-                        }
+                        },
+                        interaction: {
+                          intersect: false,
+                        },
+                        responsive: true,
+                        maintainAspectRatio: false
                     }
                 }
-            )
+            );
         }
     })
 </script>
@@ -140,11 +152,24 @@
             justify-self: start;
         }
     }
+    .chart-container {
+        position: relative;
+        width: 100%;
+        max-width: 100%;
+        height: 16rem;
+    }
+    
+    .chart-container canvas {
+        width: 100% !important;
+        height: 100% !important;
+    }
 </style>
 <div class="grid page">
     <div class="content">
 {#if practiceTests?.length > 1}
-<canvas bind:this={chartCanvas}></canvas>
+    <div class="chart-container">
+        <canvas bind:this={chartCanvas}></canvas>
+    </div>
 {/if}
                 {#if practiceTests?.length > 0}
                     <p class="h4" style="margin-top: 2rem;">Practice Tests</p>
