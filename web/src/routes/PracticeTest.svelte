@@ -549,19 +549,31 @@ FRQs: ${numFRQsToAssign}`
     .gridfourpartthingrow {
         display: grid;
         gap: 1rem;
-        grid-template-columns: 2fr 2fr 3fr 3fr;
+        grid-template-columns: 1fr 1fr 2fr auto;
         grid-template-rows: 1fr;
+        grid-template-areas: "one two three four";
+    }
+    .fourpartthing-one {
+        grid-area: one;
+    }
+    .fourpartthing-two {
+        grid-area: two;
     }
     .fourpartthing-three {
+        grid-area: three;
         justify-self: start;
     }
     .fourpartthing-four {
+        grid-area: four;
         justify-self: end;
     }
     @media only screen and (max-width: 800px) {
         .gridfourpartthingrow {
-            grid-template-columns: 2fr 2fr 3fr;
+            grid-template-columns: 1fr 1fr 2fr;
             grid-template-rows: auto auto;
+            grid-template-areas:
+                "one two three"
+                "four four four"
         }
         .fourpartthing-three {
             justify-self: end;
@@ -672,11 +684,11 @@ FRQs: ${numFRQsToAssign}`
                     {#each practiceTests as practiceTest}
                         <div class="box">
                             <div class="grid gridfourpartthingrow">
-                                <span class="b {
+                                <span class="b fourpartthing-one {
                                     Math.floor((practiceTest.questionsCorrect / practiceTest.questionsTotal) * 100) >= 90 ?
                                         "yay" : "ohno"
                                 }">{Math.floor((practiceTest.questionsCorrect / practiceTest.questionsTotal) * 100)}%</span>
-                                <span>{practiceTest.questionsCorrect}/{practiceTest.questionsTotal}</span>
+                                <span class="fourpartthing-two">{practiceTest.questionsCorrect}/{practiceTest.questionsTotal}</span>
                                 <span class="fourpartthing-three">{mounted ? fancyTimestamp.format(practiceTest.timestamp) : "..."}</span>
                                 <a href="{
                                     data.authed && !data.local ?
