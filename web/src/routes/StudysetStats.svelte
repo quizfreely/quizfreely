@@ -73,6 +73,7 @@
             })();
         }
 
+        Chart.defaults.font.size = 16;
         const rootStyles = getComputedStyle(document.documentElement);
         const mainColor = rootStyles.getPropertyValue("--main").trim();
         const fg1Color = rootStyles.getPropertyValue("--fg-1").trim();
@@ -108,11 +109,14 @@
                         scales: {
                             x: {
                                 type: "timeseries",
-                                suggestedMax: Date.now()
+                                suggestedMax: Date.now(),
+                                time: {
+                                    unit: "day",
+                                }
                             },
                             y: {
                                 ticks: {
-                                    stepSize: 0.1,
+                                    stepSize: 0.2,
                                     format: {
                                         style: "percent",
                                         minimumFractionDigits: 0,
@@ -129,6 +133,11 @@
                         responsive: true,
                         maintainAspectRatio: false,
                         plugins: {
+                            title: {
+                                display: true,
+                                text: "Practice Test Scores",
+                                font: { weight: "normal" }
+                            },
                             tooltip: {
                                 backgroundColor: bg2Color,
                                 titleColor: fg1Color,
@@ -141,9 +150,10 @@
                                 }
                             },
                             legend: {
-                                labels: {
-                                    usePointStyle: true
-                                }
+                                display: false
+                                // labels: {
+                                //     usePointStyle: true
+                                // }
                             }
                         }
                     }
