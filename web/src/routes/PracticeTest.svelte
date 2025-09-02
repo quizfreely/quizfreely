@@ -705,7 +705,10 @@ FRQs: ${numFRQsToAssign}`
                         data.local ?
                             `/studyset/local/stats?id=${data.localId}` :
                             `/studysets/${data.studysetId}/stats`
-                    } class="button button-box" style="width: 100%;">View All Practice Tests &amp; Stats</a>
+                    } class="button button-box" style="width: 100%; display: flex; align-content: center;">
+                        View All Completed Practice Tests
+                        <ForwardLongArrowIcon class="no-margin-top"></ForwardLongArrowIcon>
+                    </a>
                 {/if}
             </div>
         {/if}
