@@ -75,9 +75,12 @@
 
         const rootStyles = getComputedStyle(document.documentElement);
         const mainColor = rootStyles.getPropertyValue("--main").trim();
+        const fg1Color = rootStyles.getPropertyValue("--fg-1").trim();
+        const bg2Color = rootStyles.getPropertyValue("--bg-2").trim();
+        const borderColor = rootStyles.getPropertyValue("--border").trim();
         Chart.defaults.backgroundColor = mainColor;
-        Chart.defaults.borderColor = rootStyles.getPropertyValue("--border").trim();
-        Chart.defaults.color = rootStyles.getPropertyValue("--fg-1").trim();
+        Chart.defaults.borderColor = borderColor;
+        Chart.defaults.color = fg1Color;
         if (practiceTests?.length > 1) {
             new Chart(
                 chartCanvas,
@@ -86,14 +89,17 @@
                     data: {
                         datasets: [
                             ...(practiceTests?.length > 1 ? [{
-
+                                label: "Practice Test Scores",
                                 fill: false,
                                 tension: 0,
                                 borderColor: mainColor,
                                 backgroundColor: mainColor,
+                                pointStyle: "circle",
+                                pointRadius: 6,
+                                pointHoverRadius: 6,
                                 data: practiceTests.map(pt => ({
                                     x: Date.parse(pt.timestamp),
-                                    y: Math.floor((pt.questionsCorrect / pt.questionsTotal) * 100)
+                                    y: pt.questionsCorrect / pt.questionsTotal
                                 }))
                             }] : [])
                         ]
@@ -101,14 +107,45 @@
                     options: {
                         scales: {
                             x: {
-                                type: "time"
+                                type: "timeseries",
+                                suggestedMax: Date.now()
+                            },
+                            y: {
+                                ticks: {
+                                    stepSize: 0.1,
+                                    format: {
+                                        style: "percent",
+                                        minimumFractionDigits: 0,
+                                        maximumFractionDigits: 0
+                                    }
+                                }
                             }
                         },
                         interaction: {
-                          intersect: false,
+                            intersect: false,
+                            mode: "nearest",
+                            axis: "xy"
                         },
                         responsive: true,
-                        maintainAspectRatio: false
+                        maintainAspectRatio: false,
+                        plugins: {
+                            tooltip: {
+                                backgroundColor: bg2Color,
+                                titleColor: fg1Color,
+                                bodyColor: fg1Color,
+                                footerColor: fg1Color,
+                                titleFont: { weight: "normal" },
+                                displayColors: false,
+                                callbacks: {
+                                    label: ctx => Math.floor(ctx.raw.y * 100) + "%"
+                                }
+                            },
+                            legend: {
+                                labels: {
+                                    usePointStyle: true
+                                }
+                            }
+                        }
                     }
                 }
             );
