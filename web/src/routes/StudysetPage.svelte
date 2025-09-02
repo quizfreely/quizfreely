@@ -51,6 +51,7 @@
 
         if (
             flashcardsMaximized == true &&
+            terms?.length > 4 &&
             flashcardsIndex == terms?.length - 1 &&
             flashcardsSeenWhileMax.size == terms?.length - 1
         ) {
