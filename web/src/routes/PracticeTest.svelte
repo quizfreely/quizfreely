@@ -701,6 +701,11 @@ FRQs: ${numFRQsToAssign}`
                             </div>
                         </div>
                     {/each}
+                    <a href={
+                        data.local ?
+                            `/studyset/local/stats?id=${data.localId}` :
+                            `/studysets/${data.studysetId}/stats`
+                    } class="button button-box" style="width: 100%;">View All Practice Tests &amp; Stats</a>
                 {/if}
             </div>
         {/if}
