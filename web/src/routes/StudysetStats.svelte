@@ -112,6 +112,12 @@
                                 suggestedMax: Date.now(),
                                 time: {
                                     unit: "day",
+                                    tooltipFormat: data?.settingsDateTimeFmtHours != null ?
+                                        (data?.settingsDateTimeFmtHours == "24" ?
+                                            "dd MMM yyyy, HH:mm" :
+                                            "dd MMM yyyy, h:mm a"
+                                        ) :
+                                        undefined
                                 }
                             },
                             y: {
