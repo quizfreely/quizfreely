@@ -4,16 +4,16 @@
     import 'chartjs-adapter-luxon';
     import { setEhuiChartColors } from "$lib/ehui-chartjs-colors.js";
     import { fancyTimestamp } from "$lib/fancyTimestamp";
+    import BackIcon from "$lib/icons/BackArrow.svelte"
     import ForwardLongArrowIcon from "$lib/icons/ForwardRightArrowLong.svelte"
     let { data } = $props();
     let terms = $state();
     let practiceTests = $state([]);
-    const DISPLAY_TOP_N_PRACTICE_TESTS = 4;
 
     if (!data.local) {
         console.log(data.studyset)
         terms = data?.studyset?.terms;
-        practiceTests = data?.studyset?.practiceTests?.slice(0, DISPLAY_TOP_N_PRACTICE_TESTS);
+        practiceTests = data?.studyset?.practiceTests;
     }
 
     let chartCanvas;
@@ -44,7 +44,7 @@
                     practiceTests: true
                 })
                 terms = studyset.terms;
-                practiceTests = studyset?.practiceTests?.slice(0, DISPLAY_TOP_N_PRACTICE_TESTS);
+                practiceTests = studyset?.practiceTests;
             })();
         }
 
@@ -63,7 +63,7 @@
                     so most recent is first */
                     (a, b) => b.timestamp.localeCompare(a.timestamp)
                 );
-                practiceTests = practiceTests?.slice(0, DISPLAY_TOP_N_PRACTICE_TESTS);
+                practiceTests = practiceTests;
 
                 for (const term of terms) {
                     term.progress = await db.termProgress.where("termId").equals(term.id).toArray()?.[0];
@@ -219,6 +219,7 @@
     }
     @media only screen and (max-width: 1000px) {
         .grid-split-but-different {
+            gap: 2rem;
             grid-template-columns: auto;
             grid-template-rows: auto auto;
         }
@@ -226,17 +227,26 @@
 </style>
 <div class="grid page">
     <div class="content">
-{#if practiceTests?.length > 1}
-    <div class="chart-container">
-        <canvas bind:this={chartCanvas}></canvas>
-    </div>
-{/if}
+        <div class="flex">
+            <a class="button faint" href={data.local ?
+                `/studyset/local?id=${data.localId}` :
+                `/studysets/${data.studysetId}`
+            }>
+                <BackIcon></BackIcon>
+                Back
+            </a>
+        </div>
 <div class="grid-split-but-different">
             <div>
                 <p class="h4">Terms</p>
             </div>
             <div>
-                    <p class="h4">Practice Tests</p>
+{#if practiceTests?.length > 1}
+    <div class="chart-container">
+        <canvas bind:this={chartCanvas}></canvas>
+    </div>
+{/if}
+                    <p class="h4" style="margin-top: 2rem;">Practice Tests</p>
                 {#if practiceTests?.length > 0}
                     {#each practiceTests as practiceTest}
                         <div class="box">
