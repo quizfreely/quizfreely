@@ -6,6 +6,7 @@
     import { fancyTimestamp } from "$lib/fancyTimestamp";
     import BackIcon from "$lib/icons/BackArrow.svelte"
     import ForwardLongArrowIcon from "$lib/icons/ForwardRightArrowLong.svelte"
+    import { slide } from "svelte/transition";
     let { data } = $props();
     let terms = $state();
     let practiceTests = $state([]);
@@ -216,6 +217,9 @@
         }
         return Math.floor(avg * 100);
     }
+
+    let termsHeader;
+    let practiceTestsHeader;
 </script>
 <style>
     .gridfourpartthingrow {
@@ -293,10 +297,10 @@
         </div>
 <div class="grid grid-split-but-different">
             <div>
-                <p class="h4">Terms</p>
+                <p class="h4" bind:this={termsHeader}>Terms</p>
                 {#each terms as term, index}
                     {#if index < COLLAPSED_TERMS_COUNT || showAllTerms}
-                    <div class="box">
+                    <div class="box" transition:slide={{duration: 600}}>
                         <div class="flex">
                             <span>{term.term}</span>
                             {#if !(term.progress && (
@@ -395,7 +399,14 @@
                 {/each}
                 {#if terms?.length > COLLAPSED_TERMS_COUNT}
                 <button class="button-box" style="width: 100%;" onclick={
-                    () => showAllTerms = !showAllTerms
+                    () => {
+                        if (showAllTerms) {
+                            termsHeader.scrollIntoView();
+                            showAllTerms = false;
+                        } else {
+                            showAllTerms = true;
+                        }
+                    }
                 }>
                     {#if showAllTerms}
                     Collapse Terms
@@ -411,11 +422,11 @@
         <canvas bind:this={chartCanvas}></canvas>
     </div>
 {/if}
-                    <p class="h4" style="margin-top: 2rem;">Practice Tests</p>
+                    <p class="h4" style="margin-top: 2rem;" bind:this={practiceTestsHeader}>Practice Tests</p>
                 {#if practiceTests?.length > 0}
                     {#each practiceTests as practiceTest, index}
                         {#if index < COLLAPSED_PRACTICE_TESTS_COUNT || showAllPracticeTests}
-                        <div class="box">
+                        <div class="box" transition:slide={{duration: 600}}>
                             <div class="grid gridfourpartthingrow">
                                 <span class="b fourpartthing-one {
                                     Math.floor((practiceTest.questionsCorrect / practiceTest.questionsTotal) * 100) >= 90 ?
@@ -437,7 +448,14 @@
                     {/each}
                     {#if practiceTests?.length > COLLAPSED_PRACTICE_TESTS_COUNT}
                     <button class="button-box" style="width: 100%;" onclick={
-                        () => showAllPracticeTests = !showAllPracticeTests
+                        () => {
+                            if (showAllPracticeTests) {
+                                practiceTestsHeader.scrollIntoView();
+                                showAllPracticeTests = false;
+                            } else {
+                                showAllPracticeTests = true;
+                            }
+                        }
                     }>
                         {#if showAllPracticeTests}
                             Collapse Practice Tests
