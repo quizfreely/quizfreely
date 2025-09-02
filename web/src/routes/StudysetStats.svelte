@@ -297,7 +297,17 @@
                 {#each terms as term, index}
                     {#if index < COLLAPSED_TERMS_COUNT || showAllTerms}
                     <div class="box">
-                        <p>{term.term}</p>
+                        <div class="flex">
+                            <span>{term.term}</span>
+                            {#if !(term.progress && (
+                                term.progress.termCorrectCount > 0 ||
+                                term.progress.termIncorrectCount > 0 ||
+                                term.progress.defCorrectCount > 0 ||
+                                term.progress.defIncorrectCount > 0
+                            ))}
+                            <span class="fg0" style="margin-left: auto;">New/Unreviewed</span>
+                            {/if}
+                        </div>
                         {#if term.progress && (
                             term.progress.termCorrectCount > 0 ||
                             term.progress.termIncorrectCount > 0 ||
