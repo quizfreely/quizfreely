@@ -317,7 +317,7 @@
                         <div class="flex" style="margin-top: 0.6rem;">
                             <div>
                                 <p class="h6" style="margin-top: 0px; margin-bottom: 0px;">Avg Accuracy:</p>
-                                <p class="{
+                                <p class="b {
                                     averageAccuracy(
                                         term.progress.termCorrectCount,
                                         term.progress.termIncorrectCount,
@@ -339,7 +339,7 @@
                                 {#if term.progress.termCorrectCount +
                                     term.progress.termIncorrectCount > 0
                                 }
-                                <p class="{
+                                <p class="b {
                                     term.progress.termCorrectCount / (
                                         term.progress.termCorrectCount +
                                         term.progress.termIncorrectCount
@@ -362,7 +362,7 @@
                                 {#if term.progress.defCorrectCount +
                                     term.progress.defIncorrectCount > 0
                                 }
-                                <p class="{
+                                <p class="b {
                                     term.progress.defCorrectCount / (
                                         term.progress.defCorrectCount +
                                         term.progress.defIncorrectCount
