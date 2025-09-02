@@ -16,6 +16,7 @@
         practiceTests = data?.studyset?.practiceTests;
     }
 
+    let chartCanvasTerms;
     let chartCanvas;
 
     let mounted = $state(false);
@@ -79,9 +80,98 @@
         const fg1Color = rootStyles.getPropertyValue("--fg-1").trim();
         const bg2Color = rootStyles.getPropertyValue("--bg-2").trim();
         const borderColor = rootStyles.getPropertyValue("--border").trim();
+        const yayColor = rootStyles.getPropertyValue("--yay").trim();
+        const ohnoColor = rootStyles.getPropertyValue("--ohno").trim();
+        const bg3Color = rootStyles.getPropertyValue("--bg-3").trim();
         Chart.defaults.backgroundColor = mainColor;
         Chart.defaults.borderColor = borderColor;
         Chart.defaults.color = fg1Color;
+        if (terms?.length > 0) {
+            new Chart(
+                chartCanvasTerms,
+                {
+                    type: "doughnut",
+                    data: {
+                        labels: [
+                            "Good (≥ 90%)",
+                            "Okay (> 80%)",
+                            "Bad (≤ 80%)",
+                            "New/Unreviewed"
+                        ],
+                        datasets: [{
+                            label: "Terms",
+                            backgroundColor: [
+                                yayColor,
+                                mainColor,
+                                ohnoColor,
+                                bg3Color
+                            ],
+                            data: (() => {
+                                let goodCount = 0;
+                                let okayCount = 0;
+                                let badCount = 0;
+                                let unreviewedCount = 0;
+                                terms?.forEach(term => {
+                                    if (term?.progress == null) {
+                                        unreviewedCount++;
+                                        return;
+                                    }
+
+                                    let avgAccuracy;
+                                    if (term.progress.termCorrectCount + term.progress.termIncorrectCount > 0) {
+                                        avgAccuracy = term.progress.termCorrectCount / (
+                                            term.progress.termCorrectCount +
+                                            term.progress.termIncorrectCount
+                                        )
+                                    }
+                                    if (term.progress.defCorrectCount + term.progress.defIncorrectCount > 0) {
+                                        avgAccuracy = (
+                                            avgAccuracy +
+                                            (term.progress.defCorrectCount / (
+                                                term.progress.defCorrectCount +
+                                                term.progress.defIncorrectCount
+                                            ))
+                                        ) / 2;
+                                    }
+                                    if (avgAccuracy >= 0.9) {
+                                        goodCount++;
+                                    } else if (avgAccuracy > 0.8) {
+                                        okayCount++;
+                                    } else {
+                                        badCount++;
+                                    }
+                                });
+                                console.log([goodCount, okayCount, badCount, unreviewedCount]);
+                                return [goodCount, okayCount, badCount, unreviewedCount];
+                            })()
+                        }]
+                    },
+                    options: {
+                        interaction: {
+                            intersect: false,
+                            mode: "nearest",
+                            axis: "xy"
+                        },
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: "Average Term Accuracy",
+                                font: { weight: "normal" }
+                            },
+                            tooltip: {
+                                backgroundColor: bg2Color,
+                                titleColor: fg1Color,
+                                bodyColor: fg1Color,
+                                footerColor: fg1Color,
+                                titleFont: { weight: "normal" },
+                            }
+                        }
+                    }
+                }
+            );
+        }
         if (practiceTests?.length > 1) {
             new Chart(
                 chartCanvas,
@@ -211,8 +301,14 @@
         max-width: 100%;
         height: 16rem;
     }
+    .chart-container-smol {
+        position: relative;
+        width: 16rem;
+        height: 16rem;
+    }
     
-    .chart-container canvas {
+    .chart-container canvas,
+    .chart-container-smol canvas {
         width: 100% !important;
         height: 100% !important;
     }
@@ -242,9 +338,14 @@
                 Back
             </a>
         </div>
-<div class="grid-split-but-different">
+<div class="grid grid-split-but-different">
             <div>
-                <p class="h4">Terms</p>
+                {#if practiceTests?.length > 1}
+                    <div class="chart-container-smol">
+                        <canvas bind:this={chartCanvasTerms}></canvas>
+                    </div>
+                {/if}
+                <p class="h4" style="margin-top: 2rem;">Terms</p>
             </div>
             <div>
 {#if practiceTests?.length > 1}
