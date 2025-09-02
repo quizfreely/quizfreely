@@ -97,7 +97,7 @@
                                 backgroundColor: mainColor,
                                 pointStyle: "circle",
                                 pointRadius: 6,
-                                pointHoverRadius: 6,
+                                pointHoverRadius: 8,
                                 data: practiceTests.map(pt => ({
                                     x: Date.parse(pt.timestamp),
                                     y: pt.questionsCorrect / pt.questionsTotal
