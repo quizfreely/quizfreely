@@ -86,92 +86,6 @@
         Chart.defaults.backgroundColor = mainColor;
         Chart.defaults.borderColor = borderColor;
         Chart.defaults.color = fg1Color;
-        if (terms?.length > 0) {
-            new Chart(
-                chartCanvasTerms,
-                {
-                    type: "doughnut",
-                    data: {
-                        labels: [
-                            "Good (≥ 90%)",
-                            "Okay (> 80%)",
-                            "Bad (≤ 80%)",
-                            "New/Unreviewed"
-                        ],
-                        datasets: [{
-                            label: "Terms",
-                            backgroundColor: [
-                                yayColor,
-                                mainColor,
-                                ohnoColor,
-                                bg3Color
-                            ],
-                            data: (() => {
-                                let goodCount = 0;
-                                let okayCount = 0;
-                                let badCount = 0;
-                                let unreviewedCount = 0;
-                                terms?.forEach(term => {
-                                    if (term?.progress == null) {
-                                        unreviewedCount++;
-                                        return;
-                                    }
-
-                                    let avgAccuracy;
-                                    if (term.progress.termCorrectCount + term.progress.termIncorrectCount > 0) {
-                                        avgAccuracy = term.progress.termCorrectCount / (
-                                            term.progress.termCorrectCount +
-                                            term.progress.termIncorrectCount
-                                        )
-                                    }
-                                    if (term.progress.defCorrectCount + term.progress.defIncorrectCount > 0) {
-                                        avgAccuracy = (
-                                            avgAccuracy +
-                                            (term.progress.defCorrectCount / (
-                                                term.progress.defCorrectCount +
-                                                term.progress.defIncorrectCount
-                                            ))
-                                        ) / 2;
-                                    }
-                                    if (avgAccuracy >= 0.9) {
-                                        goodCount++;
-                                    } else if (avgAccuracy > 0.8) {
-                                        okayCount++;
-                                    } else {
-                                        badCount++;
-                                    }
-                                });
-                                console.log([goodCount, okayCount, badCount, unreviewedCount]);
-                                return [goodCount, okayCount, badCount, unreviewedCount];
-                            })()
-                        }]
-                    },
-                    options: {
-                        interaction: {
-                            intersect: false,
-                            mode: "nearest",
-                            axis: "xy"
-                        },
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            title: {
-                                display: true,
-                                text: "Average Term Accuracy",
-                                font: { weight: "normal" }
-                            },
-                            tooltip: {
-                                backgroundColor: bg2Color,
-                                titleColor: fg1Color,
-                                bodyColor: fg1Color,
-                                footerColor: fg1Color,
-                                titleFont: { weight: "normal" },
-                            }
-                        }
-                    }
-                }
-            );
-        }
         if (practiceTests?.length > 1) {
             new Chart(
                 chartCanvas,
@@ -257,6 +171,51 @@
             );
         }
     })
+
+    let showAllTerms = $state(false);
+    const COLLAPSED_TERMS_COUNT = 4;
+    let showAllPracticeTests = $state(false);
+    const COLLAPSED_PRACTICE_TESTS_COUNT = 4;
+
+
+    /* returns average term accuracy from term & def correct/incorrect counts.
+
+    averages defined values and leaves out undefined values,
+    but it will return NaN if both term & def counts are null,
+    so call it if at least one of them is defined
+    (only call it if term.progress is populated)
+    for example, somewhere below we have this condition before calling averageAccuracy
+    ```svelte
+    {#if term.progress && (
+        term.progress.termCorrectCount > 0 ||
+        term.progress.termIncorrectCount > 0 ||
+        term.progress.defCorrectCount > 0 ||
+        term.progress.defIncorrectCount > 0
+    )}
+        <!-- ... -->
+        {averageAccuracy(
+            term.progress.termCorrectCount,
+            term.progress.termIncorrectCount,
+            term.progress.defCorrectCount,
+            term.progress.defIncorrectCount
+        )}%
+        <!-- ... -->
+    {/if}
+    */
+    function averageAccuracy(tc, ti, dc, di) {
+        /* tc = termCorrect, ti = termIncorrect,
+        dc = defCorrect, di = defIncorrect */
+        let avg;
+        if (tc + ti > 0) {
+            avg = tc / (tc+ti);
+        }
+        if (dc + di > 0) {
+            avg = (avg + (
+                dc / (dc+di)
+            )) / 2
+        }
+        return Math.floor(avg * 100);
+    }
 </script>
 <style>
     .gridfourpartthingrow {
@@ -301,14 +260,8 @@
         max-width: 100%;
         height: 16rem;
     }
-    .chart-container-smol {
-        position: relative;
-        width: 16rem;
-        height: 16rem;
-    }
     
-    .chart-container canvas,
-    .chart-container-smol canvas {
+    .chart-container canvas {
         width: 100% !important;
         height: 100% !important;
     }
@@ -340,12 +293,107 @@
         </div>
 <div class="grid grid-split-but-different">
             <div>
-                {#if practiceTests?.length > 1}
-                    <div class="chart-container-smol">
-                        <canvas bind:this={chartCanvasTerms}></canvas>
+                <p class="h4">Terms</p>
+                {#each terms as term, index}
+                    {#if index < COLLAPSED_TERMS_COUNT || showAllTerms}
+                    <div class="box">
+                        <p>{term.term}</p>
+                        {#if term.progress && (
+                            term.progress.termCorrectCount > 0 ||
+                            term.progress.termIncorrectCount > 0 ||
+                            term.progress.defCorrectCount > 0 ||
+                            term.progress.defIncorrectCount > 0
+                        )}
+                        <div class="flex" style="margin-top: 0.6rem;">
+                            <div>
+                                <p class="h6" style="margin-top: 0px; margin-bottom: 0px;">Avg Accuracy:</p>
+                                <p class="{
+                                    averageAccuracy(
+                                        term.progress.termCorrectCount,
+                                        term.progress.termIncorrectCount,
+                                        term.progress.defCorrectCount,
+                                        term.progress.defIncorrectCount
+                                    ) > 0.9 ?
+                                        "yay" : "ohno"
+                                }" style="margin-top: 0px;">
+                                    {averageAccuracy(
+                                        term.progress.termCorrectCount,
+                                        term.progress.termIncorrectCount,
+                                        term.progress.defCorrectCount,
+                                        term.progress.defIncorrectCount
+                                    )}%
+                                </p>
+                            </div>
+                            <div>
+                                <p class="h6" style="margin-top: 0px; margin-bottom: 0px;">Term Accuracy:</p>
+                                {#if term.progress.termCorrectCount +
+                                    term.progress.termIncorrectCount > 0
+                                }
+                                <p class="{
+                                    term.progress.termCorrectCount / (
+                                        term.progress.termCorrectCount +
+                                        term.progress.termIncorrectCount
+                                    ) > 0.9 ?
+                                        "yay" : "ohno"
+                                }" style="margin-top: 0px;">
+                                    {Math.floor(
+                                        term.progress.termCorrectCount / (
+                                            term.progress.termCorrectCount +
+                                            term.progress.termIncorrectCount
+                                        ) * 100
+                                    )}%
+                                </p>
+                                {:else}
+                                <p class="fg0">N/A</p>
+                                {/if}
+                            </div>
+                            <div>
+                                <p class="h6" style="margin-top: 0px; margin-bottom: 0px;">Def Accuracy:</p>
+                                {#if term.progress.defCorrectCount +
+                                    term.progress.defIncorrectCount > 0
+                                }
+                                <p class="{
+                                    term.progress.defCorrectCount / (
+                                        term.progress.defCorrectCount +
+                                        term.progress.defIncorrectCount
+                                    ) > 0.9 ?
+                                        "yay" : "ohno"
+                                }" style="margin-top: 0px;">
+                                    {Math.floor(
+                                        term.progress.defCorrectCount / (
+                                            term.progress.defCorrectCount +
+                                            term.progress.defIncorrectCount
+                                        ) * 100
+                                    )}%
+                                </p>
+                                {:else}
+                                <p class="fg0" style="margin-top: 0px;">N/A</p>
+                                {/if}
+                            </div>
+                            <a href="{
+                                data.local ?
+                                    `/studyset/local/stats/term?id=${data.localId}` :
+                                    `/studysets/${data.studysetId}/stats/terms/${term.id}`
+                            }" class="fourpartthing-four" style="display: flex; align-items: center; gap: 0.4rem; margin-left: auto;">
+                                <span>View Details</span>
+                                <ForwardLongArrowIcon class="no-margin-top"></ForwardLongArrowIcon>
+                            </a>
+                        </div>
+                        {/if}
                     </div>
+                    {/if}
+                {/each}
+                {#if terms?.length > COLLAPSED_TERMS_COUNT}
+                <button class="button-box" style="width: 100%;" onclick={
+                    () => showAllTerms = !showAllTerms
+                }>
+                    {#if showAllTerms}
+                    Collapse Terms
+                    {:else}
+                    Show All Terms
+                    {/if}
+                </button>
                 {/if}
-                <p class="h4" style="margin-top: 2rem;">Terms</p>
             </div>
             <div>
 {#if practiceTests?.length > 1}
@@ -355,7 +403,8 @@
 {/if}
                     <p class="h4" style="margin-top: 2rem;">Practice Tests</p>
                 {#if practiceTests?.length > 0}
-                    {#each practiceTests as practiceTest}
+                    {#each practiceTests as practiceTest, index}
+                        {#if index < COLLAPSED_PRACTICE_TESTS_COUNT || showAllPracticeTests}
                         <div class="box">
                             <div class="grid gridfourpartthingrow">
                                 <span class="b fourpartthing-one {
@@ -374,7 +423,19 @@
                                 </a>
                             </div>
                         </div>
+                        {/if}
                     {/each}
+                    {#if practiceTests?.length > COLLAPSED_PRACTICE_TESTS_COUNT}
+                    <button class="button-box" style="width: 100%;" onclick={
+                        () => showAllPracticeTests = !showAllPracticeTests
+                    }>
+                        {#if showAllPracticeTests}
+                            Collapse Practice Tests
+                        {:else}
+                            Show All Practice Tests
+                        {/if}
+                    </button>
+                    {/if}
                 {:else}
                     <div class="box center text fg0">Completed practice tests will show up here</div>
                 {/if}
