@@ -17,12 +17,11 @@
     let { data } = $props();
     let terms = $state();
     let practiceTests = $state([]);
-    const DISPLAY_TOP_N_PRACTICE_TESTS = 4;
 
     if (!data.local) {
         console.log(data.studyset)
         terms = data?.studyset?.terms;
-        practiceTests = data?.studyset?.practiceTests?.slice(0, DISPLAY_TOP_N_PRACTICE_TESTS);
+        practiceTests = data?.studyset?.practiceTests;
     }
     let mounted = $state(false);
     onMount(() => {
@@ -50,7 +49,7 @@
                     practiceTests: true
                 })
                 terms = studyset.terms;
-                practiceTests = studyset?.practiceTests?.slice(0, DISPLAY_TOP_N_PRACTICE_TESTS);
+                practiceTests = studyset?.practiceTests;
             })();
         }
 
@@ -69,7 +68,7 @@
                     so most recent is first */
                     (a, b) => b.timestamp.localeCompare(a.timestamp)
                 );
-                practiceTests = practiceTests?.slice(0, DISPLAY_TOP_N_PRACTICE_TESTS);
+                practiceTests = practiceTests;
 
                 for (const term of terms) {
                     term.progress = await db.termProgress.where("termId").equals(term.id).toArray()?.[0];
@@ -701,14 +700,6 @@ FRQs: ${numFRQsToAssign}`
                             </div>
                         </div>
                     {/each}
-                    <a href={
-                        data.local ?
-                            `/studyset/local/stats?id=${data.localId}` :
-                            `/studysets/${data.studysetId}/stats`
-                    } class="button button-box" style="width: 100%; display: flex; align-content: center;">
-                        View All Completed Practice Tests
-                        <ForwardLongArrowIcon class="no-margin-top"></ForwardLongArrowIcon>
-                    </a>
                 {/if}
             </div>
         {/if}
