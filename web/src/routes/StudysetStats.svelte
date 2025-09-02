@@ -200,6 +200,19 @@
         width: 100% !important;
         height: 100% !important;
     }
+
+    .grid-split-but-different {
+        display: grid;
+        gap: 1rem;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: auto;
+    }
+    @media only screen and (max-width: 1000px) {
+        .grid-split-but-different {
+            grid-template-columns: auto;
+            grid-template-rows: auto auto;
+        }
+    }
 </style>
 <div class="grid page">
     <div class="content">
@@ -208,8 +221,13 @@
         <canvas bind:this={chartCanvas}></canvas>
     </div>
 {/if}
+<div class="grid-split-but-different">
+            <div>
+                <p class="h4">Terms</p>
+            </div>
+            <div>
+                    <p class="h4">Practice Tests</p>
                 {#if practiceTests?.length > 0}
-                    <p class="h4" style="margin-top: 2rem;">Practice Tests</p>
                     {#each practiceTests as practiceTest}
                         <div class="box">
                             <div class="grid gridfourpartthingrow">
@@ -230,6 +248,10 @@
                             </div>
                         </div>
                     {/each}
+                {:else}
+                    <div class="box center text fg0">Completed practice tests will show up here</div>
                 {/if}
+            </div>
+        </div>
     </div>
 </div>
