@@ -246,7 +246,7 @@
             <div>
                 <p class="h4">Terms</p>
             </div>
-            <div id="practice-tests">
+            <div>
 {#if practiceTests?.length > 1}
     <div class="chart-container">
         <canvas bind:this={chartCanvas}></canvas>
