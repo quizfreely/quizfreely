@@ -274,13 +274,33 @@
         display: grid;
         gap: 1rem;
         grid-template-columns: 1fr 1fr;
-        grid-template-rows: auto;
+        grid-template-rows: auto auto;
+        grid-template-areas:
+            "terms-chart practice-tests-chart"
+            "terms practice-tests"
+    }
+    .grid-split-but-different .terms-chart-area {
+        grid-area: terms-chart;
+    }
+    .grid-split-but-different .terms-area {
+        grid-area: terms;
+    }
+    .grid-split-but-different .practice-tests-chart-area {
+        grid-area: practice-tests-chart;
+    }
+    .grid-split-but-different .practice-tests-area {
+        grid-area: practice-tests;
     }
     @media only screen and (max-width: 1000px) {
         .grid-split-but-different {
             gap: 2rem;
             grid-template-columns: auto;
-            grid-template-rows: auto auto;
+            grid-template-rows: auto auto auto auto;
+            grid-template-areas:
+                "terms-chart"
+                "terms"
+                "practice-tests-chart"
+                "practice-tests"
         }
     }
 </style>
@@ -296,7 +316,10 @@
             </a>
         </div>
 <div class="grid grid-split-but-different">
-            <div>
+            <div class="terms-chart-area">
+                <!-- put chart/graph here later -->
+            </div>
+            <div class="terms-area">
                 <p class="h4" bind:this={termsHeader}>Terms</p>
                 {#each terms as term, index}
                     {#if index < COLLAPSED_TERMS_COUNT || showAllTerms}
@@ -416,13 +439,15 @@
                 </button>
                 {/if}
             </div>
-            <div>
+            <div class="practice-tests-chart-area">
 {#if practiceTests?.length > 1}
     <div class="chart-container">
         <canvas bind:this={chartCanvas}></canvas>
     </div>
 {/if}
-                    <p class="h4" style="margin-top: 2rem;" bind:this={practiceTestsHeader}>Practice Tests</p>
+            </div>
+            <div class="practice-tests-area">
+                    <p class="h4" bind:this={practiceTestsHeader}>Practice Tests</p>
                 {#if practiceTests?.length > 0}
                     {#each practiceTests as practiceTest, index}
                         {#if index < COLLAPSED_PRACTICE_TESTS_COUNT || showAllPracticeTests}
