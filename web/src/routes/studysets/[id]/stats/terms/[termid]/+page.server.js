@@ -32,6 +32,13 @@ export async function load({ cookies, params}) {
             defCorrectCount
             defIncorrectCount
         }
+        progressHistory {
+            timestamp
+            termCorrectCount
+            termIncorrectCount
+            defCorrectCount
+            defIncorrectCount
+        }
         topConfusionPairs {
             confusedTerm {
                 id
