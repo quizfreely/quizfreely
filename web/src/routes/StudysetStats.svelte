@@ -450,14 +450,7 @@
                 {/each}
                 {#if terms?.length > COLLAPSED_TERMS_COUNT}
                 <button class="button-box" style="width: 100%;" onclick={
-                    () => {
-                        if (showAllTerms) {
-                            termsHeader.scrollIntoView();
-                            showAllTerms = false;
-                        } else {
-                            showAllTerms = true;
-                        }
-                    }
+                    () => showAllTerms = !showAllTerms
                 }>
                     {#if showAllTerms}
                     Collapse Terms
@@ -501,14 +494,7 @@
                     {/each}
                     {#if practiceTests?.length > COLLAPSED_PRACTICE_TESTS_COUNT}
                     <button class="button-box" style="width: 100%;" onclick={
-                        () => {
-                            if (showAllPracticeTests) {
-                                practiceTestsHeader.scrollIntoView();
-                                showAllPracticeTests = false;
-                            } else {
-                                showAllPracticeTests = true;
-                            }
-                        }
+                        () => showAllPracticeTests = !showAllPracticeTests
                     }>
                         {#if showAllPracticeTests}
                             Collapse Practice Tests
