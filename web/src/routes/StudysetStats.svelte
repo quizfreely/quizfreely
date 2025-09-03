@@ -357,8 +357,8 @@
                             term.progress.defCorrectCount > 0 ||
                             term.progress.defIncorrectCount > 0
                         ))}
-                        <div class="flex" style="margin-top: 0.2rem;">
-                            <span class="fg0" style="margin-left: auto;">New/Unreviewed</span>
+                        <div class="flex" style="justify-content: center;">
+                            <span class="fg0">New/Unreviewed</span>
                         </div>
                         {/if}
                         {#if term.progress && (
@@ -434,7 +434,7 @@
                                 {/if}
                             </div>
                         </div>
-                        <div class="flex" style="justify-content: center; margin-top: 1.1rem;">
+                        <div class="flex" style="justify-content: center;">
                             <a href="{
                                 data.local ?
                                     `/studyset/local/stats/term?id=${data.localId}` :
