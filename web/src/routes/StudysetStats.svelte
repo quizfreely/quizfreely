@@ -376,7 +376,7 @@
                                         term.progress.termIncorrectCount,
                                         term.progress.defCorrectCount,
                                         term.progress.defIncorrectCount
-                                    ) > 0.9 ?
+                                    ) > 90 ?
                                         "yay" : "ohno"
                                 }" style="margin-top: 0px;">
                                     {averageAccuracy(
