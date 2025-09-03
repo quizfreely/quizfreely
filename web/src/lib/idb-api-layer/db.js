@@ -152,4 +152,7 @@ db.version(12).stores({
 db.version(13).stores({
     terms: "++id, studysetId, sortOrder, [studysetId+sortOrder], createdAt, updatedAt"
 })
+db.version(14).stores({
+    termProgressHistory: "++id, timestamp, termId, termCorrectCount, termIncorrectCount, defCorrectCount, defIncorrectCount"
+})
 export default db;
