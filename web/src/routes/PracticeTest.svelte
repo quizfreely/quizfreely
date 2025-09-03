@@ -585,26 +585,10 @@ FRQs: ${numFRQsToAssign}`
 <div class="grid page">
     <div class="content">
         <div class="flex">
-            {#if takingActualPracticeTest}
-            <button class="button faint" onclick={async () => {
-                /* goto on the same page won't reload,
-                so we go somewhere else and then come back */
-                const path = window.location.pathname +
-                    window.location.search +
-                    window.location.hash;
-                await goto( /* Go somewhere else */
-                    data.local ?
-                        `/studyset/local?id=${data.localId}` :
-                        `/studysets/${data.studysetId}`
-                );
-                await goto(path); /* Come back */
-            }}><BackIcon></BackIcon> Back</button>
-            {:else}
             <a class="button faint" href={data.local ?
                 `/studyset/local?id=${data.localId}` :
                 `/studysets/${data.studysetId}`
             }><BackIcon></BackIcon> Back</a>
-            {/if}
         </div>
         {#if takingActualPracticeTest}
             <div style="position: sticky; top: 0px; padding: 1rem; margin-top: 0px; background: var(--bg-1);" transition:slide={{ duration:400 }}>
@@ -668,12 +652,12 @@ FRQs: ${numFRQsToAssign}`
                     <!--     <CheckmarkIcon class="button-box-selected-icon"></CheckmarkIcon> -->
                     <!--     Matching -->
                     <!-- </button> -->
-                    <button class="button-box { questionTypesEnabled.frq ?
-                        "selected" : ""
-                    }" style="display: flex; margin-top: 0.4rem;" onclick={() => questionTypesEnabled.frq = !questionTypesEnabled.frq}>
-                        <CheckmarkIcon class="button-box-selected-icon"></CheckmarkIcon>
-                        Free Response
-                    </button>
+                    <!-- <button class="button-box { questionTypesEnabled.frq ? -->
+                    <!--     "selected" : "" -->
+                    <!-- }" style="display: flex; margin-top: 0.4rem;" onclick={() => questionTypesEnabled.frq = !questionTypesEnabled.frq}> -->
+                    <!--     <CheckmarkIcon class="button-box-selected-icon"></CheckmarkIcon> -->
+                    <!--     Free Response -->
+                    <!-- </button> -->
                 </div>
                 <div class="flex" style="margin-top: 1rem;">
                     <button onclick={setupStart}><CheckmarkIcon></CheckmarkIcon> Start</button>
