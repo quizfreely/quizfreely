@@ -277,7 +277,7 @@
         grid-template-columns: 1fr 1fr;
         grid-template-rows: auto auto;
         grid-template-areas:
-            "terms-chart practice-tests-chart"
+            "practice-tests-chart practice-tests-chart"
             "terms practice-tests"
     }
     .grid-split-but-different .terms-chart-area {
@@ -298,7 +298,7 @@
             grid-template-columns: auto;
             grid-template-rows: auto auto auto auto;
             grid-template-areas:
-                "terms-chart"
+                /* "terms-chart" */
                 "terms"
                 "practice-tests-chart"
                 "practice-tests"
@@ -321,9 +321,8 @@
             </a>
         </div>
 <div class="grid grid-split-but-different">
-            <div class="terms-chart-area">
-                <!-- put chart/graph here later -->
-            </div>
+            <!-- <div class="terms-chart-area"> -->
+            <!-- </div> -->
             <div class="terms-area">
                 <p class="h4" bind:this={termsHeader}>Terms</p>
                 {#each terms as term, index}
