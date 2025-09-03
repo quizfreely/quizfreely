@@ -411,7 +411,7 @@
                                 {/if}
                             </div>
                             <div>
-                                <p class="fg0" style="margin-top: 0px; margin-bottom: 0px;">Def Accuracy:</p>
+                                <p class="fg0" style="margin-top: 0px; margin-bottom: 0px;">Definition Accuracy:</p>
                                 {#if term.progress.defCorrectCount +
                                     term.progress.defIncorrectCount > 0
                                 }
