@@ -437,7 +437,7 @@
                         <div class="flex" style="justify-content: center;">
                             <a href="{
                                 data.local ?
-                                    `/studyset/local/stats/term?id=${data.localId}` :
+                                    `/studyset/local/stats/term?id=${term.id}&studysetId=${data?.localId}` :
                                     `/studysets/${data.studysetId}/stats/terms/${term.id}`
                             }" style="display: flex; flex-wrap: nowrap; align-items: center; gap: 0.4rem;">
                                 <StatsIcon></StatsIcon>
