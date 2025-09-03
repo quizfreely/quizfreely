@@ -88,90 +88,90 @@
         Chart.defaults.backgroundColor = mainColor;
         Chart.defaults.borderColor = borderColor;
         Chart.defaults.color = fg1Color;
-        if (practiceTests?.length > 1) {
-            new Chart(
-                chartCanvas,
-                {
-                    type: "line",
-                    data: {
-                        datasets: [
-                            ...(practiceTests?.length > 1 ? [{
-                                label: "Practice Test Scores",
-                                fill: false,
-                                tension: 0,
-                                borderColor: mainColor,
-                                backgroundColor: mainColor,
-                                pointStyle: "circle",
-                                pointRadius: 6,
-                                pointHoverRadius: 8,
-                                data: practiceTests.map(pt => ({
-                                    x: Date.parse(pt.timestamp),
-                                    y: pt.questionsCorrect / pt.questionsTotal
-                                }))
-                            }] : [])
-                        ]
+        new Chart(
+            chartCanvas,
+            {
+                type: "line",
+                data: {
+                    datasets: [
+                        ...(practiceTests?.length > 1 ? [{
+                            label: "Practice Test Scores",
+                            fill: false,
+                            tension: 0,
+                            borderColor: mainColor,
+                            backgroundColor: mainColor,
+                            pointStyle: "circle",
+                            pointRadius: 6,
+                            pointHoverRadius: 8,
+                            data: practiceTests.map(pt => ({
+                                x: Date.parse(pt.timestamp),
+                                y: pt.questionsCorrect / pt.questionsTotal
+                            }))
+                        }] : [])
+                    ]
+                },
+                options: {
+                    scales: {
+                        x: {
+                            type: "timeseries",
+                            suggestedMax: Date.now(),
+                            time: {
+                                unit: "day",
+                                tooltipFormat: data?.settingsDateTimeFmtHours != null ?
+                                    (data?.settingsDateTimeFmtHours == "24" ?
+                                        "dd MMM yyyy, HH:mm" :
+                                        "dd MMM yyyy, h:mm a"
+                                    ) :
+                                    undefined
+                            }
+                        },
+                        y: {
+                            suggestedMax: 1,
+                            suggestedMin: 0,
+                            ticks: {
+                                stepSize: 0.2,
+                                format: {
+                                    style: "percent",
+                                    minimumFractionDigits: 0,
+                                    maximumFractionDigits: 0
+                                }
+                            }
+                        }
                     },
-                    options: {
-                        scales: {
-                            x: {
-                                type: "timeseries",
-                                suggestedMax: Date.now(),
-                                time: {
-                                    unit: "day",
-                                    tooltipFormat: data?.settingsDateTimeFmtHours != null ?
-                                        (data?.settingsDateTimeFmtHours == "24" ?
-                                            "dd MMM yyyy, HH:mm" :
-                                            "dd MMM yyyy, h:mm a"
-                                        ) :
-                                        undefined
-                                }
-                            },
-                            y: {
-                                ticks: {
-                                    stepSize: 0.2,
-                                    format: {
-                                        style: "percent",
-                                        minimumFractionDigits: 0,
-                                        maximumFractionDigits: 0
-                                    }
-                                }
+                    interaction: {
+                        intersect: false,
+                        mode: "nearest",
+                        axis: "xy"
+                    },
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: "Practice Test Scores",
+                            font: { weight: "normal" }
+                        },
+                        tooltip: {
+                            backgroundColor: bg2Color,
+                            titleColor: fg1Color,
+                            bodyColor: fg1Color,
+                            footerColor: fg1Color,
+                            titleFont: { weight: "normal" },
+                            displayColors: false,
+                            callbacks: {
+                                label: ctx => Math.floor(ctx.raw.y * 100) + "%"
                             }
                         },
-                        interaction: {
-                            intersect: false,
-                            mode: "nearest",
-                            axis: "xy"
-                        },
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            title: {
-                                display: true,
-                                text: "Practice Test Scores",
-                                font: { weight: "normal" }
-                            },
-                            tooltip: {
-                                backgroundColor: bg2Color,
-                                titleColor: fg1Color,
-                                bodyColor: fg1Color,
-                                footerColor: fg1Color,
-                                titleFont: { weight: "normal" },
-                                displayColors: false,
-                                callbacks: {
-                                    label: ctx => Math.floor(ctx.raw.y * 100) + "%"
-                                }
-                            },
-                            legend: {
-                                display: false
-                                // labels: {
-                                //     usePointStyle: true
-                                // }
-                            }
+                        legend: {
+                            display: false
+                            // labels: {
+                            //     usePointStyle: true
+                            // }
                         }
                     }
                 }
-            );
-        }
+            }
+        );
     })
 
     let showAllTerms = $state(false);
@@ -461,11 +461,9 @@
                 {/if}
             </div>
             <div class="practice-tests-chart-area">
-{#if practiceTests?.length > 1}
     <div class="chart-container">
         <canvas bind:this={chartCanvas}></canvas>
     </div>
-{/if}
             </div>
             <div class="practice-tests-area">
                     <p class="h4" bind:this={practiceTestsHeader}>Practice Tests</p>

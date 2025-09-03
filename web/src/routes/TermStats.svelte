@@ -130,6 +130,8 @@
                             }
                         },
                         y: {
+                            suggestedMax: 1,
+                            suggestedMin: 0,
                             ticks: {
                                 stepSize: 0.2,
                                 format: {
