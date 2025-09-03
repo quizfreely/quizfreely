@@ -6,6 +6,7 @@
     import { fancyTimestamp } from "$lib/fancyTimestamp";
     import BackIcon from "$lib/icons/BackArrow.svelte"
     import ForwardLongArrowIcon from "$lib/icons/ForwardRightArrowLong.svelte"
+    import StatsIcon from "$lib/icons/ChartGraphLine.svelte"
     import { slide } from "svelte/transition";
     let { data } = $props();
     let terms = $state();
@@ -303,6 +304,10 @@
                 "practice-tests"
         }
     }
+
+    .shy-h4 {
+        font-size: 1.2rem;
+    }
 </style>
 <div class="grid page">
     <div class="content">
@@ -324,17 +329,38 @@
                 {#each terms as term, index}
                     {#if index < COLLAPSED_TERMS_COUNT || showAllTerms}
                     <div class="box" transition:slide={{duration: 600}}>
-                        <div class="flex">
-                            <span>{term.term}</span>
-                            {#if !(term.progress && (
-                                term.progress.termCorrectCount > 0 ||
-                                term.progress.termIncorrectCount > 0 ||
-                                term.progress.defCorrectCount > 0 ||
-                                term.progress.defIncorrectCount > 0
-                            ))}
-                            <span class="fg0" style="margin-left: auto;">New/Unreviewed</span>
-                            {/if}
+                        <div class="grid" style="grid-template-rows: auto; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                            <div>
+                            <p class="fg0">Term</p>
+                            <p class="{
+                                term.term.trim().split("\n")[0].length <= 20 ?
+                                    "shy-h4" : ""
+                            }" style="margin-top: 0px;">{term.term.trim().split("\n")[0]}{
+                                term.term.length > term.term.trim().split("\n")[0].length ?
+                                    "..." : ""
+                                }</p>
+                            </div>
+                            <div>
+                            <p class="fg0">Definition</p>
+                            <p class="{
+                                term.def.trim().split("\n")[0].length <= 20 ?
+                                    "shy-h4" : ""
+                            }" style="margin-top: 0px;">{term.def.trim().split("\n")[0]}{
+                                term.def.length > term.def.trim().split("\n")[0].length ?
+                                    "..." : ""
+                                }</p>
+                            </div>
                         </div>
+                        {#if !(term.progress && (
+                            term.progress.termCorrectCount > 0 ||
+                            term.progress.termIncorrectCount > 0 ||
+                            term.progress.defCorrectCount > 0 ||
+                            term.progress.defIncorrectCount > 0
+                        ))}
+                        <div class="flex" style="margin-top: 0.2rem;">
+                            <span class="fg0" style="margin-left: auto;">New/Unreviewed</span>
+                        </div>
+                        {/if}
                         {#if term.progress && (
                             term.progress.termCorrectCount > 0 ||
                             term.progress.termIncorrectCount > 0 ||
@@ -343,8 +369,8 @@
                         )}
                         <div class="flex" style="margin-top: 0.6rem;">
                             <div>
-                                <p class="h6" style="margin-top: 0px; margin-bottom: 0px;">Avg Accuracy:</p>
-                                <p class="b {
+                                <p class="fg0" style="margin-top: 0px; margin-bottom: 0px;">Avg Accuracy:</p>
+                                <p class="shy-h4 b {
                                     averageAccuracy(
                                         term.progress.termCorrectCount,
                                         term.progress.termIncorrectCount,
@@ -362,11 +388,11 @@
                                 </p>
                             </div>
                             <div>
-                                <p class="h6" style="margin-top: 0px; margin-bottom: 0px;">Term Accuracy:</p>
+                                <p class="fg0" style="margin-top: 0px; margin-bottom: 0px;">Term Accuracy:</p>
                                 {#if term.progress.termCorrectCount +
                                     term.progress.termIncorrectCount > 0
                                 }
-                                <p class="b {
+                                <p class="shy-h4 b {
                                     term.progress.termCorrectCount / (
                                         term.progress.termCorrectCount +
                                         term.progress.termIncorrectCount
@@ -381,15 +407,15 @@
                                     )}%
                                 </p>
                                 {:else}
-                                <p class="fg0">N/A</p>
+                                <p class="fg0 shy-h4">N/A</p>
                                 {/if}
                             </div>
                             <div>
-                                <p class="h6" style="margin-top: 0px; margin-bottom: 0px;">Def Accuracy:</p>
+                                <p class="fg0" style="margin-top: 0px; margin-bottom: 0px;">Def Accuracy:</p>
                                 {#if term.progress.defCorrectCount +
                                     term.progress.defIncorrectCount > 0
                                 }
-                                <p class="b {
+                                <p class="shy-h4 b {
                                     term.progress.defCorrectCount / (
                                         term.progress.defCorrectCount +
                                         term.progress.defIncorrectCount
@@ -404,16 +430,18 @@
                                     )}%
                                 </p>
                                 {:else}
-                                <p class="fg0" style="margin-top: 0px;">N/A</p>
+                                <p class="fg0 shy-h4" style="margin-top: 0px;">N/A</p>
                                 {/if}
                             </div>
+                        </div>
+                        <div class="flex" style="justify-content: center; margin-top: 1.1rem;">
                             <a href="{
                                 data.local ?
                                     `/studyset/local/stats/term?id=${data.localId}` :
                                     `/studysets/${data.studysetId}/stats/terms/${term.id}`
-                            }" class="fourpartthing-four" style="display: flex; align-items: center; gap: 0.4rem; margin-left: auto;">
-                                <span>View Details</span>
-                                <ForwardLongArrowIcon class="no-margin-top"></ForwardLongArrowIcon>
+                            }" style="display: flex; flex-wrap: nowrap; align-items: center; gap: 0.4rem;">
+                                <StatsIcon></StatsIcon>
+                                <span style="margin-top: 0px;">View Details</span>
                             </a>
                         </div>
                         {/if}
