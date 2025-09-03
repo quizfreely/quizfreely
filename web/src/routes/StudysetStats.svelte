@@ -369,7 +369,7 @@
                         )}
                         <div class="flex" style="margin-top: 0.6rem;">
                             <div>
-                                <p class="fg0" style="margin-top: 0px; margin-bottom: 0px;">Avg Accuracy:</p>
+                                <p class="fg0" style="margin-top: 0px; margin-bottom: 0px;">Average Accuracy:</p>
                                 <p class="shy-h4 b {
                                     averageAccuracy(
                                         term.progress.termCorrectCount,
