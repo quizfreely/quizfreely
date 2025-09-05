@@ -197,13 +197,13 @@ export default {
         await db.studysets.delete(id); /* delete studyset */
     },
     updateTermProgress: async function (termProgressArray) {
-        termProgressArray.forEach(({
+        for (const {
             termId,
             termReviewedAt, defReviewedAt,
             termLeitnerSystemBox, defLeitnerSystemBox,
             termCorrectIncrease, termIncorrectIncrease,
             defCorrectIncrease, defIncorrectIncrease
-        }) => {
+        } of termProgressArray) {
             if (termReviewedAt != null && !(
                 termReviewedAt instanceof Date && !isNaN(termReviewedAt)
             )) {
@@ -282,7 +282,7 @@ export default {
                     defIncorrectCount: defIncorrectIncrease ?? 0
                 });
             }
-        })
+        }
     },
     getTopConfusionPairs: async function (termId, resolveProps) {
         const confusionPairs = db.termConfusionPairs
