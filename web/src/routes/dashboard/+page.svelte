@@ -98,7 +98,7 @@
         {#if data.authed}
         <!-- only show "Local Studysets" title to tell the difference from studysets saved to an account when logged in -->
         <!-- also, the element has class="... hide" cause client/browser js only shows it if there are local studysets and the user is signed in -->
-        <p class="h3 hide" id="local-list-title">Local Studysets</p>
+        <p class="h4 hide" id="local-list-title">Local Studysets</p>
         {/if}
         <div class="grid list hide" id="local-list">
           {#if !data.authed}
