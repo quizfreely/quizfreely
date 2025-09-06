@@ -662,8 +662,10 @@ FRQs: ${numFRQsToAssign}`
                 <div class="flex" style="margin-top: 1rem;">
                     <button onclick={setupStart}><CheckmarkIcon></CheckmarkIcon> Start</button>
                 </div>
-                {#if practiceTests?.length > 0}
-                    <p class="h4" style="margin-top: 2rem;">Completed Practice Tests</p>
+                    <div class="flex compact-gap" style="margin-top: 2rem; align-items: end; justify-content: space-between; flex-wrap: wrap;">
+                        <p class="h4" style="margin-bottom: 0px;">Completed Practice Tests</p>
+                        <p class="fg0">{practiceTests?.length ?? 0} total</p>
+                    </div>
                     {#each practiceTests as practiceTest}
                         <div class="box">
                             <div class="grid gridfourpartthingrow">
@@ -683,8 +685,11 @@ FRQs: ${numFRQsToAssign}`
                                 </a>
                             </div>
                         </div>
+                    {:else}
+                        <div class="box center text fg0">
+                            (None)
+                        </div>
                     {/each}
-                {/if}
             </div>
         {/if}
         {#if showTest}
