@@ -218,9 +218,6 @@
         }
         return Math.floor(avg * 100);
     }
-
-    let termsHeader;
-    let practiceTestsHeader;
 </script>
 <style>
     .gridfourpartthingrow {
@@ -324,7 +321,7 @@
             <!-- <div class="terms-chart-area"> -->
             <!-- </div> -->
             <div class="terms-area">
-                <p class="h4" bind:this={termsHeader}>Terms</p>
+                <p class="h4">Terms</p>
                 {#each terms as term, index}
                     {#if index < COLLAPSED_TERMS_COUNT || showAllTerms}
                     <div class="box" transition:slide={{duration: 600}}>
@@ -465,7 +462,7 @@
     </div>
             </div>
             <div class="practice-tests-area">
-                    <p class="h4" bind:this={practiceTestsHeader}>Practice Tests</p>
+                    <p class="h4">Practice Tests</p>
                 {#if practiceTests?.length > 0}
                     {#each practiceTests as practiceTest, index}
                         {#if index < COLLAPSED_PRACTICE_TESTS_COUNT || showAllPracticeTests}
