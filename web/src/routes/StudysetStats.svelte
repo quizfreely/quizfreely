@@ -314,7 +314,8 @@
 
     .grid-split-but-different {
         display: grid;
-        gap: 1rem;
+        gap: 2rem;
+        row-gap: 4rem;
         grid-template-columns: 1fr 1fr;
         grid-template-rows: auto auto;
         grid-template-areas:
@@ -336,6 +337,7 @@
     @media only screen and (max-width: 1000px) {
         .grid-split-but-different {
             gap: 2rem;
+            row-gap: 4rem;
             grid-template-columns: auto;
             grid-template-rows: auto auto auto auto;
             grid-template-areas:
