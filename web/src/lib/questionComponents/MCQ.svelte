@@ -1,7 +1,7 @@
 <script>
     import CheckmarkIcon from "$lib/icons/Checkmark.svelte";
     import XMarkIcon from "$lib/icons/CloseXMark.svelte";
-    let { term, answerWith, distractors, viewOnly, showAccuracy, answerUpdateCallback } = $props();
+    let { term, answerWith, distractors, viewOnly, showAccuracy, answerUpdateCallback, answeredTerm, correctChoiceIndex } = $props();
     function shuffleArray(ogArray) {
         let arr = [...ogArray];
         for (let index = arr.length - 1; index > 0; index--) {
@@ -10,7 +10,23 @@
         }
         return arr;
     }
-    let answers = $state(shuffleArray([...distractors, term]));
+    let answers = $state(
+        correctChoiceIndex == null ?
+            shuffleArray([...distractors, term]) :
+            [
+                ...distractors.slice(
+                    0, correctChoiceIndex
+                ),
+                {
+                    id: term.id,
+                    term: term.term,
+                    def: term.def
+                },
+                ...distractors.slice(
+                    correctChoiceIndex
+                )
+            ]
+    );
     let answeredIndex = $state(-1);
     let correctAnswerIndex = answers.findIndex(
         answer => term.id == answer.id

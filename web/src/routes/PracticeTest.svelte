@@ -18,7 +18,7 @@
     let terms = $state();
     let practiceTests = $state([]);
 
-    if (!data.local) {
+    if (!data.local && !data.alreadyOver) {
         console.log(data.studyset)
         terms = data?.studyset?.terms;
         practiceTests = data?.studyset?.practiceTests;
@@ -32,7 +32,7 @@
             fancyTimestamp.hours = 12;
         }
 
-        if (data.local) {
+        if (data.local && !data.alreadyOver) {
             /* studyset is local, so regardless of wheater the user is logged in or not,
             we load the studyset and progress locally */
             (async () => {
@@ -53,7 +53,7 @@
             })();
         }
 
-        if (!data.authed && !data.local) {
+        if (!data.authed && !data.local && !data.alreadyOver) {
             /* not logged in, so user data is local,
             but studyset is a cloud studyset,
             so we need to map local progress to cloud terms
@@ -111,8 +111,14 @@
         return arr;
     }
 
-    let showSetup = $state(true);
-    let questions = $state([]);
+    console.log(data)
+
+    let showSetup = $state(!data?.alreadyOver);
+    let questions = $state(data?.practiceTest?.questions?.map(q => ({
+        questionType: q.questionType,
+        term: q?.mcq?.term ?? q?.trueFalseQuestion?.term,
+        answerWith: q?.mcq?.answerWith ?? q?.trueFalseQuestion?.answerWith,
+    })) ?? []);
     let questionComponents = $state([]);
     function setupStart() {
         if (terms == null || terms.length < 1) {
@@ -526,8 +532,8 @@ FRQs: ${numFRQsToAssign}`
         }
     })
 
-    let questionsViewOnly = $state(false);
-    let questionsShowAccuracy = $state(false);
+    let questionsViewOnly = $state(data?.alreadyOver);
+    let questionsShowAccuracy = $state(data?.alreadyOver);
     let questionsAnswered = $state(0);
     function answerUpdateCallback() {
         questionsAnswered = 0;
@@ -538,11 +544,14 @@ FRQs: ${numFRQsToAssign}`
         })
     }
 
-    let showScore = $state(false);
-    let questionsCorrect = $state(0);
+    let showScore = $state(data?.alreadyOver);
+    let questionsCorrect = $state(data?.practiceTest?.questionsCorrect ?? 0);
 
     let recordedPracticeTestId;
-    let submitted = $state(false);
+    if (data?.practiceTestId != null) {
+        recordedPracticeTestId = data.practiceTestId;
+    }
+    let submitted = $state(data?.alreadyOver);
 </script>
 <style>
     .gridfourpartthingrow {
@@ -812,7 +821,7 @@ FRQs: ${numFRQsToAssign}`
         {/if}
     </div>
 </div>
-{#if showScore && questionsCorrect / questions.length == 1}
+{#if !data?.alreadyOver && showScore && questionsCorrect / questions.length == 1}
     <!-- fullscreen confetti if 100% -->
     <div style="position: fixed; top: -50px; left 0px; margin: 0px; padding: 0px; height: 100vh; width: 100vw; display: flex; justify-content: center; overflow: hidden; pointer-events: none;">
         <Confetti x={[-5, 5]} y={[0, 0.1]} delay={[0, 6000]} duration={4000} amount=1000 fallDistance="200vh"/>
