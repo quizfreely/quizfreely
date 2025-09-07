@@ -11,6 +11,17 @@
     let { data } = $props();
     let terms = $state();
     let practiceTests = $state([]);
+    let practiceTestAvgScore = $derived.by(() => {
+        if (practiceTests) {
+            let sum = 0;
+            for (const practiceTest of practiceTests) {
+                sum += practiceTest.questionsCorrect / practiceTest.questionsTotal * 100
+            }
+            return Math.floor(sum / practiceTests.length);
+        } else {
+            return 0;
+        }
+    })
 
     if (!data.local) {
         console.log(data.studyset)
@@ -462,7 +473,17 @@
     </div>
             </div>
             <div class="practice-tests-area">
-                    <p class="h4">Practice Tests</p>
+                <div class="flex" style="align-items: end; justify-content: space-between;">
+                    <p class="h4" style="margin-bottom: 0px;">Practice Tests</p>
+                    <div class="flex">
+                        {#if practiceTests?.length > 0}
+                            <span class={practiceTestAvgScore >= 90 ?
+                                "yay" : "ohno"
+                            }>{practiceTestAvgScore}% average score</span>
+                        {/if}
+                        <span class="fg0">{practiceTests?.length ?? 0} total</span>
+                    </div>
+                </div>
                 {#if practiceTests?.length > 0}
                     {#each practiceTests as practiceTest, index}
                         {#if index < COLLAPSED_PRACTICE_TESTS_COUNT || showAllPracticeTests}
