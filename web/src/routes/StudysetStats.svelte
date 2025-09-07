@@ -4,13 +4,52 @@
     import 'chartjs-adapter-luxon';
     import { setEhuiChartColors } from "$lib/ehui-chartjs-colors.js";
     import { fancyTimestamp } from "$lib/fancyTimestamp";
+    import db from "$lib/idb-api-layer/db.js";
+    import idbApiLayer from "$lib/idb-api-layer/idb-api-layer.js";
     import BackIcon from "$lib/icons/BackArrow.svelte"
     import ForwardLongArrowIcon from "$lib/icons/ForwardRightArrowLong.svelte"
     import StatsIcon from "$lib/icons/ChartGraphLine.svelte"
     import { slide } from "svelte/transition";
     let { data } = $props();
-    let terms = $state();
-    let practiceTests = $state([]);
+    let terms = $state(
+        data?.local ?
+            [] : data?.studyset?.terms
+    );
+    let practiceTests = $state(
+        data?.local ?
+            [] : data?.studyset?.practiceTests
+    );
+    let termsStats = $derived.by(() => {
+        if (terms) {
+            let sum = 0;
+            let includedTermsCount = 0;
+            let unreviewedCount = 0;
+            for (const term of terms) {
+                if (term.progress &&
+                    term.progress.termCorrectCount > 0 ||
+                    term.progress.termIncorrectCount > 0 ||
+                    term.progress.defCorrectCount > 0 ||
+                    term.progress.defIncorrectCount > 0
+                ) {
+                    sum += averageAccuracy(
+                        term.progress.termCorrectCount,
+                        term.progress.termIncorrectCount,
+                        term.progress.defCorrectCount,
+                        term.progress.defIncorrectCount
+                    )
+                    includedTermsCount++;
+                } else {
+                    unreviewedCount++;
+                }
+            }
+            return {
+                avgAccuracy: Math.floor(sum / includedTermsCount),
+                unreviewedCount: unreviewedCount
+            }
+        } else {
+            return null;
+        }
+    })
     let practiceTestAvgScore = $derived.by(() => {
         if (practiceTests) {
             let sum = 0;
@@ -19,15 +58,9 @@
             }
             return Math.floor(sum / practiceTests.length);
         } else {
-            return 0;
+            return -1;
         }
     })
-
-    if (!data.local) {
-        console.log(data.studyset)
-        terms = data?.studyset?.terms;
-        practiceTests = data?.studyset?.practiceTests;
-    }
 
     let chartCanvasTerms;
     let chartCanvas;
@@ -332,7 +365,19 @@
             <!-- <div class="terms-chart-area"> -->
             <!-- </div> -->
             <div class="terms-area">
-                <p class="h4">Terms</p>
+                <div class="flex" style="align-items: end; justify-content: space-between; flex-wrap: wrap; row-gap: 0.2rem;">
+                    <p class="h4" style="margin-bottom: 0px;">Terms</p>
+                    <div class="flex" style="row-gap: 0.2rem;">
+                        {#if terms?.length > 0 && termsStats != null && !isNaN(termsStats.avgAccuracy)}
+                        <span class={
+                            termsStats?.avgAccuracy >= 90 ?
+                                "yay" : "ohno"
+                        }>{termsStats?.avgAccuracy}% average accuracy</span>
+                        {/if}
+                        <span class="fg0">{termsStats?.unreviewedCount ?? 0} new/unreviewed</span>
+                        <span class="fg0">{terms?.length ?? 0} total</span>
+                    </div>
+                </div>
                 {#each terms as term, index}
                     {#if index < COLLAPSED_TERMS_COUNT || showAllTerms}
                     <div class="box" transition:slide={{duration: 600}}>
@@ -476,7 +521,7 @@
                 <div class="flex" style="align-items: end; justify-content: space-between;">
                     <p class="h4" style="margin-bottom: 0px;">Practice Tests</p>
                     <div class="flex">
-                        {#if practiceTests?.length > 0}
+                        {#if practiceTests?.length > 0 && practiceTestAvgScore != -1}
                             <span class={practiceTestAvgScore >= 90 ?
                                 "yay" : "ohno"
                             }>{practiceTestAvgScore}% average score</span>
