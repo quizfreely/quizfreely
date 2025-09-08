@@ -25,12 +25,12 @@
             let includedTermsCount = 0;
             let unreviewedCount = 0;
             for (const term of terms) {
-                if (term.progress &&
+                if (term.progress && (
                     term.progress.termCorrectCount > 0 ||
                     term.progress.termIncorrectCount > 0 ||
                     term.progress.defCorrectCount > 0 ||
                     term.progress.defIncorrectCount > 0
-                ) {
+                )) {
                     sum += averageAccuracy(
                         term.progress.termCorrectCount,
                         term.progress.termIncorrectCount,
