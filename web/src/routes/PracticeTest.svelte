@@ -38,6 +38,7 @@
         terms = data?.studyset?.terms;
         practiceTests = data?.studyset?.practiceTests;
     }
+    let alreadyOverLocalPTStudysetId = $state(-1);
     let mounted = $state(false);
     onMount(async () => {
         mounted = true;
@@ -57,6 +58,7 @@
                     mapPracticeTestQuestionToQuestionComponentFormat
                 );
                 questionsCorrect = pt.questionsCorrect;
+                alreadyOverLocalPTStudysetId = pt.studysetId;
             }
         }
 
@@ -614,9 +616,22 @@ FRQs: ${numFRQsToAssign}`
 <div class="grid page">
     <div class="content">
         <div class="flex">
-            <a class="button faint" href={data.local ?
-                `/studyset/local?id=${data.localId}` :
-                `/studysets/${data.studysetId}`
+            <a class="button faint" href={data.alreadyOver ? 
+                (data.local ? /* when alreadyOver is true, data.local means practice test is local,
+                but the studyset might be a cloud studyset */
+                    (("" + alreadyOverLocalPTStudysetId).includes("-") ?
+                    /* uuids have dashes/hyphens */
+                        `/studysets/${alreadyOverLocalPTStudysetId}` :
+                        `/studyset/local?id=${alreadyOverLocalPTStudysetId}`
+                    ) :
+                    `/studysets/${data.studysetId}`
+                    /* if the practice test is a cloud pt, then the studyset is always a cloud studyset,
+                    but a local practice test can be for a local OR cloud studyset */
+                ) :
+                (data.local ?
+                    `/studyset/local?id=${data.localId}` :
+                    `/studysets/${data.studysetId}`
+                )
             }><BackIcon></BackIcon> Back</a>
         </div>
         {#if takingActualPracticeTest}
