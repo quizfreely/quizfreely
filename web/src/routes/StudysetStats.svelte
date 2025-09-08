@@ -66,7 +66,7 @@
     let chartCanvas;
 
     let mounted = $state(false);
-    onMount(() => {
+    onMount(async () => {
         mounted = true;
         if (data?.settingsDateTimeFmtHours == "24") {
             fancyTimestamp.hours = 24;
@@ -77,22 +77,20 @@
         if (data.local) {
             /* studyset is local, so regardless of wheater the user is logged in or not,
             we load the studyset and progress locally */
-            (async () => {
-                const studyset = await idbApiLayer.getStudysetById(data.localId, {
-                    terms: {
-                        progress: true,
-                        topConfusionPairs: {
-                            confusedTerm: true
-                        },
-                        topReverseConfusionPairs: {
-                            term: true
-                        }
+            const studyset = await idbApiLayer.getStudysetById(data.localId, {
+                terms: {
+                    progress: true,
+                    topConfusionPairs: {
+                        confusedTerm: true
                     },
-                    practiceTests: true
-                })
-                terms = studyset.terms;
-                practiceTests = studyset?.practiceTests;
-            })();
+                    topReverseConfusionPairs: {
+                        term: true
+                    }
+                },
+                practiceTests: true
+            })
+            terms = studyset.terms;
+            practiceTests = studyset?.practiceTests;
         }
 
         if (!data.authed && !data.local) {
@@ -101,23 +99,21 @@
             so we need to map local progress to cloud terms
 
             `terms` has already been populated during SSR (above, before onMount) */
-            (async () => {
-                practiceTests = await db.practiceTests.where("studysetId").equals(data.studysetId).toArray();
-                practiceTests?.sort(
-                    /* timestamps are ISO strings in UTC,
-                    so lexical/alphanumeric sorting is the same as chronological sorting
-                    also you see we're comparing `b` to `a`, so its descending,
-                    so most recent is first */
-                    (a, b) => b.timestamp.localeCompare(a.timestamp)
-                );
-                practiceTests = practiceTests;
+            practiceTests = await db.practiceTests.where("studysetId").equals(data.studysetId).toArray();
+            practiceTests?.sort(
+                /* timestamps are ISO strings in UTC,
+                so lexical/alphanumeric sorting is the same as chronological sorting
+                also you see we're comparing `b` to `a`, so its descending,
+                so most recent is first */
+                (a, b) => b.timestamp.localeCompare(a.timestamp)
+            );
+            practiceTests = practiceTests;
 
-                for (const term of terms) {
-                    term.progress = await db.termProgress.where("termId").equals(term.id).toArray()?.[0];
-                    term.topConfusionPairs = await idbApiLayer.getTopConfusionPairs(term.id)
-                    term.topReverseConfusionPairs = await idbApiLayer.getTopReverseConfusionPairs(term.id)
-                }
-            })();
+            for (const term of terms) {
+                term.progress = await db.termProgress.where("termId").equals(term.id).toArray()?.[0];
+                term.topConfusionPairs = await idbApiLayer.getTopConfusionPairs(term.id)
+                term.topReverseConfusionPairs = await idbApiLayer.getTopReverseConfusionPairs(term.id)
+            }
         }
 
         Chart.defaults.font.size = 16;
@@ -138,7 +134,7 @@
                 type: "line",
                 data: {
                     datasets: [
-                        ...(practiceTests?.length > 1 ? [{
+                        ...(practiceTests?.length > 0 ? [{
                             label: "Practice Test Scores",
                             fill: false,
                             tension: 0,
