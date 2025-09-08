@@ -17,14 +17,14 @@
         correctChoiceIndex == null ?
             [
                 ...shuffleInPlace(distractors).slice(
-                    0, correctChoiceIndex
+                    0, correctAnswerIndex
                 ),
                 {
                     id: term.id,
                     term: term.term,
                     def: term.def
                 },
-                ...distractors.slice(correctChoiceIndex)
+                ...distractors.slice(correctAnswerIndex)
             ] : [
                 ...distractors.slice(
                     0, correctChoiceIndex
