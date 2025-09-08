@@ -18,6 +18,21 @@
     let terms = $state();
     let practiceTests = $state([]);
 
+    // maps questions from practice test data to objs with props for question components
+    function mapPracticeTestQuestionToQuestionComponentFormat(q) {
+        return {
+            type: q.questionType,
+            term: q?.mcq?.term ?? q?.trueFalseQuestion?.term,
+            answerWith: q?.mcq?.answerWith ?? q?.trueFalseQuestion?.answerWith,
+            answeredTerm: q.mcq?.answeredTerm,
+            answeredBool: q.trueFalseQuestion?.answeredBool,
+            distractors: q.mcq?.distractors,
+            distractor: q.trueFalseQuestion?.distractor,
+            correctChoiceIndex: q.mcq?.correctChoiceIndex,
+            wasCorrect: q?.mcq?.correct ?? q?.trueFalseQuestion?.correct
+        }
+    }
+
     if (!data.local && !data.alreadyOver) {
         console.log(data.studyset)
         terms = data?.studyset?.terms;
@@ -32,9 +47,18 @@
             fancyTimestamp.hours = 12;
         }
 
-        // if (data.local && data.alreadyOver) {
-        //
-        // }
+        if (data.local && data.alreadyOver) {
+            const pt = (await db.practiceTests.where("id").equals(data.practiceTestId).toArray())?.[0];
+            if (pt == null) {
+                alert("invalid local practice test id");
+                console.error("local practice test not found");
+            } else {
+                questions = pt.questions.map(
+                    mapPracticeTestQuestionToQuestionComponentFormat
+                );
+                questionsCorrect = pt.questionsCorrect;
+            }
+        }
 
         if (data.local && !data.alreadyOver) {
             /* studyset is local, so regardless of wheater the user is logged in or not,
@@ -112,18 +136,9 @@
     }
 
     let showSetup = $state(!data?.alreadyOver);
-    let questions = $state(data?.practiceTest?.questions?.map(q => ({
-        type: q.questionType,
-        term: q?.mcq?.term ?? q?.trueFalseQuestion?.term,
-        answerWith: q?.mcq?.answerWith ?? q?.trueFalseQuestion?.answerWith,
-        answeredTerm: q.mcq?.answeredTerm,
-        answeredBool: q.trueFalseQuestion?.answeredBool,
-        distractors: q.mcq?.distractors,
-        distractor: q.trueFalseQuestion?.distractor,
-        correctChoiceIndex: q.mcq?.correctChoiceIndex,
-        wasCorrect: q?.mcq?.correct ?? q?.trueFalseQuestion?.correct
-    })) ?? []);
-    console.log(questions)
+    let questions = $state(data?.practiceTest?.questions?.map(
+        mapPracticeTestQuestionToQuestionComponentFormat
+    ) ?? []);
     let questionComponents = $state([]);
     function setupStart() {
         if (terms == null || terms.length < 1) {
