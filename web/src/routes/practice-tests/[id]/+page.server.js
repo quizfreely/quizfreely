@@ -73,6 +73,7 @@ export async function load({cookies, params}) {
         return {
             practiceTestId: params.id,
             practiceTest: resp?.data?.practiceTest,
+            studysetId: resp?.data?.practiceTest?.studysetId,
             authed: resp?.data?.authed,
             authedUser: resp?.data?.authedUser,
             settingsDateTimeFmtHours: cookies.get(

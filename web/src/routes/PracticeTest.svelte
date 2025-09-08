@@ -111,14 +111,19 @@
         return arr;
     }
 
-    console.log(data)
-
     let showSetup = $state(!data?.alreadyOver);
     let questions = $state(data?.practiceTest?.questions?.map(q => ({
-        questionType: q.questionType,
+        type: q.questionType,
         term: q?.mcq?.term ?? q?.trueFalseQuestion?.term,
         answerWith: q?.mcq?.answerWith ?? q?.trueFalseQuestion?.answerWith,
+        answeredTerm: q.mcq?.answeredTerm,
+        answeredBool: q.trueFalseQuestion?.answeredBool,
+        distractors: q.mcq?.distractors,
+        distractor: q.trueFalseQuestion?.distractor,
+        correctChoiceIndex: q.mcq?.correctChoiceIndex,
+
     })) ?? []);
+    console.log(questions)
     let questionComponents = $state([]);
     function setupStart() {
         if (terms == null || terms.length < 1) {
@@ -502,7 +507,7 @@ FRQs: ${numFRQsToAssign}`
     }
 
     var showExitConfirmationModal = $state(false);
-    var showTest = $state(false);
+    var showTest = $state(data.alreadyOver);
     var takingActualPracticeTest = $state(false);
     var bypassExitConfirmation = false;
     let navigatingToURL = $state("");
@@ -705,7 +710,7 @@ FRQs: ${numFRQsToAssign}`
             {#each questions as question, index}
                 {#if question.type == "MCQ"}
                 <div class="box">
-                    <MCQ term={question.term} answerWith={question.answerWith} distractors={question.distractors} viewOnly={questionsViewOnly} showAccuracy={questionsShowAccuracy} answerUpdateCallback={answerUpdateCallback} bind:this={questionComponents[index]}></MCQ>
+                    <MCQ term={question.term} answerWith={question.answerWith} distractors={question.distractors} viewOnly={questionsViewOnly} showAccuracy={questionsShowAccuracy} answerUpdateCallback={answerUpdateCallback} bind:this={questionComponents[index]} answeredTerm={question.answeredTerm} correctChoiceIndex={question.correctChoiceIndex}></MCQ>
                 </div>
                 {:else if question.type == "TRUE_FALSE"}
                 <div class="box">
