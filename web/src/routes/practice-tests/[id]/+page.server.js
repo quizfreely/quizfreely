@@ -42,6 +42,7 @@ export async function load({cookies, params}) {
                     term
                     def
                 }
+                correctChoiceIndex
             }
             trueFalseQuestion {
                 term {
