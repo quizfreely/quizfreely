@@ -500,6 +500,12 @@ FRQs: ${numFRQsToAssign}`
                 }
                 if (iterations > 99) {
                     console.log("(addTrueFalseQuestion) Over 99 iterations to pick random distractor term")
+                    /* use fallback same term as distractor */
+                    question.distractor = {
+                        id: term.id,
+                        term: term.term,
+                        def: term.def
+                    }
                 }
             }
             questions.push(question);
