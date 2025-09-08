@@ -768,16 +768,9 @@ FRQs: ${numFRQsToAssign}`
                     questionComponents.forEach(questionComponent => {
                         const questionData = questionComponent.getQuestion();
                         questionDataArray.push(questionData);
-                        if (questionData.questionType == "MCQ" ?
-                            questionData.mcq.correct : (
-                            questionData.questionType == "FRQ" ?
-                                questionData.frq.correct : (
-                                questionData.questionType == "TRUE_FALSE" ?
-                                    questionData.trueFalseQuestion.correct : (
-                                    () => { console.log("(submit button forEach) unknown/unimplemented question type"); return false; }
-                                    )
-                                )
-                            )
+                        if (
+                            questionData?.mcq?.correct ||
+                            questionData?.trueFalseQuestion?.correct
                         ) {
                             questionsCorrect++;
                         }
