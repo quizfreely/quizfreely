@@ -121,7 +121,7 @@
         distractors: q.mcq?.distractors,
         distractor: q.trueFalseQuestion?.distractor,
         correctChoiceIndex: q.mcq?.correctChoiceIndex,
-
+        wasCorrect: q?.mcq?.correct ?? q?.trueFalseQuestion?.correct
     })) ?? []);
     console.log(questions)
     let questionComponents = $state([]);
@@ -714,7 +714,7 @@ FRQs: ${numFRQsToAssign}`
                 </div>
                 {:else if question.type == "TRUE_FALSE"}
                 <div class="box">
-                    <TrueFalseQuestion term={question.term} answerWith={question.answerWith} distractor={question.distractor} viewOnly={questionsViewOnly} showAccuracy={questionsShowAccuracy} answerUpdateCallback={answerUpdateCallback} bind:this={questionComponents[index]}></TrueFalseQuestion>
+                    <TrueFalseQuestion term={question.term} answerWith={question.answerWith} distractor={question.distractor} viewOnly={questionsViewOnly} showAccuracy={questionsShowAccuracy} answerUpdateCallback={answerUpdateCallback} bind:this={questionComponents[index]} answeredBool={question.answeredBool} wasCorrect={question.wasCorrect}></TrueFalseQuestion>
                 </div>
                 {:else if question.type == "FRQ"}
                 <div class="box">

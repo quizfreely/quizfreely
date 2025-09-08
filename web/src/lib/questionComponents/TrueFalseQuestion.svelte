@@ -1,9 +1,12 @@
 <script>
     import CheckmarkIcon from "$lib/icons/Checkmark.svelte";
     import XMarkIcon from "$lib/icons/CloseXMark.svelte";
-    let { term, answerWith, distractor, viewOnly, showAccuracy, answerUpdateCallback } = $props();
-    let correctAnswerBool = Math.random() < 0.5;
-    let answeredBool = $state(null);
+    let { term, answerWith, distractor, viewOnly, showAccuracy, answerUpdateCallback, answeredBool, wasCorrect } = $props();
+    /* answeredBool and wasCorrect are only defined when reviewing questions from a completed practice test */
+    let correctAnswerBool = answeredBool != null ?
+        (wasCorrect ?
+            answeredBool : !answeredBool
+        ) : Math.random() < 0.5
 
     export function getQuestion() {
         if (answeredBool == null) {
