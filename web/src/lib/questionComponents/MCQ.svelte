@@ -2,18 +2,30 @@
     import CheckmarkIcon from "$lib/icons/Checkmark.svelte";
     import XMarkIcon from "$lib/icons/CloseXMark.svelte";
     let { term, answerWith, distractors, viewOnly, showAccuracy, answerUpdateCallback, answeredTerm, correctChoiceIndex } = $props();
-    function shuffleArray(ogArray) {
-        let arr = [...ogArray];
+    /* answeredTerm and correctChoiceIndex are only defined when reviewing questions from a completed practice test */
+    function shuffleInPlace(arr) {
         for (let index = arr.length - 1; index > 0; index--) {
             const randomIndex = Math.floor(Math.random() * (index + 1));
             [arr[index], arr[randomIndex]] = [arr[randomIndex], arr[index]];
         }
         return arr;
     }
+    let correctAnswerIndex = correctChoiceIndex ?? Math.floor(
+        Math.random() * (distractors.length + 1)
+    );
     let answers = $state(
         correctChoiceIndex == null ?
-            shuffleArray([...distractors, term]) :
             [
+                ...shuffleInPlace(distractors).slice(
+                    0, correctChoiceIndex
+                ),
+                {
+                    id: term.id,
+                    term: term.term,
+                    def: term.def
+                },
+                ...distractors.slice(correctChoiceIndex)
+            ] : [
                 ...distractors.slice(
                     0, correctChoiceIndex
                 ),
@@ -27,10 +39,12 @@
                 )
             ]
     );
-    let answeredIndex = $state(-1);
-    let correctAnswerIndex = answers.findIndex(
-        answer => term.id == answer.id
-    )
+
+    let answeredIndex = $state(answeredTerm == null ?
+        -1 : answers.findIndex(
+            a => a.id == answeredTerm.id
+        )
+    );
 
     export function getQuestion() {
         if (answeredIndex == -1) {
@@ -48,7 +62,8 @@
                 correct: answeredIndex == correctAnswerIndex,
                 answeredTerm: answeredIndex >= 0 ?
                     answers[answeredIndex] : null,
-                distractors: distractors
+                distractors: distractors,
+                correctChoiceIndex: correctAnswerIndex
             }
         }
     }
