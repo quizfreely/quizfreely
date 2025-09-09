@@ -217,7 +217,7 @@ export default {
                 return false;
             }
 
-            existingProgress = await db.termProgress.where("termId").equals(termId);
+            const existingProgress = await db.termProgress.where("termId").equals(termId);
             if (existingProgress?.length > 0) {
                 const termCorrectCount = (existingProgress[0].termCorrectCount) + (termCorrectIncrease ?? 0);
                 const termIncorrectCount = (existingProgress[0].termIncorrectCount) + (termIncorrectIncrease ?? 0);
