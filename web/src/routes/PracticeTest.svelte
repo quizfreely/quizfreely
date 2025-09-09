@@ -872,12 +872,14 @@ FRQs: ${numFRQsToAssign}`
                                 body: JSON.stringify({
                                     query: `mutation recordPracticeTest(
     $input: PracticeTestInput,
-    $termProgress: [TermProgressInput]
+    $termProgress: [TermProgressInput!]!
 ) {
     recordPracticeTest(input: $input) {
         id
     }
-    updateTermProgress(termProgress: $termProgress)
+    updateTermProgress(termProgress: $termProgress) {
+        id
+    }
 }`,
                                     variables: {
                                         "input": {
@@ -885,7 +887,8 @@ FRQs: ${numFRQsToAssign}`
                                             questionsCorrect: questionsCorrect,
                                             questionsTotal: questions.length,
                                             questions: questionDataArray
-                                        }
+                                        },
+                                        "termProgress": termProgressToUpdate.values()
                                     }
                                 })
                             });
@@ -909,6 +912,7 @@ FRQs: ${numFRQsToAssign}`
                             questionsTotal: questions.length,
                             questions: questionDataArray
                         })));
+                        await idbApiLayer.updateTermProgress(termProgressToUpdate);
                         submitted = true;
                     }
                 }}>
