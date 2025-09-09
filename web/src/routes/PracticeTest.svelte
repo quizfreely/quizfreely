@@ -771,14 +771,94 @@ FRQs: ${numFRQsToAssign}`
                     showScore = true;
                     let questionDataArray = [];
                     questionsCorrect = 0;
+                    let termProgressToUpdate = new Map();
                     questionComponents.forEach(questionComponent => {
                         const questionData = questionComponent.getQuestion();
                         questionDataArray.push(questionData);
+
+                        const thisTermId = questionData.mcq?.term?.id ??
+                            questionData.trueFalseQuestion?.term?.id;
+                        if (thisTermId == null) {
+                            console.error("term id from question is null(ish)! this might happen if new question types aren't fully implemented");
+                        }
+                        const thisAnswerWith = questionData.mcq?.answerWith ??
+                            questionData.trueFalseQuestion?.answerWith;
+                        let termCorrectIncrease = 0;
+                        let termIncorrectIncrease = 0;
+                        let defCorrectIncrease = 0;
+                        let defIncorrectIncrease = 0;
                         if (
                             questionData?.mcq?.correct ||
                             questionData?.trueFalseQuestion?.correct
                         ) {
                             questionsCorrect++;
+
+                            if (thisAnswerWith == "DEF") {
+                                defCorrectIncrease = 1;
+                            } else {
+                                termCorrectIncrease = 1;
+                            }
+                        } else {
+                            if (thisAnswerWith == "DEF") {
+                                defIncorrectIncrease = 1;
+                            } else {
+                                termIncorrectIncrease = 1;
+                            }
+                        }
+
+                        if (thisTermId != null) {
+                            let existingToUpdate = termProgressToUpdate.get(
+                                thisTermId
+                            );
+                            if (existingToUpdate == null) {
+                                termProgressToUpdate.set(thisTermId, {
+                                    termId: thisTermId,
+                                    ...(thisAnswerWith == "DEF" ?
+                                        {defReviewedAt: (new Date()).toISOString()} :
+                                        {termReviewedAt: (new Date()).toISOString()}
+                                    ),
+                                    termCorrectIncrease,
+                                    termIncorrectIncrease,
+                                    defCorrectIncrease,
+                                    defIncorrectIncrease,
+                                    ...(termIncorrectIncrease > 0 ?
+                                        {termLeitnerSystemBox: 1} : {}
+                                    ),
+                                    ...(defIncorrectIncrease > 0 ?
+                                        {defLeitnerSystemBox: 1} : {}
+                                    )
+                                });
+                            } else {
+                                termProgressToUpdate.set(thisTermId, {
+                                    ...existingToUpdate,
+                                    ...(thisAnswerWith == "DEF" ?
+                                        {defReviewedAt: (new Date()).toISOString()} :
+                                        {termReviewedAt: (new Date()).toISOString()}
+                                    ),
+                                    termCorrectIncrease: (
+                                        existingToUpdate.termCorrectIncrease ?? 0 +
+                                        termCorrectIncrease
+                                    ),
+                                    termIncorrectIncrease: (
+                                        existingToUpdate.termIncorrectIncrease ?? 0 +
+                                        termIncorrectIncrease
+                                    ),
+                                    defCorrectIncrease: (
+                                        existingToUpdate.defCorrectIncrease ?? 0 +
+                                            defCorrectIncrease
+                                    ),
+                                    defIncorrectIncrease: (
+                                            existingToUpdate.defIncorrectIncrease ?? 0 +
+                                            defIncorrectIncrease
+                                    ),
+                                    ...(termIncorrectIncrease > 0 ?
+                                        {termLeitnerSystemBox: 1} : {}
+                                    ),
+                                    ...(defIncorrectIncrease > 0 ?
+                                        {defLeitnerSystemBox: 1} : {}
+                                    )
+                                })
+                            }
                         }
                     })
                     console.log(questionDataArray)
@@ -790,10 +870,14 @@ FRQs: ${numFRQsToAssign}`
                                     "Content-Type": "application/json"
                                 },
                                 body: JSON.stringify({
-                                    query: `mutation recordPracticeTest($input: PracticeTestInput) {
+                                    query: `mutation recordPracticeTest(
+    $input: PracticeTestInput,
+    $termProgress: [TermProgressInput]
+) {
     recordPracticeTest(input: $input) {
         id
     }
+    updateTermProgress(termProgress: $termProgress)
 }`,
                                     variables: {
                                         "input": {
