@@ -252,9 +252,13 @@
             avg = tc / (tc+ti);
         }
         if (dc + di > 0) {
-            avg = (avg + (
-                dc / (dc+di)
-            )) / 2
+            if (avg == null) {
+                avg = dc / (dc+di);
+            } else {
+                avg = (avg + (
+                    dc / (dc+di)
+                )) / 2
+            }
         }
         return Math.floor(avg * 100);
     }
@@ -457,7 +461,7 @@
                                     )}%
                                 </p>
                                 {:else}
-                                <p class="fg0 shy-h4">N/A</p>
+                                <p class="fg0 shy-h4" style="margin-top: 0px;">N/A</p>
                                 {/if}
                             </div>
                             <div>
