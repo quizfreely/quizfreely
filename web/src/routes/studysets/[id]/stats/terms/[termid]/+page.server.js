@@ -66,7 +66,7 @@ export async function load({ cookies, params}) {
         });
         const resp = await respRaw.json();
         if (resp?.data == null || resp?.errors != null) {
-            console.log("Error in cloud studyset stats load func api request. Response: ", resp);
+            console.log("Error in cloud term stats load func api request. Response: ", resp);
         }
         return {
             studysetId: params.id,
