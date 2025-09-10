@@ -204,19 +204,6 @@ export default {
             termCorrectIncrease, termIncorrectIncrease,
             defCorrectIncrease, defIncorrectIncrease
         } of termProgressArray) {
-            if (termReviewedAt != null && !(
-                termReviewedAt instanceof Date && !isNaN(termReviewedAt)
-            )) {
-                console.error("(idb-api-layer: updateTermProgress) termReviewedAt is not a valid Date object and not null")
-                return false;
-            }
-            if (defReviewedAt != null && !(
-                defReviewedAt instanceof Date && !isNaN(defReviewedAt)
-            )) {
-                console.error("(idb-api-layer: updateTermProgress) defReviewedAt is not a valid Date object and not null")
-                return false;
-            }
-
             const existingProgress = await db.termProgress.where("termId").equals(termId);
             if (existingProgress?.length > 0) {
                 const termCorrectCount = (existingProgress[0].termCorrectCount) + (termCorrectIncrease ?? 0);
@@ -228,12 +215,12 @@ export default {
                     existingProgress[0].id,
                     {
                         termLastReviewedAt: termReviewedAt != null ?
-                            termReviewedAt.toISOString() : existingProgress[0].termLastReviewedAt,
+                            termReviewedAt : existingProgress[0].termLastReviewedAt,
                         termReviewCount: termReviewedAt != null ?
                             (existingProgress[0]?.termReviewCount ?? 0) + 1 :
                             existingProgress[0]?.termReviewCount,
                         defLastReviewedAt: defReviewedAt != null ?
-                            defReviewedAt.toISOString() : existingProgress[0].defLastReviewedAt,
+                            defReviewedAt : existingProgress[0].defLastReviewedAt,
                         defReviewCount: defReviewedAt != null ?
                             (existingProgress[0]?.defReviewCount ?? 0) + 1 :
                             existingProgress[0]?.defReviewCount,
@@ -257,12 +244,12 @@ export default {
             } else {
                 const newProgressId = await db.termProgress.add({
                     termId: termId,
-                    termFirstReviewedAt: termReviewedAt?.toISOString(),
-                    termLastReviewedAt: termReviewedAt?.toISOString(),
+                    termFirstReviewedAt: termReviewedAt,
+                    termLastReviewedAt: termReviewedAt,
                     termReviewCount: termReviewedAt != null ?
                         1 : 0,
-                    defFirstReviewedAt: defReviewedAt?.toISOString(),
-                    defLastReviewedAt: defReviewedAt?.toISOString(),
+                    defFirstReviewedAt: defReviewedAt,
+                    defLastReviewedAt: defReviewedAt,
                     defReviewCount: defReviewedAt != null ?
                         1 : 0,
                     termLeitnerSystemBox: termLeitnerSystemBox,

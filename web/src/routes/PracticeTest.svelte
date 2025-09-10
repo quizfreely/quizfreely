@@ -916,7 +916,7 @@ FRQs: ${numFRQsToAssign}`
                         })));
                         /* .values() returns a map iterator (not an array),
                         but that's fine because idbApiLayer.updateTermProgress() accepts any iteratable type */
-                        await idbApiLayer.updateTermProgress(...termProgressToUpdate.values());
+                        await idbApiLayer.updateTermProgress(termProgressToUpdate.values());
                         submitted = true;
                     }
                 }}>
