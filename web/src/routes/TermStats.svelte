@@ -1,5 +1,7 @@
 <script>
     import { onMount } from "svelte";
+    import db from "$lib/idb-api-layer/db.js";
+    import idbApiLayer from "$lib/idb-api-layer/idb-api-layer.js";
     import Chart from 'chart.js/auto';
     import 'chartjs-adapter-luxon';
     import { setEhuiChartColors } from "$lib/ehui-chartjs-colors.js";
@@ -94,7 +96,7 @@
             so we need to map local progress to cloud terms
 
             `term` has already been populated during SSR (above, before onMount) */
-            term.progress = await db.termProgress.where("termId").equals(term.id).toArray()?.[0];
+            term.progress = (await db.termProgress.where("termId").equals(term.id).toArray())?.[0];
             term.topConfusionPairs = await idbApiLayer.getTopConfusionPairs(term.id)
             term.topReverseConfusionPairs = await idbApiLayer.getTopReverseConfusionPairs(term.id)
 
@@ -235,9 +237,13 @@
             avg = tc / (tc+ti);
         }
         if (dc + di > 0) {
-            avg = (avg + (
-                dc / (dc+di)
-            )) / 2
+            if (avg == null) {
+                avg = dc / (dc+di);
+            } else {
+                avg = (avg + (
+                    dc / (dc+di)
+                )) / 2
+            }
         }
         return Math.floor(avg * 100);
     }
