@@ -18,9 +18,12 @@
         GitHub
       </a>
     </div>
-    <div class="grid list" style="text-align: start; padding: 2rem; margin-top: 2rem">
+          <a href="https://hcb.hackclub.com/donations/start/quizfreely" class="button alt ohno" style="margin-top: 0.6rem;">
+            <HeartIcon></HeartIcon> Donate
+          </a>
+    <div class="grid list" style="text-align: start; padding: 2rem; margin-top: 0px;">
       <div>
-        <p class="h4">About</p>
+        <p class="fg0">About</p>
         <div class="flex col compact-gap" style="width:fit-content">
           <a href="/landing-page">Landing Page</a>
           <a href="/privacy">Privacy Policy</a>
@@ -29,7 +32,7 @@
         </div>
       </div>
       <div>
-        <p class="h4">Development</p>
+        <p class="fg0">Development</p>
         <div class="flex col compact-gap" style="width:fit-content">
           <a href="https://codeberg.org/quizfreely/quizfreely">Source Code (Codeberg)</a>
           <a href="https://github.com/quizfreely/quizfreely">Source Code (GitHub)</a>
@@ -37,18 +40,10 @@
         </div>
       </div>
       <div>
-        <p class="h4">Community</p>
+        <p class="fg0">Community</p>
         <div class="flex col compact-gap" style="width:fit-content">
           <a href="https://matrix.to/#/#quizfreely-space:matrix.org">Matrix Space</a>
           <a href="https://quizfreely.org/discord">Discord Server</a>
-          <!-- <a href="https://hcb.hackclub.com/donations/start/quizfreely" style="display: flex; align-items: center; flex-wrap: nowrap; gap: 0.4rem;"> -->
-          <!--   <HeartIcon></HeartIcon> -->
-          <!--   <span style="margin-top: 0px;">Donate</span> -->
-          <!-- </a> -->
-          <a href="https://hcb.hackclub.com/donations/start/quizfreely" class="button alt ohno" style="margin-top: 0.4rem;">
-            <HeartIcon></HeartIcon>
-            <span style="margin-top: 0px;">Donate</span>
-          </a>
         </div>
       </div>
     </div>
