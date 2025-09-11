@@ -1,10 +1,17 @@
 <script>
-  import IconCodeberg from "$lib/icons/Codeberg.svelte";
-  import IconGitHub from "$lib/icons/GitHub.svelte";
+    import IconCodeberg from "$lib/icons/Codeberg.svelte";
+    import IconGitHub from "$lib/icons/GitHub.svelte";
+    import { footerState } from '$lib/components/footer.svelte.js';
 </script>
 
+{#if !footerState?.hideFooterWave}
 <div id="footer-wave" class="wave-top bg0"></div>
-<footer id="footer" class="background-bg0" style="border: none; margin: 0px; padding-top: 1rem; padding-bottom: 8rem;">
+{/if}
+<footer id="footer" class="background-bg0" style="border: none; margin: 0px; padding-bottom: 8rem; {
+    footerState?.hideFooterWave ?
+        "padding-top: 4rem;" :
+        "padding-top: 1rem;"
+}">
     <h2>Quizfreely</h2>
     <p>Quizfreely is free and open source <br> Made by Ehan A & contributors</p>
     <div class="flex center compact-gap">

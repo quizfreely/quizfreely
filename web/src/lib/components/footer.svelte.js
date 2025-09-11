@@ -1,3 +1,4 @@
 export const footerState = $state({
-    hideFooter: false
+    hideFooter: false,
+    hideFooterWave: false
 });
