@@ -1,6 +1,7 @@
 <script>
   import IconCodeberg from "$lib/icons/Codeberg.svelte";
   import IconGitHub from "$lib/icons/GitHub.svelte";
+  import HeartIcon from "$lib/icons/Heart.svelte";
 </script>
 
 <div id="footer-wave" class="wave-top bg0"></div>
@@ -24,6 +25,7 @@
           <a href="/landing-page">Landing Page</a>
           <a href="/privacy">Privacy Policy</a>
           <a href="/terms">Terms of Service</a>
+          <a href="https://hcb.hackclub.com/quizfreely">Transparent Finances</a>
         </div>
       </div>
       <div>
@@ -39,6 +41,14 @@
         <div class="flex col compact-gap" style="width:fit-content">
           <a href="https://matrix.to/#/#quizfreely-space:matrix.org">Matrix Space</a>
           <a href="https://quizfreely.org/discord">Discord Server</a>
+          <!-- <a href="https://hcb.hackclub.com/donations/start/quizfreely" style="display: flex; align-items: center; flex-wrap: nowrap; gap: 0.4rem;"> -->
+          <!--   <HeartIcon></HeartIcon> -->
+          <!--   <span style="margin-top: 0px;">Donate</span> -->
+          <!-- </a> -->
+          <a href="https://hcb.hackclub.com/donations/start/quizfreely" class="button alt ohno" style="margin-top: 0.4rem;">
+            <HeartIcon></HeartIcon>
+            <span style="margin-top: 0px;">Donate</span>
+          </a>
         </div>
       </div>
     </div>
