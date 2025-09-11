@@ -33,7 +33,7 @@ afterNavigate(function () {
 
 <Header />
 {#key data.transPageKey}
-<div in:fade={{ duration: 120, delay: 120, easing: sineIn }} out:fade={{ duration: 120, easing: sineOut }}>
+<div style="margin-top: 0px;" in:fade={{ duration: 120, delay: 120, easing: sineIn }} out:fade={{ duration: 120, easing: sineOut }}>
     <div style="min-height: 70vh">
         {@render children()}
     </div>
