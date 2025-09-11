@@ -28,7 +28,7 @@
 }
 </style>
 
-<header class="navbar with-search with-status" style="margin-bottom: 0px;">
+<header class="navbar with-search with-status">
     <div class="menu">
         <input type="checkbox" id="nav-menu-toggle" class="nav-menu-toggle" />
         <label for="nav-menu-toggle" class="nav-menu-open">
