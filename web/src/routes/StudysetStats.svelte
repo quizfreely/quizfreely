@@ -215,9 +215,9 @@
     })
 
     let showAllTerms = $state(false);
-    const COLLAPSED_TERMS_COUNT = 4;
+    const COLLAPSED_TERMS_COUNT = 3;
     let showAllPracticeTests = $state(false);
-    const COLLAPSED_PRACTICE_TESTS_COUNT = 4;
+    const COLLAPSED_PRACTICE_TESTS_COUNT = 3;
 
 
     /* returns average term accuracy from term & def correct/incorrect counts.
@@ -341,10 +341,10 @@
             grid-template-columns: auto;
             grid-template-rows: auto auto auto auto;
             grid-template-areas:
-                /* "terms-chart" */
-                "terms"
                 "practice-tests-chart"
                 "practice-tests"
+                /* "terms-chart" */
+                "terms";
         }
     }
 
