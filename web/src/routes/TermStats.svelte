@@ -351,7 +351,7 @@
                             )}%
                         </p>
                     {:else}
-                        <p class="fg0 shy-h4">N/A</p>
+                        <p class="fg0 shy-h4" style="margin-top: 0px;">N/A</p>
                     {/if}
                 </div>
                 <div>
