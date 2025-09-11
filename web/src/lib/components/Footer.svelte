@@ -9,11 +9,11 @@
     <h2>Quizfreely</h2>
     <p>Quizfreely is free and open source <br> Made by Ehan A & contributors</p>
     <div class="flex center compact-gap">
-      <a href="https://codeberg.org/quizfreely/quizfreely" class="button icon-only-button">
+      <a href="https://codeberg.org/quizfreely/quizfreely" class="button faint">
         <IconCodeberg />
         Codeberg
       </a>
-      <a href="https://github.com/quizfreely/quizfreely" class="button icon-only-button">
+      <a href="https://github.com/quizfreely/quizfreely" class="button faint">
         <IconGitHub />
         GitHub
       </a>
@@ -21,10 +21,10 @@
           <a href="https://hcb.hackclub.com/donations/start/quizfreely" class="button alt ohno" style="margin-top: 0.6rem;">
             <HeartIcon></HeartIcon> Donate
           </a>
-    <div class="grid list" style="text-align: start; padding: 2rem; margin-top: 0px;">
+    <div class="grid list" style="text-align: start; padding: 2rem; margin-top: 0px; margin-bottom: 0px;">
       <div>
         <p class="fg0">About</p>
-        <div class="flex col compact-gap" style="width:fit-content">
+        <div class="flex col compact-gap" style="width:fit-content; margin-top: 0.6rem;">
           <a href="/landing-page">Landing Page</a>
           <a href="/privacy">Privacy Policy</a>
           <a href="/terms">Terms of Service</a>
@@ -33,7 +33,7 @@
       </div>
       <div>
         <p class="fg0">Development</p>
-        <div class="flex col compact-gap" style="width:fit-content">
+        <div class="flex col compact-gap" style="width:fit-content; margin-top: 0.6rem;">
           <a href="https://codeberg.org/quizfreely/quizfreely">Source Code (Codeberg)</a>
           <a href="https://github.com/quizfreely/quizfreely">Source Code (GitHub)</a>
           <a href="https://quizfreely.org/docs">Documentation</a>
@@ -41,7 +41,7 @@
       </div>
       <div>
         <p class="fg0">Community</p>
-        <div class="flex col compact-gap" style="width:fit-content">
+        <div class="flex col compact-gap" style="width:fit-content; margin-top: 0.6rem;">
           <a href="https://matrix.to/#/#quizfreely-space:matrix.org">Matrix Space</a>
           <a href="https://quizfreely.org/discord">Discord Server</a>
         </div>
