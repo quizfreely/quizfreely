@@ -86,7 +86,7 @@
       <div>
         <h2 class="h3">We're <span class="love">nonprofit</span></h2>
         <p>
-            We're fiscally sponsored by <a class="yay" href="https://the.hackfoundation.org">The Hack Foundation</a>
+            Quizfreely is a nonprofit project, funded entirely by donations. 🥰<br>We're fiscally sponsored by <a class="yay" href="https://the.hackfoundation.org">The Hack Foundation</a>, a 501(c)(3) nonprofit.<br><br>
             Pleeease donate 🥺
         </p>
         <div class="flex">
