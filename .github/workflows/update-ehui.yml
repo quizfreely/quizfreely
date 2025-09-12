@@ -18,9 +18,9 @@ jobs:
           mkdir -p quizfreely/web/static/css/
           mkdir -p quizfreely/web/static/themes/
           cp ehui/site/css/ehui.min.css "quizfreely/web/static/css/ehui-$DATEYMD.min.css"
-          cp ehui/site/css/auto-light-dark.min.css "quizfreely/web/static/themes/auto-$DATEYMD.min.css"
-          cp ehui/site/css/light.min.css "quizfreely/web/static/themes/light-$DATEYMD.min.css"
-          cp ehui/site/css/dark.min.css "quizfreely/web/static/themes/dark-$DATEYMD.min.css"
+          cp ehui/site/themes/auto-light-dark.min.css "quizfreely/web/static/themes/auto-$DATEYMD.min.css"
+          cp ehui/site/themes/light.min.css "quizfreely/web/static/themes/light-$DATEYMD.min.css"
+          cp ehui/site/themes/dark.min.css "quizfreely/web/static/themes/dark-$DATEYMD.min.css"
           sed -E -i \
             -e "s/ehui-[0-9]{4}-[0-9]{2}-[0-9]{2}.min.css/ehui-$DATEYMD.min.css/g" \
             -e "s/%theme%-[0-9]{4}-[0-9]{2}-[0-9]{2}.min.css/%theme%-$DATEYMD.min.css/g" \
