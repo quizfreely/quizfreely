@@ -1,5 +1,6 @@
 <script>
     let { data } = $props();
+    import HeartIcon from "$lib/icons/Heart.svelte";
 </script>
 
 <svelte:head>
@@ -82,6 +83,24 @@
   <div class="wave-bottom extra-bg"></div>
   <div class="grid page">
     <div class="content">
+      <div>
+        <h2 class="h3">We're <span class="love">nonprofit</span></h2>
+        <p>
+            We're fiscally sponsored by <a class="yay" href="https://the.hackfoundation.org">The Hack Foundation</a>
+            Pleeease donate 🥺
+        </p>
+        <div class="flex">
+          <a class="button love" href="https://codeberg.org/quizfreely/quizfreely">
+            <HeartIcon></HeartIcon>
+            Donate
+          </a>
+          <a class="button love alt" href="https://github.com/quizfreely/quizfreely">
+            Transparent Finances on HCB
+          </a>
+        </div>
+      </div>
+            <br>
+            <br>
       {#if data?.featuredRows && data.featuredRows.length >= 1 }
       <h2 class="h3">Find flashcard sets & study guides</h2>
       <p>
