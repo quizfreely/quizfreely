@@ -86,16 +86,17 @@
       <div>
         <h2 class="h3">We're <span class="love">nonprofit</span></h2>
         <p>
-            Quizfreely is a nonprofit project, funded entirely by donations. 🥰<br>We're fiscally sponsored by <a class="yay" href="https://the.hackfoundation.org">The Hack Foundation</a>, a 501(c)(3) nonprofit.<br><br>
+            Quizfreely is a nonprofit project, funded entirely by donations. 🥰<br>We're fiscally sponsored by <a class="yay" href="https://the.hackfoundation.org">The Hack Foundation</a>, a 501(c)(3) nonprofit.<br>
+            All our finances are transparent on HCB<br><br>
             Pleeease donate 🥺
         </p>
         <div class="flex">
-          <a class="button love" href="https://codeberg.org/quizfreely/quizfreely">
+          <a class="button love" href="https://hcb.hackclub.com/donations/start/quizfreely">
             <HeartIcon></HeartIcon>
             Donate
           </a>
-          <a class="button love alt" href="https://github.com/quizfreely/quizfreely">
-            Transparent Finances on HCB
+          <a class="button love alt" href="https://hcb.hackclub.com/quizfreely">
+            Transparent Finances
           </a>
         </div>
       </div>
