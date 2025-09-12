@@ -18,7 +18,7 @@
         GitHub
       </a>
     </div>
-          <a href="https://hcb.hackclub.com/donations/start/quizfreely" class="button alt ohno" style="margin-top: 0.6rem;">
+          <a href="https://hcb.hackclub.com/donations/start/quizfreely" class="button alt love" style="margin-top: 0.6rem;">
             <HeartIcon></HeartIcon> Donate
           </a>
     <div class="grid list" style="text-align: start; padding: 2rem; margin-top: 0px; margin-bottom: 0px;">
