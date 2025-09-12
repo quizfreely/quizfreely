@@ -81,12 +81,12 @@
             switch (e.key) {
                 case "ArrowLeft":
                 case "h":
-                case "k":
+                case "j":
                     flashcardsPrev();
                     break;
                 case "ArrowRight":
                 case "l":
-                case "j":
+                case "k":
                     flashcardsNext();
                     break;
                 case " ": /* space */
