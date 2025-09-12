@@ -7,7 +7,10 @@
 <div id="footer-wave" class="wave-top bg0"></div>
 <footer id="footer" class="background-bg0" style="border: none; margin: 0px; padding-top: 1rem; padding-bottom: 8rem;">
     <h2>Quizfreely</h2>
-    <p>Quizfreely is free and open source <br> Made by Ehan A & contributors</p>
+    <p style="max-width: 24rem; margin-left: auto; margin-right: auto;">
+        Quizfreely is a free &amp; open source nonprofit project
+        made by Ehan A &amp; contributors
+    </p>
     <div class="flex center compact-gap">
       <a href="https://codeberg.org/quizfreely/quizfreely" class="button faint">
         <IconCodeberg />
@@ -21,7 +24,7 @@
           <a href="https://hcb.hackclub.com/donations/start/quizfreely" class="button alt love" style="margin-top: 0.6rem;">
             <HeartIcon></HeartIcon> Donate
           </a>
-    <div class="grid list" style="text-align: start; padding: 2rem; margin-top: 0px; margin-bottom: 0px;">
+    <div class="grid list" style="text-align: start; padding: 2rem; margin-top: 0px;">
       <div>
         <p class="fg0">About</p>
         <div class="flex col compact-gap" style="width:fit-content; margin-top: 0.6rem;">
@@ -51,13 +54,13 @@
       <!-- <p> -->
       <!--   v0.32.1 · <a href="https://codeberg.org/quizfreely/quizfreely/releases">Changelog (on Codeberg)</a> or <a href="https://github.com/quizfreely/quizfreely/releases">on GitHub</a> -->
       <!-- </p> -->
-      <p class="fg0">
+      <p class="fg0" style="font-size: 0.9rem;">
         © 2022-2025 Ehan Ahamed & contributors<br>
         Licensed under AGPL-3.0
       </p>
-      <p class="fg0">
-        Quizfreely is fiscally sponsored by The Hack Foundation, a 501(c)(3) nonprofit.<br>
-        EIN: 81-2908499
+      <p class="fg0" style="font-size: 0.9rem;">
+        Quizfreely is fiscally sponsored by The Hack Foundation,<br>
+        a 501(c)(3) nonprofit (EIN: 81-2908499)
       </p>
     </div>
 </footer>
