@@ -56,7 +56,8 @@
         Licensed under AGPL-3.0
       </p>
       <p class="fg0">
-        Quizfreely is fiscally sponsored by The Hack Foundation, a 501(c)(3) nonprofit.
+        Quizfreely is fiscally sponsored by The Hack Foundation, a 501(c)(3) nonprofit.<br>
+        EIN: 81-2908499
       </p>
     </div>
 </footer>
