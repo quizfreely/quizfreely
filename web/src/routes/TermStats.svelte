@@ -98,6 +98,7 @@
 
             `term` has already been populated during SSR (above, before onMount) */
             term.progress = (await db.termProgress.where("termId").equals(term.id).toArray())?.[0];
+            term.progressHistory = await db.termProgressHistory.where("termId").equals(term.id).toArray();
             term.topConfusionPairs = await idbApiLayer.getTopConfusionPairs(term.id)
             term.topReverseConfusionPairs = await idbApiLayer.getTopReverseConfusionPairs(term.id)
 
