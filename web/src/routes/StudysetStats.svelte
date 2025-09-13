@@ -2,7 +2,6 @@
     import { onMount } from "svelte";
     import Chart from 'chart.js/auto';
     import 'chartjs-adapter-luxon';
-    import { setEhuiChartColors } from "$lib/ehui-chartjs-colors.js";
     import { fancyTimestamp } from "$lib/fancyTimestamp";
     import db from "$lib/idb-api-layer/db.js";
     import idbApiLayer from "$lib/idb-api-layer/idb-api-layer.js";
