@@ -107,14 +107,14 @@ export default {
         return terms;
     },
     getTermById: async function (termId, resolveProps) {
-        let term = await db.terms.where("id").equals(termId).toArray()?.[0];
+        let term = (await db.terms.where("id").equals(termId).toArray())?.[0];
         if (term == null) {
             console.log("(idbApiLayer.getTermById) term not found")
             return term;
         }
 
         if (resolveProps?.progress) {
-            term.progress = await db.termProgress.where("termId").equals(termId).toArray()?.[0];
+            term.progress = (await db.termProgress.where("termId").equals(termId).toArray())?.[0];
         }
         if (resolveProps?.progressHistory) {
             term.progressHistory = await db.termProgressHistory.where("termId").equals(termId).toArray();
