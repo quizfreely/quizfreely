@@ -2,6 +2,7 @@
     import { onMount } from "svelte";
     import db from "$lib/idb-api-layer/db.js";
     import idbApiLayer from "$lib/idb-api-layer/idb-api-layer.js";
+    import averageAccuracy from "$lib/average-accuracy.js";
     import Chart from 'chart.js/auto';
     import 'chartjs-adapter-luxon';
     import { fancyTimestamp } from "$lib/fancyTimestamp";
@@ -228,25 +229,6 @@
             }
         );
     })
-
-    function averageAccuracy(tc, ti, dc, di) {
-        /* tc = termCorrect, ti = termIncorrect,
-        dc = defCorrect, di = defIncorrect */
-        let avg;
-        if (tc + ti > 0) {
-            avg = tc / (tc+ti);
-        }
-        if (dc + di > 0) {
-            if (avg == null) {
-                avg = dc / (dc+di);
-            } else {
-                avg = (avg + (
-                    dc / (dc+di)
-                )) / 2
-            }
-        }
-        return Math.floor(avg * 100);
-    }
 </script>
 <style>
     .chart-container {

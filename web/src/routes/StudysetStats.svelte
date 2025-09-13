@@ -5,6 +5,7 @@
     import { fancyTimestamp } from "$lib/fancyTimestamp";
     import db from "$lib/idb-api-layer/db.js";
     import idbApiLayer from "$lib/idb-api-layer/idb-api-layer.js";
+    import averageAccuracy from "$lib/average-accuracy.js";
     import BackIcon from "$lib/icons/BackArrow.svelte"
     import ForwardLongArrowIcon from "$lib/icons/ForwardRightArrowLong.svelte"
     import StatsIcon from "$lib/icons/ChartGraphLine.svelte"
@@ -217,50 +218,6 @@
     const COLLAPSED_TERMS_COUNT = 3;
     let showAllPracticeTests = $state(false);
     const COLLAPSED_PRACTICE_TESTS_COUNT = 3;
-
-
-    /* returns average term accuracy from term & def correct/incorrect counts.
-
-    averages defined values and leaves out undefined values,
-    but it will return NaN if both term & def counts are null,
-    so call it if at least one of them is defined
-    (only call it if term.progress is populated)
-    for example, somewhere below we have this condition before calling averageAccuracy
-    ```svelte
-    {#if term.progress && (
-        term.progress.termCorrectCount > 0 ||
-        term.progress.termIncorrectCount > 0 ||
-        term.progress.defCorrectCount > 0 ||
-        term.progress.defIncorrectCount > 0
-    )}
-        <!-- ... -->
-        {averageAccuracy(
-            term.progress.termCorrectCount,
-            term.progress.termIncorrectCount,
-            term.progress.defCorrectCount,
-            term.progress.defIncorrectCount
-        )}%
-        <!-- ... -->
-    {/if}
-    */
-    function averageAccuracy(tc, ti, dc, di) {
-        /* tc = termCorrect, ti = termIncorrect,
-        dc = defCorrect, di = defIncorrect */
-        let avg;
-        if (tc + ti > 0) {
-            avg = tc / (tc+ti);
-        }
-        if (dc + di > 0) {
-            if (avg == null) {
-                avg = dc / (dc+di);
-            } else {
-                avg = (avg + (
-                    dc / (dc+di)
-                )) / 2
-            }
-        }
-        return Math.floor(avg * 100);
-    }
 </script>
 <style>
     .gridfourpartthingrow {
