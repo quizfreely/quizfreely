@@ -83,7 +83,7 @@
   <div class="wave-bottom extra-bg"></div>
   <div class="grid page">
     <div class="content">
-      <div>
+      <div style="margin-bottom: 2rem;">
         <h2 class="h3">Quizfreely is <span class="love">nonprofit</span></h2>
         <p>
             Quizfreely is a nonprofit project with <a href="https://hcb.hackclub.com/quizfreely" class="link-love">transparent finances</a>.<br>
@@ -96,8 +96,6 @@
           </a>
         </div>
       </div>
-            <br>
-            <br>
       {#if data?.featuredRows && data.featuredRows.length >= 1 }
       <h2 class="h3">Find flashcard sets & study guides</h2>
       <p>
