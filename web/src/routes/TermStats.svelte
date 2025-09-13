@@ -79,6 +79,7 @@
         if (data.local) {
             term = await idbApiLayer.getTermById(data.localTermId, {
                 progress: true,
+                progressHistory: true,
                 topConfusionPairs: {
                     confusedTerm: true
                 },
