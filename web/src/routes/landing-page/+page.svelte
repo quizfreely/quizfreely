@@ -86,8 +86,8 @@
       <div style="margin-bottom: 2rem;">
         <h2 class="h3">Quizfreely is <span class="love">nonprofit</span></h2>
         <p>
-            Quizfreely is a nonprofit project with <a href="https://hcb.hackclub.com/quizfreely" class="link-love">transparent finances</a>.<br>
-            We're fiscally sponsored by <a class="link-love" href="https://the.hackfoundation.org">The Hack Foundation</a>, a <span style="white-space: nowrap;">501(c)(3)</span> nonprofit.
+            Quizfreely is a nonprofit project with <a href="https://hcb.hackclub.com/quizfreely" class="link-love with-underline">transparent finances</a>.<br>
+            We're fiscally sponsored by <a class="link-love with-underline" href="https://the.hackfoundation.org">The Hack Foundation</a>, a <span style="white-space: nowrap;">501(c)(3)</span> nonprofit.
         </p>
         <div class="flex">
           <a class="button large love" href="https://hcb.hackclub.com/donations/start/quizfreely">
