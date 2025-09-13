@@ -37,7 +37,7 @@
                 }
             )
         })
-        topConfusionPairsUniqueArray = topConfusionPairsUnique.values();
+        topConfusionPairsUniqueArray = [...topConfusionPairsUnique.values()];
 
         term?.topReverseConfusionPairs?.forEach(pair => {
             let obj = {
@@ -57,7 +57,7 @@
                 }
             )
         })
-        topConfusionPairsUniqueArray = topConfusionPairsUnique.values();
+        topReverseConfusionPairsUniqueArray = [...topReverseConfusionPairsUnique.values()];
     }
 
     if (!data.local) {
@@ -77,6 +77,7 @@
         }
 
         if (data.local) {
+            console.log(data.localTermId)
             term = await idbApiLayer.getTermById(data.localTermId, {
                 progress: true,
                 topConfusionPairs: {
@@ -285,7 +286,7 @@
     <div class="content">
         <div class="flex">
             <a class="button faint" href={data.local ?
-                `/studyset/local/stats?id=${data.localId}` :
+                `/studyset/local/stats?id=${data.localStudysetId}` :
                 `/studysets/${data.studysetId}/stats`
             }>
                 <BackIcon></BackIcon>
@@ -305,7 +306,7 @@
                 <p class="shy-h3" style="margin-top: 0px;">{term?.def}</p>
             </div>
         </div>
-        {#if term.progress && (
+        {#if term?.progress && (
             term.progress.termCorrectCount > 0 ||
             term.progress.termIncorrectCount > 0 ||
             term.progress.defCorrectCount > 0 ||
