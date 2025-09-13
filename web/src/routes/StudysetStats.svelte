@@ -91,8 +91,6 @@
             })
             terms = studyset.terms;
             practiceTests = studyset?.practiceTests;
-            console.log(terms)
-console.log((await db.terms.toArray()).map(t => [t.id, t]))
         }
 
         if (!data.authed && !data.local) {

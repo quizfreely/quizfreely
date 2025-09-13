@@ -77,7 +77,6 @@
         }
 
         if (data.local) {
-            console.log(data.localTermId)
             term = await idbApiLayer.getTermById(data.localTermId, {
                 progress: true,
                 topConfusionPairs: {
