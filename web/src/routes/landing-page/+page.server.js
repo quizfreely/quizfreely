@@ -19,47 +19,55 @@ export async function load({ cookies }) {
           username
           displayName
         }
-        featuredStudysets {
-          id
-          title
-          user {
-            id
-            displayName
-          }
-          termsCount
-          updatedAt
-        }
       }`
+      // query: `query {
+      //   authed
+      //   authedUser {
+      //     id
+      //     username
+      //     displayName
+      //   }
+      //   featuredStudysets {
+      //     id
+      //     title
+      //     user {
+      //       id
+      //       displayName
+      //     }
+      //     termsCount
+      //     updatedAt
+      //   }
+      // }`
     })
   })
   try {
   let responseJson = await response.json()
-      if (responseJson?.data?.featuredStudysets?.length >= 0) {
+      // if (responseJson?.data?.featuredStudysets?.length >= 0) {
+      //   return {
+      //     authed: responseJson?.data?.authed,
+      //     authedUser: responseJson?.data?.authedUser,
+      //     featuredRows: responseJson.data.featuredStudysets,
+      //     header: { activePage: "home" }
+      //   };
+      // } else {
         return {
           authed: responseJson?.data?.authed,
           authedUser: responseJson?.data?.authedUser,
-          featuredRows: responseJson.data.featuredStudysets,
-          header: { activePage: "home" }
-        };
-      } else {
-        return {
-          authed: responseJson?.data?.authed,
-          authedUser: responseJson?.data?.authedUser,
-          featuredRows: false,
+          // featuredRows: false,
       header: { activePage: "home" }
         }
-      }
+      // }
     } catch (err) {
       console.error("Error in landing-page/+page.server.js: ", err);
       return {
-        featuredRows: false,
+        // featuredRows: false,
       header: { activePage: "home" }
       }
     };
   } catch (err) {
     console.error("Error in landing-page/+page.server.js: ", err);
     return {
-      featuredRows: false,
+      // featuredRows: false,
       header: { activePage: "home" }
     }
   };
