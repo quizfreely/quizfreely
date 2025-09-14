@@ -34,7 +34,7 @@
         Data Quizfreely collects is stored to let users view/interact with their content or usage statistics. ONLY public content that users post on quizfreely.org, ONLY including public flashcard sets or studysets, study guides, and comments are analyzed to evaluate and improve Quizfreely's website, software, marketing, or promotional campains.
       </p>
       <p class="nice-paragraph-size">
-        Quizfreely stores collected data in databases on servers controlled by Quizfreely. Quizfreely is the ONLY data controller responsible for users' data on quizfreely.org. There are NO third parties that process users' data on quizfreely.org.
+        Quizfreely stores collected data in databases controlled by Quizfreely. These databases are on servers controlled by Quizfreely through a third-party infrastructure provider. This third-party infrastructure provider does NOT process or access users' data. Quizfreely is the ONLY data controller responsible for users' data on quizfreely.org. There are NO third parties that process users' data on quizfreely.org.
       </p>
       <p class="nice-paragraph-size">
         Quizfreely does NOT disclose, share, or sell any data to any third party.
