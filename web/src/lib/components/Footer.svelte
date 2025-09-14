@@ -8,7 +8,7 @@
 <footer id="footer" class="background-bg0" style="border: none; margin: 0px; padding-top: 1rem; padding-bottom: 8rem;">
     <h2>Quizfreely</h2>
     <p style="max-width: 24rem; margin-left: auto; margin-right: auto;">
-        Quizfreely is a free &amp; open source nonprofit project
+        Quizfreely is a free and open source nonprofit project
         made by Ehan A &amp; contributors
     </p>
     <div class="flex center compact-gap">
@@ -55,7 +55,7 @@
       <!--   v0.32.1 · <a href="https://codeberg.org/quizfreely/quizfreely/releases">Changelog (on Codeberg)</a> or <a href="https://github.com/quizfreely/quizfreely/releases">on GitHub</a> -->
       <!-- </p> -->
       <p class="fg0" style="font-size: 0.9rem;">
-        © 2022-2025 Ehan Ahamed & contributors<br>
+        © 2022-2025 Ehan Ahamed and contributors<br>
         Licensed under AGPL-3.0
       </p>
       <p class="fg0" style="font-size: 0.9rem;">
