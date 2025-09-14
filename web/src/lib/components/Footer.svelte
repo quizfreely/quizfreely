@@ -20,11 +20,11 @@
         <IconGitHub />
         GitHub
       </a>
+      <a href="https://hcb.hackclub.com/donations/start/quizfreely" class="button alt love" style="margin-left: 0.2rem;">
+        <HeartIcon></HeartIcon> Donate
+      </a>
     </div>
-          <a href="https://hcb.hackclub.com/donations/start/quizfreely" class="button alt love" style="margin-top: 0.6rem;">
-            <HeartIcon></HeartIcon> Donate
-          </a>
-    <div class="grid list" style="text-align: start; padding: 2rem; margin-top: 0px;">
+    <div class="grid list" style="text-align: start; padding: 2rem; margin-top: 2rem;">
       <div>
         <p class="fg0">About</p>
         <div class="flex col compact-gap" style="width:fit-content; margin-top: 0.6rem;">
