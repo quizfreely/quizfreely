@@ -11,7 +11,7 @@
   <div class="grid page">
     <div class="content">
       <h2>Privacy Policy</h2>
-      <p class="fg0">Updated 13 September 2025 (2025-09-13)</p>
+      <p class="fg0">Updated 14 September 2025 (2025-09-14)</p>
       <p class="nice-paragraph-size">
         This privacy policy describes how data is collected and used when users use Quizfreely's website, quizfreely.org.
       </p>
