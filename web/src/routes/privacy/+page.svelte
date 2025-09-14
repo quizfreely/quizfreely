@@ -25,7 +25,7 @@
       </p>
       <p class="nice-paragraph-size">
         When users with an account create flashcard sets, called studysets, or comments on quizfreely.org, Quizfreely collects the content of users' posts. If users choose to post content publicly, Quizfreely displays their content to other users on quizfreely.org.
-        When users with an account take practice tests or complete review lessons, called review mode, Quizfreely collects the questions, possible answers, selected answers, accuracy, date and time, and time spent answering each question and displays these statistics to the user. These practice test and review mode statistics are NOT shared with other users.
+        When users with an account take practice tests or complete review lessons, called review mode, Quizfreely collects the questions, possible answers, selected answers, accuracy, date and time, and time spent answering each question ("usage statistics" or "statistics") and displays these statistics to the user. These usage statistics are NOT shared with other users or any third party.
       </p>
       <p class="nice-paragraph-size">
         Quizfreely uses cookies, small files that a website stores on a user's device, ONLY to remember users' login details or settings that users choose. quizfreely.org does NOT use cookies for tracking browsing behavior or targeted advertising. quizfreely.org does NOT use any third-party cookies, cross-site cookies, or trackers.
