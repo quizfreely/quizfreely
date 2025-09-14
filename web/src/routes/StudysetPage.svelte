@@ -3,7 +3,7 @@
     import { onMount } from "svelte";
     import idbApiLayer from "$lib/idb-api-layer/idb-api-layer.js";
     import { goto } from "$app/navigation";
-    import { fade, slide } from "svelte/transition";
+    import { fade } from "svelte/transition";
     let { data } = $props();
 
     import IconLocal from "$lib/icons/Local.svelte";
@@ -238,7 +238,7 @@
     {/if}
       <div id="flashcards-outer-div">
         {#if flashcardsMaximized}
-        <div class="flex" transition:slide={{ duration: 400 }}>
+        <div class="flex">
             <button id="flashcards-unmaximize" class="faint" onclick={unmaximizeFlashcards}>
                 <IconBackArrow /> Back
             </button>
