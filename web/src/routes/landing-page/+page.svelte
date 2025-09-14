@@ -1,6 +1,8 @@
 <script>
     let { data } = $props();
     import HeartIcon from "$lib/icons/Heart.svelte";
+    import IconCodeberg from "$lib/icons/Codeberg.svelte";
+    import IconGitHub from "$lib/icons/GitHub.svelte";
 </script>
 
 <svelte:head>
@@ -83,7 +85,7 @@
   <div class="wave-bottom extra-bg"></div>
   <div class="grid page">
     <div class="content">
-      <div style="margin-bottom: 2rem;">
+      <div>
         <h2 class="h3">Quizfreely is <span class="love">nonprofit</span></h2>
         <p>
             Quizfreely is a nonprofit project with <a href="https://hcb.hackclub.com/quizfreely" class="link-love with-underline">transparent finances</a>.<br>
@@ -96,40 +98,56 @@
           </a>
         </div>
       </div>
-      {#if data?.featuredRows && data.featuredRows.length >= 1 }
-      <h2 class="h3">Find flashcard sets & study guides</h2>
-      <p>
-        Quizfreely has <span class="s">hundreds of</span> <span class="fg0 i">a few</span> sets made by teachers & students.<br />
-        <a href="/explore">Explore more studysets</a>
-      </p>
-      <div class="grid list" style="overflow-wrap:anywhere">
-        {#each data.featuredRows as featuredStudyset }
-          <div class="box">
-            <a href={"/studysets/" + featuredStudyset.id}>
-              { featuredStudyset.title }
-            </a>
-            <p class="h6" style="margin-top:0.4rem;margin-bottom:0px">
-              { featuredStudyset.user.displayName }
-            </p>
-            {#if featuredStudyset.termsCount >= 1}
-            <p class="h6" style="margin-top:0.2rem;margin-bottom:0.2rem">
-              { featuredStudyset.termsCount } Terms
-            </p>
-            {/if}
-          </div>
-        {/each}
+      <div style="margin-top: 4rem;">
+        <h2 class="h3">Fully open source</h2>
+        <p style="max-width: 40rem;">
+            Quizfreely is released under the AGPL-3.0 license. Our frontend web app, backend API, and all of our software are all open source on Codeberg and GitHub.
+        </p>
+        <div class="flex compact-gap">
+          <a class="button large faint" href="https://codeberg.org/quizfreely">
+            <IconCodeberg></IconCodeberg>
+            Codeberg
+          </a>
+          <a class="button large faint" href="https://codeberg.org/quizfreely">
+            <IconGitHub></IconGitHub>
+            GitHub
+          </a>
+        </div>
       </div>
-      {:else}
-      <h2 class="h3">Find flashcard sets & study guides</h2>
-      <p>Quizfreely has <span class="s">hundreds of</span> <span class="fg0 i">a few</span> sets made by teachers & students.</p>
-      <div class="flex">
-        <a href="/explore" class="button">
-          Explore
-        </a>
-      </div>
-      <br />
-      <br />
-      {/if}
+      <!-- {#if data?.featuredRows && data.featuredRows.length >= 1 } -->
+      <!-- <h2 class="h3">Find flashcard sets & study guides</h2> -->
+      <!-- <p> -->
+      <!--   Quizfreely has <span class="s">hundreds of</span> <span class="fg0 i">a few</span> sets made by teachers & students.<br /> -->
+      <!--   <a href="/explore">Explore more studysets</a> -->
+      <!-- </p> -->
+      <!-- <div class="grid list" style="overflow-wrap:anywhere"> -->
+      <!--   {#each data.featuredRows as featuredStudyset } -->
+      <!--     <div class="box"> -->
+      <!--       <a href={"/studysets/" + featuredStudyset.id}> -->
+      <!--         { featuredStudyset.title } -->
+      <!--       </a> -->
+      <!--       <p class="h6" style="margin-top:0.4rem;margin-bottom:0px"> -->
+      <!--         { featuredStudyset.user.displayName } -->
+      <!--       </p> -->
+      <!--       {#if featuredStudyset.termsCount >= 1} -->
+      <!--       <p class="h6" style="margin-top:0.2rem;margin-bottom:0.2rem"> -->
+      <!--         { featuredStudyset.termsCount } Terms -->
+      <!--       </p> -->
+      <!--       {/if} -->
+      <!--     </div> -->
+      <!--   {/each} -->
+      <!-- </div> -->
+      <!-- {:else} -->
+      <!-- <h2 class="h3">Find flashcard sets & study guides</h2> -->
+      <!-- <p>Quizfreely has <span class="s">hundreds of</span> <span class="fg0 i">a few</span> sets made by teachers & students.</p> -->
+      <!-- <div class="flex"> -->
+      <!--   <a href="/explore" class="button"> -->
+      <!--     Explore -->
+      <!--   </a> -->
+      <!-- </div> -->
+      <!-- <br /> -->
+      <!-- <br /> -->
+      <!-- {/if} -->
       <!--<div class="flex">
         <a href="/sign-up" class="button">
           Create account
