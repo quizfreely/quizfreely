@@ -11,6 +11,7 @@ jobs:
       - name: npm run build
         run: |
           cd web
+          npm install
           npm run build
       - name: Set up SSH
         run: |
