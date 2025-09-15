@@ -580,6 +580,7 @@ FRQs: ${numFRQsToAssign}`
         recordedPracticeTestId = data.practiceTestId;
     }
     let submitted = $state(data?.alreadyOver);
+    let submitting = false;
 </script>
 <style>
     .gridfourpartthingrow {
@@ -765,6 +766,14 @@ FRQs: ${numFRQsToAssign}`
             {:else}
             <div class="flex" transition:slide={{ duration: 400 }}>
                 <button class="yay" onclick={async () => {
+                    if (submitting) {
+                        return;
+                    }
+                    submitting = true;
+                    setTimeout(() => {
+                        submitting = false;
+                    }, 2000);
+
                     questionsViewOnly = true;
                     questionsShowAccuracy = true;
                     takingActualPracticeTest = false;
