@@ -13,7 +13,7 @@
       <h2>Privacy Policy</h2>
       <p class="fg0">Updated 15 September 2025 (2025-09-15)</p>
       <p class="nice-paragraph-size">
-        Quizfreely is an open source project. This Privacy Policy describes how data is collected and used when users use Quizfreely's website, quizfreely.org.
+        Quizfreely is an open source project. This Privacy Policy describes how data is collected, used, and stored and how users can manage their data when they use Quizfreely's website, quizfreely.org.
       </p>
       <p class="nice-paragraph-size">
         Quizfreely ONLY collects data from users when they use quizfreely.org with an account.
@@ -39,6 +39,9 @@
       </p>
       <p class="nice-paragraph-size">
         There are NO advertisements on quizfreely.org.
+      </p>
+      <p class="nice-paragraph-size">
+        Users can choose to delete their data through Quizfreely's website. Users can also contact <a href="mailto:privacy@quizfreely.org">privacy@quizfreely.org</a> about their data or about this Privacy Policy.
       </p>
     </div>
   </div>
