@@ -38,19 +38,15 @@
 }
 .auto-resize-textarea-div > textarea {
     resize: none;
-    overflow-y: hidden; /* hide vertical scrollbar */
-    /* horizontal scrollbar set to auto hide/show (below) */
 }
 .auto-resize-textarea-div > textarea,
 .auto-resize-textarea-div::after {
     /* overlap elements to get same height */
     grid-area: 1 / 1 / 2 / 2;
-    white-space: pre;
+    white-space: pre-wrap;
 
-    overflow-x: auto; /* horizontal scrollbar
-    we added it for BOTH textarea and ::after
-    so the scrollbar height is also added
-    to the invisible element's height calculations */
+    overflow-y: hidden;
+    overflow-x: hidden;
 
     /* same styling as normal textarea to get same height */
     box-sizing: border-box;
@@ -62,6 +58,7 @@
     font-size: 1rem;
     line-height: 1.4;
     transition-duration: 0.4s;
+    border: 0.2rem solid var(--border); /* even tiny things like borders effects the size especially with line wrapping, so these properties are also styled the same for the real textarea and the fake overlapped element */
 }
 </style>
 
@@ -69,8 +66,3 @@
 <div {...div} class={["auto-resize-textarea-div", div?.class ?? ""]} data-autoresizetextvalue={value}>
     <textarea bind:value={value} {...textarea} ></textarea>
 </div>
-
-<!--
-    this is such a hacky solution 💀
-    but it works really nicely
--->
