@@ -65,20 +65,16 @@
   <div class="grid page extra">
     <div class="content">
       <div>
-        <h2 class="h3">It's <span class="extra">free</span> and <span class="extra">open source</span></h2>
-        <p style="max-width: 36rem;">
-          Quizfreely is made by volunteers and contributors.
-          Quizfreely is not owned by any company or buisness.
-          You can see our source code and contribute on Codeberg or GitHub.
+        <h2 class="h3">It's <span class="extra">actually free</span></h2>
+        <p style="max-width: 40rem;">
+            Quizfreely has unlimited practice tests for free, unlike other flashcard websites or studying apps. Quizfreely is open source and nonprofit, and there are no paid features or subscriptions.
         </p>
-        <div class="flex">
-          <a class="button extra" href="https://codeberg.org/quizfreely/quizfreely">
-            Codeberg
-          </a>
-          <a class="button extra alt" href="https://github.com/quizfreely/quizfreely">
-            GitHub
-          </a>
-        </div>
+      </div>
+      <div style="margin-top: 4rem;">
+        <h2 class="h3" style="max-width: 40rem;"><span class="extra">Advanced features</span> to measure &amp; improve your studying habits</h2>
+        <p style="max-width: 40rem;">
+            Quizfreely records individual terms' &amp; flashcards' progress &amp; accuracy. It calculates frequently confused terms or definitions and finds which incorrect answer choices are selected the most. Also, there's cool graphs and charts and stuff.
+        </p>
       </div>
     </div>
   </div>
@@ -100,15 +96,15 @@
       </div>
       <div style="margin-top: 4rem;">
         <h2 class="h3">Fully open source</h2>
-        <p style="max-width: 40rem;">
-            Quizfreely is released under the AGPL-3.0 license. Our frontend web app, backend API, and all of our software are all open source on Codeberg and GitHub.
+        <p style="max-width: 36rem;">
+            Quizfreely is released under the AGPL-3.0 license. Our frontend web app, backend API, <a href="https://quizfreely.org/docs" class="with-underline">documentation</a>, and all of our software are all open source on Codeberg and GitHub.
         </p>
         <div class="flex compact-gap">
           <a class="button large faint" href="https://codeberg.org/quizfreely">
             <IconCodeberg></IconCodeberg>
             Codeberg
           </a>
-          <a class="button large faint" href="https://codeberg.org/quizfreely">
+          <a class="button large faint" href="https://github.com/quizfreely">
             <IconGitHub></IconGitHub>
             GitHub
           </a>
