@@ -204,7 +204,7 @@ export default {
             termCorrectIncrease, termIncorrectIncrease,
             defCorrectIncrease, defIncorrectIncrease
         } of termProgressArray) {
-            const existingProgress = await db.termProgress.where("termId").equals(termId);
+            const existingProgress = await db.termProgress.where("termId").equals(termId).toArray();
             if (existingProgress?.length > 0) {
                 const termCorrectCount = (existingProgress[0].termCorrectCount) + (termCorrectIncrease ?? 0);
                 const termIncorrectCount = (existingProgress[0].termIncorrectCount) + (termIncorrectIncrease ?? 0);
