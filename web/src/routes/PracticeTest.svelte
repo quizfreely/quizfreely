@@ -34,7 +34,7 @@
     }
 
     if (!data.local && !data.alreadyOver) {
-        console.log(data.studyset)
+        // console.log(data.studyset)
         terms = data?.studyset?.terms;
         practiceTests = data?.studyset?.practiceTests;
     }
