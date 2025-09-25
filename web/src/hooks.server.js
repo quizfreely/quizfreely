@@ -1,5 +1,5 @@
 import themesList from "$lib/themes";
-import { env } from "$env/dynamic/private";
+import { env } from "$env/dynamic/public";
 
 export function init() {
     if (env.PORT == null || env.API_URL == null) {

@@ -1,4 +1,4 @@
-import { env } from "$env/dynamic/private";
+import { env } from "$env/dynamic/public";
 import themes from '$lib/themes.js';
 import { redirect, error } from "@sveltejs/kit";
 

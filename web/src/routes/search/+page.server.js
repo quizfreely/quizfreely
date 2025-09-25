@@ -1,4 +1,4 @@
-import { env } from '$env/dynamic/private';
+import { env } from '$env/dynamic/public';
 import { error } from '@sveltejs/kit';
 import fetchAuthData from '$lib/fetchAuthData.server';
 

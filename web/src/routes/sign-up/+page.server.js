@@ -1,5 +1,5 @@
 import fetchAuthData from "$lib/fetchAuthData.server";
-import { env } from "$env/dynamic/private";
+import { env } from "$env/dynamic/public";
 
 export async function load({ cookies }) {
     return {

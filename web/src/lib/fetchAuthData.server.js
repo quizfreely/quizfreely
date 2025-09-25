@@ -1,4 +1,4 @@
-import { env } from "$env/dynamic/private";
+import { env } from "$env/dynamic/public";
 
 export default async function ({ cookies }) {
   let authed = false;
