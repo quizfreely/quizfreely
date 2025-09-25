@@ -1,9 +1,21 @@
 quizfreely.org {
         encode zstd gzip
         reverse_proxy localhost:8080
+
+        header /immutable/* Cache-Control "public, max-age=31536000, immutable"
+
         handle_path /api/* {
-                reverse_proxy localhost:8008
+            reverse_proxy localhost:8008
         }
+        handle_path /realtime/* {
+            reverse_proxy localhost:8000
+        }
+
+        handle_path /docs* {
+            root * /srv/quizfreely-docs/www
+            file_server
+        }
+
         redir /discord https://discord.gg/6qQrybf6kG
 }
 www.quizfreely.org, quizfreely.com, www.quizfreely.com {
