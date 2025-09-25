@@ -13,14 +13,14 @@ jobs:
       - name: Copy compiled CSS
         run: |
           DATEYMD=$(date +%F)
-          rm quizfreely/web/static/css/ehui-*.min.css
-          rm quizfreely/web/static/themes/{auto,light,dark}-*.min.css
-          mkdir -p quizfreely/web/static/css/
-          mkdir -p quizfreely/web/static/themes/
-          cp ehui/site/css/ehui.min.css "quizfreely/web/static/css/ehui-$DATEYMD.min.css"
-          cp ehui/site/themes/auto-light-dark.min.css "quizfreely/web/static/themes/auto-$DATEYMD.min.css"
-          cp ehui/site/themes/light.min.css "quizfreely/web/static/themes/light-$DATEYMD.min.css"
-          cp ehui/site/themes/dark.min.css "quizfreely/web/static/themes/dark-$DATEYMD.min.css"
+          rm quizfreely/web/static/immutable/css/ehui-*.min.css
+          rm quizfreely/web/static/immutable/themes/{auto,light,dark}-*.min.css
+          mkdir -p quizfreely/web/static/immutable/css/
+          mkdir -p quizfreely/web/static/immutable/themes/
+          cp ehui/site/css/ehui.min.css "quizfreely/web/static/immutable/css/ehui-$DATEYMD.min.css"
+          cp ehui/site/themes/auto-light-dark.min.css "quizfreely/web/static/immutable/themes/auto-$DATEYMD.min.css"
+          cp ehui/site/themes/light.min.css "quizfreely/web/static/immutable/themes/light-$DATEYMD.min.css"
+          cp ehui/site/themes/dark.min.css "quizfreely/web/static/immutable/themes/dark-$DATEYMD.min.css"
           sed -E -i \
             -e "s/ehui-[0-9]{4}-[0-9]{2}-[0-9]{2}.min.css/ehui-$DATEYMD.min.css/g" \
             -e "s/%theme%-[0-9]{4}-[0-9]{2}-[0-9]{2}.min.css/%theme%-$DATEYMD.min.css/g" \
