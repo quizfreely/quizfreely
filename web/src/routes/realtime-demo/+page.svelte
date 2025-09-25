@@ -1,5 +1,6 @@
 <script>
     import { onMount } from "svelte";
+    import { env } from "$env/dynamic/public";
     let gameCode = "";
     onMount(() => {
         let uniqueName;
@@ -13,7 +14,7 @@
         document.getElementById("connectBtn").onclick = () => {
           uniqueName = document.getElementById("uniqueName").value.trim();
 
-          ws = new WebSocket("ws://localhost:8000/ws");
+          ws = new WebSocket(env.REALTIME_SERVER_WS_URL);
 
           ws.onopen = () => {
             log("Connected to server");
