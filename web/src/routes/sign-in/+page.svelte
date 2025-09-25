@@ -1,5 +1,7 @@
 <script>
+    import { env } from "$env/dynamic/public";
     import Noscript from "$lib/components/Noscript.svelte";
+
     import { onMount } from "svelte";
     import { goto } from "$app/navigation";
     let {data} = $props();
@@ -159,7 +161,7 @@
           </div>
           <div class="separator">or</div>
           <div>
-            {#if data.enableOAuthGoogle}
+            {#if env.ENABLE_OAUTH_GOOGLE == "true"}
             <a class="button fullWidth gaccount-button" href="/api/oauth/google">
               <div class="gaccount-container">
                 <div class="gaccount-icon">
