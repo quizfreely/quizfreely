@@ -15,13 +15,20 @@ export default defineConfig({
 					return path.replace(/^\/api/, "");
 				}
 			},
-			"/classes/api/": {
-				target: process?.env?.CLASSES_API_URL ?? "http://localhost:3000",
+			"/realtime/": {
+				target: process?.env?.REALTIME_SERVER_URL ?? "http://localhost:8000",
 				changeOrigin: true,
 				rewrite: function (path) {
-					return path.replace(/^\/classes\/api/, "");
+					return path.replace(/^\/realtime/, "");
 				}
-			}
+			},
+			// "/classes/api/": {
+			// 	target: process?.env?.CLASSES_API_URL ?? "http://localhost:3000",
+			// 	changeOrigin: true,
+			// 	rewrite: function (path) {
+			// 		return path.replace(/^\/classes\/api/, "");
+			// 	}
+			// }
 		}
 	},
 	preview: {
@@ -34,13 +41,20 @@ export default defineConfig({
 					return path.replace(/^\/api/, "");
 				}
 			},
-			"/classes/api/": {
-				target: process?.env?.CLASSES_API_URL ?? "http://localhost:8008",
+			"/realtime/": {
+				target: process?.env?.REALTIME_SERVER_URL ?? "http://localhost:8000",
 				changeOrigin: true,
 				rewrite: function (path) {
-					return path.replace(/^\/classes\/api/, "");
+					return path.replace(/^\/realtime/, "");
 				}
-			}
+			},
+			// "/classes/api/": {
+			// 	target: process?.env?.CLASSES_API_URL ?? "http://localhost:8008",
+			// 	changeOrigin: true,
+			// 	rewrite: function (path) {
+			// 		return path.replace(/^\/classes\/api/, "");
+			// 	}
+			// }
 		}
 	}
 });
