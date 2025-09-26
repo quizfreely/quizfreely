@@ -22,7 +22,7 @@
             if (gameCode) {
               ws.send(JSON.stringify({ action: "join", code: gameCode, uniqueName }));
             } else {
-              ws.send(JSON.stringify({ action: "host" }));
+              ws.send(JSON.stringify({ action: "host", studyset: { apt: "aptaptapt", u: "uhuhuhuh"} }));
             }
           };
 
