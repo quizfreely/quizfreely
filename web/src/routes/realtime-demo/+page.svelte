@@ -14,7 +14,7 @@
         document.getElementById("connectBtn").onclick = () => {
           uniqueName = document.getElementById("uniqueName").value.trim();
 
-          ws = new WebSocket(env.REALTIME_SERVER_WS_URL);
+          ws = new WebSocket(env.REALTIME_SERVER_WS_URL+"/ws");
 
           ws.onopen = () => {
             log("Connected to server");
