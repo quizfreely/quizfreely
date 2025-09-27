@@ -4,6 +4,8 @@
     let gameCode = $state("");
     let uniqueName;
     let codeEntered = $state(false);
+    let inLobby = $state(false);
+    let inGame = $state(false);
     let showErrorMsg = $state(false)
     let errorMsg = $state("");
     let ws;
@@ -49,6 +51,12 @@
                     errorMsg = json.msg;
                     showErrorMsg = true;
                 }
+                if (json?.type == "joined" && json?.alreadyStarted) {
+                    alert("ohnogamealreadystarted")
+                    inGame = true;
+                } else if (json?.type == "joined") {
+                    inLobby = true;
+                }
             };
 
             ws.onclose = () => {
@@ -74,6 +82,7 @@
 <svelte:head>
     <title>Quizfreely</title>
 </svelte:head>
+{#if !inLobby && !inGame}
 <div style="display: grid; align-items: center; justify-items: center; height: 70vh;">
     <div class="box" style="padding: 2rem 2rem;">
         <h1 class="h3 center" style="margin-bottom: 0px;">Join Game</h1>
@@ -112,3 +121,6 @@
         {/if}
     </div>
 </div>
+{:else if inLobby}
+    lobby
+{/if}
