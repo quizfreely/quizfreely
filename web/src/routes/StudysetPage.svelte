@@ -2,7 +2,7 @@
     import Noscript from "$lib/components/Noscript.svelte";
     import { onMount } from "svelte";
     import idbApiLayer from "$lib/idb-api-layer/idb-api-layer.js";
-    import { goto } from "$app/navigation";
+    import { goto, beforeNavigate } from "$app/navigation";
     import { fade } from "svelte/transition";
     let { data } = $props();
 
@@ -168,6 +168,10 @@
         flashcardsMaximized = false;
         footerState.hideFooter = false;
     }
+
+    beforeNavigate(() => {
+        footerState.hideFooter = false;
+    })
 </script>
 
 <svelte:head>
