@@ -55,12 +55,14 @@
       <!--   v0.32.1 · <a href="https://codeberg.org/quizfreely/quizfreely/releases">Changelog (on Codeberg)</a> or <a href="https://github.com/quizfreely/quizfreely/releases">on GitHub</a> -->
       <!-- </p> -->
       <p class="fg0" style="font-size: 0.9rem;">
-        © 2022-2025 Ehan Ahamed and contributors<br>
+        © 2022-2025 Ehan Ahamed and contributors
+      </p>
+      <p class="fg0" style="font-size: 0.9rem; margin-top: 0px;">
         Licensed under AGPL-3.0
       </p>
       <p class="fg0" style="font-size: 0.9rem;">
-        <span class="optional-line">Quizfreely is fiscally sponsored by The Hack Foundation,</span>
-        <span class="optional-line">a 501(c)(3) nonprofit (EIN: 81-2908499)</span>
+        <span class="optional-line-500px">Quizfreely is fiscally sponsored by The Hack Foundation,</span>
+        <span class="optional-line-500px">a 501(c)(3) nonprofit (EIN: 81-2908499)</span>
       </p>
     </div>
 </footer>
