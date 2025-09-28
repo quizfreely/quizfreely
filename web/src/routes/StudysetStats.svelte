@@ -523,8 +523,9 @@
                     {/if}
                 {:else}
                     <div class="box center text fg0">
-                        (None)<br>
-                        Completed practice tests will show up here</div>
+                        (None)
+                        <span class="line">Completed practice tests will show up here</span>
+                    </div>
                 {/if}
             </div>
         </div>

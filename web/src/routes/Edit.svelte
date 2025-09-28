@@ -563,7 +563,10 @@
               </div>
               {:else}
               <div class="box">
-                <p class="fg0">No terms?<br>Tap "add term" to create one or use "import terms" to transfer them from somewhere else.</p>
+                <p class="fg0">
+                    No terms?
+                    <span class="line">Tap "add term" to create one or use "import terms" to transfer them from somewhere else.</span>
+                </p>
               </div>
               {/each}
             </div>
