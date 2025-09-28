@@ -113,8 +113,8 @@
       <!-- {#if data?.featuredRows && data.featuredRows.length >= 1 } -->
       <!-- <h2 class="h3">Find flashcard sets & study guides</h2> -->
       <!-- <p> -->
-      <!--   Quizfreely has <span class="s">hundreds of</span> <span class="fg0 i">a few</span> sets made by teachers & students.<br /> -->
-      <!--   <a href="/explore">Explore more studysets</a> -->
+      <!--   Quizfreely has <span class="s">hundreds of</span> <span class="fg0 i">a few</span> sets made by teachers & students. -->
+      <!--   <span class="line"><a href="/explore">Explore more studysets</a></span> -->
       <!-- </p> -->
       <!-- <div class="grid list" style="overflow-wrap:anywhere"> -->
       <!--   {#each data.featuredRows as featuredStudyset } -->
@@ -136,13 +136,11 @@
       <!-- {:else} -->
       <!-- <h2 class="h3">Find flashcard sets & study guides</h2> -->
       <!-- <p>Quizfreely has <span class="s">hundreds of</span> <span class="fg0 i">a few</span> sets made by teachers & students.</p> -->
-      <!-- <div class="flex"> -->
+      <!-- <div class="flex" style="margin-bottom: 2rem;"> -->
       <!--   <a href="/explore" class="button"> -->
       <!--     Explore -->
       <!--   </a> -->
       <!-- </div> -->
-      <!-- <br /> -->
-      <!-- <br /> -->
       <!-- {/if} -->
       <!--<div class="flex">
         <a href="/sign-up" class="button">
