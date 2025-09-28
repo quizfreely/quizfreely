@@ -1,6 +1,7 @@
 <script>
     import { env } from "$env/dynamic/public";
     import { scale } from "svelte/transition";
+    import Lobby from "$lib/multiplayer/Lobby.svelte";
     let gameCode = $state("");
     let uniqueName;
     let codeEntered = $state(false);
@@ -9,6 +10,7 @@
     let showErrorMsg = $state(false)
     let errorMsg = $state("");
     let ws;
+    let players = [];
     async function joinButton() {
         showErrorMsg = false;
         if (!codeEntered) {
@@ -52,10 +54,14 @@
                     showErrorMsg = true;
                 }
                 if (json?.type == "joined" && json?.alreadyStarted) {
+                    players = json?.players;
                     alert("ohnogamealreadystarted")
                     inGame = true;
                 } else if (json?.type == "joined") {
+                    players = json?.players;
                     inLobby = true;
+                } else if (json?.type == "player_joined") {
+                    players.push(json?.player);
                 }
             };
 
@@ -113,7 +119,7 @@
         }}>
         </div>
         {/if}
-        <button class="large yay" style="width: 100%;" onclick={joinButton}>Join</button>
+        <button class="large" style="width: 100%;" onclick={joinButton}>Join</button>
         {#if showErrorMsg}
         <p class="ohno center" style="max-width: 16rem; white-space: pre-wrap;" transition:scale={{ duration: 200 }}>
             {errorMsg}
@@ -122,5 +128,5 @@
     </div>
 </div>
 {:else if inLobby}
-    lobby
+    <Lobby {ws} {players} {gameCode}></Lobby>
 {/if}

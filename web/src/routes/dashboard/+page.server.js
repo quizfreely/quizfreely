@@ -83,6 +83,7 @@ export async function load({ cookies, locals }) {
     let apiRes = await rawApiRes.json();
         if (apiRes?.data?.authed) {
             return {
+              dashboardPage: "dashboard",
               authed: apiRes.data.authed,
               authedUser: apiRes.data.authedUser,
               studysetList: apiRes.data.myStudysets,
@@ -93,6 +94,7 @@ export async function load({ cookies, locals }) {
             }
         } else {
           return {
+              dashboardPage: "dashboard",
             authed: false,
       header: { activePage: "home" },
               settingsDateTimeFormatHours: cookies.get(
@@ -104,6 +106,7 @@ export async function load({ cookies, locals }) {
         //request.log.error(error);
         //reply.send("work in progress error message error during api response json parse")
         return {
+              dashboardPage: "dashboard",
           authed: false,
       header: { activePage: "home" },
               settingsDateTimeFormatHours: cookies.get(
@@ -116,6 +119,7 @@ export async function load({ cookies, locals }) {
       //reply.send("work in progress error message error during api graphql fetch")
       // in addition to an error message, our dashboard.html view should still be sent so that stuff like local studysets are still usable
       return {
+              dashboardPage: "dashboard",
         authed: false,
       header: { activePage: "home" },
               settingsDateTimeFormatHours: cookies.get(
@@ -125,6 +129,7 @@ export async function load({ cookies, locals }) {
     }
   } else {
     return {
+              dashboardPage: "dashboard",
       authed: false,
       header: { activePage: "home" },
               settingsDateTimeFormatHours: cookies.get(

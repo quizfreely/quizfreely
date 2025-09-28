@@ -9,6 +9,7 @@ import { beforeNavigate, afterNavigate } from "$app/navigation";
 import { nprogressTimeout, cancelNprogressTimeout } from "$lib/stores/nprogressTimeout.js";
 import { get } from "svelte/store";
 import { footerState } from '$lib/components/footer.svelte.js';
+import { page } from '$app/state';
 let { children, data } = $props();
 
 NProgress.configure({
@@ -31,7 +32,9 @@ afterNavigate(function () {
 })
 </script>
 
+{#if !page?.data?.header?.hideHeader}
 <Header />
+{/if}
 {#key data.transPageKey}
 <div in:fade={{ duration: 120, delay: 120, easing: sineIn }} out:fade={{ duration: 120, easing: sineOut }}>
     <div style="min-height: 70vh">

@@ -64,9 +64,6 @@
 </svelte:head>
 
 <Noscript />
-<main>
-  <div class="grid page">
-    <div class="content">
       <div id="mainDashboarddiv">
         {#if !data.authed}
           <p id="dashboard-noaccount-alert" class="fg0">
@@ -146,6 +143,3 @@
           </div>
         </div>
       </div>
-    </div>
-  </div>
-</main>
