@@ -56,9 +56,7 @@
       <!-- </p> -->
       <p class="fg0" style="font-size: 0.9rem;">
         © 2022-2025 Ehan Ahamed and contributors
-      </p>
-      <p class="fg0" style="font-size: 0.9rem; margin-top: 0px;">
-        Licensed under AGPL-3.0
+        <span class="line">Licensed under AGPL-3.0</span>
       </p>
       <p class="fg0" style="font-size: 0.9rem;">
         <span class="optional-line-500px">Quizfreely is fiscally sponsored by The Hack Foundation,</span>
