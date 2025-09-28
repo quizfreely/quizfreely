@@ -63,28 +63,3 @@
     </a>
   </div>
 </div>
-<!--<h3>Data & Privacy</h3>
-<div class="box">
-  <p>Some settings are stored as cookies.<br />
-  Quizfreely does not use third-party cookies or trackers.<br />
-  Clearing cookies will reset some settings and sign you out.</p>
-  <a href="/settings/clear-cookies" class="button ohno">Clear cookies</a>
-  <p>
-    ~~Local data~~ and some settings are saved using localStorage.<br/>
-    Clearing localStorage will delete local/on-device studysets and will sign out of your account.
-  </p>
-  <button class="ohno">Clear localStorage</button>
-</div>
-<div class="modal hide">
-  <div class="content">
-    <p></p>
-  </div>
-</div>-->
-<!--<script>
-  
-</script>
-{#if data.authed}
-<script>
-  
-</script>
-{/if}-->
