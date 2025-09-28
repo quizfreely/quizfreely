@@ -163,6 +163,11 @@
     function maximizeFlashcards() {
         flashcardsMaximized = true;
         footerState.hideFooter = true;
+
+        fetch("/dashboard/set-dashboard-state", {
+            method: "POST",
+            credentials: "include"
+        });
     }
     function unmaximizeFlashcards() {
         flashcardsMaximized = false;

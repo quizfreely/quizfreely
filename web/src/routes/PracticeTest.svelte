@@ -527,6 +527,11 @@ FRQs: ${numFRQsToAssign}`
         takingActualPracticeTest = true;
         
         console.log([...questions])
+
+        fetch("/dashboard/set-dashboard-state", {
+            method: "POST",
+            credentials: "include"
+        });
     }
 
     var showExitConfirmationModal = $state(false);
