@@ -473,23 +473,6 @@
     <main>
       <div class="grid page" style="min-height: 80vh;">
         <div class="content">
-            <div id="mainEditStudySetIsCopy" class="modal hide">
-              <div class="content">
-                <h2>¯\_(ツ)_/¯</h2>
-                <p>
-                  A study set with this name already exists in your account.
-                  <br />
-                  You can update/overwrite the existing copy or go back and
-                  rename this copy.
-                </p>
-                <div class="flex">
-                  <button id="mainEditStudySetIsCopyUpdate">
-                    Update existing
-                  </button>
-                  <button id="mainEditStudySetIsCopyBack">Go back</button>
-                </div>
-              </div>
-            </div>
             <div>
               <a class="button faint" data-sveltekit-preload-data="false" href={ 
                 data.new ?
