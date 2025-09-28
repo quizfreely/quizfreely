@@ -2,6 +2,7 @@
     import { env } from "$env/dynamic/public";
     import { scale } from "svelte/transition";
     import Lobby from "$lib/multiplayer/Lobby.svelte";
+    let { data } = $props()
     let gameCode = $state("");
     let uniqueName;
     let codeEntered = $state(false);
@@ -11,6 +12,12 @@
     let errorMsg = $state("");
     let ws;
     let players = [];
+
+    if (data?.prefilledCode?.length > 0) {
+        gameCode = data.prefilledCode.substring(0,4)+" "+data.prefilledCode.substring(4);
+        codeEntered = true;
+    }
+
     async function joinButton() {
         showErrorMsg = false;
         if (!codeEntered) {
