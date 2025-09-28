@@ -69,6 +69,11 @@
                     inLobby = true;
                 } else if (json?.type == "player_joined") {
                     players.push(json?.player);
+                } else if (json?.type == "player_left") {
+                    players.splice(
+                        players.indexOf(json?.player),
+                        1
+                    );
                 }
             };
 
