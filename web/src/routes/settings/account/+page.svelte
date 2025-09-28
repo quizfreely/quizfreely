@@ -122,8 +122,8 @@
 <div id="account-signedin-div" class="box">
   <div class="flex compact-gap align-end" id="display-name-view-div">
     <p>
-      <span class="h6">Display name:</span><br />
-      <span id="account-display-name">{ data.authedUser.displayName }</span>
+      <span class="h6">Display name:</span>
+      <span class="line" id="account-display-name">{ data.authedUser.displayName }</span>
     </p>
     <button class="icon-only-button" id="display-name-edit-button" aria-label="Edit"><IconPencil /></button>
   </div>
@@ -141,15 +141,15 @@
   <div id="account-oauth-google-div">
       <p class="fg0">Signed in with Google</p>
       <p>
-        <span class="h6">Google account:</span><br />
-        <span id="account-oauth-google-email">{ data.authedUser.oauthGoogleEmail }</span>
+        <span class="h6">Google account:</span>
+        <span class="line" id="account-oauth-google-email">{ data.authedUser.oauthGoogleEmail }</span>
       </p>
     </div>
   {:else}
   <div id="account-username-password-div">
     <p>
-      <span class="h6">Username:</span><br />
-      <span id="account-username">{ data.authedUser.username }</span>
+      <span class="h6">Username:</span>
+      <span class="line" id="account-username">{ data.authedUser.username }</span>
     </p>
   </div>
   {/if}
@@ -167,8 +167,8 @@
 {:else}
 <div id="account-not-signedin-div" class="box">
   <p>
-    You're not signed in.<br />
-    Do you want to <a href="/sign-in">sign in</a> or <a href="/sign-up">create an account</a>?
+    You're not signed in.
+    <span class="line">Do you want to <a href="/sign-in">sign in</a> or <a href="/sign-up">create an account</a>?</span>
   </p>
 </div>
 {/if}
@@ -176,7 +176,10 @@
 <div class="modal hide" id="delete-account-modal">
   <div class="content">
       <p class="h4">Are you sure you want to delete your account?</p>
-      <p>You can keep your public studysets or delete all your studysets (public and private). <br>This will not delete local studysets saved on your device (not in your account).</p>
+      <p>
+          You can keep your public studysets or delete all your studysets (public and private).
+          <span class="line">This will not delete local studysets saved on your device (not in your account).</span>
+      </p>
       <div class="combo-select">
           <button id="delete-account-delete-all-my-studysets-false" class="left selected">
             <IconCheckmark class="combo-selected-icon" />
@@ -187,8 +190,10 @@
             Delete all sets
           </button>
       </div>
-      <br>
-      <p class="fg0">This will delete all data/content in your account. <br>Even if you keep your public studysets, all your account/profile info will be deleted.</p>
+      <p class="fg0" style="margin-top: 2rem;">
+          This will delete all data/content in your account.
+          <span class="line">Even if you keep your public studysets, all your account/profile info will be deleted.</span>
+      </p>
       {#if !(data.authedUser.authType == "OAUTH_GOOGLE") }
           <div><input type="password" placeholder="Enter password to confirm" id="delete-account-confirm-password-input"></div>
       {/if}
