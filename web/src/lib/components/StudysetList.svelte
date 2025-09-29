@@ -1,4 +1,10 @@
 <script>
+    import { fancyTimestamp } from "$lib/fancyTimestamp";
+    import db from "$lib/idb-api-layer/db.js";
+    import { onMount } from "svelte";
+
+    import IconPlus from "$lib/icons/Plus.svelte";
+
     let {
         data,
         cloudLinkTemplateFunc,
@@ -7,11 +13,10 @@
         localEmptyMsg
     } = $props();
 
-    import { fancyTimestamp } from "$lib/fancyTimestamp";
-    import db from "$lib/idb-api-layer/db.js";
-    import { onMount } from "svelte";
-
-    import IconPlus from "$lib/icons/Plus.svelte";
+    let localEmpty = $state(true);
+    let studysetList;
+    let localList;
+    let localListTitle;
 
     onMount(async function () {
         if (data?.settingsDateTimeFormatHours == "24") {
@@ -21,8 +26,8 @@
         }
 
         if (data.authed) {
-            for (var i = 0; i < document.getElementById("studyset-list").children.length; i++) {
-                var timestampElement = document.getElementById("studyset-list").children[i].children[1]
+            for (var i = 0; i < studysetList.children.length; i++) {
+                var timestampElement = studysetList.children[i].children[1]
                 if (timestampElement) {
                   timestampElement.innerText = fancyTimestamp.format(timestampElement.dataset.timestamp);
                 }
@@ -31,11 +36,11 @@
 
         const studysets = await db.studysets.orderBy("updatedAt").toArray();
         if (studysets.length >= 1) {
-            var localListTitleElement = document.getElementById("local-list-title");
+            var localListTitleElement = localListTitle;
             if (localListTitleElement) {
                 localListTitleElement.classList.remove("hide");
             }
-            document.getElementById("local-list").classList.remove("hide");
+            localList.classList.remove("hide");
             studysets.sort(function (a, b) {
                 return Date.parse(b.updatedAt) - Date.parse(a.updatedAt)
             })
@@ -52,13 +57,12 @@
                     timestamp.innerText = fancyTimestamp.format(studysets[i].updatedAt);
                     div.appendChild(timestamp);
                 }
-                document.getElementById("local-list").appendChild(div);
+                localList.appendChild(div);
             }
         } else {
-            var emptyMessageElement = document.getElementById("local-list-empty");
-            if (emptyMessageElement) {
-                document.getElementById("local-list").classList.remove("hide");
-                emptyMessageElement.classList.remove("hide");
+            if (localListTitle) {
+                localList.classList.remove("hide");
+                localEmpty = true;
             }
         }
     })
@@ -66,7 +70,7 @@
 
 <div>
     {#if data.authed}
-        <div class="grid list" id="studyset-list" style="overflow-wrap:anywhere">
+        <div class="grid list" style="overflow-wrap:anywhere" bind:this={studysetList}>
             {#if data.studysetList && data.studysetList.length > 0}
                 {#each data.studysetList as studyset}
                     <div class="box">
@@ -82,10 +86,10 @@
     {#if data.authed}
         <!-- only show "Local Studysets" title to tell the difference from studysets saved to an account when logged in -->
         <!-- also, the element has class="... hide" cause client/browser js only shows it if there are local studysets and the user is signed in -->
-        <p class="h4 hide" id="local-list-title">Local Studysets</p>
+        <p class="h4 hide" bind:this={localListTitle}>Local Studysets</p>
     {/if}
-    <div class="grid list hide" id="local-list">
-        {#if !data.authed}
+    <div class="grid list hide" bind:this={localList}>
+        {#if !data.authed && localEmpty}
             <!-- only show empty message if user is logged out and can therefore only have local studysets -->
             {@render localEmptyMsg}
         {/if}
