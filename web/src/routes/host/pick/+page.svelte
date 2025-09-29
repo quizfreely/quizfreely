@@ -12,6 +12,7 @@
                 Back
             </a>
         </div>
+        <p>Select a studyset:</p>
         {#snippet emptyMsg()}
             <div class="box flex center-h center-v">
                 <div class="text fg0">No studysets here...</div>
