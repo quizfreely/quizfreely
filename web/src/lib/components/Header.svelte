@@ -2,6 +2,7 @@
     import Searchbar from "$lib/components/Searchbar.svelte";
     import { page } from '$app/state';
     import { beforeNavigate } from "$app/navigation"
+    import { slide } from "svelte/transition";
     import IconUser from "$lib/icons/User.svelte";
     import IconMenu from "$lib/icons/Menu.svelte";
     import IconCloseXMark from "$lib/icons/CloseXMark.svelte";
@@ -28,7 +29,7 @@
 }
 </style>
 
-<header class="navbar with-search with-status">
+<header class="navbar with-search with-status" transition:slide={{duration: 400}}>
     <div class="menu">
         <input type="checkbox" id="nav-menu-toggle" class="nav-menu-toggle" />
         <label for="nav-menu-toggle" class="nav-menu-open">

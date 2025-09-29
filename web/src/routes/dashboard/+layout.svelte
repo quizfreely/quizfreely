@@ -46,7 +46,7 @@
             }" href="/dashboard/activities">Activities &amp; Games</a>
         </div>
         {#key data.dashboardTransPageKey}
-            <div in:fade={{ duration: 120, delay: 120, easing: sineIn }} out:fade={{ duration: 120, easing: sineOut }}>
+            <div style="margin-top: 1.4rem;" in:fade={{ duration: 120, delay: 120, easing: sineIn }} out:fade={{ duration: 120, easing: sineOut }}>
                 {@render children()}
             </div>
         {/key}

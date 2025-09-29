@@ -1,5 +1,7 @@
 <script>
     import Noscript from "$lib/components/Noscript.svelte";
+    import GroupIcon from "$lib/icons/GroupUsers.svelte";
+    import EnterIcon from "$lib/icons/Enter.svelte";
     let { data } = $props();
 </script>
 <style>
@@ -33,4 +35,13 @@
 </svelte:head>
 
 <Noscript />
-adsf
+<div class="flex">
+    <a class="button" href="/host">
+        <GroupIcon></GroupIcon>
+        Host Game
+    </a>
+    <a class="button alt" href="/join">
+        <EnterIcon></EnterIcon>
+        Join Game
+    </a>
+</div>
