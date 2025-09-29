@@ -19,6 +19,7 @@
     import IconGraph from "$lib/icons/ChartGraphLine.svelte";
     import IconFlashcards from "$lib/icons/Flashcards.svelte";
     import IconSettingsGear from "$lib/icons/SettingsGear.svelte";
+    import GroupIcon from "$lib/icons/GroupUsers.svelte";
     import { Confetti } from "svelte-confetti";
     import { footerState } from "$lib/components/footer.svelte.js";
 
@@ -322,9 +323,9 @@
             <IconPracticeTestChecklist />
             Practice Test
           </a>
-          <a href="/studyset/local/stats?id={data.localId}" class="button alt">
-            <IconGraph />
-            Progress &amp; Stats
+          <a href="/host?localId={data.localId}" class="button alt">
+            <GroupIcon></GroupIcon>
+            Review Game
           </a>
           {:else if data.studyset}
             <!-- <a href="/studysets/{ data.studyset.id }/review-mode" class="button alt"> -->
@@ -335,14 +336,26 @@
               <IconPracticeTestChecklist />
               Practice Test
             </a>
-            <a href="/studysets/{data.studyset.id}/stats" class="button alt">
-              <IconGraph />
-              Progress &amp; Stats
+            <a href="/host?studysetId={data.studyset.id}" class="button alt">
+              <GroupIcon></GroupIcon>
+              Review Game
             </a>
           {/if}
           
         </div>
-        <!-- Add "this study set is private/public..." thingy here too -->
+        <div class="flex">
+            {#if data.local}
+                <a href="/studyset/local/stats?id={data.localId}" class="button faint">
+                  <IconGraph />
+                  View Progress &amp; Stats
+                </a>
+            {:else if data.studyset}
+                <a href="/studysets/{data.studyset.id}/stats" class="button faint">
+                  <IconGraph />
+                  View Progress &amp; Stats
+                </a>
+            {/if}
+        </div>
         <table class="outer caption box" id="terms-table">
           <tbody>
             <tr>
