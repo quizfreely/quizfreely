@@ -1,5 +1,8 @@
 <script>
     import Noscript from "$lib/components/Noscript.svelte";
+    import StudysetList from "$lib/components/StudysetList.svelte";
+    import IconPlus from "$lib/icons/Plus.svelte";
+
     let { data } = $props();
 </script>
 
@@ -31,6 +34,6 @@
         cloudLinkTemplateFunc={(id) => `/studysets/${id}`}
         localLinkTemplateFunc={(id) => `/studyset/local?id=${id}`}
         cloudEmptyMsg={emptyMsg}
-        localEmptyMsg{emptyMsg}
+        localEmptyMsg={emptyMsg}
     ></StudysetList>
 </div>

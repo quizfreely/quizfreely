@@ -3,7 +3,6 @@
     import db from "$lib/idb-api-layer/db.js";
     import { onMount } from "svelte";
 
-    import IconPlus from "$lib/icons/Plus.svelte";
 
     let {
         data,
@@ -13,10 +12,8 @@
         localEmptyMsg
     } = $props();
 
-    let localEmpty = $state(true);
     let studysetList;
-    let localList;
-    let localListTitle;
+    let localStudysetList = $state([]);
 
     onMount(async function () {
         if (data?.settingsDateTimeFormatHours == "24") {
@@ -36,33 +33,16 @@
 
         const studysets = await db.studysets.orderBy("updatedAt").toArray();
         if (studysets.length >= 1) {
-            var localListTitleElement = localListTitle;
-            if (localListTitleElement) {
-                localListTitleElement.classList.remove("hide");
-            }
-            localList.classList.remove("hide");
             studysets.sort(function (a, b) {
                 return Date.parse(b.updatedAt) - Date.parse(a.updatedAt)
             })
-            for (var i = 0; i < studysets.length; i++) {
-                var div = document.createElement("div");
-                div.classList.add("box");
-                var title = document.createElement("a");
-                title.innerText = studysets[i].title;
-                title.href = localLinkTemplateFunc(studysets[i].id);
-                div.appendChild(title);
-                if (studysets[i].updatedAt) {
-                    var timestamp = document.createElement("p");
-                    timestamp.classList.add("h6");
-                    timestamp.innerText = fancyTimestamp.format(studysets[i].updatedAt);
-                    div.appendChild(timestamp);
+            localStudysetList = studysets;
+            for (var i = 0; i < localStudysetList.length; i++) {
+                if (localStudysetList[i].updatedAt) {
+                    localStudysetList[i].formattedFancyTimestamp = fancyTimestamp.format(
+                        localStudysetList[i].updatedAt
+                    );
                 }
-                localList.appendChild(div);
-            }
-        } else {
-            if (localListTitle) {
-                localList.classList.remove("hide");
-                localEmpty = true;
             }
         }
     })
@@ -79,19 +59,23 @@
                     </div>
                 {/each}
             {:else}
-                {@render cloudEmptyMsg}
+                {@render cloudEmptyMsg()}
             {/if}
         </div>
     {/if}
-    {#if data.authed}
-        <!-- only show "Local Studysets" title to tell the difference from studysets saved to an account when logged in -->
-        <!-- also, the element has class="... hide" cause client/browser js only shows it if there are local studysets and the user is signed in -->
-        <p class="h4 hide" bind:this={localListTitle}>Local Studysets</p>
+    {#if data.authed && localStudysetList?.length > 0}
+        <p class="h4">Local Studysets</p>
     {/if}
-    <div class="grid list hide" bind:this={localList}>
-        {#if !data.authed && localEmpty}
-            <!-- only show empty message if user is logged out and can therefore only have local studysets -->
-            {@render localEmptyMsg}
+    <div class="grid list">
+        {#each localStudysetList as studyset}
+            <div class="box">
+                <a href={localLinkTemplateFunc(studyset.id)}>{ studyset.title }</a>
+                <p class="h6">{studyset.formattedFancyTimestamp}</p>
+            </div>
+        {/each}
+        {#if !data.authed && localStudysetList.length == 0}
+            <!-- only show empty message here if user is logged out and therefore can only have local studysets -->
+            {@render localEmptyMsg()}
         {/if}
     </div>
 </div>
