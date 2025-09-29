@@ -105,41 +105,4 @@
           </div>
           {/if}
         </div>
-        <div id="mainDashboardImportother" class="modal hide">
-          <div class="content">
-            <h2>Import from another app</h2>
-            <p>Delimiter/Seperator between term and definition</p>
-            <input
-              type="text"
-              placeholder="Term delimiter"
-              id="mainDashboardImportotherTermdelimiter"
-            />
-            <p>
-              Delimiter/Seperator between rows, leave blank to use a
-              newline/enter
-            </p>
-            <input
-              type="text"
-              placeholder="Row delimiter"
-              id="mainDashboardImportotherRowdelimiter"
-            />
-            <textarea
-              id="mainDashboardImportotherData"
-              class="fullWidth"
-              rows="10"
-              placeholder="Paste data here"
-            ></textarea>
-            <div class="flex">
-              <button id="mainDashboardImportotherImportbutton">
-                Import
-              </button>
-              <button
-                class="red"
-                onclick={document.getElementById('mainDashboardImportother').classList.add('hide')}
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
       </div>
