@@ -9,7 +9,8 @@
         cloudLinkTemplateFunc,
         localLinkTemplateFunc,
         cloudEmptyMsg,
-        localEmptyMsg
+        localEmptyMsg,
+        hideTypeWhenCloudEmptyAndLocalExists
     } = $props();
 
     let studysetList;
@@ -49,7 +50,7 @@
 </script>
 
 <div>
-    {#if data.authed}
+    {#if data.authed && !(hideTypeWhenCloudEmptyAndLocalExists && !(data.studysetList?.length > 0) && localStudysetList?.length > 0)}
         <div class="grid list" style="overflow-wrap:anywhere" bind:this={studysetList}>
             {#if data.studysetList && data.studysetList.length > 0}
                 {#each data.studysetList as studyset}
@@ -63,7 +64,9 @@
             {/if}
         </div>
     {/if}
-    {#if data.authed && localStudysetList?.length > 0}
+    {#if data.authed && localStudysetList?.length > 0 && !(
+        hideTypeWhenCloudEmptyAndLocalExists && !(data.studysetList?.length > 0) && localStudysetList?.length > 0
+    )}
         <p class="h4">Local Studysets</p>
     {/if}
     <div class="grid list">

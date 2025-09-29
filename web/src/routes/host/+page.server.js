@@ -11,7 +11,7 @@ export async function load({ url, cookies }) {
         };
       }
     const studysetId = url.searchParams.get("studysetId");
-    const localId = parseInt(url.searchParams.get("studysetId"));
+    const localId = parseInt(url.searchParams.get("localId"));
     let respData = {};
     if (studysetId) {
         try {
@@ -44,8 +44,8 @@ export async function load({ url, cookies }) {
         }
     }
     return {
-        studysetId: url.searchParams.get("studysetId"),
-        localId: parseInt(url.searchParams.get("studysetId")),
+        studysetId,
+        localId,
         ...respData
     }
 }
