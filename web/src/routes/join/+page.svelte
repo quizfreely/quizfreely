@@ -2,6 +2,7 @@
     import { env } from "$env/dynamic/public";
     import { scale } from "svelte/transition";
     import Lobby from "$lib/multiplayer/Lobby.svelte";
+    import { footerState } from "$lib/components/footer.svelte.js";
     let { data } = $props()
     let gameCode = $state("");
     let uniqueName;
@@ -67,6 +68,7 @@
                 } else if (json?.type == "joined") {
                     players = json?.players;
                     inLobby = true;
+                    footerState.hideFooter = true;
                 } else if (json?.type == "player_joined") {
                     players.push(json?.player);
                 } else if (json?.type == "player_left") {

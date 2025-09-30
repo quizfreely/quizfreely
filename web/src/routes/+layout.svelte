@@ -40,7 +40,7 @@ afterNavigate(function () {
     <div style="min-height: 70vh">
         {@render children()}
     </div>
-    {#if !footerState?.hideFooter}
+    {#if !page?.data?.footer?.hideFooter && !footerState?.hideFooter}
     <Footer />
     {/if}
 </div>

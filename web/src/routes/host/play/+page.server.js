@@ -74,6 +74,9 @@ export async function load({ url, cookies }) {
         header: {
             hideHeader: true
         },
+        footer: {
+            hideFooter: true
+        },
         studysetId,
         localId,
         ...respData

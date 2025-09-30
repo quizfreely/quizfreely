@@ -1,11 +1,12 @@
 <script>
+  import { slide } from "svelte/transition";
   import IconCodeberg from "$lib/icons/Codeberg.svelte";
   import IconGitHub from "$lib/icons/GitHub.svelte";
   import HeartIcon from "$lib/icons/Heart.svelte";
 </script>
 
-<div id="footer-wave" class="wave-top bg0"></div>
-<footer id="footer" class="background-bg0" style="border: none; margin: 0px; padding-top: 1rem; padding-bottom: 8rem;">
+<div id="footer-wave" class="wave-top bg0" transition:slide={{duration:400}}></div>
+<footer id="footer" class="background-bg0" transition:slide={{duration:400}} style="border: none; margin: 0px; padding-top: 1rem; padding-bottom: 8rem;">
     <h2>Quizfreely</h2>
     <p style="max-width: 24rem; margin-left: auto; margin-right: auto;">
         Quizfreely is a free and open source nonprofit project
