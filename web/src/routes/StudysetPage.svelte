@@ -263,7 +263,7 @@
               <IconMoreDotsV />
             </button>
             <div class="content">
-              <button class="ohno" id="delete-button"><IconTrash /> Delete </button>
+              <button class="ohno" id="delete-button" onclick={() => {showDeleteConfirmationModal = true}}><IconTrash /> Delete </button>
             </div>
           </div>
         </div>
