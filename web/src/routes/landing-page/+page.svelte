@@ -95,9 +95,9 @@
         </div>
       </div>
       <div style="margin-top: 4rem;">
-        <h2 class="h3">Fully open source</h2>
+        <h2 class="h3">Fully <span class="love">open source</span></h2>
         <p style="max-width: 36rem;">
-            Quizfreely is released under the AGPL-3.0 license. Our frontend web app, backend API, <a href="https://quizfreely.org/docs" class="with-underline">documentation</a>, and all of our software are all open source on Codeberg and GitHub.
+            Quizfreely is released under the AGPL-3.0 license. Our frontend web app, backend API, <a href="https://quizfreely.org/docs" class="link-love with-underline">documentation</a>, and all of our software are all open source on Codeberg and GitHub.
         </p>
         <div class="flex compact-gap">
           <a class="button large faint" href="https://codeberg.org/quizfreely">
