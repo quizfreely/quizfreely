@@ -71,7 +71,6 @@
         background-color: #FeFeFe;
         color: #1F1F1F;
         font-family: Roboto, Inter, Arial, Helvetica, sans-serif;
-        font-weight: 500;
         border: 0.2rem solid var(--border);
         border-radius: 2rem;
         padding: 0.6rem;
