@@ -37,18 +37,6 @@
             <p style="">Pick a studyset or <a href="/explore">search for one</a></p>
             <a href="/host/pick" class="button" style="margin-top: 0.6rem;">Select Studyset</a>
         {/if}
-        <!-- <p style="margin-top: 2rem;">Select game mode:</p> -->
-        <!-- <div class="flex" style="margin-top: 0.6rem;"> -->
-        <!--     <button class="button-box selected"> -->
-        <!--         Quiz Game -->
-        <!--     </button> -->
-        <!--     <button class="button-box selected"> -->
-        <!--         Race -->
-        <!--     </button> -->
-        <!--     <button class="button-box" disabled> -->
-        <!--         More coming soon -->
-        <!--     </button> -->
-        <!-- </div> -->
         <p style="margin-top: 2rem;">Set time limit:</p>
         <div class="flex compact-gap" style="margin-top: 0.6rem; align-items: center;">
             <input type="text" placeholder="{DEFAULT_MINS}" bind:value={mins} style="max-width: 6rem;">
