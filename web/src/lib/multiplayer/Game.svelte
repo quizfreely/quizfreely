@@ -1,35 +1,48 @@
 <script>
     import { onMount } from "svelte";
-    let { ws, gameCode, studyset, ...props } = $props();
+    let { ws, gameCode, studyset, answerWith, ...props } = $props();
+    let players = $state(props?.players ?? []);
+    let term = $state(null);
+    let distractors = $state([]);
     onMount(() => {
+        ws.onmessage = (event) => {
+            console.log("Received: " + event.data);
+            const json = JSON.parse(event.data);
+            if (json?.error && json?.msg) {
+                errorMsg = json.msg;
+                showErrorMsg = true;
+            }
+            if (json?.type == "player_joined") {
+                players.push(json?.player);
+            } else if (json?.type == "player_left") {
+                players.splice(
+                    players.indexOf(json?.player),
+                    1
+                );
+            } else if (json?.type == "end") {
+                endCallback({players});
+            }
+        };
 
-    })
+        ws.onclose = () => {
+          console.log("Connection closed");
+        };
+
+        ws.onerror = (err) => {
+          console.log("Error: " + err.message);
+        };
+    });
+    function randomQuestion() {
+        let unusedTerms = [...studyset.terms];
+        term = unusedTerms.splice(Math.floor(Math.random() * unusedTerms.length), 1);
+        for (let i = 0; i < 3; i++) {
+            distractors.push(unusedTerms.splice(Math.floor(Math.random() * unusedTerms.length), 1));
+        }
+    }
 </script>
 <div class="grid page" style="margin-top: 2rem;">
     <div class="content">
         <p class="fg0 center">{gameCode}</p>
-        <div class="flex" style="width: 100%; flex-direction: row;">
-            {#each playersData as playerData}
-                <div class="box grid" style="width: 100%; grid-template-rows: auto; grid-template-columns: 3fr 2fr 2fr 2fr;">
-                    <span>{playerData.uniqueName}</span>
-                    <span>{playerData.correctCount || 0}/{
-                        (playerData.incorrectCount +
-                        playerData.correctCount) || 0
-                    }</span>
-                    <span class={
-                    ((playerData.correctCount || 0) / ((
-                        playerData.incorrectCount +
-                        playerData.correctCount
-                    ) || 1)) > 0.9 ? "yay" : "ohno"
-                    }>{Math.floor((playerData.correctCount || 0) / ((
-                        playerData.incorrectCount +
-                        playerData.correctCount
-                    ) || 1) * 100)}%</span>
-                    <span class={
-                        (playerData.streak ?? 0) == 0 ? "fg0" : ""
-                    }>{playerData.streak ?? 0} streak</span>
-                </div>
-            {/each}
-        </div>
+        <p></p>
     </div>
 </div>

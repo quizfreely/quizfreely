@@ -14,6 +14,7 @@
     let errorMsg = $state("");
     let ws = $state(null);
     let players = [];
+    let studyset;
 
     if (data?.prefilledCode?.length > 0) {
         gameCode = data.prefilledCode.substring(0,4)+" "+data.prefilledCode.substring(4);
@@ -65,11 +66,14 @@
                 if (json?.type == "joined" && json?.alreadyStarted) {
                     players = json?.players;
                     alert("ohnogamealreadystarted")
+                    footerState.hideFooter = true;
+                    studyset = json.studyset;
                     inGame = true;
                 } else if (json?.type == "joined") {
                     players = json?.players;
-                    inLobby = true;
                     footerState.hideFooter = true;
+                    studyset = json.studyset;
+                    inLobby = true;
                 } else if (json?.type == "player_joined") {
                     players.push(json?.player);
                 } else if (json?.type == "player_left") {
@@ -152,6 +156,6 @@
     {/if}
 {:else if inGame}
     {#if ws && gameCode}
-        <Game {ws} {players} {gameCode}></Game>
+        <Game {ws} {players} {studyset} {gameCode}></Game>
     {/if}
 {/if}
