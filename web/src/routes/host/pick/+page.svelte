@@ -15,7 +15,7 @@
         <p>Select a studyset:</p>
         {#snippet emptyMsg()}
             <div class="box flex center-h center-v">
-                <div class="text fg0">No studysets here...</div>
+                <div class="text fg0">You have no studysets</div>
             </div>
         {/snippet}
         <StudysetList
