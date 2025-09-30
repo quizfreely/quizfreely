@@ -203,7 +203,7 @@
           Created by { data.studyset.user.displayName }
         </p>
         {/if}
-        {#if (data.studyset && data.authed && (data.authedUser.id == data.studyset.user.id)) }
+        {#if (data.studyset && data.authed && (data.authedUser.id == data.studyset.user?.id)) }
         <div id="edit-menu" class="flex">
           <a href="/studyset/edit/{ data.studyset.id }" class="button">
             <IconPencil />
@@ -229,7 +229,7 @@
               <IconMoreDotsV />
             </button>
             <div class="content">
-              <button class="ohno" id="delete-button"><IconTrash /> Delete </button>
+              <button class="ohno" id="delete-button" onclick={() => {showDeleteConfirmationModal = true}}><IconTrash /> Delete </button>
             </div>
           </div>
         </div>
