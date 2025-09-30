@@ -10,7 +10,7 @@
     let inGame = $state(false);
     let showErrorMsg = $state(false)
     let errorMsg = $state("");
-    let ws;
+    let ws = $state(null);
     let players = [];
 
     if (data?.prefilledCode?.length > 0) {
@@ -140,5 +140,7 @@
     </div>
 </div>
 {:else if inLobby}
-    <Lobby {ws} {players} {gameCode}></Lobby>
+    {#if ws}
+        <Lobby {ws} {players} {gameCode}></Lobby>
+    {/if}
 {/if}

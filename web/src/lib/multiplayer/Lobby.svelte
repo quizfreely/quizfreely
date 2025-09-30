@@ -1,39 +1,38 @@
 <script>
+    import { onMount } from "svelte";
     import { scale } from "svelte/transition";
     import UserIcon from "$lib/icons/User.svelte";
     import XMarkIcon from "$lib/icons/CloseXMark.svelte";
     import CheckmarkIcon from "$lib/icons/Checkmark.svelte";
     let { ws, gameCode, hostPOV, ...props } = $props();
-    let players = $state(props.players);
-    ws.onopen = () => {
-      console.log("Connected to server");
-      ws.send(JSON.stringify({ action: "join", code: gameCode.replaceAll(" ", ""), uniqueName }));
-    };
+    let players = $state(props?.players ?? []);
 
-    ws.onmessage = (event) => {
-        console.log("Received: " + event.data);
-        const json = JSON.parse(event.data);
-        if (json?.error && json?.msg) {
-            errorMsg = json.msg;
-            showErrorMsg = true;
-        }
-        if (json?.type == "player_joined") {
-            players.push(json?.player);
-        } else if (json?.type == "player_left") {
-            players.splice(
-                players.indexOf(json?.player),
-                1
-            );
-        }
-    };
+    onMount(() => {
+        ws.onmessage = (event) => {
+            console.log("Received: " + event.data);
+            const json = JSON.parse(event.data);
+            if (json?.error && json?.msg) {
+                errorMsg = json.msg;
+                showErrorMsg = true;
+            }
+            if (json?.type == "player_joined") {
+                players.push(json?.player);
+            } else if (json?.type == "player_left") {
+                players.splice(
+                    players.indexOf(json?.player),
+                    1
+                );
+            }
+        };
 
-    ws.onclose = () => {
-      console.log("Connection closed");
-    };
+        ws.onclose = () => {
+          console.log("Connection closed");
+        };
 
-    ws.onerror = (err) => {
-      console.log("Error: " + err.message);
-    };
+        ws.onerror = (err) => {
+          console.log("Error: " + err.message);
+        };
+    })
 </script>
 <div class="grid page" style="margin-top: 2rem;">
     <div class="content">

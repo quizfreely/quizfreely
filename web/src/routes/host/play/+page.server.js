@@ -11,7 +11,10 @@ export async function load({ url, cookies }) {
         };
       }
     const studysetId = url.searchParams.get("studysetId");
-    const localId = parseInt(url.searchParams.get("studysetId"));
+    let localId = parseInt(url.searchParams.get("localId"));
+    if (isNaN(localId)) {
+        localId = null;
+    }
     let respData = {};
     if (studysetId) {
         try {
@@ -28,7 +31,6 @@ export async function load({ url, cookies }) {
     }
     studyset(id: $id) {
         id
-        termsCount
         terms {
             id
             term
@@ -46,13 +48,34 @@ export async function load({ url, cookies }) {
         } catch (err) {
             console.error("Error in /host/play load func: ", err);
         }
+    } else {
+        try {
+            const raw = await fetch(env.API_URL+"/graphql", {
+                method: "POST",
+                headers: headers,
+                body: JSON.stringify({
+                    query: `{
+    authed
+    authedUser {
+        id
+        username
+        displayName
+    }
+}`,
+                })
+            });
+            const resp = await raw.json();
+            respData = resp?.data;
+        } catch (err) {
+            console.error("Error in /host/play load func: ", err);
+        }
     }
     return {
         header: {
             hideHeader: true
         },
-        studysetId: url.searchParams.get("studysetId"),
-        localId: parseInt(url.searchParams.get("studysetId")),
+        studysetId,
+        localId,
         ...respData
     }
 }
