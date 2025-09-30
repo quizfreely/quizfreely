@@ -29,7 +29,7 @@
                     1
                 );
             } else if (json?.type == "start") {
-                startCallback();
+                startCallback({players});
             }
         };
 
@@ -61,7 +61,7 @@
                         ws.send(JSON.stringify({
                             type: "start"
                         }));
-                        startCallback();
+                        startCallback({players});
                     }}>
                         <CheckmarkIcon></CheckmarkIcon> Start
                     </button>

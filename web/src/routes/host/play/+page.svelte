@@ -10,6 +10,7 @@
     let studyset = data.studyset;
     let inGame = $state(false);
     let showResults = $state(false);
+    let players = $state([]);
     onMount(async () => {
         if (data.localId != null) {
             studyset = await idbApiLayer.getStudysetById(
@@ -49,11 +50,12 @@
     })
 </script>
 {#if ws && gameCode && !inGame}
-    <Lobby {ws} {gameCode} hostPOV startCallback={() => {
+    <Lobby {ws} {gameCode} hostPOV startCallback={(d) => {
+        players = d.players;
         inGame = true;
     }}></Lobby>
 {:else if ws && gameCode && inGame}
-    <Leaderboard {ws} {gameCode} endCallback={() => {
+    <Leaderboard {ws} {players} {gameCode} endCallback={() => {
         inGame = false;
         showResults = true;
     }}></Leaderboard>

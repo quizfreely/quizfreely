@@ -2,6 +2,7 @@
     import { env } from "$env/dynamic/public";
     import { scale } from "svelte/transition";
     import Lobby from "$lib/multiplayer/Lobby.svelte";
+    import Game from "$lib/multiplayer/Game.svelte";
     import { footerState } from "$lib/components/footer.svelte.js";
     let { data } = $props()
     let gameCode = $state("");
@@ -143,7 +144,8 @@
 </div>
 {:else if inLobby}
     {#if ws && gameCode}
-        <Lobby {ws} {players} {gameCode} startCallback={() => {
+        <Lobby {ws} {players} {gameCode} startCallback={(d) => {
+            players = d.players;
             inLobby = false;
             inGame = true;
         }}></Lobby>
