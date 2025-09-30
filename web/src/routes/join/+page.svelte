@@ -77,10 +77,12 @@
                 } else if (json?.type == "player_joined") {
                     players.push(json?.player);
                 } else if (json?.type == "player_left") {
-                    players.splice(
-                        players.indexOf(json?.player),
-                        1
-                    );
+                    const index = players.indexOf(json?.player);
+                    if (index > 0) {
+                        players.splice(
+                            index, 1
+                        );
+                    }
                 }
             };
 
