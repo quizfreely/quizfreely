@@ -4,7 +4,7 @@
     import UserIcon from "$lib/icons/User.svelte";
     import XMarkIcon from "$lib/icons/CloseXMark.svelte";
     import CheckmarkIcon from "$lib/icons/Checkmark.svelte";
-    let { ws, gameCode, hostPOV, ...props } = $props();
+    let { ws, gameCode, hostPOV, startCallback, ...props } = $props();
     let players = $state(props?.players ?? []);
     let showKicking = $state(false);
     let kickingUniqueName = $state("");
@@ -28,6 +28,8 @@
                     players.indexOf(json?.player),
                     1
                 );
+            } else if (json?.type == "start") {
+                startCallback();
             }
         };
 
@@ -55,7 +57,12 @@
             </div>
             {#if hostPOV}
                 <div class="flex" style="justify-content: end;">
-                    <button>
+                    <button onclick={() => {
+                        ws.send(JSON.stringify({
+                            type: "start"
+                        }));
+                        startCallback();
+                    }}>
                         <CheckmarkIcon></CheckmarkIcon> Start
                     </button>
                 </div>

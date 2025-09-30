@@ -142,7 +142,14 @@
     </div>
 </div>
 {:else if inLobby}
-    {#if ws}
-        <Lobby {ws} {players} {gameCode}></Lobby>
+    {#if ws && gameCode}
+        <Lobby {ws} {players} {gameCode} startCallback={() => {
+            inLobby = false;
+            inGame = true;
+        }}></Lobby>
+    {/if}
+{:else if inGame}
+    {#if ws && gameCode}
+        <Game {ws} {players} {gameCode}></Game>
     {/if}
 {/if}

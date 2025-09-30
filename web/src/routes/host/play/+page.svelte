@@ -3,10 +3,13 @@
     import { onMount } from "svelte";
     import idbApiLayer from "$lib/idb-api-layer/idb-api-layer.js";
     import Lobby from "$lib/multiplayer/Lobby.svelte";
+    import Leaderboard from "$lib/multiplayer/Leaderboard.svelte";
     let { data } = $props();
     let ws = $state(null);
     let gameCode = $state(null);
     let studyset = data.studyset;
+    let inGame = $state(false);
+    let showResults = $state(false);
     onMount(async () => {
         if (data.localId != null) {
             studyset = await idbApiLayer.getStudysetById(
@@ -46,6 +49,15 @@
         };
     })
 </script>
-{#if ws && gameCode}
-    <Lobby {ws} {gameCode} hostPOV></Lobby>
+{#if ws && gameCode && !inGame}
+    <Lobby {ws} {gameCode} hostPOV startCallback={() => {
+        inGame = true;
+    }}></Lobby>
+{:else if ws && gameCode && inGame}
+    <Leaderboard {ws} {gameCode} endCallback={() => {
+        inGame = false;
+        showResults = true;
+    }}></Leaderboard>
+{:else if showResults}
+    asdf
 {/if}
