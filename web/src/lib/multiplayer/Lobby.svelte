@@ -1,7 +1,7 @@
 <script>
     import { onMount } from "svelte";
     import { scale } from "svelte/transition";
-    import UserIcon from "$lib/icons/User.svelte";
+    import GroupIcon from "$lib/icons/GroupUsers.svelte";
     import XMarkIcon from "$lib/icons/CloseXMark.svelte";
     import CheckmarkIcon from "$lib/icons/Checkmark.svelte";
     let { ws, gameCode, hostPOV, startCallback, ...props } = $props();
@@ -24,10 +24,12 @@
             if (json?.type == "player_joined") {
                 players.push(json?.player);
             } else if (json?.type == "player_left") {
-                players.splice(
-                    players.indexOf(json?.player),
-                    1
-                );
+                const index = players.indexOf(json?.player);
+                if (index > 0) {
+                    players.splice(
+                        index, 1
+                    );
+                }
             } else if (json?.type == "start") {
                 startCallback({players});
             }
@@ -52,7 +54,7 @@
         }">{gameCode}</p>
         <div class="flex" style="justify-content: space-between; align-items: end;">
             <div style="display: flex; align-items: center; gap: 0.4rem;">
-                <UserIcon class="text fg0"></UserIcon>
+                <GroupIcon class="text fg0"></GroupIcon>
                 <span class="fg0 no-margin-top">{players.length} Joined</span>
             </div>
             {#if hostPOV}
