@@ -6,6 +6,7 @@
     let { data } = $props();
     let localStudyset = $state(null);
     let mins = $state("");
+    const DEFAULT_MINS = 10;
     onMount(async () => {
         if (data.localId != null) {
             localStudyset = (
@@ -47,12 +48,12 @@
         </div>
         <p style="margin-top: 2rem;">Set time to end game after:</p>
         <div class="flex compact-gap" style="margin-top: 0.6rem; align-items: center;">
-            <input type="text" placeholder="10" bind:value={mins} style="max-width: 6rem;">
+            <input type="text" placeholder="{DEFAULT_MINS}" bind:value={mins} style="max-width: 6rem;">
             <span>minutes</span>
         </div>
         <a href="/host/play?{data.studysetId != null ?
             `studysetId=${data.studysetId}` :
             `localId=${data.studysetId}`
-        }&t={parseInt(mins)}" class="button"><CheckmarkIcon></CheckmarkIcon> Start</a>
+        }&t={parseInt(mins) || DEFAULT_MINS}" class="button"><CheckmarkIcon></CheckmarkIcon> Start</a>
     </div>
 </div>

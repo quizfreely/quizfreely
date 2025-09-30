@@ -36,7 +36,6 @@
             }
             if (json?.type == "host_joined") {
                 gameCode = json.code.substring(0,4)+" "+json.code.substring(4);
-                ;
             }
         };
 
