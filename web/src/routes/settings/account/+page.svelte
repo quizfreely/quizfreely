@@ -115,7 +115,7 @@
                     })
                 }
             })
-            modPowersActive = localStorage.getItem("quizfreely:modPowersActive");
+            modPowersActive = localStorage.getItem("quizfreely:modPowersActive") == "true";
         }
     })
 </script>
