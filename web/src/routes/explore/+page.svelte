@@ -1,5 +1,12 @@
 <script>
+    import { onMount } from "svelte";
     let { data } = $props();
+    let modPowersActive = $state(false);
+    onMount(() => {
+        if (data.authedUser?.modPerms) {
+            modPowersActive = localStorage.getItem("quizfreely:modPowersActive") == "true";
+        }
+    })
 </script>
 
 <svelte:head>
@@ -11,10 +18,13 @@
 <main>
   <div class="grid page">
     <div class="content">
-      {#if (data.featuredStudysets?.length >= 1) }
-      <h2 class="h4">Featured Studysets</h2>
+      {#each data.featuredCategories as category}
+      {#if (category.studysets?.length >= 1) }
+      <h2 class="h4">{category.title}</h2>
+      {#if modPowersActive}
+      {/if}
       <div class="grid list" style="overflow-wrap:anywhere">
-        {#each data.featuredStudysets as featuredStudyset }
+        {#each category.studysets as featuredStudyset }
           <div class="box">
             <a href="/studysets/{ featuredStudyset.id }">
               { featuredStudyset.title }
@@ -31,6 +41,7 @@
         {/each}
       </div>
       {/if}
+      {/each}
       {#if (data.recentStudysets?.length >= 1) }
       <h2 class="h4">Recently Created or Updated</h2>
         <div class="grid list" style="overflow-wrap:anywhere">
