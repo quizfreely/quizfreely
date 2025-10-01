@@ -1,6 +1,7 @@
 <script>
     import { onMount } from "svelte";
     let { data } = $props();
+    let modPowersActive = $state(false);
 
     import IconPencil from "$lib/icons/Pencil.svelte";
     import IconCheckmark from "$lib/icons/Checkmark.svelte";
@@ -114,6 +115,7 @@
                     })
                 }
             })
+            modPowersActive = localStorage.getItem("quizfreely:modPowersActive");
         }
     })
 </script>
@@ -164,6 +166,17 @@
       </div>
   </details>
 </div>
+    {#if data.authedUser.modPerms && modPowersActive}
+        <button class="yay alt" style="margin-top: 2rem;" onclick={() => {
+            localStorage.setItem("quizfreely:modPowersActive", "false");
+            modPowersActive = false;
+        }}>Hide Mod Powers</button>
+    {:else if data.authedUser.modPerms}
+        <button class="yay alt" style="margin-top: 2rem;" onclick={() => {
+            localStorage.setItem("quizfreely:modPowersActive", "true");
+            modPowersActive = true;
+        }}>Activate Mod Powers</button>
+    {/if}
 {:else}
 <div id="account-not-signedin-div" class="box">
   <p>
