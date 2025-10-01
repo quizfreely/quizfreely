@@ -18,14 +18,18 @@ export async function load({ cookies }) {
                 authType
                 oauthGoogleEmail
               }
-              featuredStudysets {
+                            featuredCategories {
                 id
                 title
-                user {
-                    displayName
+                studysets {
+                  id
+                  title
+                  user {
+                      displayName
+                  }
+                  termsCount
+                  updatedAt
                 }
-                termsCount
-                updatedAt
               }
               recentStudysets {
                 id
@@ -42,21 +46,17 @@ export async function load({ cookies }) {
         let apiRes = await rawApiRes.json();
         let authed = false;
         let authedUser;
-        let featuredStudysets = [];
         let recentStudysets = [];
         if (apiRes?.data?.authed) {
           authed = apiRes.data.authed;
           authedUser = apiRes.data?.authedUser;
-        }
-        if (apiRes?.data?.featuredStudysets?.length >= 0) {
-          featuredStudysets = apiRes.data.featuredStudysets;
         }
         if (apiRes?.data?.recentStudysets?.length >= 0) {
           recentStudysets = apiRes.data.recentStudysets;
         }
         
         return {
-            featuredStudysets: featuredStudysets,
+            featuredCategories: apiRes?.data?.featuredCategories,
             recentStudysets: recentStudysets,
             authed: authed,
             authedUser: authedUser,
