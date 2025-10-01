@@ -53,7 +53,7 @@
                 },
                 body: JSON.stringify({
                     query: `mutation setFeaturedCategory($studysetId: ID, $categoryId: ID) {
-    setFeaturedCategory(studysetId: $studysetId, categoryId: $categoryId)
+    setStudysetFeaturedCategory(studysetId: $studysetId, categoryId: $categoryId)
 }`,
                     variables: {
                         studysetId,
