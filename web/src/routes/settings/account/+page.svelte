@@ -170,12 +170,12 @@
         <button class="yay alt" style="margin-top: 2rem;" onclick={() => {
             localStorage.setItem("quizfreely:modPowersActive", "false");
             modPowersActive = false;
-        }}>Hide Mod/Admin Powers</button>
+        }}>Hide Special Powers</button>
     {:else if data.authedUser.modPerms}
         <button class="yay alt" style="margin-top: 2rem;" onclick={() => {
             localStorage.setItem("quizfreely:modPowersActive", "true");
             modPowersActive = true;
-        }}>Activate Mod/Admin Powers</button>
+        }}>Activate Special Powers</button>
     {/if}
 {:else}
 <div id="account-not-signedin-div" class="box">
