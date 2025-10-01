@@ -21,6 +21,7 @@ export default async function ({ cookies }) {
               displayName
               authType
               oauthGoogleEmail
+              modPerms
             }
           }`
         })
