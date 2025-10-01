@@ -17,6 +17,7 @@ export async function load({ cookies }) {
                 displayName
                 authType
                 oauthGoogleEmail
+                modPerms
               }
                             featuredCategories {
                 id
