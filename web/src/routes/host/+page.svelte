@@ -6,7 +6,7 @@
     let { data } = $props();
     let localStudyset = $state(null);
     let mins = $state("");
-    const DEFAULT_MINS = 10;
+    const DEFAULT_MINS = 20;
     onMount(async () => {
         if (data.localId != null) {
             localStudyset = (
