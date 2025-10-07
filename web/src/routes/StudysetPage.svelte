@@ -20,6 +20,8 @@
     import IconFlashcards from "$lib/icons/Flashcards.svelte";
     import IconSettingsGear from "$lib/icons/SettingsGear.svelte";
     import GroupIcon from "$lib/icons/GroupUsers.svelte";
+    import BookmarkIcon from "$lib/icons/Bookmark.svelte";
+    import FolderIcon from "$lib/icons/Folder.svelte";
     import { Confetti } from "svelte-confetti";
     import { footerState } from "$lib/components/footer.svelte.js";
 
@@ -178,6 +180,8 @@
     beforeNavigate(() => {
         footerState.hideFooter = false;
     })
+
+    let saved = $state(data?.studyset?.saved ?? false);
 </script>
 <style>
     .top-menu-link {
@@ -266,6 +270,74 @@
               <button class="ohno" id="delete-button" onclick={() => {showDeleteConfirmationModal = true}}><IconTrash /> Delete </button>
             </div>
           </div>
+        </div>
+        {:else if data.authed && saved}
+        <div id="edit-menu" class="flex">
+            <button class="alt" onclick={async () => {
+                try {
+                    const respRaw = await fetch("/api/graphql", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            query: `mutation unsaveStudyset($id: ID!) {
+    unsaveStudyset(studysetId: $id)
+}`,
+                            variables: {
+                                id: data?.studyset?.id
+                            }
+                        })
+                    });
+                    const resp = await respRaw.json();
+                    if (resp?.data?.unsaveStudyset) {
+                        saved = false;
+                    } else {
+                        console.error("idk, this happened: ", resp);
+                    }
+                } catch (err) {
+                    console.error("idk, this errored: ", err);
+                }
+            }}>
+                <BookmarkIcon />
+                Unsave
+            </button>
+            <button class="alt">
+                <FolderIcon></FolderIcon>
+                Add to Folder
+            </button>
+        </div>
+        {:else if data.authed}
+        <div id="edit-menu" class="flex">
+            <button class="alt" onclick={async () => {
+                try {
+                    const respRaw = await fetch("/api/graphql", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            query: `mutation saveStudyset($id: ID!) {
+    saveStudyset(studysetId: $id)
+}`,
+                            variables: {
+                                id: data?.studyset?.id
+                            }
+                        })
+                    });
+                    const resp = await respRaw.json();
+                    if (resp?.data?.saveStudyset) {
+                        saved = true;
+                    } else {
+                        console.error("idk, this happened: ", resp);
+                    }
+                } catch (err) {
+                    console.error("idk, this errored: ", err);
+                }
+            }}>
+                <BookmarkIcon />
+                Save
+            </button>
         </div>
         {/if}
       </div>

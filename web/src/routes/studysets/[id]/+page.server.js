@@ -32,6 +32,11 @@ export async function load({ params, cookies }) {
                     displayName
                 }
                 private
+                saved
+                folder {
+                    id
+                    name
+                }
                 terms {
                     id
                     term
@@ -58,13 +63,19 @@ export async function load({ params, cookies }) {
               authedUser: authedUser
             }
           } else {
-            // work in progess should we implement a way to send the already fetched user data from this request to the not found handler
-            // that would save an extra api request because our callnotfound handler has 
+            console.error(
+                "API Error in studyset page load func: ",
+                apiRes
+            );
             error(404, {
               message: "Not Found"
             })
           }
       } catch (err) {
+        console.error(
+            "Error in studyset page load func: ",
+            err
+        );
         error(404, {
           message: "Not Found"
         })
