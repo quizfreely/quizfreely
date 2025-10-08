@@ -182,6 +182,7 @@
     })
 
     let saved = $state(data?.studyset?.saved ?? false);
+    let showFolderChooser = $state(false);
 </script>
 <style>
     .top-menu-link {
@@ -302,7 +303,32 @@
                 <BookmarkIcon />
                 Unsave
             </button>
-            <button class="alt">
+            <button class="alt" onclick={async () => {
+                try {
+                    const respRaw = await fetch("/api/graphql", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            query: `mutation saveStudysetToFolder($id: ID!, $folderId: ID) {
+    saveStudyset(studysetId: $id, folderId: $folderId)
+}`,
+                            variables: {
+                                id: data?.studyset?.id
+                            }
+                        })
+                    });
+                    const resp = await respRaw.json();
+                    if (resp?.data?.unsaveStudyset) {
+                        saved = false;
+                    } else {
+                        console.error("idk, this happened: ", resp);
+                    }
+                } catch (err) {
+                    console.error("idk, this errored: ", err);
+                }
+            }}>
                 <FolderIcon></FolderIcon>
                 Add to Folder
             </button>
@@ -472,6 +498,20 @@
       <div class="modal" transition:fade={{ duration: 200 }}>
         <div class="content">
           <p>Are you sure you want to delete this studyset?</p>
+          <div class="flex">
+            <button class="ohno" onclick={deleteConfirmButtonClicked}>
+              <IconTrash />
+              Delete
+            </button>
+            <button class="alt" onclick={function () { showDeleteConfirmationModal = false }}>Cancel</button>
+          </div>
+        </div>
+      </div>
+      {/if}
+      {#if showFolderChooser}
+      <div class="modal" transition:fade={{ duration: 200 }}>
+        <div class="content">
+          <p>Choose a folder</p>
           <div class="flex">
             <button class="ohno" onclick={deleteConfirmButtonClicked}>
               <IconTrash />
