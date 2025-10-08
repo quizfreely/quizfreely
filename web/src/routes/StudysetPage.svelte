@@ -513,7 +513,9 @@
         <div class="content">
           <p>Choose a folder</p>
           <div class="flex">
-            <button class="ohno" onclick={deleteConfirmButtonClicked}>
+            <button class="ohno" onclick={() => {
+
+            }}>
               <IconTrash />
               Delete
             </button>
