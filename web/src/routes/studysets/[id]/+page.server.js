@@ -43,10 +43,6 @@ export async function load({ params, cookies }) {
                     def
                 }
               }
-              myFolders {
-                id
-                name
-              }
             }`,
             variables: {
               id: params.id

@@ -193,6 +193,7 @@
     })
 
     let saved = $state(data?.studyset?.saved ?? false);
+    let folderId = $state(data?.studyset?.folder?.id ?? null);
     let showFolderChooser = $state(false);
 </script>
 <style>
@@ -227,6 +228,12 @@
         <title>Quizfreely</title>
     {/if}
 </svelte:head>
+
+{#snippet folderPickerErrMsg()}
+    <div class="box ohno" transition:slide={{duration: 400}}>
+        <p>Error adding/moving to folder :(</p>
+    </div>
+{/snippet}
 
 {#if data.local}
 <Noscript />
@@ -283,8 +290,9 @@
             </div>
           </div>
         </div>
-        {:else if data.authed && saved}
+        {:else if data.authed}
         <div id="edit-menu" class="flex">
+            {#if saved}
             <button class="alt" onclick={async () => {
                 try {
                     const respRaw = await fetch("/api/graphql", {
@@ -314,13 +322,7 @@
                 <BookmarkIcon />
                 Unsave
             </button>
-            <button class="alt" onclick={() => showFolderChooser = true}>
-                <FolderIcon></FolderIcon>
-                Add to Folder
-            </button>
-        </div>
-        {:else if data.authed}
-        <div id="edit-menu" class="flex">
+            {:else}
             <button class="alt" onclick={async () => {
                 try {
                     const respRaw = await fetch("/api/graphql", {
@@ -350,6 +352,18 @@
                 <BookmarkIcon />
                 Save
             </button>
+            {/if}
+            {#if folderId != null}
+            <a class="button alt" href="/folders/{folderId}">
+                <FolderIcon></FolderIcon>
+                View Folder
+            </a>
+            {:else}
+            <button class="alt" onclick={() => showFolderChooser = true}>
+                <FolderIcon></FolderIcon>
+                Add to Folder
+            </button>
+            {/if}
         </div>
         {/if}
       </div>
@@ -495,8 +509,36 @@
       </div>
       {/if}
       {#if showFolderChooser}
-        <FolderPicker closeCallback={() => showFolderChooser = false} selectCallback={async (selectedFolderId) => {
-            console.log(selectedFolderId)
+        <FolderPicker closeCallback={() => showFolderChooser = false} errMsg={folderPickerErrMsg} selectCallback={async (selectedFolder, showErrorMsgCallback) => {
+                showErrorMsgCallback(false);
+                try {
+                    const raw = await fetch(`/api/graphql`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                        query: `mutation ($studysetId: ID!, $folderId: ID!) {
+    setStudysetFolder(studysetId: $studysetId, folderId: $folderId)
+}`,
+                            variables: {
+                                studysetId: data.studyset.id,
+                                folderId: selectedFolder.id
+                            }
+                        })
+                    });
+                    const resp = await raw.json();
+                    if (resp?.data?.setStudysetFolder) {
+                        folderId = selectedFolder.id;
+                        showFolderChooser = false;
+                    } else {
+                        console.error("Unsuccessful json response: ", resp);
+                        showErrorMsgCallback(true);
+                    }
+                } catch (err) {
+                    console.error("Error adding to folder: ", err);
+                    showErrorMsgCallback(true);
+                }
         }}></FolderPicker>
       {/if}
     {/if}

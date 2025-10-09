@@ -3,9 +3,10 @@
     import { fade, slide } from "svelte/transition";
     import CloseXMarkIcon from "$lib/icons/CloseXMark.svelte";
     import FolderIcon from "$lib/icons/Folder.svelte";
-    let { closeCallback, selectCallback } = $props();
+    let { closeCallback, selectCallback, errMsg } = $props();
     let folders = $state([]);
     let showErrMsg = $state(false);
+    let showActionErrMsg = $state(false);
     let showCreateErrMsg = $state(false);
     let newFolderName = $state("");
     onMount(async () => {
@@ -45,14 +46,21 @@
                 <CloseXMarkIcon></CloseXMarkIcon>
             </button>
         </div>
-        {#if showErrMsg}
+        {#if showActionErrMsg}
+            {@render errMsg?.()}
+        {:else if showErrMsg}
             <div class="box ohno" transition:slide={{duration: 400}}>
                 <p>Error while loading folders :(</p>
             </div>
         {/if}
         <div class="flex" style="gap: 0.6rem; flex-direction: column; flex-wrap: nowrap; max-height: 50vh; overflow-y: auto; margin-top: 0.6rem;">
             {#each folders as folder}
-                <button class="button-box" style="text-align: start; display: flex; align-items: center; justify-content: start; gap: 0.6rem;" onclick={() => selectCallback(folder.id)}>
+                <button class="button-box" style="text-align: start; display: flex; align-items: center; justify-content: start; gap: 0.6rem;" onclick={
+                    () => selectCallback(
+                        folder,
+                        (show) => showActionErrMsg = show
+                    )
+                }>
                     <FolderIcon></FolderIcon>
                     {folder.name}
                 </button>
