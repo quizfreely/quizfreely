@@ -50,7 +50,7 @@
                 <p>Error while loading folders :(</p>
             </div>
         {/if}
-        <div class="flex" style="flex-direction: column; flex-wrap: nowrap; max-height: 50vh; overflow-y: auto; margin-top: 0.6rem;">
+        <div class="flex" style="gap: 0.6rem; flex-direction: column; flex-wrap: nowrap; max-height: 50vh; overflow-y: auto; margin-top: 0.6rem;">
             {#each folders as folder}
                 <button class="button-box" style="text-align: start; display: flex; align-items: center; justify-content: start; gap: 0.6rem;" onclick={() => selectCallback(folder.id)}>
                     <FolderIcon></FolderIcon>
