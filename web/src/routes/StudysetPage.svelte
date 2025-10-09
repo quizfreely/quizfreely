@@ -6,6 +6,8 @@
     import { fade } from "svelte/transition";
     let { data } = $props();
 
+    import FolderPicker from "$lib/components/FolderPicker.svelte";
+
     import IconLocal from "$lib/icons/Local.svelte";
     import IconPencil from "$lib/icons/Pencil.svelte";
     import IconEyeSlash from "$lib/icons/EyeSlash.svelte";
@@ -22,6 +24,7 @@
     import GroupIcon from "$lib/icons/GroupUsers.svelte";
     import BookmarkIcon from "$lib/icons/Bookmark.svelte";
     import FolderIcon from "$lib/icons/Folder.svelte";
+
     import { Confetti } from "svelte-confetti";
     import { footerState } from "$lib/components/footer.svelte.js";
 
@@ -81,6 +84,10 @@
         }
 
         function flashcardsOnKeyDown(e) {
+            if (showFolderChooser) {
+                return;
+            }
+
             switch (e.key) {
                 case "ArrowLeft":
                 case "h":
@@ -103,6 +110,10 @@
             }
         }
         function flashcardsOnKeyUp(e) {
+            if (showFolderChooser) {
+                return;
+            }
+
             if (e.key == " ") {
                 /* flip in keyup to only flip once */
                 e.preventDefault();
@@ -303,32 +314,7 @@
                 <BookmarkIcon />
                 Unsave
             </button>
-            <button class="alt" onclick={async () => {
-                try {
-                    const respRaw = await fetch("/api/graphql", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json"
-                        },
-                        body: JSON.stringify({
-                            query: `mutation saveStudysetToFolder($id: ID!, $folderId: ID) {
-    saveStudyset(studysetId: $id, folderId: $folderId)
-}`,
-                            variables: {
-                                id: data?.studyset?.id
-                            }
-                        })
-                    });
-                    const resp = await respRaw.json();
-                    if (resp?.data?.unsaveStudyset) {
-                        saved = false;
-                    } else {
-                        console.error("idk, this happened: ", resp);
-                    }
-                } catch (err) {
-                    console.error("idk, this errored: ", err);
-                }
-            }}>
+            <button class="alt" onclick={() => showFolderChooser = true}>
                 <FolderIcon></FolderIcon>
                 Add to Folder
             </button>
@@ -509,20 +495,9 @@
       </div>
       {/if}
       {#if showFolderChooser}
-      <div class="modal" transition:fade={{ duration: 200 }}>
-        <div class="content">
-          <p>Choose a folder</p>
-          <div class="flex">
-            <button class="ohno" onclick={() => {
-
-            }}>
-              <IconTrash />
-              Delete
-            </button>
-            <button class="alt" onclick={function () { showDeleteConfirmationModal = false }}>Cancel</button>
-          </div>
-        </div>
-      </div>
+        <FolderPicker closeCallback={() => showFolderChooser = false} selectCallback={async (selectedFolderId) => {
+            console.log(selectedFolderId)
+        }}></FolderPicker>
       {/if}
     {/if}
     </div>
