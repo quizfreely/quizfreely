@@ -16,7 +16,6 @@
         collapseLocal = true
     } = $props();
 
-    let studysetList;
     let localStudysetList = $state([]);
 
     let cloudCurrentlyCollapsed = $state(true);
@@ -35,7 +34,7 @@
         <div class="grid list" style="overflow-wrap: anywhere; {
             collapseCloud && data.studysetList?.length > 6 ?
                 "margin-bottom: 0px;" : ""
-        }" bind:this={studysetList}>
+        }">
             {#if data.studysetList && data.studysetList.length > 0}
                 {#each data.studysetList as studyset, index}
                     {#if !(collapseCloud && index >= 6 && cloudCurrentlyCollapsed)}
@@ -85,5 +84,8 @@
                 {localCurrentlyCollapsed ? "Show All" : "Collapse"}
             </button>
         </div>
+    {/if}
+    {#if data.mySavedStudysets?.length}
+        <p class="h4">Saved Studysets</p>
     {/if}
 </div>
