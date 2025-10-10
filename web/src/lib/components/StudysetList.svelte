@@ -1,8 +1,9 @@
 <script>
     import { fancyTimestamp } from "$lib/fancyTimestamp";
     import db from "$lib/idb-api-layer/db.js";
+    import idbApiLayer from "$lib/idb-api-layer/idb-api-layer.js";
     import { onMount } from "svelte";
-
+    import { slide } from "svelte/transition";
 
     let {
         data,
@@ -11,8 +12,8 @@
         cloudEmptyMsg,
         localEmptyMsg,
         hideTypeWhenCloudEmptyAndLocalExists,
-        collapseCloud,
-        collapseLocal
+        collapseCloud = true,
+        collapseLocal = true
     } = $props();
 
     let studysetList;
@@ -22,34 +23,9 @@
     let localCurrentlyCollapsed = $state(true);
 
     onMount(async function () {
-        if (data?.settingsDateTimeFormatHours == "24") {
-            fancyTimestamp.hours = 24;
-        } else if (data?.settingsDateTimeFormatHours == "12") {
-            fancyTimestamp.hours = 12;
-        }
-
-        if (data.authed) {
-            for (var i = 0; i < studysetList.children.length; i++) {
-                var timestampElement = studysetList.children[i].children[1]
-                if (timestampElement) {
-                  timestampElement.innerText = fancyTimestamp.format(timestampElement.dataset.timestamp);
-                }
-            }
-        }
-
-        const studysets = await db.studysets.orderBy("updatedAt").toArray();
-        if (studysets.length >= 1) {
-            studysets.sort(function (a, b) {
-                return Date.parse(b.updatedAt) - Date.parse(a.updatedAt)
-            })
-            localStudysetList = studysets;
-            for (var i = 0; i < localStudysetList.length; i++) {
-                if (localStudysetList[i].updatedAt) {
-                    localStudysetList[i].formattedFancyTimestamp = fancyTimestamp.format(
-                        localStudysetList[i].updatedAt
-                    );
-                }
-            }
+        localStudysetList = await db.studysets.orderBy("updatedAt").toArray();
+        for (const studyset of localStudysetList) {
+            studyset.termsCount = (await idbApiLayer.getTermsByStudysetId(studyset.id))?.length ?? 0;
         }
     })
 </script>
@@ -63,10 +39,10 @@
             {#if data.studysetList && data.studysetList.length > 0}
                 {#each data.studysetList as studyset, index}
                     {#if !(collapseCloud && index >= 6 && cloudCurrentlyCollapsed)}
-                    <div class="box">
-                        <a href={cloudLinkTemplateFunc(studyset.id)}>{ studyset.title }</a>
-                        <p class="h6" data-timestamp={ studyset.updatedAt }>...</p>
-                    </div>
+                    <a href={cloudLinkTemplateFunc(studyset.id)} class="button button-box" style="display: flex; flex-direction: column; text-align: start; align-items: start; align-content: start; justify-content: space-between;" transition:slide={{ duration: 400 }}>
+                        <p style="margin-bottom: 0px;">{ studyset.title }</p>
+                        <p class="h6 fg0" style="margin-top: 0.6rem; margin-bottom: 0.2rem;">{studyset.termsCount} Terms</p>
+                    </a>
                     {/if}
                 {/each}
             {:else}
@@ -92,10 +68,10 @@
         }">
         {#each localStudysetList as studyset, index}
             {#if !(collapseLocal && index >= 6 && localCurrentlyCollapsed)}
-            <div class="box">
-                <a href={localLinkTemplateFunc(studyset.id)}>{ studyset.title }</a>
-                <p class="h6">{studyset.formattedFancyTimestamp}</p>
-            </div>
+            <a href={localLinkTemplateFunc(studyset.id)} class="button button-box" style="display: flex; flex-direction: column; text-align: start; align-items: start; align-content: start; justify-content: space-between;" transition:slide={{ duration: 400 }}>
+                <p style="margin-bottom: 0px;">{ studyset.title }</p>
+                <p class="h6 fg0" style="margin-top: 0.6rem; margin-bottom: 0.2rem;">{studyset.termsCount} Terms</p>
+            </a>
             {/if}
         {/each}
         {#if !data.authed && localStudysetList.length == 0}
@@ -103,7 +79,7 @@
             {@render localEmptyMsg()}
         {/if}
     </div>
-    {#if collapseLocal && localStudysetList?.length >= 6}
+    {#if collapseLocal && localStudysetList?.length > 6}
         <div class="flex center" style="width: 100%; margin-top: 0.6rem;">
             <button class="faint" onclick={() => localCurrentlyCollapsed = !localCurrentlyCollapsed}>
                 {localCurrentlyCollapsed ? "Show All" : "Collapse"}
