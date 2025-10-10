@@ -41,7 +41,7 @@
                     {#if !(collapseCloud && index >= 6 && cloudCurrentlyCollapsed)}
                     <a href={cloudLinkTemplateFunc(studyset.id)} class="button button-box" style="display: flex; flex-direction: column; text-align: start; align-items: start; align-content: start; justify-content: space-between;" transition:slide={{ duration: 400 }}>
                         <p style="margin-bottom: 0px;">{ studyset.title }</p>
-                        <p class="h6 fg0" style="margin-top: 0.6rem; margin-bottom: 0.2rem;">{studyset.termsCount} Terms</p>
+                        <p class="h6 fg0" style="margin-top: 0.4rem; margin-bottom: 0px;">{studyset.termsCount} Terms</p>
                     </a>
                     {/if}
                 {/each}
@@ -70,7 +70,7 @@
             {#if !(collapseLocal && index >= 6 && localCurrentlyCollapsed)}
             <a href={localLinkTemplateFunc(studyset.id)} class="button button-box" style="display: flex; flex-direction: column; text-align: start; align-items: start; align-content: start; justify-content: space-between;" transition:slide={{ duration: 400 }}>
                 <p style="margin-bottom: 0px;">{ studyset.title }</p>
-                <p class="h6 fg0" style="margin-top: 0.6rem; margin-bottom: 0.2rem;">{studyset.termsCount} Terms</p>
+                <p class="h6 fg0" style="margin-top: 0.4rem; margin-bottom: 0px;">{studyset.termsCount} Terms</p>
             </a>
             {/if}
         {/each}
