@@ -35,5 +35,7 @@
         localLinkTemplateFunc={(id) => `/studyset/local?id=${id}`}
         cloudEmptyMsg={emptyMsg}
         localEmptyMsg={emptyMsg}
+        collapseCloud={true}
+        collapseLocal={true}
     ></StudysetList>
 </div>
