@@ -95,13 +95,15 @@
     }
 </script>
 
-{#key inFolder}
+{#key transKey}
 <div in:fade={{ duration: 120, delay: 120, easing: sineIn }} out:fade={{ duration: 120, easing: sineOut }}>
     {#if showErrorBox}
         <div class="box ohno" transition:slide={{duration:400}}>
             <p>{errorBoxText}</p>
         </div>
     {/if}
+    {#if inFolder}
+    {:else}
     {#if data.myFolders?.length > 0}
         <div class="grid list">
             {#each data.myFolders as folder}
@@ -194,6 +196,7 @@
                 </button>
             </div>
         {/if}
+    {/if}
     {/if}
 </div>
 {/key}
