@@ -1,0 +1,27 @@
+<script>
+    let {
+        studyset,
+        linkTemplateFunc,
+        showDropdown = false,
+        dropdownContent
+    } = $props();
+    import MoreIcon from "$lib/icons/MoreDotsVertical.svelte";
+</script>
+<div>
+    <a href={linkTemplateFunc(studyset.id)} class="button button-box" style="display: flex; gap: 0.4rem; flex-direction: column; text-align: start; align-items: start; align-content: start; justify-content: space-between; height: 100%;">
+        <p style="margin-bottom: 0px;">{ studyset.title }</p>
+        <p class="h6 fg0" style="margin-top: 0px; margin-bottom: 0px;">{studyset.termsCount ?? 0} {studyset.termsCount == 1 ? "Term" : "Terms"}</p>
+    </a>
+    {#if showDropdown}
+    <div class="flex" style="justify-content: end; position: relative; margin-top: 0px; margin-bottom: 0px;">
+        <div class="dropdown left" tabindex="0" style="position: absolute; bottom: 0.2rem;">
+            <button class="dropdown-toggle">
+                <MoreIcon class="text fg0"></MoreIcon>
+            </button>
+            <div class="content">
+                {@render dropdownContent?.(studyset)}
+            </div>
+        </div>
+    </div>
+    {/if}
+</div>

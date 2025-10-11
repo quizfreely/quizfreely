@@ -3,8 +3,13 @@
     import db from "$lib/idb-api-layer/db.js";
     import idbApiLayer from "$lib/idb-api-layer/idb-api-layer.js";
     import { onMount } from "svelte";
-    import { slide } from "svelte/transition";
+    import { slide, fade } from "svelte/transition";
+    import { sineIn, sineOut } from "svelte/easing";
+    import StudysetLinkBox from "$lib/components/StudysetLinkBox.svelte";
     import MoreIcon from "$lib/icons/MoreDotsVertical.svelte";
+    import LocalIcon from "$lib/icons/Local.svelte";
+    import BookmarkIcon from "$lib/icons/Bookmark.svelte";
+    import FolderIcon from "$lib/icons/Folder.svelte";
 
     let {
         data,
@@ -39,9 +44,73 @@
     })
 
     const COLLAPSE_LENGTH = 6;
+
+    let transKey = $state(0);
+
+    let showErrorBox = $state(false);
+    let errorBoxText = $state("");
+    let inFolder = $state(false);
+    let folderStudysets = $state([]);
+    async function viewFolder(id) {
+        inFolder = true;
+        try {
+            const respRaw = await fetch("/api/graphql", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    query: `query ($id: ID!){
+    folder(id: $id) {
+        id
+        name
+        studysets {
+            id
+            title
+            termsCount
+        }
+    }
+}`,
+                    variables: {
+                        id
+                    }
+                })
+            });
+            const resp = await respRaw.json()
+            if (resp?.data?.folder) {
+                folderStudysets = resp.data.folder.folderStudysets
+                showErrorBox = false;
+                inFolder = true;
+                transKey++;
+            } else {
+                console.log("unsucessful response while loading folder: ", resp);
+                errorBoxText = "Error loading folder :("
+                showErrorBox = true;
+            }
+        } catch (err) {
+            console.error(err);
+            errorBoxText = "Error loading folder :("
+            showErrorBox = true;
+        }
+    }
 </script>
 
-<div>
+{#key inFolder}
+<div in:fade={{ duration: 120, delay: 120, easing: sineIn }} out:fade={{ duration: 120, easing: sineOut }}>
+    {#if showErrorBox}
+        <div class="box ohno" transition:slide={{duration:400}}>
+            <p>{errorBoxText}</p>
+        </div>
+    {/if}
+    {#if data.myFolders?.length > 0}
+        <div class="grid list">
+            {#each data.myFolders as folder}
+                <button class="button-box" onclick={() => viewFolder(folder.id)}>
+                    <FolderIcon></FolderIcon> {folder.name}
+                </button>
+            {/each}
+        </div>
+    {/if}
     {#if data.authed && !(hideTypeWhenCloudEmptyAndLocalExists && !(data.studysetList?.length > 0) && localStudysetList?.length > 0)}
         <div class="grid list" style="overflow-wrap: anywhere; {
             collapseCloud && data.studysetList?.length > COLLAPSE_LENGTH ?
@@ -50,24 +119,12 @@
             {#if data.studysetList && data.studysetList.length > 0}
                 {#each data.studysetList as studyset, index}
                     {#if !(collapseCloud && index >= COLLAPSE_LENGTH && cloudCurrentlyCollapsed)}
-                    <div>
-                        <a href={cloudLinkTemplateFunc(studyset.id)} class="button button-box" style="display: flex; gap: 0.4rem; flex-direction: column; text-align: start; align-items: start; align-content: start; justify-content: space-between; height: 100%;">
-                            <p style="margin-bottom: 0px;">{ studyset.title }</p>
-                            <p class="h6 fg0" style="margin-top: 0px; margin-bottom: 0px;">{studyset.termsCount ?? 0} {studyset.termsCount == 1 ? "Term" : "Terms"}</p>
-                        </a>
-                        {#if showCloudDropdown}
-                        <div class="flex" style="justify-content: end; position: relative; margin-top: 0px; margin-bottom: 0px;">
-                            <div class="dropdown left" style="position: absolute; bottom: 0.2rem;">
-                                <button class="dropdown-toggle">
-                                    <MoreIcon class="text fg0"></MoreIcon>
-                                </button>
-                                <div class="content">
-                                    {@render cloudDropdownContent?.(studyset)}
-                                </div>
-                            </div>
-                        </div>
-                        {/if}
-                    </div>
+                        <StudysetLinkBox
+                            {studyset}
+                            linkTemplateFunc={cloudLinkTemplateFunc}
+                            showDropdown={showCloudDropdown}
+                            dropdownContent={cloudDropdownContent}
+                        ></StudysetLinkBox>
                     {/if}
                 {/each}
             {:else}
@@ -85,7 +142,7 @@
     {#if data.authed && localStudysetList?.length > 0 && !(
         hideTypeWhenCloudEmptyAndLocalExists && !(data.studysetList?.length > 0) && localStudysetList?.length > 0
     )}
-        <p class="h4" style="margin-top: 0.6rem;">Local Studysets</p>
+        <p class="h4" style="margin-top: 0.6rem;"><LocalIcon></LocalIcon> Local Studysets</p>
     {/if}
     <div class="grid list" style="overflow-wrap: anywhere; {
             collapseLocal && localStudysetList?.length > COLLAPSE_LENGTH ?
@@ -93,24 +150,12 @@
         }">
         {#each localStudysetList as studyset, index}
             {#if !(collapseLocal && index >= COLLAPSE_LENGTH && localCurrentlyCollapsed)}
-                <div>
-                    <a href={localLinkTemplateFunc(studyset.id)} class="button button-box" style="display: flex; gap: 0.4rem; flex-direction: column; text-align: start; align-items: start; align-content: start; justify-content: space-between; height: 100%;">
-                        <p style="margin-bottom: 0px;">{ studyset.title }</p>
-                        <p class="h6 fg0" style="margin-top: 0px; margin-bottom: 0px;">{studyset.termsCount ?? 0} {studyset.termsCount == 1 ? "Term" : "Terms"}</p>
-                    </a>
-                    {#if showLocalDropdown}
-                        <div class="flex" style="justify-content: end; position: relative; margin-top: 0px; margin-bottom: 0px;">
-                            <div class="dropdown left" style="position: absolute; bottom: 0.2rem;">
-                                <button class="dropdown-toggle">
-                                    <MoreIcon class="text fg0"></MoreIcon>
-                                </button>
-                                <div class="content">
-                                    {@render localDropdownContent?.(studyset)}
-                                </div>
-                            </div>
-                        </div>
-                    {/if}
-                </div>
+                <StudysetLinkBox
+                    {studyset}
+                    linkTemplateFunc={localLinkTemplateFunc}
+                    showDropdown={showLocalDropdown}
+                    dropdownContent={localDropdownContent}
+                ></StudysetLinkBox>
             {/if}
         {/each}
         {#if !data.authed && localStudysetList.length == 0}
@@ -126,31 +171,19 @@
         </div>
     {/if}
     {#if data.mySavedStudysets?.length > 0}
-        <p class="h4" style="margin-top: 0.6rem;">Saved Studysets</p>
+        <p class="h4" style="margin-top: 0.6rem;"><BookmarkIcon></BookmarkIcon> Saved Studysets</p>
         <div class="grid list" style="overflow-wrap: anywhere; {
             collapseSaved && data.mySavedStudysets?.length > COLLAPSE_LENGTH ?
                 "margin-bottom: 0px;" : ""
         }">
             {#each data.mySavedStudysets as studyset, index}
                 {#if !(collapseSaved && index >= COLLAPSE_LENGTH && savedCurrentlyCollapsed)}
-                <div>
-                    <a href={cloudLinkTemplateFunc(studyset.id)} class="button button-box" style="display: flex; gap: 0.4rem; flex-direction: column; text-align: start; align-items: start; align-content: start; justify-content: space-between; height: 100%;">
-                        <p style="margin-bottom: 0px;">{ studyset.title }</p>
-                        <p class="h6 fg0" style="margin-top: 0px; margin-bottom: 0px;">{studyset.termsCount ?? 0} {studyset.termsCount == 1 ? "Term" : "Terms"}</p>
-                    </a>
-                    {#if showSavedDropdown}
-                    <div class="flex" style="justify-content: end; position: relative; margin-top: 0px; margin-bottom: 0px;">
-                        <div class="dropdown left" style="position: absolute; bottom: 0.2rem;">
-                            <button class="dropdown-toggle">
-                                <MoreIcon class="text fg0"></MoreIcon>
-                            </button>
-                            <div class="content">
-                                {@render savedDropdownContent?.(studyset)}
-                            </div>
-                        </div>
-                    </div>
-                    {/if}
-                </div>
+                    <StudysetLinkBox
+                        {studyset}
+                        linkTemplateFunc={cloudLinkTemplateFunc}
+                        showDropdown={showSavedDropdown}
+                        dropdownContent={savedDropdownContent}
+                    ></StudysetLinkBox>
                 {/if}
             {/each}
         </div>
@@ -163,3 +196,4 @@
         {/if}
     {/if}
 </div>
+{/key}
