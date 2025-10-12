@@ -84,7 +84,13 @@
         }
 
         function flashcardsOnKeyDown(e) {
-            if (showFolderChooser) {
+            const active = document.activeElement;
+            if (
+                active &&
+                (active.tagName === "INPUT" ||
+                active.tagName === "TEXTAREA" ||
+                active.isContentEditable)
+            ) {
                 return;
             }
 
@@ -110,7 +116,13 @@
             }
         }
         function flashcardsOnKeyUp(e) {
-            if (showFolderChooser) {
+            const active = document.activeElement;
+            if (
+                active &&
+                (active.tagName === "INPUT" ||
+                active.tagName === "TEXTAREA" ||
+                active.isContentEditable)
+            ) {
                 return;
             }
 

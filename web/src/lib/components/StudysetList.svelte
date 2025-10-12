@@ -10,6 +10,7 @@
     import LocalIcon from "$lib/icons/Local.svelte";
     import BookmarkIcon from "$lib/icons/Bookmark.svelte";
     import FolderIcon from "$lib/icons/Folder.svelte";
+    import BackIcon from "$lib/icons/BackArrow.svelte";
 
     let {
         data,
@@ -26,7 +27,9 @@
         showLocalDropdown = false,
         localDropdownContent,
         showSavedDropdown = false,
-        savedDropdownContent
+        savedDropdownContent,
+        topMenu,
+        folderMenu
     } = $props();
 
     let localStudysetList = $state([]);
@@ -45,14 +48,11 @@
 
     const COLLAPSE_LENGTH = 6;
 
-    let transKey = $state(0);
-
     let showErrorBox = $state(false);
     let errorBoxText = $state("");
     let inFolder = $state(false);
-    let folderStudysets = $state([]);
+    let currentFolder = $state(null);
     async function viewFolder(id) {
-        inFolder = true;
         try {
             const respRaw = await fetch("/api/graphql", {
                 method: "POST",
@@ -78,10 +78,9 @@
             });
             const resp = await respRaw.json()
             if (resp?.data?.folder) {
-                folderStudysets = resp.data.folder.folderStudysets
+                currentFolder = resp.data.folder;
                 showErrorBox = false;
                 inFolder = true;
-                transKey++;
             } else {
                 console.log("unsucessful response while loading folder: ", resp);
                 errorBoxText = "Error loading folder :("
@@ -95,7 +94,7 @@
     }
 </script>
 
-{#key transKey}
+{#key inFolder}
 <div in:fade={{ duration: 120, delay: 120, easing: sineIn }} out:fade={{ duration: 120, easing: sineOut }}>
     {#if showErrorBox}
         <div class="box ohno" transition:slide={{duration:400}}>
@@ -103,9 +102,19 @@
         </div>
     {/if}
     {#if inFolder}
+        <div class="flex">
+            <button class="faint" onclick={() => {
+                inFolder = false;
+            }}>
+                <BackIcon></BackIcon> Back
+            </button>
+        </div>
+        <p class="h4" style="margin-top: 1rem;"><FolderIcon></FolderIcon> {currentFolder?.name}</p>
+        {@render folderMenu?.()}
     {:else}
+    {@render topMenu?.()}
     {#if data.myFolders?.length > 0}
-        <div class="grid list">
+        <div class="grid list" style="margin-bottom: 1rem;">
             {#each data.myFolders as folder}
                 <button class="button-box" onclick={() => viewFolder(folder.id)}>
                     <FolderIcon></FolderIcon> {folder.name}

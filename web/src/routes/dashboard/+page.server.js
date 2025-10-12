@@ -76,6 +76,10 @@ export async function load({ cookies, locals }) {
                 name
             }
           }
+          myFolders {
+            id
+            name
+          }
         }`
       })
     });
@@ -88,6 +92,7 @@ export async function load({ cookies, locals }) {
               authedUser: apiRes.data.authedUser,
               studysetList: apiRes.data.myStudysets,
               mySavedStudysets: apiRes.data.mySavedStudysets,
+              myFolders: apiRes.data.myFolders,
         header: { activePage: "home" },
               settingsDateTimeFormatHours: cookies.get(
                 "settingsdatetimeformathours"

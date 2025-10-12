@@ -24,6 +24,13 @@ export async function load({ cookies, locals }) {
             termsCount
             updatedAt
           }
+          mySavedStudysets {
+            id
+            title
+            private
+            termsCount
+            updatedAt
+          }
         }`
       })
     });
@@ -34,6 +41,7 @@ export async function load({ cookies, locals }) {
               authed: apiRes.data.authed,
               authedUser: apiRes.data.authedUser,
               studysetList: apiRes.data.myStudysets,
+              mySavedStudysets: apiRes.data.mySavedStudysets,
               settingsDateTimeFormatHours: cookies.get(
                 "settingsdatetimeformathours"
               )
