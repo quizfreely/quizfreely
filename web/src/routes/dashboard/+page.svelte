@@ -9,6 +9,15 @@
 
     let { data } = $props();
     let showFolderPicker = $state(false);
+
+    let folderToRename = null;
+    let showFolderRenamingFlag = $state(false);
+    function showFolderRenaming(folderId) {
+        folderIdToRename = folderId;
+        showFolderRenamingFlag = true;
+    }
+
+    let studysetListComponent;
 </script>
 
 <svelte:head>
@@ -28,10 +37,10 @@
             <IconPlus />
             New Studyset
         </a>
-        <a href="/studyset/create" class="button alt">
+        <button class="alt" onclick={() => showNewFolderModal = true}>
             <FolderIcon></FolderIcon>
             New Folder
-        </a>
+        </button>
     </div>
     {/snippet}
     {#snippet folderMenu(folder)}
@@ -40,7 +49,7 @@
             <IconPlus />
             New Studyset
         </a>
-        <button href="/studyset/create?folderId={folder?.id}" class="alt">
+        <button class="alt" onclick={() => showFolderRenaming(folder.id)}>
             <PencilIcon />
             Rename Folder
         </button>
@@ -70,6 +79,7 @@
         </button>
     {/snippet}
     <StudysetList
+        bind:this={studysetListComponent}
         {data}
         cloudLinkTemplateFunc={(id) => `/studysets/${id}`}
         localLinkTemplateFunc={(id) => `/studyset/local?id=${id}`}
@@ -87,3 +97,6 @@
         {folderMenu}
     ></StudysetList>
 </div>
+{#if showNewFolderModal}
+    
+{/if}

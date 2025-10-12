@@ -111,10 +111,25 @@
         </div>
         <p class="h4" style="margin-top: 1rem;"><FolderIcon></FolderIcon> {currentFolder?.name}</p>
         {@render folderMenu?.()}
+        <div class="grid list" style="overflow-wrap: anywhere;">
+            {#if currentFolder?.studysets?.length > 0}
+                {#each currentFolder.studysets as studyset}
+                    <StudysetLinkBox
+                        {studyset}
+                        linkTemplateFunc={cloudLinkTemplateFunc}
+                        showDropdown={showCloudDropdown}
+                        dropdownContent={cloudDropdownContent}
+                    ></StudysetLinkBox>
+                {/each}
+            {:else}
+                <div class="box">
+                </div>
+            {/if}
+        </div>
     {:else}
     {@render topMenu?.()}
     {#if data.myFolders?.length > 0}
-        <div class="grid list" style="margin-bottom: 1rem;">
+        <div class="grid list" style="overflow-wrap: anywhere; margin-bottom: 1rem;">
             {#each data.myFolders as folder}
                 <button class="button-box" onclick={() => viewFolder(folder.id)}>
                     <FolderIcon></FolderIcon> {folder.name}
