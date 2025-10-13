@@ -50,10 +50,12 @@
             <IconPlus />
             New Studyset
         </a>
+        {#if data.authed}
         <button class="alt" onclick={() => showNewFolderModal = true}>
             <FolderIcon></FolderIcon>
             New Folder
         </button>
+        {/if}
     </div>
     {/snippet}
     {#snippet folderMenu(folder)}

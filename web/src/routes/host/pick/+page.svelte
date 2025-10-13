@@ -6,12 +6,12 @@
 </script>
 <div class="grid page">
     <div class="content">
-        <div class="flex">
-            <a href="/host" class="button faint">
-                <BackIcon></BackIcon>
-                Back
-            </a>
-        </div>
+        <!-- <div class="flex"> -->
+        <!--     <a href="/host" class="button faint"> -->
+        <!--         <BackIcon></BackIcon> -->
+        <!--         Back -->
+        <!--     </a> -->
+        <!-- </div> -->
         <p>Select a studyset:</p>
         {#snippet emptyMsg()}
             <div class="box flex center-h center-v">
