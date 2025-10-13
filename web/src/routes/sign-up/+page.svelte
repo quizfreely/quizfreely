@@ -5,10 +5,11 @@
     import { slide } from "svelte/transition";
     import Noscript from "$lib/components/Noscript.svelte";
 
+    let { data } = $props();
+    
     let showErr = $state(false);
     let errMsg = $state("");
 
-    let { data } = $props();
     onMount(function () {
       if (!data.authed) {
         if (window.location.search.includes("?error")) {

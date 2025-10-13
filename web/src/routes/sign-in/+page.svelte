@@ -1,18 +1,21 @@
 <script>
     import { env } from "$env/dynamic/public";
-    import Noscript from "$lib/components/Noscript.svelte";
-
     import { onMount } from "svelte";
     import { goto } from "$app/navigation";
-    let {data} = $props();
+    import { slide } from "svelte/transition";
+    import Noscript from "$lib/components/Noscript.svelte";
+    
+    let { data } = $props();
+
+    let showErr = $state(false);
+    let errMsg = $state("");
 
     onMount(function () {
         if (!data.authed) {
         if (window.location.search.includes("?error")) {
             var urlParams = new URLSearchParams(window.location.search);
-            document.getElementById("error-div").classList.remove("hide");
-            document.getElementById("error-text").innerHTML =
-            "<b>Error</b>: " + urlParams.get("error");
+            showErr = true;
+            errMsg = "<b>Error</b>: " + urlParams.get("error");
         }
 
         function signinSubmit() {
@@ -28,13 +31,14 @@
         }).then(function (rawResponse) {
           rawResponse.json().then(function (response) {
             if (response.error) {
-              document.getElementById("error-div").classList.remove("hide");
-              if (response.error.code) {
-                document.getElementById("error-text").innerHTML =
-                "<b>Error</b>: " + response.error.code;
+              console.log("error in response: ", response);
+              showErr = true;
+              if (response.error.message != null) {
+                errMsg = response.error.message;
+              } else if (response.error.code != null) {
+                errMsg = "<b>Error</b>: " + response.error.code;
               } else {
-                document.getElementById("error-text").innerHTML =
-                "<b>Error</b>: " + response.error;
+                errMsg = "idk something went wrong sorry :(";
               }
             } else {
                 goto("/dashboard");
@@ -42,15 +46,13 @@
             }
           }).catch(function (error) {
             console.error(error)
-            document.getElementById("error-div").classList.remove("hide");
-          document.getElementById("error-text").innerHTML =
-          "<b>Error</b>: Can't connect to API? Or mabye it's response is invalid?";
+            showErr = true;
+            errMsg = "Error: Can't connect for some reason <b>:(</b>";
           })
         }).catch(function (error) {
           console.error(error)
-          document.getElementById("error-div").classList.remove("hide");
-          document.getElementById("error-text").innerHTML =
-          "<b>Error</b>: Can't connect to Quizfreely's API???";
+          showErr = true;
+          errMsg = "Error: Can't connect for some reason <b>:(</b>";
         });
       }
       document.getElementById("signinButton").addEventListener("click", signinSubmit);
@@ -113,11 +115,15 @@
 
 <Noscript />
 <main>
-  <div id="error-div" class="grid page hide">
-    <div class="content">
-      <p id="error-text" class="box ohno">Error</p>
+    {#if showErr}
+    <div class="grid page" transition:slide={{duration:400}}>
+        <div class="content">
+            <div class="box ohno">
+                <p>{@html errMsg}</p>
+            </div>
+        </div>
     </div>
-  </div>
+    {/if}
     {#if data.authed}
     <div id="signedin-div" class="grid thin-centered">
           <div class="content">
