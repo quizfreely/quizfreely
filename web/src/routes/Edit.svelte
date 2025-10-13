@@ -322,7 +322,7 @@
         }
         const query = `
             mutation CreateStudyset($studyset: StudysetInput!, $terms: [NewTermInput], $folderId: ID) {
-                createStudyset(studyset: $studyset, terms: $terms) {
+                createStudyset(studyset: $studyset, terms: $terms, folderId: $folderId) {
                     id
                 }
             }
