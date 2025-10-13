@@ -17,12 +17,16 @@
     let showErrInNewFolderModal = $state(false);
     let errInNewFolderModalMsg = $state("");
 
-    let folderToRename = null;
+    let folderRenaming;
+    let folderRenamingName;
     let showFolderRenamingFlag = $state(false);
-    function showFolderRenaming(folderId) {
-        folderIdToRename = folderId;
+    function showFolderRenaming(folder) {
+        folderRenaming = folder;
+        folderRenamingName = folder?.name ?? "";
         showFolderRenamingFlag = true;
     }
+    let showFolderRenamingErr = $state(false);
+    let folderRenamingErrMsg = $state(false);
 
     let studysetListComponent;
     let studysetListData = $state({
@@ -64,7 +68,7 @@
             <IconPlus />
             New Studyset
         </a>
-        <button class="alt" onclick={() => showFolderRenaming(folder.id)}>
+        <button class="alt" onclick={() => showFolderRenaming(folder)}>
             <PencilIcon />
             Rename Folder
         </button>
@@ -170,6 +174,7 @@
                 <button class="alt" onclick={() => {
                     showNewFolderModal = false;
                     showErrInNewFolderModal = false;
+                    newFolderName = "";
                 }}>
                     Cancel
                 </button>
@@ -177,6 +182,77 @@
             {#if showErrInNewFolderModal}
             <div class="box ohno" transition:slide={{duration:400}}>
                 <p>{errInNewFolderModalMsg}</p>
+            </div>
+            {/if}
+        </div>
+    </div>
+{/if}
+{#if showFolderRenamingFlag}
+    <div class="modal" transition:fade={{duration: 200}}>
+        <div class="content">
+            <p>Rename Folder:</p>
+            <input type="text" placeholder="New Folder Name" style="margin-top: 0.4rem;" bind:value={folderRenamingName}>
+            <div class="flex">
+                <button onclick={async () => {
+                    try {
+                        const raw = await fetch(
+                            "/api/graphql",
+                            {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json"
+                                },
+                                body: JSON.stringify({
+                                    query: `mutation ($id: ID!, $name: String!) {
+    renameFolder(id: $id, name: $name) {
+        id
+    }
+}`,
+                                    variables: {
+                                        id: folderRenaming.id,
+                                        name: folderRenamingName
+                                    }
+                                })
+                            }
+                        )
+                        const resp = await raw.json();
+                        if (resp?.data?.renameFolder) {
+                            /* update og obj from studysetlist component folder view */
+                            folderRenaming.name = folderRenamingName;
+
+                            /* update array from studysetlist component main view */
+                            const renamedIndex = studysetListData.myFolders.findIndex(
+                                folder => folderRenaming.id == folder?.id
+                            );
+                            studysetListData.myFolders[renamedIndex].name = folderRenamingName;
+                            showFolderRenamingFlag = false
+                            showFolderRenamingErr = false;
+                        } else {
+                            console.log(
+                                "unsuccessful response when creating folder: ",
+                                resp
+                            );
+                            folderRenamingErrMsg = "Error renaming folder :(";
+                            showFolderRenamingErr = true;
+                        }
+                    } catch (err) {
+                        console.log("error creating folder: ", err);
+                        folderRenamingErrMsg = "Error renaming folder :(";
+                        showFolderRenamingErr = true;
+                    }
+                }}>
+                    <CheckmarkIcon></CheckmarkIcon> Rename
+                </button>
+                <button class="alt" onclick={() => {
+                    showFolderRenamingFlag = false;
+                    showFolderRenamingErr = false;
+                }}>
+                    Cancel
+                </button>
+            </div>
+            {#if showFolderRenamingErr}
+            <div class="box ohno" transition:slide={{duration:400}}>
+                <p>{folderRenamingErrMsg}</p>
             </div>
             {/if}
         </div>
