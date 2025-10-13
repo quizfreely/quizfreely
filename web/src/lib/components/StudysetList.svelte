@@ -3,7 +3,7 @@
     import db from "$lib/idb-api-layer/db.js";
     import idbApiLayer from "$lib/idb-api-layer/idb-api-layer.js";
     import { onMount } from "svelte";
-    import { slide, fade } from "svelte/transition";
+    import { slide, fade, scale } from "svelte/transition";
     import { sineIn, sineOut } from "svelte/easing";
     import StudysetLinkBox from "$lib/components/StudysetLinkBox.svelte";
     import MoreIcon from "$lib/icons/MoreDotsVertical.svelte";
@@ -130,7 +130,7 @@
     {#if data.myFolders?.length > 0}
         <div class="grid list" style="overflow-wrap: anywhere; margin-bottom: 1rem;">
             {#each data.myFolders as folder}
-                <button class="button-box" onclick={() => viewFolder(folder.id)}>
+                <button class="button-box" onclick={() => viewFolder(folder.id)} transition:scale={{duration:200}}>
                     <FolderIcon></FolderIcon> {folder.name}
                 </button>
             {/each}
