@@ -10,6 +10,8 @@
     let { data } = $props();
     let showFolderPicker = $state(false);
 
+    let showNewFolderModal = $state(false);
+
     let folderToRename = null;
     let showFolderRenamingFlag = $state(false);
     function showFolderRenaming(folderId) {
