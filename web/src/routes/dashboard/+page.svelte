@@ -26,6 +26,7 @@
 
     let studysetListComponent;
     let studysetListData = $state({
+        authed: data.authed,
         studysetList: data.studysetList,
         myFolders: data.myFolders,
         mySavedStudysets: data.mySavedStudysets

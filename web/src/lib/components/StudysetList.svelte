@@ -18,7 +18,7 @@
         localLinkTemplateFunc,
         cloudEmptyMsg,
         localEmptyMsg,
-        hideTypeWhenCloudEmptyAndLocalExists,
+        hideTypeWhenCloudEmptyAndLocalExists = false,
         collapseCloud = true,
         collapseLocal = true,
         collapseSaved = true,
@@ -39,7 +39,6 @@
     let savedCurrentlyCollapsed = $state(true);
 
     onMount(async function () {
-        console.log(data)
         localStudysetList = await db.studysets.orderBy("updatedAt").toArray();
         for (const studyset of localStudysetList) {
             studyset.termsCount = (await idbApiLayer.getTermsByStudysetId(studyset.id))?.length ?? 0;

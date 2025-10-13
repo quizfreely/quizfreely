@@ -250,6 +250,20 @@
 {#if data.local}
 <Noscript />
 {/if}
+
+{#snippet addToOrViewFolder()}
+    {#if folderId != null}
+    <a class="button alt" href="/folders/{folderId}">
+        <FolderIcon></FolderIcon>
+        View Folder
+    </a>
+    {:else}
+    <button class="alt" onclick={() => showFolderChooser = true}>
+        <FolderIcon></FolderIcon>
+        Add to Folder
+    </button>
+    {/if}
+{/snippet}
 <main>
   <div class="grid page">
     <div class="content">
@@ -278,6 +292,7 @@
             <IconPencil />
             Edit
           </a>
+          {@render addToOrViewFolder()}
           <div class="dropdown" tabindex="0">
             <button class="dropdown-toggle" aria-label="More Options Dropdown">
               <IconMoreDotsV />
@@ -365,17 +380,7 @@
                 Save
             </button>
             {/if}
-            {#if folderId != null}
-            <a class="button alt" href="/folders/{folderId}">
-                <FolderIcon></FolderIcon>
-                View Folder
-            </a>
-            {:else}
-            <button class="alt" onclick={() => showFolderChooser = true}>
-                <FolderIcon></FolderIcon>
-                Add to Folder
-            </button>
-            {/if}
+            {@render addToOrViewFolder()}
         </div>
         {/if}
       </div>
