@@ -8,6 +8,8 @@
     import BookmarkIcon from "$lib/icons/Bookmark.svelte";
     import PencilIcon from "$lib/icons/Pencil.svelte";
     import CheckmarkIcon from "$lib/icons/Checkmark.svelte";
+    import TrashIcon from "$lib/icons/Trash.svelte";
+    import MoreIcon from "$lib/icons/MoreDotsVertical.svelte";
 
     let { data } = $props();
     let showFolderPicker = $state(false);
@@ -35,6 +37,17 @@
         myFolders: data.myFolders,
         mySavedStudysets: data.mySavedStudysets
     })
+
+    let showDeleteFolderModal = $state(false);
+    let deleteFolderId = $state(null);
+    let deleteFolderName = $state(null);
+    let showDeleteFolderErr = $state(false);
+    let deleteFolderErrMsg = $state("");
+    function showDeleteFolderConfirmation(folder) {
+        showDeleteFolderModal = true;
+        deleteFolderId = folder?.id;
+        deleteFolderName = folder?.name;
+    }
 </script>
 
 <svelte:head>
@@ -72,6 +85,18 @@
             <PencilIcon />
             Rename Folder
         </button>
+        <div class="dropdown left" tabindex="0">
+            <button class="dropdown-toggle">
+                <MoreIcon></MoreIcon>
+            </button>
+            <div class="content">
+                <button class="ohno" onclick={
+                    () => showDeleteFolderConfirmation(folder)
+                }>
+                    <TrashIcon></TrashIcon> Delete Folder
+                </button>
+            </div>
+        </div>
     </div>
     {/snippet}
 
@@ -229,14 +254,14 @@
                             showFolderRenamingErr = false;
                         } else {
                             console.log(
-                                "unsuccessful response when creating folder: ",
+                                "unsuccessful response when renaming folder: ",
                                 resp
                             );
                             folderRenamingErrMsg = "Error renaming folder :(";
                             showFolderRenamingErr = true;
                         }
                     } catch (err) {
-                        console.log("error creating folder: ", err);
+                        console.log("error renaming folder: ", err);
                         folderRenamingErrMsg = "Error renaming folder :(";
                         showFolderRenamingErr = true;
                     }
@@ -253,6 +278,69 @@
             {#if showFolderRenamingErr}
             <div class="box ohno" transition:slide={{duration:400}}>
                 <p>{folderRenamingErrMsg}</p>
+            </div>
+            {/if}
+        </div>
+    </div>
+{/if}
+{#if showDeleteFolderModal}
+    <div class="modal" transition:fade={{duration: 200}}>
+        <div class="content">
+            <p>Are you sure you want to delete this folder?</p>
+            <div class="box">
+                <div class="flex" style="align-items: center; flex-wrap: nowrap;">
+                    <FolderIcon></FolderIcon> {deleteFolderName}
+                </div>
+            </div>
+            <div class="flex">
+                <button class="ohno" onclick={async () => {
+                    try {
+                        const raw = await fetch(
+                            "/api/graphql",
+                            {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json"
+                                },
+                                body: JSON.stringify({
+                                    query: `mutation ($id: ID!) {
+    deleteFolder(id: $id)
+}`,
+                                    variables: {
+                                        id: deleteFolderId
+                                    }
+                                })
+                            }
+                        )
+                        const resp = await raw.json();
+                        if (resp?.data?.deleteFolder) {
+                            window.location.reload();
+                        } else {
+                            console.log(
+                                "unsuccessful response when deleting folder: ",
+                                resp
+                            );
+                            deleteFolderErrMsg = "Error deleting folder :(";
+                            showDeleteFolderErr = true;
+                        }
+                    } catch (err) {
+                        console.log("error deleting folder: ", err);
+                        deleteFolderErrMsg = "Error deleting folder :(";
+                        showDeleteFolderErr = true;
+                    }
+                }}>
+                    <TrashIcon></TrashIcon> Delete
+                </button>
+                <button class="alt" onclick={() => {
+                    showDeleteFolderModal = false;
+                    showDeleteFolderErr = false;
+                }}>
+                    Cancel
+                </button>
+            </div>
+            {#if showDeleteFolderErr}
+            <div class="box ohno" transition:slide={{duration:400}}>
+                <p>{deleteFolderErrMsg}</p>
             </div>
             {/if}
         </div>

@@ -91,6 +91,10 @@
             showErrorBox = true;
         }
     }
+
+    export function exitFolderView() {
+        inFolder = false;
+    }
 </script>
 
 {#key inFolder}
