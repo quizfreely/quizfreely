@@ -1,4 +1,5 @@
 <script>
+    import { slide, fade } from "svelte/transition";
     import Noscript from "$lib/components/Noscript.svelte";
     import StudysetList from "$lib/components/StudysetList.svelte";
     import FolderPicker from "$lib/components/FolderPicker.svelte";
@@ -6,11 +7,15 @@
     import FolderIcon from "$lib/icons/Folder.svelte";
     import BookmarkIcon from "$lib/icons/Bookmark.svelte";
     import PencilIcon from "$lib/icons/Pencil.svelte";
+    import CheckmarkIcon from "$lib/icons/Checkmark.svelte";
 
     let { data } = $props();
     let showFolderPicker = $state(false);
 
     let showNewFolderModal = $state(false);
+    let newFolderName = $state("");
+    let showErrInNewFolderModal = $state(false);
+    let errInNewFolderModalMsg = $state("");
 
     let folderToRename = null;
     let showFolderRenamingFlag = $state(false);
@@ -20,6 +25,11 @@
     }
 
     let studysetListComponent;
+    let studysetListData = $state({
+        studysetList: data.studysetList,
+        myFolders: data.myFolders,
+        mySavedStudysets: data.mySavedStudysets
+    })
 </script>
 
 <svelte:head>
@@ -82,7 +92,7 @@
     {/snippet}
     <StudysetList
         bind:this={studysetListComponent}
-        {data}
+        data={studysetListData}
         cloudLinkTemplateFunc={(id) => `/studysets/${id}`}
         localLinkTemplateFunc={(id) => `/studyset/local?id=${id}`}
         cloudEmptyMsg={emptyMsg}
@@ -100,5 +110,72 @@
     ></StudysetList>
 </div>
 {#if showNewFolderModal}
-    
+    <div class="modal" transition:fade={{duration: 200}}>
+        <div class="content">
+            <p>Create New Folder:</p>
+            <input type="text" placeholder="Folder Name" style="margin-top: 0.4rem;" bind:value={newFolderName}>
+            <div class="flex">
+                <button onclick={async () => {
+                    try {
+                        const raw = await fetch(
+                            "/api/graphql",
+                            {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json"
+                                },
+                                body: JSON.stringify({
+                                    query: `mutation ($name: String!) {
+    createFolder(name: $name) {
+        id
+    }
+}`,
+                                    variables: {
+                                        name: newFolderName
+                                    }
+                                })
+                            }
+                        )
+                        const resp = await raw.json();
+                        if (resp?.data?.createFolder) {
+                            studysetListData.myFolders = [
+                                ...(studysetListData?.myFolders ?? []),
+                                {
+                                    id: resp.data.createFolder?.id,
+                                    name: newFolderName
+                                }
+                            ];
+                            showNewFolderModal = false
+                            showErrInNewFolderModal = false;
+                        } else {
+                            console.log(
+                                "unsuccessful response when creating folder: ",
+                                resp
+                            );
+                            errInNewFolderModalMsg = "Error creating folder :(";
+                            showErrInNewFolderModal = true;
+                        }
+                    } catch (err) {
+                        console.log("error creating folder: ", err);
+                        errInNewFolderModalMsg = "Error creating folder :(";
+                        showErrInNewFolderModal = true;
+                    }
+                    newFolderName = "";
+                }}>
+                    <CheckmarkIcon></CheckmarkIcon> Create
+                </button>
+                <button class="alt" onclick={() => {
+                    showNewFolderModal = false;
+                    showErrInNewFolderModal = false;
+                }}>
+                    Cancel
+                </button>
+            </div>
+            {#if showErrInNewFolderModal}
+            <div class="box ohno" transition:slide={{duration:400}}>
+                <p>{errInNewFolderModalMsg}</p>
+            </div>
+            {/if}
+        </div>
+    </div>
 {/if}
