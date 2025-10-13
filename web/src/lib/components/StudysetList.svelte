@@ -67,6 +67,10 @@
             id
             title
             termsCount
+            folder {
+                id
+                name
+            }
         }
     }
 }`,
