@@ -109,7 +109,7 @@
             </button>
         </div>
         <p class="h4" style="margin-top: 1rem;"><FolderIcon></FolderIcon> {currentFolder?.name}</p>
-        {@render folderMenu?.()}
+        {@render folderMenu?.(currentFolder)}
         <div class="grid list" style="overflow-wrap: anywhere;">
             {#if currentFolder?.studysets?.length > 0}
                 {#each currentFolder.studysets as studyset}
