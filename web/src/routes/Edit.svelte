@@ -209,7 +209,7 @@
 
     var createLocalStudysetCooldown = false;
     function createLocalStudyset() {
-        if (createCloudStudysetCooldown) {
+        if (createLocalStudysetCooldown) {
             return;
         }
 
