@@ -321,7 +321,7 @@
             });
         }
         const query = `
-            mutation CreateStudyset($studyset: StudysetInput!, $terms: [NewTermInput]) {
+            mutation CreateStudyset($studyset: StudysetInput!, $terms: [NewTermInput], $folderId: ID) {
                 createStudyset(studyset: $studyset, terms: $terms) {
                     id
                 }
@@ -333,7 +333,8 @@
                 title,
                 private: isPrivate,
             },
-            terms: newTerms
+            terms: newTerms,
+            folderId: data?.folderId
         };
         
         fetch("/api/graphql", {
