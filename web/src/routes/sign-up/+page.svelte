@@ -1,24 +1,27 @@
 <script>
     import { env } from "$env/dynamic/public";
-    import Noscript from "$lib/components/Noscript.svelte";
     import { onMount } from "svelte";
     import { goto } from "$app/navigation";
+    import { slide } from "svelte/transition";
+    import Noscript from "$lib/components/Noscript.svelte";
+
+    let showErr = $state(false);
+    let errMsg = $state("");
 
     let { data } = $props();
     onMount(function () {
       if (!data.authed) {
         if (window.location.search.includes("?error")) {
           var urlParams = new URLSearchParams(window.location.search);
-          document.getElementById("error-div").classList.remove("hide");
-          document.getElementById("error-text").innerHTML =
-            "<b>Error</b>: " + urlParams.get("error");
+          showErr = true;
+          errMsg = "<b>Error</b>: " + urlParams.get("error");
         }
 
         function signupSubmit() {
         if (
           document.getElementById("signupPasswordInput").value === document.getElementById("signupPasswordConfirmInput").value
         ) {
-          document.getElementById("error-div").classList.add("hide");
+          showErr = false;
           var username = document.getElementById("signupUsernameInput").value
           fetch("/api/v0/auth/sign-up", {
             method: "POST",
@@ -32,13 +35,18 @@
           }).then(function (rawRes) {
             rawRes.json().then(function (response) {
               if (response.error) {
-                document.getElementById("error-div").classList.remove("hide");
-                if (response.error.code) {
-                  document.getElementById("error-text").innerHTML =
-                  "<b>Error</b>: " + response.error.code;
+                console.log("error in response: ", response);
+                showErr = true;
+                if (response.error.code == "USERNAME_INVALID") {
+                  errMsg = "Usernames need less than 100 characters" +
+                    "<span class=\"line\">Only letters/numbers (any alphabet, but no uppercase),</span>" +
+                    "<span class=\"line\">underscores, dots, or dashes allowed</span>"
+                } else if (response.error.message != null) {
+                  errMsg = response.error.message;
+                } else if (response.error.code != null) {
+                  errMsg = "<b>Error</b>: " + response.error.code;
                 } else {
-                  document.getElementById("error-text").innerHTML =
-                  "<b>Error</b>: " + response.error;
+                  errMsg = "idk something didn't work :(";
                 }
               } else {
                 goto("/dashboard");
@@ -46,20 +54,17 @@
               }
             }).catch(function (error) {
               console.error(error)
-              document.getElementById("error-div").classList.remove("hide");
-              document.getElementById("error-text").innerHTML =
-              "<b>Error</b>: Can't connect to API? Or mabye it's response is invalid?";
+              showErr = true;
+              errMsg = "Error: Can't connect for some reason <b>:(</b>";
             })
           }).catch(function (error) {
             console.error(error)
-            document.getElementById("error-div").classList.remove("hide");
-            document.getElementById("error-text").innerHTML =
-            "<b>Error</b>: Can't connect to Quizfreely's API???";
+            showErr = true;
+            errMsg = "Error: Can't connect for some reason <b>:(</b>";
           });
         } else {
-          document.getElementById("error-div").classList.remove("hide");
-          document.getElementById("error-text").innerHTML =
-            "Passwords don't match <b>D:</b>" +
+          showErr = true;
+          errMsg = "Passwords don't match :(" +
             "<span class=\"line\">Make sure you retyped your password how you want!</span>";
         }
       }
@@ -123,11 +128,15 @@
 
 <Noscript />
 <main>
-    <div id="error-div" class="grid page hide">
+    {#if showErr}
+    <div class="grid page" transition:slide={{duration:400}}>
         <div class="content">
-            <p id="error-text" class="box ohno">Error</p>
+            <div class="box ohno">
+                <p>{@html errMsg}</p>
+            </div>
         </div>
     </div>
+    {/if}
     {#if data.authed}
         <div id="signedin-div" class="grid thin-centered">
             <div class="content">
