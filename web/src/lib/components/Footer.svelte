@@ -21,7 +21,7 @@
         <IconGitHub />
         GitHub
       </a>
-      <a href="https://hcb.hackclub.com/donations/start/quizfreely" class="button alt love" style="margin-left: 0.2rem;">
+      <a href="https://hcb.hackclub.com/donations/start/quizfreely" class="button alt love" style="margin-left: 0.2rem; border: 0.2rem solid var(--love)">
         <HeartIcon></HeartIcon> Donate
       </a>
     </div>
