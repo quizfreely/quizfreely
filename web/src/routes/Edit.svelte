@@ -647,7 +647,7 @@
                                     "selected" : ""
                             }" onclick={() => importTermsTermDefDelimiterRadioSelect = "comma"}>
                                 <IconCheckmark class="button-box-selected-icon"></IconCheckmark>
-                                Comma <code>,</code>
+                                Comma
                             </button>
                             <button class="button-box {
                                 importTermsTermDefDelimiterRadioSelect == "custom" ?
@@ -678,7 +678,7 @@
                                     "selected" : ""
                             }" onclick={() => importTermsRowDelimiterRadioSelect = "semicolon"}>
                                 <IconCheckmark class="button-box-selected-icon"></IconCheckmark>
-                                Semicolon <code>;</code>
+                                Semicolon
                             </button>
                             <button class="button-box {
                                 importTermsRowDelimiterRadioSelect == "custom" ?
