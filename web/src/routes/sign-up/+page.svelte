@@ -191,7 +191,7 @@
                     <div class="separator">or</div>
                     <div>
                         {#if env.ENABLE_OAUTH_GOOGLE == "true"}
-                            <a class="button fullWidth gaccount-button" href="/api/oauth/google">
+                            <a class="button fullWidth gaccount-button no-box-shadow" href="/api/oauth/google">
                                 <div class="gaccount-container">
                                     <div class="gaccount-icon">
                                         <svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" xmlns:xlink="http://www.w3.org/1999/xlink" style="display: block;">
