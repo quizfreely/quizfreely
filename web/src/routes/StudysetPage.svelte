@@ -206,6 +206,7 @@
 
     let saved = $state(data?.studyset?.saved ?? false);
     let folderId = $state(data?.studyset?.folder?.id ?? null);
+    let folderName = $state(data?.studyset?.folder?.name ?? null);
     let showFolderChooser = $state(false);
 </script>
 <style>
@@ -243,7 +244,7 @@
 
 {#snippet folderPickerErrMsg()}
     <div class="box ohno" transition:slide={{duration: 400}}>
-        <p>Error adding/moving to folder :(</p>
+        <p>Error adding to/changing folder :(</p>
     </div>
 {/snippet}
 
@@ -251,25 +252,26 @@
 <Noscript />
 {/if}
 
-{#snippet addToOrViewFolder()}
-    {#if folderId != null}
-    <a class="button alt" href="/folders/{folderId}">
-        <FolderIcon></FolderIcon>
-        View Folder
-    </a>
-    {:else}
+{#snippet addToFolder()}
     <button class="alt" onclick={() => showFolderChooser = true}>
         <FolderIcon></FolderIcon>
-        Add to Folder
+        {folderId != null ? "Change Folder" : "Add to Folder"}
     </button>
-    {/if}
 {/snippet}
 <main>
   <div class="grid page">
     <div class="content">
     {#if !flashcardsMaximized}
       <div id="title-and-menu-outer-div">
-        <h2 class="caption" style="overflow-wrap:anywhere">{ title ?? "Title" }</h2>
+        {#if folderName}
+            <div class="flex">
+                <a href="/dashboard?folder={folderId}" class="button faint">
+                    <FolderIcon></FolderIcon>
+                    {folderName}
+                </a>
+            </div>
+        {/if}
+        <h2 class="caption" style="overflow-wrap: anywhere; margin-top: 0.4rem;">{ title ?? "Title" }</h2>
         {#if data.local}
         <p class="fg0">
           <IconLocal /> Local Studyset
@@ -292,7 +294,7 @@
             <IconPencil />
             Edit
           </a>
-          {@render addToOrViewFolder()}
+          {@render addToFolder()}
           <div class="dropdown" tabindex="0">
             <button class="dropdown-toggle" aria-label="More Options Dropdown">
               <IconMoreDotsV />
@@ -380,7 +382,7 @@
                 Save
             </button>
             {/if}
-            {@render addToOrViewFolder()}
+            {@render addToFolder()}
         </div>
         {/if}
       </div>
@@ -547,6 +549,7 @@
                     const resp = await raw.json();
                     if (resp?.data?.setStudysetFolder) {
                         folderId = selectedFolder.id;
+                        folderName = selectedFolder.name;
                         showFolderChooser = false;
                     } else {
                         console.error("Unsuccessful json response: ", resp);
@@ -556,7 +559,40 @@
                     console.error("Error adding to folder: ", err);
                     showErrorMsgCallback(true);
                 }
-        }}></FolderPicker>
+            }}
+            showNoneOption={true}
+            noneCallback={async (showErrorMsgCallback) => {
+                showErrorMsgCallback(false);
+                try {
+                    const raw = await fetch(`/api/graphql`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                        query: `mutation ($studysetId: ID!) {
+    removeStudysetFromFolder(studysetId: $studysetId)
+}`,
+                            variables: {
+                                studysetId: data.studyset.id,
+                            }
+                        })
+                    });
+                    const resp = await raw.json();
+                    if (resp?.data?.removeStudysetFromFolder) {
+                        folderId = null;
+                        folderName = null;
+                        showFolderChooser = false;
+                    } else {
+                        console.error("Unsuccessful json response: ", resp);
+                        showErrorMsgCallback(true);
+                    }
+                } catch (err) {
+                    console.error("Error removing from folder: ", err);
+                    showErrorMsgCallback(true);
+                }
+            }}
+        ></FolderPicker>
       {/if}
     {/if}
     </div>

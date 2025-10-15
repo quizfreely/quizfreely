@@ -3,7 +3,7 @@
     import { fade, slide } from "svelte/transition";
     import CloseXMarkIcon from "$lib/icons/CloseXMark.svelte";
     import FolderIcon from "$lib/icons/Folder.svelte";
-    let { closeCallback, selectCallback, errMsg } = $props();
+    let { closeCallback, selectCallback, errMsg, showNoneOption, noneCallback } = $props();
     let folders = $state([]);
     let showErrMsg = $state(false);
     let showActionErrMsg = $state(false);
@@ -54,6 +54,13 @@
             </div>
         {/if}
         <div class="flex" style="gap: 0.6rem; flex-direction: column; flex-wrap: nowrap; max-height: 50vh; overflow-y: auto; margin-top: 0.6rem;">
+            {#if showNoneOption && folders?.length > 0}
+            <button class="button-box" onclick={() => noneCallback(
+                (show) => showActionErrMsg = show
+            )}>
+                None
+            </button>
+            {/if}
             {#each folders as folder}
                 <button class="button-box" style="text-align: start; display: flex; align-items: center; justify-content: start; gap: 0.6rem;" onclick={
                     () => selectCallback(
