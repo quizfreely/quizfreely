@@ -106,18 +106,28 @@
         </div>
     {/snippet}
     {#snippet cloudDropdownContent(studyset)}
-        {#if studyset?.folder}
-            <button><FolderIcon></FolderIcon> Change Folder</button>
-        {:else}
-            <button onclick={() => console.log(studyset)}><FolderIcon></FolderIcon> Add to Folder</button>
-        {/if}
+        <button onclick={() => {
+            folderPickerStudysetId = studyset?.id;
+            showFolderPicker = true;
+        }}>
+            <FolderIcon></FolderIcon>
+            {
+                studyset?.folder != null ?
+                    "Change Folder" : "Add to Folder"
+            }
+        </button>
     {/snippet}
     {#snippet savedDropdownContent(studyset)}
-        {#if studyset?.folder}
-            <button><FolderIcon></FolderIcon> Change Folder</button>
-        {:else}
-            <button onclick={() => console.log(studyset)}><FolderIcon></FolderIcon> Add to Folder</button>
-        {/if}
+        <button onclick={() => {
+            folderPickerStudysetId = studyset?.id;
+            showFolderPicker = true;
+        }}>
+            <FolderIcon></FolderIcon>
+            {
+                studyset?.folder != null ?
+                    "Change Folder" : "Add to Folder"
+            }
+        </button>
         <button onclick={() => console.log(studyset)}>
             <BookmarkIcon></BookmarkIcon> Unsave
         </button>
@@ -345,4 +355,76 @@
             {/if}
         </div>
     </div>
+{/if}
+{#snippet folderPickerErrMsg()}
+    <div class="box ohno" transition:slide={{duration: 400}}>
+        <p>Error adding to/changing folder :(</p>
+    </div>
+{/snippet}
+{#if showFolderPicker}
+    <FolderPicker closeCallback={() => showFolderPicker = false} errMsg={folderPickerErrMsg} selectCallback={async (selectedFolder, showErrorMsgCallback) => {
+            showErrorMsgCallback(false);
+            try {
+                const raw = await fetch(`/api/graphql`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                    query: `mutation ($studysetId: ID!, $folderId: ID!) {
+    tudysetFolder(studysetId: $studysetId, folderId: $folderId)
+}`,
+                        variables: {
+                            studysetId: folderPickerStudysetId,
+                            folderId: selectedFolder.id
+                        }
+                    })
+                });
+                const resp = await raw.json();
+                if (resp?.data?.setStudysetFolder) {
+                    folderId = selectedFolder.id;
+                    folderName = selectedFolder.name;
+                    showFolderPicker = false;
+                } else {
+                    console.error("Unsuccessful json response: ", resp);
+                    showErrorMsgCallback(true);
+                }
+            } catch (err) {
+                console.error("Error adding to folder: ", err);
+                showErrorMsgCallback(true);
+            }
+        }}
+        showNoneOption={true}
+        noneCallback={async (showErrorMsgCallback) => {
+            showErrorMsgCallback(false);
+            try {
+                const raw = await fetch(`/api/graphql`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                    query: `mutation ($studysetId: ID!) {
+    veStudysetFromFolder(studysetId: $studysetId)
+}`,
+                        variables: {
+                            studysetId: folderPickerStudysetId,
+                        }
+                    })
+                });
+                const resp = await raw.json();
+                if (resp?.data?.removeStudysetFromFolder) {
+                    folderId = null;
+                    folderName = null;
+                    showFolderPicker = false;
+                } else {
+                    console.error("Unsuccessful json response: ", resp);
+                    showErrorMsgCallback(true);
+                }
+            } catch (err) {
+                console.error("Error removing from folder: ", err);
+                showErrorMsgCallback(true);
+            }
+        }}
+    ></FolderPicker>
 {/if}

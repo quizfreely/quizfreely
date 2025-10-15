@@ -17,7 +17,7 @@ export async function load({ cookies, locals }) {
             username
             displayName
           }
-          myStudysets {
+          myStudysets(hideFoldered: true) {
             id
             title
             private
