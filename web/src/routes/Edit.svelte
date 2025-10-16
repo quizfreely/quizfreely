@@ -1,6 +1,6 @@
 <script>
     import Noscript from "$lib/components/Noscript.svelte";
-    import { onMount, mount } from "svelte";
+    import { onMount, mount, tick } from "svelte";
     import idbApiLayer from "$lib/idb-api-layer/idb-api-layer.js";
     import { goto, beforeNavigate } from "$app/navigation";
     import { cancelNprogressTimeout } from "$lib/stores/nprogressTimeout.js";
@@ -31,6 +31,15 @@
     var key = 0;
     function addTerm(term, def, id) {
       terms.push({
+        id: id ?? undefined,
+        term: term ?? "",
+        def: def ?? "",
+        key: key,
+      })
+      key++;
+    }
+    function insertTerm(index, term, def, id) {
+      terms.splice(index, 0, {
         id: id ?? undefined,
         term: term ?? "",
         def: def ?? "",
@@ -69,6 +78,9 @@
         addTerm(arr[row][0], arr[row][1]);
       }
     }
+
+    let termTextareas = $state([]);
+    let defTextareas = $state([]);
 
     onMount(() => {
         (async function () {
@@ -167,9 +179,65 @@
         })();
 
         function onKeydown(e) {
-            if (event.key === "Enter" && event.ctrlKey) {
+            if (event.key === "Enter" && event.ctrlKey && !event.altKey) {
                 event.preventDefault();
                 addTerm();
+                unsavedChanges = true;
+                tick().then(
+                    () => termTextareas?.[termTextareas?.length - 1]?.focus()
+                );
+            }
+            if (event.key === "Enter" && event.altKey) {
+                event.preventDefault();
+                if (document.activeElement?.dataset?.rowIndex >= 0) {
+                    insertTerm(
+                        document.activeElement?.dataset?.rowIndex - -(1)
+                        /* string + number = string
+                           string - (-number) = number */
+                    )
+                    unsavedChanges = true;
+                    tick().then(() => {
+                        termTextareas?.[
+                            document.activeElement?.dataset?.rowIndex - -(1)
+                            /* string + number = string
+                               string - (-number) = number */
+                        ]?.focus();
+                    });
+                }
+            }
+
+            if (event.key === "ArrowUp" && event.altKey && !event.shiftKey) {
+                event.preventDefault();
+                if (document.activeElement?.dataset?.columnType == "TERM" &&
+                    document.activeElement.dataset?.rowIndex - 1 >= 0) {
+                    termTextareas?.[
+                        document.activeElement.dataset?.rowIndex - 1
+                    ]?.focus();
+                }
+                if (document.activeElement?.dataset?.columnType == "DEF" &&
+                    document.activeElement.dataset?.rowIndex - 1 >= 0) {
+                    defTextareas?.[
+                        document.activeElement.dataset?.rowIndex - 1
+                    ]?.focus();
+                }
+            }
+
+            if (event.key === "ArrowDown" && event.altKey && !event.shiftKey) {
+                event.preventDefault();
+                if (document.activeElement?.dataset?.columnType == "TERM") {
+                    termTextareas?.[
+                        document.activeElement.dataset?.rowIndex - (-1)
+                        /* string + number = string
+                           string - (-number) = number */
+                    ]?.focus();
+                }
+                if (document.activeElement?.dataset?.columnType == "DEF") {
+                    defTextareas?.[
+                        document.activeElement.dataset?.rowIndex - (-1)
+                        /* string + number = string
+                           string - (-number) = number */
+                    ]?.focus();
+                }
             }
         }
         window.addEventListener("keydown", onKeydown);
@@ -533,9 +601,12 @@
                       rows: "2",
                       oninput: () => {if (!unsavedChanges) {
                         unsavedChanges = true;
-                      }}
+                      }},
+                      "data-column-type": "TERM",
+                      "data-row-index": index
                     }}
                     bind:value={term.term}
+                    bind:textareaElement={termTextareas[index]}
                   />
                   <AutoResizeTextarea
                     div={{
@@ -546,9 +617,12 @@
                       rows: "2",
                       oninput: () => {if (!unsavedChanges) {
                         unsavedChanges = true;
-                      }}
+                      }},
+                      "data-column-type": "DEF",
+                      "data-row-index": index
                     }}
                     bind:value={term.def}
+                    bind:textareaElement={defTextareas[index]}
                   />
                   <div class="flex center term-row-box-actions">
                       <div class="dropdown left" tabindex="0">
@@ -569,6 +643,13 @@
                                 event.target.blur();
                               }}>
                                   <IconArrowDown /> Move down
+                              </button>
+                              <button onclick={function (event) {
+                                insertTerm(index + 1);
+                                unsavedChanges = true;
+                                event.target.blur();
+                              }}>
+                                  <IconPlus /> Add Below
                               </button>
                               <button class="ohno" onclick={function () {
                                   deleteTerm(index);
@@ -594,6 +675,9 @@
                 <button onclick={function () {
                   addTerm();
                   unsavedChanges = true;
+                  tick().then(
+                    () => termTextareas?.[termTextareas?.length - 1]?.focus()
+                  );
                 }}>
                   <IconPlus />
                   Add term
