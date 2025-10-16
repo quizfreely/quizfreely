@@ -1,4 +1,5 @@
 <script>
+    import { tick, onMount } from "svelte";
     import { slide, fade } from "svelte/transition";
     import Noscript from "$lib/components/Noscript.svelte";
     import StudysetList from "$lib/components/StudysetList.svelte";
@@ -19,14 +20,36 @@
     let newFolderName = $state("");
     let showErrInNewFolderModal = $state(false);
     let errInNewFolderModalMsg = $state("");
+    let newFolderInput;
+    function openNewFolderModal() {
+        showNewFolderModal = true;
+        showErrInNewFolderModal = false;
+        newFolderName = "";
+        tick().then(
+            () => newFolderInput?.focus()
+        );
+    }
+    function hideNewFolderModal() {
+        showNewFolderModal = false;
+        showErrInNewFolderModal = false;
+        newFolderName = "";
+    }
 
     let folderRenaming;
     let folderRenamingName;
+    let folderRenamingInput;
     let showFolderRenamingFlag = $state(false);
     function showFolderRenaming(folder) {
         folderRenaming = folder;
         folderRenamingName = folder?.name ?? "";
         showFolderRenamingFlag = true;
+        tick().then(
+            () => folderRenamingInput?.focus()
+        );
+    }
+    function hideFolderRenaming() {
+        showFolderRenamingFlag = false;
+        showFolderRenamingErr = false;
     }
     let showFolderRenamingErr = $state(false);
     let folderRenamingErrMsg = $state(false);
@@ -48,6 +71,10 @@
         showDeleteFolderModal = true;
         deleteFolderId = folder?.id;
         deleteFolderName = folder?.name;
+    }
+    function hideDeleteFolderConfirmation() {
+        showDeleteFolderModal = false;
+        showDeleteFolderErr = false;
     }
 
     async function newFolderOnclick() {
@@ -146,6 +173,19 @@
             showFolderRenamingErr = true;
         }
     }
+    function onKeyup(e) {
+        if (e.key === "Escape") {
+            hideNewFolderModal();
+            hideFolderRenaming();
+            hideDeleteFolderConfirmation();
+        }
+    }
+    onMount(() => {
+        window.addEventListener("keydown", onKeyup);
+        return () => {
+            window.removeEventListener("keydown", onKeyup);
+        };
+    });
 </script>
 
 <svelte:head>
@@ -166,7 +206,7 @@
             New Studyset
         </a>
         {#if data.authed}
-        <button class="alt" onclick={() => showNewFolderModal = true}>
+        <button class="alt" onclick={() => openNewFolderModal()}>
             <FolderIcon></FolderIcon>
             New Folder
         </button>
@@ -253,7 +293,7 @@
     <div class="modal" transition:fade={{duration: 200}}>
         <div class="content">
             <p>Create New Folder:</p>
-            <input type="text" placeholder="Folder Name" style="margin-top: 0.4rem;" bind:value={newFolderName} onkeyup={(e) => {
+            <input type="text" placeholder="Folder Name" style="margin-top: 0.4rem;" bind:value={newFolderName} bind:this={newFolderInput} onkeyup={(e) => {
                 if (e.key == "Enter") {
                     newFolderOnclick();
                 }
@@ -262,11 +302,7 @@
                 <button onclick={newFolderOnclick}>
                     <CheckmarkIcon></CheckmarkIcon> Create
                 </button>
-                <button class="alt" onclick={() => {
-                    showNewFolderModal = false;
-                    showErrInNewFolderModal = false;
-                    newFolderName = "";
-                }}>
+                <button class="alt" onclick={hideNewFolderModal}>
                     Cancel
                 </button>
             </div>
@@ -282,7 +318,7 @@
     <div class="modal" transition:fade={{duration: 200}}>
         <div class="content">
             <p>Rename Folder:</p>
-            <input type="text" placeholder="New Folder Name" style="margin-top: 0.4rem;" bind:value={folderRenamingName} onkeyup={(e) => {
+            <input type="text" placeholder="New Folder Name" style="margin-top: 0.4rem;" bind:value={folderRenamingName} bind:this={folderRenamingInput} onkeyup={(e) => {
                 if (e.key == "Enter") {
                     renameFolderOnclick();
                 }
@@ -291,10 +327,7 @@
                 <button onclick={renameFolderOnclick}>
                     <CheckmarkIcon></CheckmarkIcon> Rename
                 </button>
-                <button class="alt" onclick={() => {
-                    showFolderRenamingFlag = false;
-                    showFolderRenamingErr = false;
-                }}>
+                <button class="alt" onclick={hideFolderRenaming}>
                     Cancel
                 </button>
             </div>
