@@ -70,98 +70,111 @@
       }
     }
 
-    onMount(async function () {
-        if (data.authed && !(data.local)) {
-            document.getElementById("edit-private-false").addEventListener("click",
-                function () {
-                    document.getElementById("edit-private-false").classList.add("selected");
-                    document.getElementById("edit-private-true").classList.remove("selected");
-                }
-            )
-            document.getElementById("edit-private-true").addEventListener("click",
-                function () {
-                    document.getElementById("edit-private-false").classList.remove("selected");
-                    document.getElementById("edit-private-true").classList.add("selected");
-                }
-            )
-        }
-        if (data.new) {
-            addTerm();
-            if (data.authed) {
-            /* and data.new is true (creating a new studyset, not updating one) */
+    onMount(() => {
+        (async function () {
+            if (data.authed && !(data.local)) {
+                document.getElementById("edit-private-false").addEventListener("click",
+                    function () {
+                        document.getElementById("edit-private-false").classList.add("selected");
+                        document.getElementById("edit-private-true").classList.remove("selected");
+                    }
+                )
+                document.getElementById("edit-private-true").addEventListener("click",
+                    function () {
+                        document.getElementById("edit-private-false").classList.remove("selected");
+                        document.getElementById("edit-private-true").classList.add("selected");
+                    }
+                )
             }
-        } else if (data.studysetId) {
-            /* data.new is false (updating an existing studyset, not creating one) */
-            if (data.authed) {
-                fetch("/api/graphql", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Accept": "application/json"
-                    },
-                    credentials: "same-origin",
-                    body: JSON.stringify({
-                        query: `
-                            query GetStudyset($id: ID!) {
-                                studyset(id: $id) {
-                                    title
-                                    private
-                                    terms {
-                                        id
-                                        term
-                                        def
+            if (data.new) {
+                addTerm();
+                if (data.authed) {
+                /* and data.new is true (creating a new studyset, not updating one) */
+                }
+            } else if (data.studysetId) {
+                /* data.new is false (updating an existing studyset, not creating one) */
+                if (data.authed) {
+                    fetch("/api/graphql", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Accept": "application/json"
+                        },
+                        credentials: "same-origin",
+                        body: JSON.stringify({
+                            query: `
+                                query GetStudyset($id: ID!) {
+                                    studyset(id: $id) {
+                                        title
+                                        private
+                                        terms {
+                                            id
+                                            term
+                                            def
+                                        }
                                     }
                                 }
+                            `,
+                            variables: {
+                                id: data.studysetId
                             }
-                        `,
-                        variables: {
-                            id: data.studysetId
-                        }
-                    })
-                }).then(response => response.json()).then(result => {
-                    if (result.errors) {
-                        alert("Error loading studyset");
-                        console.error(result.errors);
-                    } else {
-                        const studyset = result.data.studyset;
-                        document.getElementById("edit-title").value = studyset.title;
-                        if (studyset.private) {
-                            document.getElementById("edit-private-false").classList.remove("selected");
-                            document.getElementById("edit-private-true").classList.add("selected");
+                        })
+                    }).then(response => response.json()).then(result => {
+                        if (result.errors) {
+                            alert("Error loading studyset");
+                            console.error(result.errors);
                         } else {
-                            document.getElementById("edit-private-false").classList.add("selected");
-                            document.getElementById("edit-private-true").classList.remove("selected");
+                            const studyset = result.data.studyset;
+                            document.getElementById("edit-title").value = studyset.title;
+                            if (studyset.private) {
+                                document.getElementById("edit-private-false").classList.remove("selected");
+                                document.getElementById("edit-private-true").classList.add("selected");
+                            } else {
+                                document.getElementById("edit-private-false").classList.add("selected");
+                                document.getElementById("edit-private-true").classList.remove("selected");
+                            }
+                            if (studyset.terms != null) {
+                                studyset.terms.forEach((t) => {
+                                    addTerm(
+                                        t.term,
+                                        t.def,
+                                        t.id
+                                    );
+                                })
+                            }
                         }
-                        if (studyset.terms != null) {
-                            studyset.terms.forEach((t) => {
-                                addTerm(
-                                    t.term,
-                                    t.def,
-                                    t.id
-                                );
-                            })
-                        }
-                    }
-                });
-            }
-        }
-        if (data.local && !data.new) {
-            const studysetRecord = await idbApiLayer.getStudysetById(
-                data.localId,
-                { terms: true }
-            );
-            if (studysetRecord) {
-                document.getElementById("edit-title").value = studysetRecord.title;
-                if (studysetRecord.terms != null) {
-                    studysetRecord.terms.forEach((t) => {
-                        addTerm(
-                            t.term,
-                            t.def,
-                            t.id
-                        );
-                    })
+                    });
                 }
             }
+            if (data.local && !data.new) {
+                const studysetRecord = await idbApiLayer.getStudysetById(
+                    data.localId,
+                    { terms: true }
+                );
+                if (studysetRecord) {
+                    document.getElementById("edit-title").value = studysetRecord.title;
+                    if (studysetRecord.terms != null) {
+                        studysetRecord.terms.forEach((t) => {
+                            addTerm(
+                                t.term,
+                                t.def,
+                                t.id
+                            );
+                        })
+                    }
+                }
+            }
+        })();
+
+        function onKeydown(e) {
+            if (event.key === "Enter" && event.ctrlKey) {
+                event.preventDefault();
+                addTerm();
+            }
+        }
+        window.addEventListener("keydown", onKeydown);
+        return () => {
+            window.removeEventListener("keydown", onKeydown);
         }
     });
 
