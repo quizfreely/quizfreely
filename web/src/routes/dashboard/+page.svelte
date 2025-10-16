@@ -49,6 +49,54 @@
         deleteFolderId = folder?.id;
         deleteFolderName = folder?.name;
     }
+
+    async function newFolderOnclick() {
+        try {
+            const raw = await fetch(
+                "/api/graphql",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        query: `mutation ($name: String!) {
+    createFolder(name: $name) {
+        id
+    }
+}`,
+                        variables: {
+                            name: newFolderName
+                        }
+                    })
+                }
+            )
+            const resp = await raw.json();
+            if (resp?.data?.createFolder) {
+                studysetListData.myFolders = [
+                    ...(studysetListData?.myFolders ?? []),
+                    {
+                        id: resp.data.createFolder?.id,
+                        name: newFolderName
+                    }
+                ];
+                showNewFolderModal = false
+                showErrInNewFolderModal = false;
+            } else {
+                console.log(
+                    "unsuccessful response when creating folder: ",
+                    resp
+                );
+                errInNewFolderModalMsg = "Error creating folder :(";
+                showErrInNewFolderModal = true;
+            }
+        } catch (err) {
+            console.log("error creating folder: ", err);
+            errInNewFolderModalMsg = "Error creating folder :(";
+            showErrInNewFolderModal = true;
+        }
+        newFolderName = "";
+    }
 </script>
 
 <svelte:head>
@@ -156,55 +204,13 @@
     <div class="modal" transition:fade={{duration: 200}}>
         <div class="content">
             <p>Create New Folder:</p>
-            <input type="text" placeholder="Folder Name" style="margin-top: 0.4rem;" bind:value={newFolderName}>
+            <input type="text" placeholder="Folder Name" style="margin-top: 0.4rem;" bind:value={newFolderName} onkeyup={(e) => {
+                if (e.key == "Enter") {
+                    newFolderOnclick();
+                }
+            }}>
             <div class="flex">
-                <button onclick={async () => {
-                    try {
-                        const raw = await fetch(
-                            "/api/graphql",
-                            {
-                                method: "POST",
-                                headers: {
-                                    "Content-Type": "application/json"
-                                },
-                                body: JSON.stringify({
-                                    query: `mutation ($name: String!) {
-    createFolder(name: $name) {
-        id
-    }
-}`,
-                                    variables: {
-                                        name: newFolderName
-                                    }
-                                })
-                            }
-                        )
-                        const resp = await raw.json();
-                        if (resp?.data?.createFolder) {
-                            studysetListData.myFolders = [
-                                ...(studysetListData?.myFolders ?? []),
-                                {
-                                    id: resp.data.createFolder?.id,
-                                    name: newFolderName
-                                }
-                            ];
-                            showNewFolderModal = false
-                            showErrInNewFolderModal = false;
-                        } else {
-                            console.log(
-                                "unsuccessful response when creating folder: ",
-                                resp
-                            );
-                            errInNewFolderModalMsg = "Error creating folder :(";
-                            showErrInNewFolderModal = true;
-                        }
-                    } catch (err) {
-                        console.log("error creating folder: ", err);
-                        errInNewFolderModalMsg = "Error creating folder :(";
-                        showErrInNewFolderModal = true;
-                    }
-                    newFolderName = "";
-                }}>
+                <button onclick={newFolderOnclick}>
                     <CheckmarkIcon></CheckmarkIcon> Create
                 </button>
                 <button class="alt" onclick={() => {
