@@ -13,6 +13,7 @@
 
     let { data } = $props();
     let showFolderPicker = $state(false);
+    let folderPickerStudysetId;
 
     let showNewFolderModal = $state(false);
     let newFolderName = $state("");
@@ -372,7 +373,7 @@
                     },
                     body: JSON.stringify({
                     query: `mutation ($studysetId: ID!, $folderId: ID!) {
-    tudysetFolder(studysetId: $studysetId, folderId: $folderId)
+    setStudysetFolder(studysetId: $studysetId, folderId: $folderId)
 }`,
                         variables: {
                             studysetId: folderPickerStudysetId,
@@ -382,8 +383,25 @@
                 });
                 const resp = await raw.json();
                 if (resp?.data?.setStudysetFolder) {
-                    folderId = selectedFolder.id;
-                    folderName = selectedFolder.name;
+                    const studysetListIndex = studysetListData.studysetList?.findIndex(
+                        studyset => folderPickerStudysetId == studyset?.id
+                    );
+                    if (studysetListIndex >= 0) {
+                        studysetListData.studysetList.splice(
+                            studysetListIndex, 1
+                        );
+                    }
+                    const folderData = studysetListComponent.getFolderData();
+                    if (folderData && folderData?.id != selectedFolder?.id) {
+                        const index = folderData?.studysets?.findIndex(
+                            studyset => folderPickerStudysetId == studyset?.id
+                        );
+                        if (index >= 0) {
+                            folderData.studysets.splice(
+                                index, 1
+                            );
+                        }
+                    }
                     showFolderPicker = false;
                 } else {
                     console.error("Unsuccessful json response: ", resp);
@@ -405,7 +423,7 @@
                     },
                     body: JSON.stringify({
                     query: `mutation ($studysetId: ID!) {
-    veStudysetFromFolder(studysetId: $studysetId)
+    removeStudysetFromFolder(studysetId: $studysetId)
 }`,
                         variables: {
                             studysetId: folderPickerStudysetId,
@@ -414,8 +432,18 @@
                 });
                 const resp = await raw.json();
                 if (resp?.data?.removeStudysetFromFolder) {
-                    folderId = null;
-                    folderName = null;
+                    const folderData = studysetListComponent.getFolderData();
+                    if (folderData) {
+                        const index = folderData?.studysets?.findIndex(
+                            studyset => folderPickerStudysetId == studyset?.id
+                        );
+                        if (index >= 0) {
+                            const deleted = folderData.studysets.splice(
+                                index, 1
+                            );
+                            studysetListData?.studysetList?.unshift(deleted[0]);
+                        }
+                    }
                     showFolderPicker = false;
                 } else {
                     console.error("Unsuccessful json response: ", resp);

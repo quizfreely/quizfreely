@@ -99,6 +99,10 @@
     export function exitFolderView() {
         inFolder = false;
     }
+
+    export function getFolderData() {
+        return inFolder ? currentFolder : null;
+    }
 </script>
 
 {#key inFolder}
