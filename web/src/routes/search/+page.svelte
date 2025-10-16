@@ -28,16 +28,6 @@
             {studyset}
             linkTemplateFunc={id => `/studysets/${id}`}
         ></StudysetLinkBox>
-        <div class="box">
-          <a href="/studysets/{ studyset.id }">
-            { studyset.title }
-          </a>
-          {#if (studyset.termsCount >= 1) }
-          <p class="h6">
-            { studyset.termsCount } Terms
-          </p>
-          {/if}
-        </div>
         {:else}
           <div class="box">
             No results :(
