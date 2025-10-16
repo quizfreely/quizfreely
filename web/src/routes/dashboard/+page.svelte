@@ -97,6 +97,55 @@
         }
         newFolderName = "";
     }
+
+    async function renameFolderOnclick() {
+        try {
+            const raw = await fetch(
+                "/api/graphql",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        query: `mutation ($id: ID!, $name: String!) {
+    renameFolder(id: $id, name: $name) {
+        id
+    }
+}`,
+                        variables: {
+                            id: folderRenaming.id,
+                            name: folderRenamingName
+                        }
+                    })
+                }
+            )
+            const resp = await raw.json();
+            if (resp?.data?.renameFolder) {
+                /* update og obj from studysetlist component folder view */
+                folderRenaming.name = folderRenamingName;
+
+                /* update array from studysetlist component main view */
+                const renamedIndex = studysetListData.myFolders.findIndex(
+                    folder => folderRenaming.id == folder?.id
+                );
+                studysetListData.myFolders[renamedIndex].name = folderRenamingName;
+                showFolderRenamingFlag = false
+                showFolderRenamingErr = false;
+            } else {
+                console.log(
+                    "unsuccessful response when renaming folder: ",
+                    resp
+                );
+                folderRenamingErrMsg = "Error renaming folder :(";
+                showFolderRenamingErr = true;
+            }
+        } catch (err) {
+            console.log("error renaming folder: ", err);
+            folderRenamingErrMsg = "Error renaming folder :(";
+            showFolderRenamingErr = true;
+        }
+    }
 </script>
 
 <svelte:head>
@@ -233,56 +282,13 @@
     <div class="modal" transition:fade={{duration: 200}}>
         <div class="content">
             <p>Rename Folder:</p>
-            <input type="text" placeholder="New Folder Name" style="margin-top: 0.4rem;" bind:value={folderRenamingName}>
+            <input type="text" placeholder="New Folder Name" style="margin-top: 0.4rem;" bind:value={folderRenamingName} onkeyup={(e) => {
+                if (e.key == "Enter") {
+                    renameFolderOnclick();
+                }
+            }}>
             <div class="flex">
-                <button onclick={async () => {
-                    try {
-                        const raw = await fetch(
-                            "/api/graphql",
-                            {
-                                method: "POST",
-                                headers: {
-                                    "Content-Type": "application/json"
-                                },
-                                body: JSON.stringify({
-                                    query: `mutation ($id: ID!, $name: String!) {
-    renameFolder(id: $id, name: $name) {
-        id
-    }
-}`,
-                                    variables: {
-                                        id: folderRenaming.id,
-                                        name: folderRenamingName
-                                    }
-                                })
-                            }
-                        )
-                        const resp = await raw.json();
-                        if (resp?.data?.renameFolder) {
-                            /* update og obj from studysetlist component folder view */
-                            folderRenaming.name = folderRenamingName;
-
-                            /* update array from studysetlist component main view */
-                            const renamedIndex = studysetListData.myFolders.findIndex(
-                                folder => folderRenaming.id == folder?.id
-                            );
-                            studysetListData.myFolders[renamedIndex].name = folderRenamingName;
-                            showFolderRenamingFlag = false
-                            showFolderRenamingErr = false;
-                        } else {
-                            console.log(
-                                "unsuccessful response when renaming folder: ",
-                                resp
-                            );
-                            folderRenamingErrMsg = "Error renaming folder :(";
-                            showFolderRenamingErr = true;
-                        }
-                    } catch (err) {
-                        console.log("error renaming folder: ", err);
-                        folderRenamingErrMsg = "Error renaming folder :(";
-                        showFolderRenamingErr = true;
-                    }
-                }}>
+                <button onclick={renameFolderOnclick}>
                     <CheckmarkIcon></CheckmarkIcon> Rename
                 </button>
                 <button class="alt" onclick={() => {

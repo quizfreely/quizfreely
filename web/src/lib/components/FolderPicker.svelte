@@ -37,6 +37,43 @@
             showErrMsg = true;
         }
     })
+
+    async function newFolderButtonOnclick() {
+        const folderName = newFolderName;
+        newFolderName = "";
+        showCreateErrMsg = false;
+        try {
+            const raw = await fetch(`/api/graphql`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    query: `mutation ($name: String!) {
+    createFolder(name: $name) {
+        id
+    }
+}`,
+                    variables: {
+                        name: folderName
+                    }
+                })
+            });
+            const resp = await raw.json();
+            if (resp?.data?.createFolder?.id) {
+                folders.push({
+                    id: resp?.data?.createFolder?.id,
+                    name: folderName
+                })
+            } else {
+                console.error("Unsuccessful json response: ", resp);
+                showCreateErrMsg = true;
+            }
+        } catch (err) {
+            console.error("Error creating folder: ", err);
+            showCreateErrMsg = true;
+        }
+    }
 </script>
 <div class="modal" transition:fade={{ duration: 200 }}>
     <div class="content" style="padding-top: 0.6rem;">
@@ -79,43 +116,12 @@
         </div>
         <p>Create a new folder?</p>
         <div class="flex" style="margin-top: 0.6rem;">
-            <input type="text" placeholder="Folder Name" bind:value={newFolderName}>
-            <button onclick={async () => {
-                const folderName = newFolderName;
-                newFolderName = "";
-                showCreateErrMsg = false;
-                try {
-                    const raw = await fetch(`/api/graphql`, {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json"
-                        },
-                        body: JSON.stringify({
-                            query: `mutation ($name: String!) {
-    createFolder(name: $name) {
-        id
-    }
-}`,
-                            variables: {
-                                name: folderName
-                            }
-                        })
-                    });
-                    const resp = await raw.json();
-                    if (resp?.data?.createFolder?.id) {
-                        folders.push({
-                            id: resp?.data?.createFolder?.id,
-                            name: folderName
-                        })
-                    } else {
-                        console.error("Unsuccessful json response: ", resp);
-                        showCreateErrMsg = true;
-                    }
-                } catch (err) {
-                    console.error("Error creating folder: ", err);
-                    showCreateErrMsg = true;
+            <input type="text" placeholder="Folder Name" bind:value={newFolderName} onkeyup={e => {
+                if (e.key == "Enter") {
+                    newFolderButtonOnclick();
                 }
-            }}>Create</button>
+            }}>
+            <button onclick={newFolderButtonOnclick}>Create</button>
         </div>
         {#if showCreateErrMsg}
             <div class="box ohno" transition:slide={{duration: 400}}>
