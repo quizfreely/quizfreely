@@ -16,7 +16,6 @@
     {/if}
 </svelte:head>
 
-<Noscript />
 <main>
     <div class="grid page">
         <div class="content">
