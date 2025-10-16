@@ -1,5 +1,5 @@
 <script>
-    let {value = $bindable(), div, textarea} = $props();
+    let {value = $bindable(), div, textarea, textareaElement = $bindable()} = $props();
     /*
         `textarea` and `div` are spread below
         like this: `{...textarea}` and `{...div}`,
@@ -64,5 +64,5 @@
 
 <!-- notice class is AFTER `...div` because we're overwriting class from spread props -->
 <div {...div} class={["auto-resize-textarea-div", div?.class ?? ""]} data-autoresizetextvalue={value}>
-    <textarea bind:value={value} {...textarea} ></textarea>
+    <textarea bind:value={value} bind:this={textareaElement} {...textarea} ></textarea>
 </div>
