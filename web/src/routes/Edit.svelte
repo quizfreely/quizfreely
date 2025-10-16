@@ -79,9 +79,6 @@
       }
     }
 
-    let termTextareas = $state([]);
-    let defTextareas = $state([]);
-
     onMount(() => {
         (async function () {
             if (data.authed && !(data.local)) {
@@ -183,9 +180,9 @@
                 event.preventDefault();
                 addTerm();
                 unsavedChanges = true;
-                tick().then(
-                    () => termTextareas?.[termTextareas?.length - 1]?.focus()
-                );
+                tick().then(() => {
+                    terms?.[terms?.length - 1]?.termTextarea?.focus();
+                });
             }
             if (event.key === "Enter" && event.altKey) {
                 event.preventDefault();
@@ -196,12 +193,13 @@
                            string - (-number) = number */
                     )
                     unsavedChanges = true;
+
                     tick().then(() => {
-                        termTextareas?.[
+                        terms?.[
                             document.activeElement?.dataset?.rowIndex - -(1)
                             /* string + number = string
                                string - (-number) = number */
-                        ]?.focus();
+                        ]?.termTextarea?.focus();
                     });
                 }
             }
@@ -210,34 +208,66 @@
                 event.preventDefault();
                 if (document.activeElement?.dataset?.columnType == "TERM" &&
                     document.activeElement.dataset?.rowIndex - 1 >= 0) {
-                    termTextareas?.[
+                    terms?.[
                         document.activeElement.dataset?.rowIndex - 1
-                    ]?.focus();
-                }
-                if (document.activeElement?.dataset?.columnType == "DEF" &&
+                    ]?.termTextarea?.focus();
+                } else if (document.activeElement?.dataset?.columnType == "DEF" &&
                     document.activeElement.dataset?.rowIndex - 1 >= 0) {
-                    defTextareas?.[
+                    terms?.[
                         document.activeElement.dataset?.rowIndex - 1
-                    ]?.focus();
+                    ]?.defTextarea?.focus();
                 }
             }
-
             if (event.key === "ArrowDown" && event.altKey && !event.shiftKey) {
                 event.preventDefault();
                 if (document.activeElement?.dataset?.columnType == "TERM") {
-                    termTextareas?.[
+                    terms?.[
                         document.activeElement.dataset?.rowIndex - (-1)
                         /* string + number = string
                            string - (-number) = number */
-                    ]?.focus();
-                }
-                if (document.activeElement?.dataset?.columnType == "DEF") {
-                    defTextareas?.[
+                    ]?.termTextarea?.focus();
+                } else if (document.activeElement?.dataset?.columnType == "DEF") {
+                    terms?.[
                         document.activeElement.dataset?.rowIndex - (-1)
                         /* string + number = string
                            string - (-number) = number */
-                    ]?.focus();
+                    ]?.defTextarea?.focus();
                 }
+            }
+
+            if (event.key === "ArrowUp" && event.altKey && event.shiftKey) {
+                event.preventDefault();
+                const wasDefFocused = document.activeElement.dataset?.columnType == "DEF";
+                const index = document.activeElement.dataset?.rowIndex;
+                const newIndex = document.activeElement.dataset?.rowIndex - 1;
+                moveTerm(index, newIndex);
+                unsavedChanges = true;
+
+                tick().then(() => {
+                    if (wasDefFocused) {
+                        terms?.[newIndex]?.defTextarea?.focus();
+                    } else {
+                        terms?.[newIndex]?.termTextarea?.focus();
+                    }
+                });
+            }
+            if (event.key === "ArrowDown" && event.altKey && event.shiftKey) {
+                event.preventDefault();
+                const wasDefFocused = document.activeElement.dataset?.columnType == "DEF";
+                const index = document.activeElement.dataset?.rowIndex;
+                const newIndex = document.activeElement.dataset?.rowIndex - (-1);
+                /* string + number = string
+                   string - (-number) = number */
+                moveTerm(index, newIndex);
+                unsavedChanges = true;
+
+                tick().then(() => {
+                    if (wasDefFocused) {
+                        terms?.[newIndex]?.defTextarea?.focus();
+                    } else {
+                        terms?.[newIndex]?.termTextarea?.focus();
+                    }
+                });
             }
         }
         window.addEventListener("keydown", onKeydown);
@@ -606,7 +636,7 @@
                       "data-row-index": index
                     }}
                     bind:value={term.term}
-                    bind:textareaElement={termTextareas[index]}
+                    bind:textareaElement={term.termTextarea}
                   />
                   <AutoResizeTextarea
                     div={{
@@ -622,7 +652,7 @@
                       "data-row-index": index
                     }}
                     bind:value={term.def}
-                    bind:textareaElement={defTextareas[index]}
+                    bind:textareaElement={term.defTextarea}
                   />
                   <div class="flex center term-row-box-actions">
                       <div class="dropdown left" tabindex="0">
@@ -676,7 +706,7 @@
                   addTerm();
                   unsavedChanges = true;
                   tick().then(
-                    () => termTextareas?.[termTextareas?.length - 1]?.focus()
+                    () => terms?.[terms?.length - 1]?.termTextarea?.focus()
                   );
                 }}>
                   <IconPlus />
