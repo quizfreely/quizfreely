@@ -1,4 +1,5 @@
 <script>
+    import StudysetLinkBox from "$lib/components/StudysetLinkBox.svelte";
     import Noscript from "$lib/components/Noscript.svelte";
     import Searchbar from "$lib/components/Searchbar.svelte";
 
@@ -23,6 +24,10 @@
         <p>Results for "{ data.query }"</p>
         <div class="grid list" style="overflow-wrap:anywhere">
         {#each data.results as studyset }
+        <StudysetLinkBox
+            {studyset}
+            linkTemplateFunc={id => `/studysets/${id}`}
+        ></StudysetLinkBox>
         <div class="box">
           <a href="/studysets/{ studyset.id }">
             { studyset.title }
@@ -33,6 +38,10 @@
           </p>
           {/if}
         </div>
+        {:else}
+          <div class="box">
+            No results :(
+          </div>
         {/each}
         </div>
       {:else}
