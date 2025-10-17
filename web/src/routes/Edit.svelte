@@ -79,6 +79,9 @@
       }
     }
 
+    let defFocused = $state(false);
+    let focusedRow = $state(0);
+    let showFocusBorder = $state(false);
     onMount(() => {
         (async function () {
             if (data.authed && !(data.local)) {
@@ -175,6 +178,21 @@
             }
         })();
 
+        let keySeq = "";
+        let keySeqMultiplier = null;
+        function addToKeySeq(key) {
+            if (key == "d") {
+                keySeq += key;
+            } else if (("1234567890").includes(key)) {
+                keySeqMultiplier = ("" + (keySeqMultiplier ?? "") + key) - 0;
+            }
+            return keySeq;
+        }
+        function resetKeySeq() {
+            keySeq = "";
+            keySeqMultiplier = null;
+        }
+
         function onKeydown(e) {
             if (event.key === "Enter" && event.ctrlKey && !event.altKey) {
                 event.preventDefault();
@@ -183,63 +201,67 @@
                 tick().then(() => {
                     terms?.[terms?.length - 1]?.termTextarea?.focus();
                 });
+                return;
             }
-            if (event.key === "Enter" && event.altKey) {
+            if (
+                (event.key === "Enter" && event.altKey) ||
+                (event.key === "o" && !(
+                    document.activeElement?.tagName === "INPUT" ||
+                    document.activeElement?.tagName === "TEXTAREA" ||
+                    document.activeElement?.isContentEditable
+                ))
+            ) {
                 event.preventDefault();
-                if (document.activeElement?.dataset?.rowIndex >= 0) {
-                    insertTerm(
-                        document.activeElement?.dataset?.rowIndex - -(1)
-                        /* string + number = string
-                           string - (-number) = number */
-                    )
-                    unsavedChanges = true;
+                insertTerm(focusedRow + 1);
+                unsavedChanges = true;
 
-                    tick().then(() => {
-                        terms?.[
-                            document.activeElement?.dataset?.rowIndex - -(1)
-                            /* string + number = string
-                               string - (-number) = number */
-                        ]?.termTextarea?.focus();
-                    });
-                }
+                tick().then(() => {
+                    terms?.[focusedRow + 1]?.termTextarea?.focus();
+                });
+                return;
+            }
+            if (
+                (event.key === "O" && !(
+                    document.activeElement?.tagName === "INPUT" ||
+                    document.activeElement?.tagName === "TEXTAREA" ||
+                    document.activeElement?.isContentEditable
+                ))
+            ) {
+                event.preventDefault();
+                insertTerm(focusedRow);
+                unsavedChanges = true;
+
+                tick().then(() => {
+                    terms?.[focusedRow]?.termTextarea?.focus();
+                });
+                return;
             }
 
             if (event.key === "ArrowUp" && event.altKey && !event.shiftKey) {
                 event.preventDefault();
-                if (document.activeElement?.dataset?.columnType == "TERM" &&
-                    document.activeElement.dataset?.rowIndex - 1 >= 0) {
-                    terms?.[
-                        document.activeElement.dataset?.rowIndex - 1
-                    ]?.termTextarea?.focus();
-                } else if (document.activeElement?.dataset?.columnType == "DEF" &&
-                    document.activeElement.dataset?.rowIndex - 1 >= 0) {
-                    terms?.[
-                        document.activeElement.dataset?.rowIndex - 1
-                    ]?.defTextarea?.focus();
+                if (defFocused) {
+                    terms?.[focusedRow - 1]?.defTextarea?.focus();
+                } else {
+                    terms?.[focusedRow - 1]?.termTextarea?.focus();
                 }
+                return;
             }
             if (event.key === "ArrowDown" && event.altKey && !event.shiftKey) {
                 event.preventDefault();
-                if (document.activeElement?.dataset?.columnType == "TERM") {
-                    terms?.[
-                        document.activeElement.dataset?.rowIndex - (-1)
-                        /* string + number = string
-                           string - (-number) = number */
-                    ]?.termTextarea?.focus();
-                } else if (document.activeElement?.dataset?.columnType == "DEF") {
-                    terms?.[
-                        document.activeElement.dataset?.rowIndex - (-1)
-                        /* string + number = string
-                           string - (-number) = number */
-                    ]?.defTextarea?.focus();
+                if (defFocused) {
+                    terms?.[focusedRow + 1]?.defTextarea?.focus();
+                } else {
+                    terms?.[focusedRow + 1]?.termTextarea?.focus();
                 }
+                return;
             }
 
             if (event.key === "ArrowUp" && event.altKey && event.shiftKey) {
                 event.preventDefault();
-                const wasDefFocused = document.activeElement.dataset?.columnType == "DEF";
-                const index = document.activeElement.dataset?.rowIndex;
-                const newIndex = document.activeElement.dataset?.rowIndex - 1;
+                const index = focusedRow;
+                const newIndex = focusedRow - 1;
+                const wasDefFocused = defFocused;
+
                 moveTerm(index, newIndex);
                 unsavedChanges = true;
 
@@ -250,29 +272,81 @@
                         terms?.[newIndex]?.termTextarea?.focus();
                     }
                 });
+                return;
             }
-            if (event.key === "ArrowDown" && event.altKey && event.shiftKey) {
+            if ((event.key === "j" || event.key === "ArrowDown") && !(
+                document.activeElement?.tagName === "INPUT" ||
+                document.activeElement?.tagName === "TEXTAREA" ||
+                document.activeElement?.isContentEditable
+            )) {
                 event.preventDefault();
-                const wasDefFocused = document.activeElement.dataset?.columnType == "DEF";
-                const index = document.activeElement.dataset?.rowIndex;
-                const newIndex = document.activeElement.dataset?.rowIndex - (-1);
-                /* string + number = string
-                   string - (-number) = number */
-                moveTerm(index, newIndex);
-                unsavedChanges = true;
-
-                tick().then(() => {
-                    if (wasDefFocused) {
-                        terms?.[newIndex]?.defTextarea?.focus();
+                if (focusedRow + 1 < terms?.length) {
+                    focusedRow++;
+                    showFocusBorder = true;
+                }
+                return;
+            }
+            if ((event.key === "k" || event.key === "ArrowUp") && !(
+                document.activeElement?.tagName === "INPUT" ||
+                document.activeElement?.tagName === "TEXTAREA" ||
+                document.activeElement?.isContentEditable
+            )) {
+                event.preventDefault();
+                if (focusedRow - 1 >= 0) {
+                    focusedRow--;
+                    showFocusBorder = true;
+                }
+                return;
+            }
+            if (
+                showFocusBorder &&
+                !(event.ctrlKey || event.altKey) &&
+                !(document.activeElement?.tagName === "INPUT" ||
+                document.activeElement?.tagName === "TEXTAREA" ||
+                document.activeElement?.isContentEditable) &&
+                (event.key === "i" || event.key === "Enter")
+            ) {
+                event.preventDefault();
+                if (defFocused) {
+                    terms?.[focusedRow]?.defTextarea?.focus();
+                } else {
+                    terms?.[focusedRow]?.termTextarea?.focus();
+                }
+                return;
+            }
+        }
+        function onKeyup(event) {
+            if (event.key === "Escape") {
+                document?.activeElement?.blur();
+                resetKeySeq();
+                if (showFocusBorder) {
+                    showFocusBorder = false;
+                }
+                return;
+            }
+            if (
+                !(document.activeElement?.tagName === "INPUT" ||
+                document.activeElement?.tagName === "TEXTAREA" ||
+                document.activeElement?.isContentEditable) &&
+                addToKeySeq(event.key).endsWith("dd")
+            ) {
+                for (let i = 0; i < (keySeqMultiplier ?? 1); i++) {
+                    deleteTerm(focusedRow);
+                    if (focusedRow + 1 < terms?.length) {
+                        focusedRow++;
                     } else {
-                        terms?.[newIndex]?.termTextarea?.focus();
+                        focusedRow--;
+                        break;
                     }
-                });
+                }
+                resetKeySeq();
             }
         }
         window.addEventListener("keydown", onKeydown);
+        window.addEventListener("keyup", onKeyup);
         return () => {
             window.removeEventListener("keydown", onKeydown);
+            window.removeEventListener("keyup", onKeyup);
         }
     });
 
@@ -632,8 +706,9 @@
                       oninput: () => {if (!unsavedChanges) {
                         unsavedChanges = true;
                       }},
-                      "data-column-type": "TERM",
-                      "data-row-index": index
+                      onfocus: () => {defFocused = false; focusedRow = index; showFocusBorder = false},
+                      style: showFocusBorder && !defFocused && focusedRow == index ?
+                        "border-color: var(--main);" : ""
                     }}
                     bind:value={term.term}
                     bind:textareaElement={term.termTextarea}
@@ -648,8 +723,9 @@
                       oninput: () => {if (!unsavedChanges) {
                         unsavedChanges = true;
                       }},
-                      "data-column-type": "DEF",
-                      "data-row-index": index
+                      onfocus: () => {defFocused = true; focusedRow = index; showFocusBorder = false},
+                      style: showFocusBorder && defFocused && focusedRow == index ?
+                        "border-color: var(--main);" : ""
                     }}
                     bind:value={term.def}
                     bind:textareaElement={term.defTextarea}
