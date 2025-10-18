@@ -57,13 +57,14 @@
         terms.splice(newIndex, 0, term);
       }
     }
+    let deletedTermRegister;
     function deleteTerm(index) {
       if (terms[index].id != null) {
         existingTermIdsToDelete.push(
           terms[index].id
         );
       }
-      terms.splice(index, 1);
+      deletedTermRegister = terms.splice(index, 1)?.[0];
     }
 
     function termsTo2DArray() {
@@ -179,18 +180,12 @@
         })();
 
         let keySeq = "";
-        let keySeqMultiplier = null;
         function addToKeySeq(key) {
-            if (key == "d") {
-                keySeq += key;
-            } else if (("1234567890").includes(key)) {
-                keySeqMultiplier = ("" + (keySeqMultiplier ?? "") + key) - 0;
-            }
+            keySeq += key;
             return keySeq;
         }
         function resetKeySeq() {
             keySeq = "";
-            keySeqMultiplier = null;
         }
 
         function onKeydown(e) {
@@ -262,18 +257,43 @@
                 const newIndex = focusedRow - 1;
                 const wasDefFocused = defFocused;
 
-                moveTerm(index, newIndex);
-                unsavedChanges = true;
+                if (newIndex >= 0) {
+                    moveTerm(index, newIndex);
+                    unsavedChanges = true;
 
-                tick().then(() => {
-                    if (wasDefFocused) {
-                        terms?.[newIndex]?.defTextarea?.focus();
-                    } else {
-                        terms?.[newIndex]?.termTextarea?.focus();
-                    }
-                });
+                    focusedRow = newIndex;
+                    tick().then(() => {
+                        if (wasDefFocused) {
+                            terms?.[newIndex]?.defTextarea?.focus();
+                        } else {
+                            terms?.[newIndex]?.termTextarea?.focus();
+                        }
+                    });
+                }
                 return;
             }
+            if (event.key === "ArrowDown" && event.altKey && event.shiftKey) {
+                event.preventDefault();
+                const index = focusedRow;
+                const newIndex = focusedRow + 1;
+                const wasDefFocused = defFocused;
+
+                if (newIndex < terms?.length) {
+                    moveTerm(index, newIndex);
+                    unsavedChanges = true;
+
+                    focusedRow = newIndex;
+                    tick().then(() => {
+                        if (wasDefFocused) {
+                            terms?.[newIndex]?.defTextarea?.focus();
+                        } else {
+                            terms?.[newIndex]?.termTextarea?.focus();
+                        }
+                    });
+                }
+                return;
+            }
+
             if ((event.key === "j" || event.key === "ArrowDown") && !(
                 document.activeElement?.tagName === "INPUT" ||
                 document.activeElement?.tagName === "TEXTAREA" ||
@@ -282,8 +302,8 @@
                 event.preventDefault();
                 if (focusedRow + 1 < terms?.length) {
                     focusedRow++;
-                    showFocusBorder = true;
                 }
+                showFocusBorder = true;
                 return;
             }
             if ((event.key === "k" || event.key === "ArrowUp") && !(
@@ -294,12 +314,33 @@
                 event.preventDefault();
                 if (focusedRow - 1 >= 0) {
                     focusedRow--;
-                    showFocusBorder = true;
                 }
+                showFocusBorder = true;
                 return;
             }
             if (
-                showFocusBorder &&
+                (event.key === "h" || event.key === "ArrowLeft") &&
+                !(document.activeElement?.tagName === "INPUT" ||
+                document.activeElement?.tagName === "TEXTAREA" ||
+                document.activeElement?.isContentEditable)
+            ) {
+                event.preventDefault();
+                defFocused = false;
+                showFocusBorder = true;
+                return;
+            }
+            if (
+                (event.key === "l" || event.key === "ArrowRight") &&
+                !(document.activeElement?.tagName === "INPUT" ||
+                document.activeElement?.tagName === "TEXTAREA" ||
+                document.activeElement?.isContentEditable)
+            ) {
+                event.preventDefault();
+                defFocused = true;
+                showFocusBorder = true;
+                return;
+            }
+            if (
                 !(event.ctrlKey || event.altKey) &&
                 !(document.activeElement?.tagName === "INPUT" ||
                 document.activeElement?.tagName === "TEXTAREA" ||
@@ -330,14 +371,9 @@
                 document.activeElement?.isContentEditable) &&
                 addToKeySeq(event.key).endsWith("dd")
             ) {
-                for (let i = 0; i < (keySeqMultiplier ?? 1); i++) {
-                    deleteTerm(focusedRow);
-                    if (focusedRow + 1 < terms?.length) {
-                        focusedRow++;
-                    } else {
-                        focusedRow--;
-                        break;
-                    }
+                deleteTerm(focusedRow);
+                if (focusedRow > 0) {
+                    focusedRow--;
                 }
                 resetKeySeq();
             }
