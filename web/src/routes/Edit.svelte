@@ -58,13 +58,27 @@
       }
     }
     let deletedTermRegister;
-    function deleteTerm(index) {
-      if (terms[index].id != null) {
-        existingTermIdsToDelete.push(
-          terms[index].id
-        );
-      }
-      deletedTermRegister = terms.splice(index, 1)?.[0];
+    function deleteTerm(index, copyToRegister) {
+        if (terms[index].id != null) {
+            existingTermIdsToDelete.push(
+                terms[index].id
+            );
+        }
+        const deletedTerm = terms.splice(index, 1)?.[0];
+        if (copyToRegister) {
+            deletedTermRegister = deletedTerm;
+            navigator?.clipboard?.writeText(
+                deletedTerm.term + " \n" + deletedTerm.def
+            )
+        }
+    }
+    function unmarkForDeletion(id) {
+        const index = existingTermIdsToDelete.indexOf(id);
+        if (index >= 0) {
+            existingTermIdsToDelete.splice(
+                index, 1
+            );
+        }
     }
 
     function termsTo2DArray() {
@@ -83,6 +97,7 @@
     let defFocused = $state(false);
     let focusedRow = $state(0);
     let showFocusBorder = $state(false);
+    let useOhnoColorFocusBorder = $state(false);
     onMount(() => {
         (async function () {
             if (data.authed && !(data.local)) {
@@ -179,13 +194,26 @@
             }
         })();
 
-        let keySeq = "";
+        let keySeq = [];
         function addToKeySeq(key) {
-            keySeq += key;
+            if (("hjkl").includes(key)) {
+                resetKeySeq();
+                /* dont return cause we want to remove ohnocolorfocusborder below */
+            } else if (key == "Backspace") {
+                keySeq.pop();
+            } else {
+                keySeq.push(key);
+            }
+            if (keySeq.length == 1 && keySeq[0] == "d") {
+                showFocusBorder = true;
+                useOhnoColorFocusBorder = true;
+            } else {
+                useOhnoColorFocusBorder = false;
+            }
             return keySeq;
         }
         function resetKeySeq() {
-            keySeq = "";
+            keySeq = [];
         }
 
         function onKeydown(e) {
@@ -207,11 +235,16 @@
                 ))
             ) {
                 event.preventDefault();
-                insertTerm(focusedRow + 1);
+                let indexWeWant = 0;
+                if (focusedRow + 1 <= terms?.length) {
+                    indexWeWant = focusedRow + 1;
+                }
+                insertTerm(indexWeWant);
                 unsavedChanges = true;
 
                 tick().then(() => {
-                    terms?.[focusedRow + 1]?.termTextarea?.focus();
+                    focusedRow = indexWeWant;
+                    terms?.[indexWeWant]?.termTextarea?.focus();
                 });
                 return;
             }
@@ -261,8 +294,8 @@
                     moveTerm(index, newIndex);
                     unsavedChanges = true;
 
-                    focusedRow = newIndex;
                     tick().then(() => {
+                        focusedRow = newIndex;
                         if (wasDefFocused) {
                             terms?.[newIndex]?.defTextarea?.focus();
                         } else {
@@ -282,8 +315,8 @@
                     moveTerm(index, newIndex);
                     unsavedChanges = true;
 
-                    focusedRow = newIndex;
                     tick().then(() => {
+                        focusedRow = newIndex;
                         if (wasDefFocused) {
                             terms?.[newIndex]?.defTextarea?.focus();
                         } else {
@@ -366,16 +399,97 @@
                 return;
             }
             if (
+                ["Alt",
+                "AltGraph",
+                "CapsLock",
+                "Control",
+                "Fn",
+                "FnLock",
+                "Hyper",
+                "Meta",
+                "NumLock",
+                "ScrollLock",
+                "Shift",
+                "Super",
+                "Symbol",
+                "SymbolLock",
+                "Compose",
+                "Dead",
+                ].includes(event.key)
+            ) {
+                return;
+            }
+            if (
+                event.key == "p" &&
                 !(document.activeElement?.tagName === "INPUT" ||
                 document.activeElement?.tagName === "TEXTAREA" ||
-                document.activeElement?.isContentEditable) &&
-                addToKeySeq(event.key).endsWith("dd")
+                document.activeElement?.isContentEditable)
             ) {
-                deleteTerm(focusedRow);
-                if (focusedRow > 0) {
-                    focusedRow--;
+                if (deletedTermRegister) {
+                    let indexWeWant = 0;
+                    if (focusedRow + 1 <= terms?.length) {
+                        indexWeWant = focusedRow + 1;
+                    }
+                    insertTerm(
+                        indexWeWant,
+                        deletedTermRegister?.term,
+                        deletedTermRegister?.def,
+                        deletedTermRegister?.id ?? undefined
+                    );
+
+                    tick().then(() => {
+                        focusedRow = indexWeWant;
+                    });
+
+                    if (deletedTermRegister?.id) {
+                        unmarkForDeletion(deletedTermRegister?.id);
+
+                        /* next time, if i paste again, i need a new id,
+                        so set .id to undefined, but keep .term and .def */
+                        deletedTermRegister.id = undefined;
+                    }
                 }
                 resetKeySeq();
+                return;
+            }
+            if (
+                event.key == "P" &&
+                !(document.activeElement?.tagName === "INPUT" ||
+                document.activeElement?.tagName === "TEXTAREA" ||
+                document.activeElement?.isContentEditable)
+            ) {
+                if (deletedTermRegister) {
+                    insertTerm(
+                        focusedRow,
+                        deletedTermRegister?.term,
+                        deletedTermRegister?.def,
+                        deletedTermRegister?.id ?? undefined
+                    );
+
+                    if (deletedTermRegister?.id) {
+                        unmarkForDeletion(deletedTermRegister?.id);
+
+                        /* next time, if i paste again, i need a new id,
+                        so set .id to undefined, but keep .term and .def */
+                        deletedTermRegister.id = undefined;
+                    }
+                }
+                resetKeySeq();
+                return;
+            }
+            if (
+                !(document.activeElement?.tagName === "INPUT" ||
+                document.activeElement?.tagName === "TEXTAREA" ||
+                document.activeElement?.isContentEditable)
+            ) {
+                const newKeySeq = addToKeySeq(event.key);
+                if (newKeySeq.length == 2 && newKeySeq[0] == "d" && newKeySeq[1] == "d") {
+                    deleteTerm(focusedRow, true);
+                    if (focusedRow > 0) {
+                        focusedRow--;
+                    }
+                    resetKeySeq();
+                }
             }
         }
         window.addEventListener("keydown", onKeydown);
@@ -743,8 +857,10 @@
                         unsavedChanges = true;
                       }},
                       onfocus: () => {defFocused = false; focusedRow = index; showFocusBorder = false},
-                      style: showFocusBorder && !defFocused && focusedRow == index ?
-                        "border-color: var(--main);" : ""
+                      style: `transition-duration: 0.2s; ${showFocusBorder && useOhnoColorFocusBorder && !defFocused && focusedRow == index ?
+                        "border-color: var(--ohno);" :
+                        (showFocusBorder && !defFocused && focusedRow == index ?
+                            "border-color: var(--main)" : "")}`
                     }}
                     bind:value={term.term}
                     bind:textareaElement={term.termTextarea}
@@ -760,8 +876,10 @@
                         unsavedChanges = true;
                       }},
                       onfocus: () => {defFocused = true; focusedRow = index; showFocusBorder = false},
-                      style: showFocusBorder && defFocused && focusedRow == index ?
-                        "border-color: var(--main);" : ""
+                      style: `transition-duration: 0.2s; ${showFocusBorder && useOhnoColorFocusBorder && defFocused && focusedRow == index ?
+                        "border-color: var(--ohno);" :
+                        (showFocusBorder && defFocused && focusedRow == index ?
+                            "border-color: var(--main)" : "")}`
                     }}
                     bind:value={term.def}
                     bind:textareaElement={term.defTextarea}
