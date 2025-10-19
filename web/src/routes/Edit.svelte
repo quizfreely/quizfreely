@@ -485,10 +485,13 @@
                 const newKeySeq = addToKeySeq(event.key);
                 if (newKeySeq.length == 2 && newKeySeq[0] == "d" && newKeySeq[1] == "d") {
                     deleteTerm(focusedRow, true);
-                    if (focusedRow > 0) {
-                        focusedRow--;
-                    }
                     resetKeySeq();
+
+                    tick().then(() => {
+                        if (focusedRow == terms?.length) {
+                            focusedRow--;
+                        }
+                    })
                 }
             }
         }
