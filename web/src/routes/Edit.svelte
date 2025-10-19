@@ -98,6 +98,27 @@
     let focusedRow = $state(0);
     let showFocusBorder = $state(false);
     let useOhnoColorFocusBorder = $state(false);
+    let keySeq = [];
+    function addToKeySeq(key) {
+        if (("hjkl").includes(key)) {
+            resetKeySeq();
+            /* dont return cause we want to remove ohnocolorfocusborder below */
+        } else if (key == "Backspace") {
+            keySeq.pop();
+        } else {
+            keySeq.push(key);
+        }
+        if (keySeq.length == 1 && keySeq[0] == "d") {
+            showFocusBorder = true;
+            useOhnoColorFocusBorder = true;
+        } else {
+            useOhnoColorFocusBorder = false;
+        }
+        return keySeq;
+    }
+    function resetKeySeq() {
+        keySeq = [];
+    }
     onMount(() => {
         (async function () {
             if (data.authed && !(data.local)) {
@@ -194,27 +215,6 @@
             }
         })();
 
-        let keySeq = [];
-        function addToKeySeq(key) {
-            if (("hjkl").includes(key)) {
-                resetKeySeq();
-                /* dont return cause we want to remove ohnocolorfocusborder below */
-            } else if (key == "Backspace") {
-                keySeq.pop();
-            } else {
-                keySeq.push(key);
-            }
-            if (keySeq.length == 1 && keySeq[0] == "d") {
-                showFocusBorder = true;
-                useOhnoColorFocusBorder = true;
-            } else {
-                useOhnoColorFocusBorder = false;
-            }
-            return keySeq;
-        }
-        function resetKeySeq() {
-            keySeq = [];
-        }
 
         function onKeydown(e) {
             if (event.key === "Enter" && event.ctrlKey && !event.altKey) {
@@ -859,7 +859,7 @@
                       oninput: () => {if (!unsavedChanges) {
                         unsavedChanges = true;
                       }},
-                      onfocus: () => {defFocused = false; focusedRow = index; showFocusBorder = false},
+                      onfocus: () => {defFocused = false; focusedRow = index; showFocusBorder = false; resetKeySeq()},
                       style: `transition-duration: 0.2s; ${showFocusBorder && useOhnoColorFocusBorder && !defFocused && focusedRow == index ?
                         "border-color: var(--ohno);" :
                         (showFocusBorder && !defFocused && focusedRow == index ?
@@ -878,7 +878,7 @@
                       oninput: () => {if (!unsavedChanges) {
                         unsavedChanges = true;
                       }},
-                      onfocus: () => {defFocused = true; focusedRow = index; showFocusBorder = false},
+                      onfocus: () => {defFocused = true; focusedRow = index; showFocusBorder = false; resetKeySeq()},
                       style: `transition-duration: 0.2s; ${showFocusBorder && useOhnoColorFocusBorder && defFocused && focusedRow == index ?
                         "border-color: var(--ohno);" :
                         (showFocusBorder && defFocused && focusedRow == index ?
