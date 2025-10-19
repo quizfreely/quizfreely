@@ -266,7 +266,39 @@
                     "Change Folder" : "Add to Folder"
             }
         </button>
-        <button onclick={() => console.log(studyset)}>
+        <button onclick={async () => {
+            try {
+                const raw = await fetch("/api/graphql", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        query: `mutation ($id: ID!) {
+    unsaveStudyset(studysetId: $id)
+}`,
+                        variables: {
+                            id: studyset?.id
+                        }
+                    })
+                });
+                const json = await raw.json();
+                if (json?.data?.unsaveStudyset) {
+                    const index = studysetListData?.mySavedStudysets?.findIndex(
+                        s => s?.id == studyset?.id
+                    );
+                    if (index >= 0) {
+                        studysetListData?.mySavedStudysets?.splice(
+                            index, 1
+                        );
+                    }
+                } else {
+                    console.log("failed to unsave studyset: ", json);
+                }
+            } catch (err) {
+                console.log("error unsaving studyset: ", err);
+            }
+        }}>
             <BookmarkIcon></BookmarkIcon> Unsave
         </button>
     {/snippet}
