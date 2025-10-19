@@ -45,7 +45,7 @@
     }
 </script>
 
-<form action="/search" method="get" class="searchbar with-autocomplete" style="margin-bottom: 0px; box-shadow: 0px 1px 2px 1px rgba(0, 0, 0, 0.1);">
+<form action="/search" method="get" class="searchbar with-autocomplete" style="margin-bottom: 0px; box-shadow: 0px 0px 2px 1px rgba(0, 0, 0, 0.1);">
     <IconSearch class="searchbar-icon" />
     <input type="text"
         name="q"
