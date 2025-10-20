@@ -18,54 +18,6 @@
 <main>
   <div class="grid page">
     <div class="content">
-      {#if modPowersActive}
-                <div class="flex" style="margin-bottom: 1rem;">
-        <button class="alt yay"onclick={async () => {
-            const title = prompt("title");
-            const raw = await fetch("/api/graphql", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    query: `mutation newFeaturedCategory($title: String) {
-    createFeaturedCategory(title: $title) {
-        id
-    }
-}`,
-                    variables: {
-                        title
-                    }
-                })
-            });
-            const resp = await raw.json();
-            console.log(resp);
-            alert(resp?.data?.createFeaturedCategory?.id)
-        }}>Create Featured Category</button>
-
-        <button class="alt yay" onclick={async () => {
-            const studysetId = prompt("studyset id");
-            const categoryId = prompt("category id");
-            const raw = await fetch("/api/graphql", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    query: `mutation setFeaturedCategory($studysetId: ID, $categoryId: ID) {
-    setStudysetFeaturedCategory(studysetId: $studysetId, categoryId: $categoryId)
-}`,
-                    variables: {
-                        studysetId,
-                        categoryId
-                    }
-                })
-            });
-            const resp = await raw.json();
-            console.log(resp);
-        }}>Set Studyset Category</button>
-    </div>
-      {/if}
       {#each data.featuredCategories as category}
       {#if (category.studysets?.length >= 1) }
       <h2 class="h4">{category.title}</h2>

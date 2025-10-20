@@ -20,11 +20,13 @@
         border-radius: 0.8rem;
     }
     .settings-menu-link:hover {
-        background-color: var(--bg-3);
+        background-color: var(--bg-3ish);
+        box-shadow: 0px 1px 2px 1px var(--button-box-shadow-color);
     }
     .settings-menu-link.current {
         color: var(--main);
-        background-color: var(--bg-3);
+        background-color: var(--bg-3ish);
+        box-shadow: 0px 1px 2px 1px var(--button-box-shadow-color);
     }
     .settings-menu-link.current:hover {
         color: var(--main-alt);
