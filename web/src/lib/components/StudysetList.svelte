@@ -142,7 +142,7 @@
     {#if data.myFolders?.length > 0}
         <div class="grid list" style="overflow-wrap: anywhere; margin-bottom: 1rem;">
             {#each data.myFolders as folder}
-                <button class="button-box" onclick={() => viewFolder(folder.id)} transition:scale={{duration:200}}>
+                <button class="button-box" style="display: flex;" onclick={() => viewFolder(folder.id)} transition:scale={{duration:200}}>
                     <FolderIcon></FolderIcon> {folder.name}
                 </button>
             {/each}
