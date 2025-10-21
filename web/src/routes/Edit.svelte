@@ -67,9 +67,6 @@
         const deletedTerm = terms.splice(index, 1)?.[0];
         if (copyToRegister) {
             deletedTermRegister = deletedTerm;
-            navigator?.clipboard?.writeText(
-                deletedTerm.term + " \n" + deletedTerm.def
-            )
         }
     }
     function unmarkForDeletion(id) {
