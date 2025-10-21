@@ -218,12 +218,12 @@
     }
     .top-menu-link:hover {
         background-color: var(--bg-3ish);
-        box-shadow: 0px 0px 2px 1px var(--button-box-shadow-color);
+        box-shadow: 0px 1px 2px 1px var(--button-box-shadow-color);
     }
     .top-menu-link.current {
         color: var(--main);
         background-color: var(--bg-3ish);
-        box-shadow: 0px 0px 2px 1px var(--button-box-shadow-color);
+        box-shadow: 0px 1px 2px 1px var(--button-box-shadow-color);
     }
     .top-menu-link.current:hover {
         color: var(--main-alt);
