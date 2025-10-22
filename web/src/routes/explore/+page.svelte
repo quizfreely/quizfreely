@@ -26,21 +26,21 @@
                     </div>
                 </div>
             <div class="grid list" style="margin-top: 4rem;">
-                <a class="button button-box" href="/categories/math">
-                    Math
-                </a>
-                <a class="button button-box" href="/categories/languages">
+                <button class="button button-box" onclick={() => showCategory("LANG")}>
                     World Languages
-                </a>
-                <a class="button button-box" href="/categories/stem">
-                    STEM
-                </a>
-                <a class="button button-box" href="/categories/social-studies">
+                </button>
+                <button class="button button-box" onclick={() => showCategory("SOCIAL_STUDIES")}>
                     Social Studies
-                </a>
-                <a class="button button-box" href="/categories/la">
+                </button>
+                <button class="button button-box" onclick={() => showCategory("STEM")}>
+                    STEM
+                </button>
+                <button class="button button-box" onclick={() => showCategory("MATH")}>
+                    Math
+                </button>
+                <button class="button button-box" onclick={() => showCategory("LA")}>
                     Language Arts
-                </a>
+                </button>
             </div>
             <p style="margin-top: 6rem;">All Subjects:</p>
             <div class="grid list">
