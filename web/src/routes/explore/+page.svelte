@@ -1,6 +1,5 @@
 <script>
     import { onMount } from "svelte";
-    import MathIcon from "$lib/icons/Math.svelte";
     let { data } = $props();
     let modPowersActive = $state(false);
     onMount(() => {
