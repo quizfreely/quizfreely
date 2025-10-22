@@ -1,5 +1,6 @@
 <script>
     import { onMount } from "svelte";
+    import MathIcon from "$lib/icons/Math.svelte";
     let { data } = $props();
     let modPowersActive = $state(false);
     onMount(() => {
@@ -16,9 +17,25 @@
 </svelte:head>
 
 <main>
-  <div class="grid page">
-    <div class="content">
-        <div class="button-box"
+    <div class="grid page">
+        <div class="content">
+            <div class="grid list">
+                <a class="button button-box">
+                    Math
+                </a>
+                <a class="button button-box">
+                    World Languages
+                </a>
+                <a class="button button-box">
+                    STEM
+                </a>
+                <a class="button button-box">
+                    Social Studies
+                </a>
+                <a class="button button-box">
+                    Language Arts
+                </a>
+            </div>
+        </div>
     </div>
-  </div>
 </main>
