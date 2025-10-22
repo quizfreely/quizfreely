@@ -1,5 +1,5 @@
 import { env } from '$env/dynamic/public';
-import { error } from '@sveltejs/kit';
+import { error, redirect } from '@sveltejs/kit';
 import fetchAuthData from '$lib/fetchAuthData.server';
 
 export async function load({ cookies, url }) {
@@ -73,15 +73,6 @@ if (searchQuery.length >= 1) {
       )
     }
   } else {
-    let userResult = await fetchAuthData({ cookies });
-    return {
-      query: "",
-      authed: userResult.authed,
-      authedUser: userResult?.authedUser,
-      header: {
-        activePage: "explore",
-        hideSearchbar: true
-      }
-    }
+    redirect(307, "/explore");
   }
 }

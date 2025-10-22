@@ -19,19 +19,6 @@ export async function load({ cookies }) {
                 oauthGoogleEmail
                 modPerms
               }
-                            featuredCategories {
-                id
-                title
-                studysets {
-                  id
-                  title
-                  user {
-                      displayName
-                  }
-                  termsCount
-                  updatedAt
-                }
-              }
               recentStudysets {
                 id
                 title
@@ -40,6 +27,11 @@ export async function load({ cookies }) {
                 }
                 termsCount
                 updatedAt
+              }
+              allSubjects {
+                id
+                name
+                category
               }
             }`
           })
@@ -56,13 +48,16 @@ export async function load({ cookies }) {
           recentStudysets = apiRes.data.recentStudysets;
         }
         
+        console.log(apiRes)
         return {
             featuredCategories: apiRes?.data?.featuredCategories,
             recentStudysets: recentStudysets,
             authed: authed,
             authedUser: authedUser,
+            allSubjects: apiRes?.data?.allSubjects,
             header: {
-                activePage: "explore"
+                activePage: "explore",
+                hideSearchbar: true
             },
         }
       } catch (err) {
@@ -70,7 +65,8 @@ export async function load({ cookies }) {
         return {
             authed: false,
             header: {
-                activePage: "explore"
+                activePage: "explore",
+                hideSearchbar: true
             }
         }
       }
