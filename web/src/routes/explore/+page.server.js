@@ -56,8 +56,7 @@ export async function load({ cookies }) {
             authedUser: authedUser,
             allSubjects: apiRes?.data?.allSubjects,
             header: {
-                activePage: "explore",
-                hideSearchbar: true
+                activePage: "explore"
             },
         }
       } catch (err) {
@@ -65,8 +64,7 @@ export async function load({ cookies }) {
         return {
             authed: false,
             header: {
-                activePage: "explore",
-                hideSearchbar: true
+                activePage: "explore"
             }
         }
       }

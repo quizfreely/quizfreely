@@ -55,13 +55,9 @@
             </div>
         </div>
     </div>
-    {#if page.data?.header?.hideSearchbar }
-        <div class="search"></div>
-    {:else}
     <div class="search">
         <Searchbar query={page.data?.header?.searchQuery} />
     </div>
-    {/if}
     <div class="status">
         {#if page.data?.authed }
             <!--<div class="dropdown" tabindex="0" style="margin-top:0px;margin-bottom:0px;margin-left:1rem;margin-right:1rem">

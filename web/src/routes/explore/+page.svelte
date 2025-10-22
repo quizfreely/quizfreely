@@ -9,6 +9,16 @@
         }
     })
 </script>
+<style>
+    .aligndiffwhensmol {
+        text-align: center;
+    }
+    @media only screen and (max-width: 800px) {
+        .aligndiffwhensmol {
+            text-align: start;
+        }
+    }
+</style>
 
 <svelte:head>
     <title>Explore & Search - Quizfreely</title>
@@ -19,37 +29,29 @@
 <main>
     <div class="grid page">
         <div class="content">
-                <h2 style="text-align:center;margin-top:4rem;margin-bottom:0px">Quizfreely</h2>
-                <div class="flex center">
-                    <div style="width: 100%; max-width: 40rem;">
-                        <Searchbar />
-                    </div>
-                </div>
-            <div class="grid list" style="margin-top: 4rem;">
-                <button class="button button-box" onclick={() => showCategory("LANG")}>
+            <div class="grid list" style="margin-top: 2rem;">
+                <a class="button button-box aligndiffwhensmol" href="/subject-categories/languages">
                     World Languages
-                </button>
-                <button class="button button-box" onclick={() => showCategory("SOCIAL_STUDIES")}>
+                </a>
+                <a class="button button-box aligndiffwhensmol" href="/subject-categories/social-studies">
                     Social Studies
-                </button>
-                <button class="button button-box" onclick={() => showCategory("STEM")}>
+                </a>
+                <a class="button button-box aligndiffwhensmol" href="/subject-categories/stem">
                     STEM
-                </button>
-                <button class="button button-box" onclick={() => showCategory("MATH")}>
+                </a>
+                <a class="button button-box aligndiffwhensmol" href="/subject-categories/social-studies">
                     Math
-                </button>
-                <button class="button button-box" onclick={() => showCategory("LA")}>
+                </a>
+                <a class="button button-box aligndiffwhensmol" href="/subject-categories/la">
                     Language Arts
-                </button>
+                </a>
             </div>
-            <p style="margin-top: 6rem;">All Subjects:</p>
+            <p class="fg0" style="margin-top: 4rem;">All Subjects</p>
             <div class="grid list">
                 {#each data?.allSubjects as subject}
-                    <span>
-                        <a href="/subjects/{subject.id}">
-                            {subject.name}
-                        </a>
-                    </span>
+                    <a class="button button-box" style="text-align: start;" href="/subjects/{subject.id}">
+                        {subject.name}
+                    </a>
                 {/each}
             </div>
         </div>
