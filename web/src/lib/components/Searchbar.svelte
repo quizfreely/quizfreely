@@ -1,7 +1,13 @@
 <script>
     let props = $props();
+    import { slide } from "svelte/transition";
     import IconSearch from "$lib/icons/Search.svelte";
     
+    let showAutocomplete = $state(false);
+    let autocompleteItems = $state([]);
+
+    let searchbarInput;
+    let searchbarAutocomplete;
     function onSearchbarInput(event) {
         if (event.target.value.length > 0 && event.target.value.length < 50) {
             fetch(
@@ -9,38 +15,25 @@
             ).then(function (response) {
                 response.json().then(function (responseJson) {
                     if (responseJson.data && responseJson.data.queries && responseJson.data.queries.length > 0) {
-                        /* clear old items */
-                        document.getElementById("searchbar-autocomplete").innerHTML = "";
-                        /* iterate over queries and add their link element to the list */
-                        for(var i = 0; i < responseJson.data.queries.length; i++) {
-                            var link = document.createElement("a");
-                            link.href = "/search?q=" + encodeURIComponent(
-                                responseJson.data.queries[i].query
-                            );
-                            link.innerText = responseJson.data.queries[i].query;
-                            document.getElementById("searchbar-autocomplete").appendChild(link);
-                        }
-                        /* show the container */
-                        document.getElementById("searchbar-autocomplete").classList.remove("hide");
+                        autocompleteItems = responseJson.data.queries;
+                        showAutocomplete = true;
                     } else {
-                        /* hide and clear container on error */
-                        document.getElementById("searchbar-autocomplete").classList.add("hide");
-                        document.getElementById("searchbar-autocomplete").innerHTML = "";
+                        showAutocomplete = false;
+                        autocompleteItems = [];
                     }
                 }).catch(function (error) {
-                    /* hide and clear container on error */
-                    document.getElementById("searchbar-autocomplete").classList.add("hide");
-                    document.getElementById("searchbar-autocomplete").innerHTML = "";
+                    showAutocomplete = false;
+                    autocompleteItems = [];
                     console.error(error);
                 })
             }).catch(function (error) {
-                document.getElementById("searchbar-autocomplete").classList.add("hide");
-                document.getElementById("searchbar-autocomplete").innerHTML = "";
+                showAutocomplete = false;
+                autocompleteItems = [];
                 console.error(error);
             })
         } else {
-            document.getElementById("searchbar-autocomplete").classList.add("hide");
-            document.getElementById("searchbar-autocomplete").innerHTML = "";
+            showAutocomplete = false;
+            autocompleteItems = [];
         }
     }
 </script>
@@ -49,15 +42,23 @@
     <IconSearch class="searchbar-icon" />
     <input type="text"
         name="q"
-        id="searchbar-input"
+        bind:this={searchbarInput}
         placeholder="Search"
         autocomplete="off"
         autocapitalize="off"
         spellcheck="false"
-        value={ props.query || "" }
+        value={ props.query ?? "" }
         oninput={
             onSearchbarInput
         }
     />
-    <div id="searchbar-autocomplete" class="searchbar-autocomplete hide"></div>
+    {#if showAutocomplete}
+        <div bind:this={searchbarAutocomplete} class="searchbar-autocomplete" transition:slide={{duration:200}}>
+            {#each autocompleteItems as item}
+                <a href="/search?q={encodeURIComponent(item?.query)}" transition:slide={{duration:200}}>
+                    {item.query}
+                </a>
+            {/each}
+        </div>
+    {/if}
 </form>
