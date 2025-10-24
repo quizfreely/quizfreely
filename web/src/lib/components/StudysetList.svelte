@@ -122,21 +122,22 @@
         </div>
         <p class="h4" style="margin-top: 1rem;"><FolderIcon></FolderIcon> {currentFolder?.name}</p>
         {@render folderMenu?.(currentFolder)}
-        <div class="grid list" style="overflow-wrap: anywhere;">
-            {#if currentFolder?.studysets?.length > 0}
-                {#each currentFolder.studysets as studyset}
-                    <StudysetLinkBox
-                        {studyset}
-                        linkTemplateFunc={cloudLinkTemplateFunc}
-                        showDropdown={showCloudDropdown}
-                        dropdownContent={cloudDropdownContent}
-                    ></StudysetLinkBox>
-                {/each}
-            {:else}
-                <div class="box">
-                </div>
-            {/if}
-        </div>
+        {#if currentFolder?.studysets?.length > 0}
+            <div class="grid list" style="overflow-wrap: anywhere;">
+                    {#each currentFolder.studysets as studyset}
+                        <StudysetLinkBox
+                            {studyset}
+                            linkTemplateFunc={cloudLinkTemplateFunc}
+                            showDropdown={showCloudDropdown}
+                            dropdownContent={cloudDropdownContent}
+                        ></StudysetLinkBox>
+                    {/each}
+            </div>
+        {:else}
+            <div class="box">
+                <p class="fg0">This folder is empty</p>
+            </div>
+        {/if}
     {:else}
     {@render topMenu?.()}
     {#if data.myFolders?.length > 0}
