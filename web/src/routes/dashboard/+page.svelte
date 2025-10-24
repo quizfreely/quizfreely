@@ -323,7 +323,7 @@
 </div>
 {#if showNewFolderModal}
     <div class="modal" transition:fade={{duration: 200}}>
-        <div class="content">
+        <div class="content" style="min-width: 0px;">
             <p>Create New Folder:</p>
             <input type="text" placeholder="Folder Name" style="margin-top: 0.4rem;" bind:value={newFolderName} bind:this={newFolderInput} onkeyup={(e) => {
                 if (e.key == "Enter") {
@@ -348,7 +348,7 @@
 {/if}
 {#if showFolderRenamingFlag}
     <div class="modal" transition:fade={{duration: 200}}>
-        <div class="content">
+        <div class="content" style="min-width: 0px;">
             <p>Rename Folder:</p>
             <input type="text" placeholder="New Folder Name" style="margin-top: 0.4rem;" bind:value={folderRenamingName} bind:this={folderRenamingInput} onkeyup={(e) => {
                 if (e.key == "Enter") {

@@ -76,7 +76,7 @@
     }
 </script>
 <div class="modal" transition:fade={{ duration: 200 }}>
-    <div class="content" style="padding-top: 0.6rem;">
+    <div class="content" style="min-width: 0px; padding-top: 0.6rem;">
         <div class="flex" style="justify-content: space-between; align-items: center;">
             <span>Select a folder:</span>
             <button class="icon-only-button" onclick={closeCallback}>
