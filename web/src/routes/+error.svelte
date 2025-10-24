@@ -11,6 +11,9 @@
         <p>If you found an error or incorrect link, report it so we can fix it:</p>
         <p style="margin-top:0.4rem;"><a href="https://matrix.to/#/#quizfreely-space:matrix.org">Matrix space</a> · <a href="https://discord.gg/6qQrybf6kG">Discord server</a></p>
         <p style="margin-top:0.4rem;"><a href="https://codeberg.org/quizfreely/quizfreely">Codeberg</a> · <a href="https://github.com/quizfreely/quizfreely">GitHub</a></p>
-        <p class="fg0" style="margin-top:4rem;">Quizfreely is made by students/contributors who work on this project for free. Help us improve Quizfreely by posting bug reports, feature requests, or questions.</p>
+        <p class="fg0" style="margin-top:4rem;">
+            Quizfreely is made by students/contributors who work on this project for free.
+            <span class="optional-line">Help us improve Quizfreely by posting bug reports, feature requests, or questions.</span>
+        </p>
     </div>
 </div>
