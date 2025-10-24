@@ -24,6 +24,7 @@
     import GroupIcon from "$lib/icons/GroupUsers.svelte";
     import BookmarkIcon from "$lib/icons/Bookmark.svelte";
     import FolderIcon from "$lib/icons/Folder.svelte";
+    import AngleRIcon from "$lib/icons/AngleRight.svelte";
 
     import { Confetti } from "svelte-confetti";
     import { footerState } from "$lib/components/footer.svelte.js";
@@ -266,7 +267,9 @@
     {#if !flashcardsMaximized}
       <div id="title-and-menu-outer-div">
         {#if folderName}
-            <div class="flex">
+            <div class="flex compact-gap" style="align-items: center;">
+                <a href="/dashboard" class="button faint">Folders</a>
+                <AngleRIcon></AngleRIcon>
                 <a href="/dashboard?folder={folderId}" class="button faint">
                     <FolderIcon></FolderIcon>
                     {folderName}
