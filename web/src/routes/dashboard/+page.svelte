@@ -1,6 +1,7 @@
 <script>
     import { tick, onMount } from "svelte";
     import { slide, fade } from "svelte/transition";
+    import Dropdown from "$lib/components/Dropdown.svelte";
     import Noscript from "$lib/components/Noscript.svelte";
     import StudysetList from "$lib/components/StudysetList.svelte";
     import FolderPicker from "$lib/components/FolderPicker.svelte";
@@ -194,6 +195,16 @@
 
 <Noscript />
 <div>
+    <Dropdown>
+        {#snippet buttonContent()}
+            asdf
+        {/snippet}
+        {#snippet divContent()}
+            <button>apt</button>
+            <button class="ohno">apt</button>
+        {/snippet}
+    </Dropdown>
+
     {#if !data.authed}
         <p id="dashboard-noaccount-alert" class="fg0">
             You're not signed in, so your sets will be saved locally (on your device)
