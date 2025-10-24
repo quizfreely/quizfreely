@@ -294,7 +294,7 @@
         </p>
         {/if}
         {#if (data.studyset && data.authed && (data.authedUser.id == data.studyset.user?.id)) }
-        <div id="edit-menu" class="flex">
+        <div id="edit-menu" class="flex" style="align-items: center;">
           <a href="/studyset/edit/{ data.studyset.id }" class="button">
             <IconPencil />
             Edit
