@@ -11,7 +11,8 @@
         button,
         buttonContent,
         div,
-        divContent
+        divContent,
+        computePositionOptions
     } = $props();
     let buttonEl;
     let divEl;
@@ -19,12 +20,18 @@
 
     function toggle() {
         show = !show;
+        if (show) {
+            document.addEventListener("click", outsideClickHandler);
+        } else {
+            cleanUpOutsideClickHandler();
+        }
         tick().then(update);
     }
     function update() {
         if (show) {
             computePosition(buttonEl, divEl, {
                 placement: "bottom",
+                ...computePositionOptions,
                 middleware: [offset(4), flip(), shift({
                     padding: 10
                 })]
@@ -36,12 +43,22 @@
             });
         }
     }
+    function outsideClickHandler(e) {
+        if (!buttonEl.contains(e.target) && !divEl.contains(e.target)) {
+            show = false;
+            cleanUpOutsideClickHandler();
+        }
+    }
+    function cleanUpOutsideClickHandler() {
+        document.removeEventListener("click", outsideClickHandler);
+    }
     onMount(() => {
         window.addEventListener("resize", update);
         window.addEventListener("scroll", update);
         return () => {
             window.removeEventListener("resize", update);
             window.removeEventListener("scroll", update);
+            cleanUpOutsideClickHandler();
         }
     })
 </script>
