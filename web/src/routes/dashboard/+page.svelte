@@ -214,7 +214,7 @@
     </div>
     {/snippet}
     {#snippet folderMenu(folder)}
-    <div class="flex">
+    <div class="flex" style="align-items: center;">
         <a href="/studyset/create?folderId={folder?.id}" class="button">
             <IconPlus />
             New Studyset
