@@ -13,7 +13,11 @@
         buttonContent,
         div,
         divContent,
-        computePositionOptions
+        ...props /*
+            offset,
+            shiftPadding,
+            placement
+        */
     } = $props();
     let buttonEl;
     let divEl;
@@ -37,10 +41,9 @@
     function update() {
         if (show) {
             computePosition(buttonEl, divEl, {
-                placement: "bottom",
-                ...computePositionOptions,
-                middleware: [offset(4), flip(), shift({
-                    padding: 10
+                placement: props?.placement ?? "bottom-start",
+                middleware: [offset(props?.offset ?? 6), flip(), shift({
+                    padding: props?.shiftPadding ?? 10
                 })]
             }).then(({x, y}) => {
                 Object.assign(divEl.style, {
@@ -66,6 +69,14 @@
         }
     });
 </script>
+<style>
+    .qzfr-raw-dropdown {
+        position: absolute;
+        width: max-content;
+        top: 0;
+        left: 0;
+    }
+</style>
 <button
     onclick={() => toggle()}
     bind:this={buttonEl}
@@ -78,7 +89,7 @@
         transition:slide={{duration: 200}}
         bind:this={divEl}
         {...div}
-        class="raw-dropdown {div?.class}"
+        class="raw-dropdown qzfr-raw-dropdown {div?.class}"
         onintrostart={update /* compute position before animation */}
         onintroend={update /* compute again after animation */}
     >

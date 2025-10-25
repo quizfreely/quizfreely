@@ -225,18 +225,18 @@
             <PencilIcon />
             Rename Folder
         </button>
-        <div class="dropdown left" tabindex="0">
-            <button class="dropdown-toggle">
+        <Dropdown button={{class:"dropdown-toggle"}} placement="bottom-end">
+            {#snippet buttonContent()}
                 <MoreIcon></MoreIcon>
-            </button>
-            <div class="content">
+            {/snippet}
+            {#snippet divContent()}
                 <button class="ohno" onclick={
                     () => showDeleteFolderConfirmation(folder)
                 }>
                     <TrashIcon></TrashIcon> Delete Folder
                 </button>
-            </div>
-        </div>
+            {/snippet}
+        </Dropdown>
     </div>
     {/snippet}
 
