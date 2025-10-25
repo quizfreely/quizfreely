@@ -5,6 +5,7 @@
         showDropdown = false,
         dropdownContent
     } = $props();
+    import Dropdown from "$lib/components/Dropdown.svelte";
     import MoreIcon from "$lib/icons/MoreDotsVertical.svelte";
 </script>
 <div>
@@ -14,14 +15,14 @@
     </a>
     {#if showDropdown}
     <div class="flex" style="justify-content: end; position: relative; margin-top: 0px; margin-bottom: 0px;">
-        <div class="dropdown left" tabindex="0" style="position: absolute; bottom: 0.2rem;">
-            <button class="dropdown-toggle">
+        <Dropdown button={{class:"dropdown-toggle"}} container={{style:"position: absolute; bottom: 0.2rem;"}}>
+            {#snippet buttonContent()}
                 <MoreIcon class="text fg0"></MoreIcon>
-            </button>
-            <div class="content">
+            {/snippet}
+            {#snippet divContent()}
                 {@render dropdownContent?.(studyset)}
-            </div>
-        </div>
+            {/snippet}
+        </Dropdown>
     </div>
     {/if}
 </div>

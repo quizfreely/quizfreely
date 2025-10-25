@@ -13,6 +13,7 @@
         buttonContent,
         div,
         divContent,
+        container,
         ...props /*
             offset,
             shiftPadding,
@@ -42,7 +43,7 @@
         if (show) {
             computePosition(buttonEl, divEl, {
                 placement: props?.placement ?? "bottom-start",
-                middleware: [offset(props?.offset ?? 6), flip(), shift({
+                middleware: [offset(props?.offset ?? 4), flip(), shift({
                     padding: props?.shiftPadding ?? 10
                 })]
             }).then(({x, y}) => {
@@ -77,6 +78,7 @@
         left: 0;
     }
 </style>
+<div {...container}>
 <button
     onclick={() => toggle()}
     bind:this={buttonEl}
@@ -96,3 +98,4 @@
         {@render divContent?.()}
     </div>
 {/if}
+</div>
