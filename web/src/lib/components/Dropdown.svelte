@@ -36,7 +36,6 @@
     }
     function update() {
         if (show) {
-            console.log("called")
             computePosition(buttonEl, divEl, {
                 placement: "bottom",
                 ...computePositionOptions,
