@@ -5,7 +5,8 @@
         computePosition,
         flip,
         shift,
-        offset
+        offset,
+        autoUpdate
     } from "@floating-ui/dom";
     let {
         button,
@@ -18,17 +19,24 @@
     let divEl;
     let show = $state(false);
 
+    let cleanUpAutoUpdate;
     function toggle() {
         show = !show;
         if (show) {
             document.addEventListener("click", outsideClickHandler);
+            tick().then(() => {
+                cleanUpAutoUpdate = autoUpdate(
+                    buttonEl, divEl, update
+                )
+            });
         } else {
             cleanUpOutsideClickHandler();
+            cleanUpAutoUpdate?.();
         }
-        tick().then(update);
     }
     function update() {
         if (show) {
+            console.log("called")
             computePosition(buttonEl, divEl, {
                 placement: "bottom",
                 ...computePositionOptions,
@@ -53,11 +61,7 @@
         document.removeEventListener("click", outsideClickHandler);
     }
     onMount(() => {
-        window.addEventListener("resize", update);
-        window.addEventListener("scroll", update);
         return () => {
-            window.removeEventListener("resize", update);
-            window.removeEventListener("scroll", update);
             cleanUpOutsideClickHandler();
         }
     })
@@ -75,6 +79,8 @@
         bind:this={divEl}
         {...div}
         class="raw-dropdown {div?.class}"
+        onintrostart={update /* compute position before animation */}
+        onintroend={update /* compute again after animation */}
     >
         {@render divContent?.()}
     </div>

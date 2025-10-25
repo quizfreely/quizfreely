@@ -195,15 +195,6 @@
 
 <Noscript />
 <div>
-    <Dropdown>
-        {#snippet buttonContent()}
-            asdf
-        {/snippet}
-        {#snippet divContent()}
-            <button>apt</button>
-            <button class="ohno">apt</button>
-        {/snippet}
-    </Dropdown>
 
     {#if !data.authed}
         <p id="dashboard-noaccount-alert" class="fg0">
@@ -544,3 +535,12 @@
         }}
     ></FolderPicker>
 {/if}
+    <Dropdown button={{class:"faint"}}>
+        {#snippet buttonContent()}
+            asdf
+        {/snippet}
+        {#snippet divContent()}
+            <button>apt</button>
+            <button class="ohno">apt</button>
+        {/snippet}
+    </Dropdown>
