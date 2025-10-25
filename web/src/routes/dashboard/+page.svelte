@@ -535,12 +535,3 @@
         }}
     ></FolderPicker>
 {/if}
-    <Dropdown button={{class:"faint"}}>
-        {#snippet buttonContent()}
-            asdf
-        {/snippet}
-        {#snippet divContent()}
-            <button>apt</button>
-            <button class="ohno">apt</button>
-        {/snippet}
-    </Dropdown>
