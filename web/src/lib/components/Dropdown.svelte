@@ -63,8 +63,9 @@
     onMount(() => {
         return () => {
             cleanUpOutsideClickHandler();
+            cleanUpAutoUpdate?.();
         }
-    })
+    });
 </script>
 <button
     onclick={() => toggle()}
