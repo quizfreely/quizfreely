@@ -6,6 +6,7 @@
     import { fade } from "svelte/transition";
     let { data } = $props();
 
+    import Dropdown from "$lib/components/Dropdown.svelte";
     import FolderPicker from "$lib/components/FolderPicker.svelte";
 
     import IconLocal from "$lib/icons/Local.svelte";
@@ -300,14 +301,14 @@
             Edit
           </a>
           {@render addToFolder()}
-          <div class="dropdown" tabindex="0">
-            <button class="dropdown-toggle" aria-label="More Options Dropdown">
+          <Dropdown button={{class:"dropdown-toggle","aria-label":"More Options Dropdown"}}>
+            {#snippet buttonContent()}
               <IconMoreDotsV />
-            </button>
-            <div class="content">
+            {/snippet}
+            {#snippet divContent()}
               <button class="ohno" id="delete-button" onclick={() => {showDeleteConfirmationModal = true}}><IconTrash /> Delete </button>
-            </div>
-          </div>
+            {/snippet}
+          </Dropdown>
         </div>
         {:else if (data.local) }
         <div id="edit-menu" class="flex">
@@ -315,14 +316,14 @@
             <IconPencil />
             Edit
           </a>
-          <div class="dropdown" tabindex="0">
-            <button class="dropdown-toggle" aria-label="More Options Dropdown">
+          <Dropdown button={{class:"dropdown-toggle","aria-label":"More Options Dropdown"}}>
+            {#snippet buttonContent()}
               <IconMoreDotsV />
-            </button>
-            <div class="content">
+            {/snippet}
+            {#snippet divContent()}
               <button class="ohno" id="delete-button" onclick={() => {showDeleteConfirmationModal = true}}><IconTrash /> Delete </button>
-            </div>
-          </div>
+            {/snippet}
+          </Dropdown>
         </div>
         {:else if data.authed}
         <div id="edit-menu" class="flex">
