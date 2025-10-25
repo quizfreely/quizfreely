@@ -25,6 +25,10 @@
     let show = $state(false);
 
     let cleanUpAutoUpdate;
+    function hide() {
+        show = false;
+        cleanUp();
+    }
     function toggle() {
         show = !show;
         if (show) {
@@ -35,8 +39,7 @@
                 )
             });
         } else {
-            cleanUpOutsideClickHandler();
-            cleanUpAutoUpdate?.();
+            cleanUp();
         }
     }
     function update() {
@@ -63,11 +66,12 @@
     function cleanUpOutsideClickHandler() {
         document.removeEventListener("click", outsideClickHandler);
     }
+    function cleanUp() {
+        cleanUpOutsideClickHandler();
+        cleanUpAutoUpdate?.();
+    }
     onMount(() => {
-        return () => {
-            cleanUpOutsideClickHandler();
-            cleanUpAutoUpdate?.();
-        }
+        return cleanUp;
     });
 </script>
 <style>
@@ -95,7 +99,7 @@
         onintrostart={update /* compute position before animation */}
         onintroend={update /* compute again after animation */}
     >
-        {@render divContent?.()}
+        {@render divContent?.(hide)}
     </div>
 {/if}
 </div>

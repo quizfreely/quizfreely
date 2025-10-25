@@ -5,6 +5,7 @@
     import { goto, beforeNavigate } from "$app/navigation";
     import { cancelNprogressTimeout } from "$lib/stores/nprogressTimeout.js";
     let { data } = $props();
+    import Dropdown from "$lib/components/Dropdown.svelte";
 
     import IconLocal from "$lib/icons/Local.svelte";
     import IconCheckmark from "$lib/icons/Checkmark.svelte";
@@ -885,29 +886,32 @@
                     bind:textareaElement={term.defTextarea}
                   />
                   <div class="flex center term-row-box-actions">
-                      <div class="dropdown left" tabindex="0">
-                          <button class="dropdown-toggle" aria-label="Actions dropdown menu">
+                      <Dropdown button={{
+                          class:"dropdown-toggle",
+                          "aria-label": "Actions dropdown menu"
+                      }}>
+                          {#snippet buttonContent()}
                               <IconMoreDotsV />
-                          </button>
-                          <div class="content">
+                          {/snippet}
+                          {#snippet divContent(hide)}
                               <button onclick={function (event) {
                                 moveTerm(index, index - 1);
                                 unsavedChanges = true;
-                                event.target.blur();
+                                hide()
                               }}>
                                   <IconArrowUp /> Move up
                               </button>
                               <button onclick={function (event) {
                                 moveTerm(index, index + 1);
                                 unsavedChanges = true;
-                                event.target.blur();
+                                hide()
                               }}>
                                   <IconArrowDown /> Move down
                               </button>
                               <button onclick={function (event) {
                                 insertTerm(index + 1);
                                 unsavedChanges = true;
-                                event.target.blur();
+                                hide()
                               }}>
                                   <IconPlus /> Add Below
                               </button>
@@ -917,8 +921,8 @@
                               }}>
                                   <IconTrash /> Delete
                               </button>
-                          </div>
-                      </div>
+                          {/snippet}
+                      </Dropdown>
                   </div>
               </div>
               {:else}
