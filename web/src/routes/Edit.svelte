@@ -972,11 +972,11 @@
                 Cancel
               </a>
               {#if data.new && data.authed}
-              <div class="dropdown" tabindex="0">
-                <button class="dropdown-toggle" aria-label="saving options dropdown">
+              <Dropdown button={{class:"dropdown-toggle","aria-label":"saving options dropdown"}}>
+                {#snippet buttonContent()}
                   <IconMoreDotsV />
-                </button>
-                <div class="content">
+                {/snippet}
+                {#snippet divContent()}
                   <button data-sveltekit-preload-data="false" onclick={() => {
                     bypassUnsavedChangesConfirmation = true;
                     createLocalStudyset()
@@ -984,8 +984,8 @@
                     <IconLocal />
                     Save Locally
                   </button>
-                </div>
-              </div>
+                {/snippet}
+              </Dropdown>
               {/if}
             </div>
             {#if showImportTermsModal}
