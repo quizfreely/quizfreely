@@ -13,6 +13,7 @@
                 document.getElementById("display-name-edit").value = document.getElementById("account-display-name").innerText;
                 document.getElementById("display-name-edit-div").classList.remove("hide");
                 document.getElementById("display-name-view-div").classList.add("hide");
+                document.getElementById("display-name-edit").focus();
             })
             document.getElementById("display-name-edit-save-button").addEventListener("click", function () {
     const displayName = document.getElementById("display-name-edit").value;
