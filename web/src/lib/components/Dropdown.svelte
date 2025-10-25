@@ -21,7 +21,7 @@
         */
     } = $props();
     let buttonEl;
-    let divEl;
+    let divEl = $state(null);
     let show = $state(false);
 
     let cleanUpAutoUpdate;

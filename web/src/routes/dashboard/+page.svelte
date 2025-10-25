@@ -21,7 +21,7 @@
     let newFolderName = $state("");
     let showErrInNewFolderModal = $state(false);
     let errInNewFolderModalMsg = $state("");
-    let newFolderInput;
+    let newFolderInput = $state(null);
     function openNewFolderModal() {
         showNewFolderModal = true;
         showErrInNewFolderModal = false;
@@ -37,8 +37,8 @@
     }
 
     let folderRenaming;
-    let folderRenamingName;
-    let folderRenamingInput;
+    let folderRenamingName = $state(null);
+    let folderRenamingInput = $state(null);
     let showFolderRenamingFlag = $state(false);
     function showFolderRenaming(folder) {
         folderRenaming = folder;

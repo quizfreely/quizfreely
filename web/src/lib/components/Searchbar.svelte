@@ -7,7 +7,7 @@
     let autocompleteItems = $state([]);
 
     let searchbarInput;
-    let searchbarAutocomplete;
+    let searchbarAutocomplete = $state(null);
     function onSearchbarInput(event) {
         if (event.target.value.length > 0 && event.target.value.length < 50) {
             fetch(
