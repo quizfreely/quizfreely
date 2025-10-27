@@ -30,19 +30,19 @@
     <div class="grid page">
         <div class="content">
             <div class="grid list" style="margin-top: 2rem;">
-                <a class="button button-box aligndiffwhensmol" href="/subject-categories/languages">
+                <a class="button button-box aligndiffwhensmol" href="/categories/languages">
                     World Languages
                 </a>
-                <a class="button button-box aligndiffwhensmol" href="/subject-categories/social-studies">
+                <a class="button button-box aligndiffwhensmol" href="/categories/social-studies">
                     Social Studies
                 </a>
-                <a class="button button-box aligndiffwhensmol" href="/subject-categories/stem">
+                <a class="button button-box aligndiffwhensmol" href="/categories/stem">
                     STEM
                 </a>
-                <a class="button button-box aligndiffwhensmol" href="/subject-categories/social-studies">
+                <a class="button button-box aligndiffwhensmol" href="/categories/social-studies">
                     Math
                 </a>
-                <a class="button button-box aligndiffwhensmol" href="/subject-categories/la">
+                <a class="button button-box aligndiffwhensmol" href="/categories/language-arts">
                     Language Arts
                 </a>
             </div>
