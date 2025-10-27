@@ -2,13 +2,32 @@
     import StudysetLinkBox from "$lib/components/StudysetLinkBox.svelte";
     import BackIcon from "$lib/icons/BackArrow.svelte";
     import BookmarkIcon from "$lib/icons/Bookmark.svelte";
+    import AngleRightIcon from "$lib/icons/AngleRight.svelte";
     let { data } = $props();
+    const categoryName = {
+        LANG: "World Languages",
+        SOCIAL_STUDIES: "Social Studies",
+        STEM: "STEM",
+        MATH: "Math",
+        LA: "Language Arts"
+    }?.[data?.subject?.category];
+    const categoryPath = {
+        LANG: "languages",
+        SOCIAL_STUDIES: "social-studies",
+        STEM: "stem",
+        MATH: "math",
+        LA: "language-arts"
+    }?.[data?.subject?.category];
 </script>
 <div class="grid page">
     <div class="content">
-        <div class="flex">
+        <div class="flex compact-gap" style="align-items: center;">
             <a class="button faint" href="/explore">
-                <BackIcon></BackIcon> Back
+                Explore
+            </a>
+            <AngleRightIcon></AngleRightIcon>
+            <a class="button faint" href="/categories/{categoryPath}">
+                {categoryName}
             </a>
         </div>
         <h3>{data?.subject?.name}</h3>
