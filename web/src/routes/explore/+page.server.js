@@ -48,7 +48,6 @@ export async function load({ cookies }) {
           recentStudysets = apiRes.data.recentStudysets;
         }
         
-        console.log(apiRes)
         return {
             featuredCategories: apiRes?.data?.featuredCategories,
             recentStudysets: recentStudysets,

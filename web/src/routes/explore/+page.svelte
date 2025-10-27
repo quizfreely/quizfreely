@@ -39,7 +39,7 @@
                 <a class="button button-box aligndiffwhensmol" href="/categories/stem">
                     STEM
                 </a>
-                <a class="button button-box aligndiffwhensmol" href="/categories/social-studies">
+                <a class="button button-box aligndiffwhensmol" href="/categories/math">
                     Math
                 </a>
                 <a class="button button-box aligndiffwhensmol" href="/categories/language-arts">

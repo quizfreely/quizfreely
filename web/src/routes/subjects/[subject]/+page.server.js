@@ -2,19 +2,6 @@ import { env } from "$env/dynamic/public";
 import { error } from '@sveltejs/kit';
 
 export async function load({ params, cookies }) {
-    const categoryEnum = {
-        "languages": "LANG",
-        "social-studies": "SOCIAL_STUDIES",
-        "stem": "STEM",
-        "math": "MATH",
-        "language-arts": "LA"
-    }?.[params.category];
-    if (categoryEnum == null) {
-        error(404, {
-          message: "Not Found"
-        });
-        return;
-    }
     let headers = {
         "Content-Type": "application/json"
       };
@@ -29,20 +16,31 @@ export async function load({ params, cookies }) {
           method: "POST",
           headers: headers,
           body: JSON.stringify({
-            query: `query subjectCategory($category: SubjectCategory) {
+            query: `query subjectPage($id: String!) {
               authed
               authedUser {
                 id
                 username
                 displayName
               }
-              subjectsByCategory(category: $category) {
-                id,
+              subject(id: $id) {
+                id
                 name
+                category
+                studysets {
+                  id
+                  title
+                  termsCount
+                  saved
+                  folder {
+                    id
+                    name
+                  }
+                }
               }
             }`,
             variables: {
-              category: categoryEnum
+              id: params.subject
             }
           })
         })
@@ -55,10 +53,9 @@ export async function load({ params, cookies }) {
           }
           if (apiRes?.data) {
             return {
-              subjects: apiRes.data?.subjectsByCategory,
+              subject: apiRes.data?.subject,
               authed: authed,
               authedUser: authedUser,
-              categoryEnum,
               header: {
                 activePage: "explore"
               }

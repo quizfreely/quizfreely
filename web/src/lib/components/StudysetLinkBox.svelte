@@ -19,8 +19,8 @@
             {#snippet buttonContent()}
                 <MoreIcon class="text fg0"></MoreIcon>
             {/snippet}
-            {#snippet divContent()}
-                {@render dropdownContent?.(studyset)}
+            {#snippet divContent(hideFunc)}
+                {@render dropdownContent?.(studyset, hideFunc)}
             {/snippet}
         </Dropdown>
     </div>

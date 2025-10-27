@@ -20,7 +20,7 @@
         <p class="fg0">{data?.subjects?.length} Subjects</p>
         <div class="grid list">
             {#each data?.subjects as subject}
-                <a class="button button-box" style="text-align: start;" href="subjects/subject.id">
+                <a class="button button-box" style="text-align: start;" href="/subjects/{subject.id}">
                     {subject.name}
                 </a>
             {/each}
