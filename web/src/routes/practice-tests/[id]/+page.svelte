@@ -1,6 +1,6 @@
 <script>
-    import ReviewMode from "../../PracticeTest.svelte"
+    import PracticeTest from "../../PracticeTest.svelte"
     let { data } = $props();
 </script>
 
-<ReviewMode data={{ ...data, local: false, alreadyOver: true }} />
+<PracticeTest data={{ ...data, local: false, alreadyOver: true }} />
