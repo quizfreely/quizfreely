@@ -1,7 +1,7 @@
 <script>
     import CheckmarkIcon from "$lib/icons/Checkmark.svelte";
     import XMarkIcon from "$lib/icons/CloseXMark.svelte";
-    let { term, answerWith, distractors, viewOnly, showAccuracy, answerUpdateCallback, answeredTerm, correctChoiceIndex } = $props();
+    let { term, answerWith, distractors, viewOnly, showAccuracy, answerUpdateCallback, answeredTerm, correctChoiceIndex, showCorrectAnswer } = $props();
     /* answeredTerm and correctChoiceIndex are only defined when reviewing questions from a completed practice test */
     function shuffleInPlace(arr) {
         for (let index = arr.length - 1; index > 0; index--) {
@@ -78,7 +78,7 @@
     }</p>
     <div style="display: grid; gap: 0.2rem; grid-template-columns: auto; justify-content: start; margin-top: 0.6rem;">
         {#each answers as answer, index}
-            <button style="display: flex; justify-items: start; justify-content: start; text-align: start; margin-top: 0px;" class="button-box with-bordercolor-border { answeredIndex == index ? "selected" : ""} {
+            <button style="display: flex; justify-items: start; justify-content: start; text-align: start; margin-top: 0px;" class="button-box with-bordercolor-border { answeredIndex == index ? "selected" : ""} {showAccuracy && showCorrectAnswer && correctAnswerIndex == index ? "selected yay" : ""} {
                 showAccuracy && index == answeredIndex ?
                     (answeredIndex == correctAnswerIndex ?
                         "yay" : "ohno"
@@ -99,4 +99,17 @@
             </button>
         {/each}
     </div>
+    {#if showAccuracy && answeredIndex != correctAnswerIndex}
+        <div class="flex">
+            {#if showCorrectAnswer}
+                <button class="faint" onclick={() => showCorrectAnswer = false}>
+                    Hide Correct Answer
+                </button>
+            {:else}
+                <button class="faint" onclick={() => showCorrectAnswer = true}>
+                    Show Correct Answer
+                </button>
+            {/if}
+        </div>
+    {/if}
 </div>
