@@ -831,13 +831,13 @@
             <input id="edit-title" type="text" placeholder="Title" />
             {#if (data.authed && !data.local) }
             <div id="edit-private-div">
-              <div class="combo-select">
-                <button class="left selected" id="edit-private-false" onclick={() => unsavedChanges = true}>
-                  <IconCheckmark class="combo-selected-icon" />
+              <div class="flex">
+                <button class="button-box selected" id="edit-private-false" onclick={() => unsavedChanges = true}>
+                  <IconCheckmark class="button-box-selected-icon" />
                   Public
                 </button>
-                <button class="right" id="edit-private-true" onclick={() => unsavedChanges = true}>
-                  <IconCheckmark class="combo-selected-icon" />
+                <button class="button-box" id="edit-private-true" onclick={() => unsavedChanges = true}>
+                  <IconCheckmark class="button-box-selected-icon" />
                   Private
                 </button>
               </div>
