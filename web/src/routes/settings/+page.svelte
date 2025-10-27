@@ -35,30 +35,30 @@
 </div>
 <p>Date & Time</p>
 <div>
-  <div class="combo-select">
-    <a href="/settings/date-time-format?clear=true" class="button left {
+  <div class="flex">
+    <a href="/settings/date-time-format?clear=true" class="button button-box {
         data?.dateTimeFormatHours != "24" &&
         data?.dateTimeFormatHours != "12" ?
             "selected" :
             ""
     }">
-        <IconCheckmark class="combo-selected-icon" />
+        <IconCheckmark class="button-box-selected-icon" />
         Auto
     </a>
-    <a href="/settings/date-time-format?h=24" class="button mid {
+    <a href="/settings/date-time-format?h=24" class="button button-box {
         data?.dateTimeFormatHours == "24" ?
             "selected" :
             ""
     }">
-      <IconCheckmark class="combo-selected-icon" />
+      <IconCheckmark class="button-box-selected-icon" />
       24 Hour
     </a>
-    <a href="/settings/date-time-format?h=12" class="button right {
+    <a href="/settings/date-time-format?h=12" class="button button-box {
         data?.dateTimeFormatHours == "12" ?
             "selected" :
             ""
     }">
-      <IconCheckmark class="combo-selected-icon" />
+      <IconCheckmark class="button-box-selected-icon" />
       12 Hour (AM/PM)
     </a>
   </div>
