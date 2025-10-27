@@ -6,6 +6,7 @@
     import { cancelNprogressTimeout } from "$lib/stores/nprogressTimeout.js";
     let { data } = $props();
     import Dropdown from "$lib/components/Dropdown.svelte";
+    import SubjectPicker from "$lib/components/SubjectPicker.svelte";
 
     import IconLocal from "$lib/icons/Local.svelte";
     import IconCheckmark from "$lib/icons/Checkmark.svelte";
@@ -15,6 +16,7 @@
     import IconArrowUp from "$lib/icons/ArrowUp.svelte";
     import IconArrowDown from "$lib/icons/ArrowDown.svelte";
     import IconPlus from "$lib/icons/Plus.svelte";
+    import MenuIcon from "$lib/icons/Menu.svelte";
 
     import { flip } from "svelte/animate";
     import { scale, fade } from "svelte/transition";
@@ -23,6 +25,9 @@
 
     var showImportTermsModal = $state(false);
     var showExitConfirmationModal = $state(false);
+
+    var showSubjectPicker = $state(false);
+    let selectedSubject = $state(null);
 
     var unsavedChanges = false;
     var bypassUnsavedChangesConfirmation = false;
@@ -842,6 +847,12 @@
                 </button>
               </div>
             </div>
+            <div class="flex" style="align-items: center;">
+                <button class="button-box flex" style="display: flex; gap: 0.4rem; align-items: center;" onclick={() => showSubjectPicker = true}>
+                    <MenuIcon class="text fg0"></MenuIcon>
+                    <span><span class="fg0">Subject:</span> {selectedSubject?.name ?? "None"}</span>
+                </button>
+            </div>
             {/if}
 
             <div id="edit-terms-rows">
@@ -1114,6 +1125,21 @@
                 </div>
               </div>
             </div>
+            {/if}
+            {#snippet subjectPickerErrMsg()}
+                <div class="box ohno">
+                    <p>Error setting subject :(</p>
+                </div>
+            {/snippet}
+            {#if showSubjectPicker}
+                <SubjectPicker
+                    closeCallback={() => showSubjectPicker = false}
+                    selectCallback={(subject) => {
+                        selectedSubject = subject;
+                        showSubjectPicker = false;
+                    }}
+                >
+                </SubjectPicker>
             {/if}
             {#if showExitConfirmationModal}
             <div class="modal" transition:fade={{ duration: 200 }}>
