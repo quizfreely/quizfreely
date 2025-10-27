@@ -31,70 +31,71 @@
             </a>
         </div>
         <h3>{data?.subject?.name}</h3>
-        <div class="grid list">
-            {#snippet dropdownContent(studyset, hide)}
-                {#if studyset?.saved}
-                <button onclick={async () => {
-                    try {
-                        const raw = await fetch("/api/graphql", {
-                            method: "POST",
-                            headers: {
-                                "Content-Type": "application/json"
-                            },
-                            body: JSON.stringify({
-                                query: `mutation ($id: ID!) {
+        {#snippet dropdownContent(studyset, hide)}
+            {#if studyset?.saved}
+            <button onclick={async () => {
+                try {
+                    const raw = await fetch("/api/graphql", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            query: `mutation ($id: ID!) {
     unsaveStudyset(studysetId: $id)
 }`,
-                                variables: {
-                                    id: studyset?.id
-                                }
-                            })
-                        });
-                        const json = await raw.json();
-                        if (json?.data?.unsaveStudyset) {
-                            studyset.saved = false;
-                            hide();
-                        } else {
-                            console.log("failed to unsave studyset: ", json);
-                        }
-                    } catch (err) {
-                            console.log("error unsaving studyset: ", err);
+                            variables: {
+                                id: studyset?.id
+                            }
+                        })
+                    });
+                    const json = await raw.json();
+                    if (json?.data?.unsaveStudyset) {
+                        studyset.saved = false;
+                        hide();
+                    } else {
+                        console.log("failed to unsave studyset: ", json);
                     }
-                }}>
-                    <BookmarkIcon></BookmarkIcon> Unsave
-                </button>
-                {:else}
-                <button onclick={async () => {
-                    try {
-                        const raw = await fetch("/api/graphql", {
-                            method: "POST",
-                            headers: {
-                                "Content-Type": "application/json"
-                            },
-                            body: JSON.stringify({
-                                query: `mutation ($id: ID!) {
+                } catch (err) {
+                        console.log("error unsaving studyset: ", err);
+                }
+            }}>
+                <BookmarkIcon></BookmarkIcon> Unsave
+            </button>
+            {:else}
+            <button onclick={async () => {
+                try {
+                    const raw = await fetch("/api/graphql", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            query: `mutation ($id: ID!) {
     saveStudyset(studysetId: $id)
 }`,
-                                variables: {
-                                    id: studyset?.id
-                                }
-                            })
-                        });
-                        const json = await raw.json();
-                        if (json?.data?.saveStudyset) {
-                            studyset.saved = true;
-                            hide();
-                        } else {
-                            console.log("failed to save studyset: ", json);
-                        }
-                    } catch (err) {
-                        console.log("error saving studyset: ", err);
+                            variables: {
+                                id: studyset?.id
+                            }
+                        })
+                    });
+                    const json = await raw.json();
+                    if (json?.data?.saveStudyset) {
+                        studyset.saved = true;
+                        hide();
+                    } else {
+                        console.log("failed to save studyset: ", json);
                     }
-                }}>
-                    <BookmarkIcon></BookmarkIcon> Save
-                </button>
-                {/if}
-            {/snippet}
+                } catch (err) {
+                    console.log("error saving studyset: ", err);
+                }
+            }}>
+                <BookmarkIcon></BookmarkIcon> Save
+            </button>
+            {/if}
+        {/snippet}
+        {#if data?.subject?.studysets?.length > 0}
+        <div class="grid list">
             {#each data?.subject?.studysets as studyset}
                 <StudysetLinkBox
                     {studyset}
@@ -107,5 +108,10 @@
                 </StudysetLinkBox>
             {/each}
         </div>
+        {:else}
+        <div class="box">
+            <p class="fg0">No studysets for this subject</p>
+        </div>
+        {/if}
     </div>
 </div>
