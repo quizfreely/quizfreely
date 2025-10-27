@@ -21,18 +21,20 @@
         <div class="content">
             {#if data.query?.length >= 1 }
                 <p>Results for "{ data.query }"</p>
+                {#if data?.results?.length > 0}
                 <div class="grid list" style="overflow-wrap:anywhere">
                     {#each data.results as studyset }
                         <StudysetLinkBox
                             {studyset}
                             linkTemplateFunc={id => `/studysets/${id}`}
                         ></StudysetLinkBox>
-                    {:else}
-                        <div class="box">
-                            No results :(
-                        </div>
                     {/each}
                 </div>
+                {:else}
+                <div class="box">
+                    <p class="fg0">No results</p>
+                </div>
+                {/if}
             {:else}
                 <h2 style="text-align:center;margin-top:4rem;margin-bottom:0px">Quizfreely</h2>
                 <Searchbar />
