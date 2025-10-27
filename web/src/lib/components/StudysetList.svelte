@@ -51,7 +51,7 @@
     let errorBoxText = $state("");
     let inFolder = $state(false);
     let currentFolder = $state(null);
-    async function viewFolder(id) {
+    export async function viewFolder(id) {
         try {
             const respRaw = await fetch("/api/graphql", {
                 method: "POST",

@@ -182,6 +182,10 @@
         }
     }
     onMount(() => {
+        if (data?.folderId != null) {
+            studysetListComponent.viewFolder(data?.folderId);
+        }
+
         window.addEventListener("keydown", onKeyup);
         return () => {
             window.removeEventListener("keydown", onKeyup);

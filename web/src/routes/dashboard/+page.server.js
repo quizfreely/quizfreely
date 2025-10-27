@@ -1,6 +1,6 @@
 import { env } from '$env/dynamic/public';
 
-export async function load({ cookies, locals }) {
+export async function load({ cookies, locals, url }) {
   /*
     cookies are not permanent, they eventually expire
     resetting the expiration date on every page doesn't make sense
@@ -38,6 +38,7 @@ export async function load({ cookies, locals }) {
           }
         );
     }
+    const folderId = url?.searchParams?.get("folder");
   if (cookies.get("auth")) {
     try {
     let rawApiRes = await fetch(env.API_URL + "/graphql", {
@@ -96,7 +97,8 @@ export async function load({ cookies, locals }) {
         header: { activePage: "home" },
               settingsDateTimeFormatHours: cookies.get(
                 "settingsdatetimeformathours"
-              )
+              ),
+              folderId
             }
         } else {
           return {
@@ -105,19 +107,21 @@ export async function load({ cookies, locals }) {
       header: { activePage: "home" },
               settingsDateTimeFormatHours: cookies.get(
                 "settingsdatetimeformathours"
-              )
+              ),
+              folderId
           }
         }
       } catch (error) {
         //request.log.error(error);
         //reply.send("work in progress error message error during api response json parse")
         return {
-              dashboardPage: "dashboard",
-          authed: false,
-      header: { activePage: "home" },
-              settingsDateTimeFormatHours: cookies.get(
-                "settingsdatetimeformathours"
-              )
+            dashboardPage: "dashboard",
+            authed: false,
+            header: { activePage: "home" },
+            settingsDateTimeFormatHours: cookies.get(
+              "settingsdatetimeformathours"
+            ),
+            folderId
         }
       }
     } catch (error) {
@@ -125,22 +129,24 @@ export async function load({ cookies, locals }) {
       //reply.send("work in progress error message error during api graphql fetch")
       // in addition to an error message, our dashboard.html view should still be sent so that stuff like local studysets are still usable
       return {
-              dashboardPage: "dashboard",
-        authed: false,
-      header: { activePage: "home" },
-              settingsDateTimeFormatHours: cookies.get(
+            dashboardPage: "dashboard",
+            authed: false,
+            header: { activePage: "home" },
+            settingsDateTimeFormatHours: cookies.get(
                 "settingsdatetimeformathours"
-              )
+            ),
+            folderId
       }
     }
   } else {
     return {
-              dashboardPage: "dashboard",
-      authed: false,
-      header: { activePage: "home" },
-              settingsDateTimeFormatHours: cookies.get(
-                "settingsdatetimeformathours"
-              )
+        dashboardPage: "dashboard",
+        authed: false,
+        header: { activePage: "home" },
+        settingsDateTimeFormatHours: cookies.get(
+            "settingsdatetimeformathours"
+        ),
+        folderId
     }
   }
 };
