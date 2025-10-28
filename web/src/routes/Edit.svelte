@@ -628,6 +628,7 @@
                     studyset: {
                         title: document.getElementById("edit-title").value,
                         private: document.getElementById("edit-private-true").classList.contains("selected"),
+                        subjectId: selectedSubject?.id ?? null
                     },
                     terms: existingTerms,
                     newTerms: newTerms,
@@ -673,6 +674,7 @@
             studyset: {
                 title,
                 private: isPrivate,
+                subjectId: selectedSubject?.id ?? null
             },
             terms: newTerms,
             folderId: data?.folderId
