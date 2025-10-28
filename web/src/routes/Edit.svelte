@@ -508,7 +508,7 @@
 
     var updateLocalStudysetCooldown = false;
     function updateLocalStudyset() {
-        if (updateCloudStudysetCooldown) {
+        if (updateLocalStudysetCooldown) {
             return;
         }
 
