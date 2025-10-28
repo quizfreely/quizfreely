@@ -159,6 +159,10 @@
                                     studyset(id: $id) {
                                         title
                                         private
+                                        subject {
+                                            name
+                                            id
+                                        }
                                         terms {
                                             id
                                             term
@@ -194,6 +198,7 @@
                                     );
                                 })
                             }
+                            selectedSubject = studyset.subject;
                         }
                     });
                 }
