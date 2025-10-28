@@ -470,9 +470,9 @@
             <IconPracticeTestChecklist />
             Practice Test
           </a>
-          <a href="/host?localId={data.localId}" class="button alt">
-            <GroupIcon></GroupIcon>
-            Review Game
+          <a href="/studyset/local/stats?id={data.localId}" class="button alt">
+            <IconGraph />
+            Progress &amp; Stats
           </a>
           {:else if data.studyset}
             <!-- <a href="/studysets/{ data.studyset.id }/review-mode" class="button alt"> -->
@@ -483,25 +483,14 @@
               <IconPracticeTestChecklist />
               Practice Test
             </a>
-            <a href="/host?studysetId={data.studyset.id}" class="button alt">
-              <GroupIcon></GroupIcon>
-              Review Game
+            <a href="/studysets/{data.studyset.id}/stats" class="button alt">
+              <IconGraph />
+              Progress &amp; Stats
             </a>
           {/if}
           
         </div>
 
-        <div class="top-menu-nav">
-            <a class="top-menu-link current" href="#">Terms</a>
-            <a class="top-menu-link" style="display: flex; align-items: center; gap: 0.4rem;" href={
-                data.local ?
-                    `/studyset/local/stats?id=${data.localId}` :
-                    `/studysets/${data.studyset.id}/stats`
-            }>
-                <IconGraph />
-                Progress &amp; Stats
-            </a>
-        </div>
         <table class="outer caption box" id="terms-table">
           <tbody>
             <tr>
