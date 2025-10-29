@@ -81,7 +81,7 @@
         onfocus={resetOutsideClick}
     />
     {#if doIHaveContentToShow && !gotOutsideClicked}
-        <div bind:this={searchbarAutocomplete} class="searchbar-raw-autocomplete" transition:slide={{duration:200}}>
+        <div bind:this={searchbarAutocomplete} class="searchbar-raw-autocomplete" style="z-index: 11;" transition:slide={{duration:200}}>
             {#each autocompleteItems as item}
                 <a href="/search?q={encodeURIComponent(item?.query)}" transition:slide={{duration:200}}>
                     {item.query}
