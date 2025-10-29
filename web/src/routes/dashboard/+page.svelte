@@ -17,6 +17,10 @@
     let showFolderPicker = $state(false);
     let folderPickerStudysetId;
 
+    let lastKeydown = null;
+    let ignoreEnterOnceNewFolder = false;
+    let ignoreEnterOnceRenameFolder = false;
+
     let showNewFolderModal = $state(false);
     let newFolderName = $state("");
     let showErrInNewFolderModal = $state(false);
@@ -26,6 +30,10 @@
         showNewFolderModal = true;
         showErrInNewFolderModal = false;
         newFolderName = "";
+        
+        /* if enter was used on the button to open the modal, prevent immideatly submitting & closing the modal with the same enter key press */
+        ignoreEnterOnceNewFolder = (lastKeydown == "Enter");
+
         tick().then(
             () => newFolderInput?.focus()
         );
@@ -44,6 +52,10 @@
         folderRenaming = folder;
         folderRenamingName = folder?.name ?? "";
         showFolderRenamingFlag = true;
+
+        /* if enter was used on the button to open the modal, prevent immideatly submitting & closing the modal with the same enter key press */
+        ignoreEnterOnceRenameFolder = (lastKeydown == "Enter");
+
         tick().then(
             () => folderRenamingInput?.focus()
         );
@@ -181,14 +193,24 @@
             hideDeleteFolderConfirmation();
         }
     }
+    function onKeydown(e) {
+        lastKeydown = e.key;
+    }
+    function windowOnclick() {
+        lastKeydown = null;
+    }
     onMount(() => {
         if (data?.folderId != null) {
             studysetListComponent.viewFolder(data?.folderId);
         }
 
-        window.addEventListener("keydown", onKeyup);
+        window.addEventListener("keyup", onKeyup);
+        window.addEventListener("keydown", onKeydown);
+        window.addEventListener("click", windowOnclick);
         return () => {
-            window.removeEventListener("keydown", onKeyup);
+            window.removeEventListener("keyup", onKeyup);
+            window.removeEventListener("keydown", onKeydown);
+            window.removeEventListener("click", windowOnclick);
         };
     });
 </script>
@@ -333,6 +355,10 @@
             <p>Create New Folder:</p>
             <input type="text" placeholder="Folder Name" style="margin-top: 0.4rem;" bind:value={newFolderName} bind:this={newFolderInput} onkeyup={(e) => {
                 if (e.key == "Enter") {
+                    if (ignoreEnterOnceNewFolder) {
+                        ignoreEnterOnceNewFolder = false;
+                        return;
+                    }
                     newFolderOnclick();
                 }
             }}>
@@ -358,6 +384,10 @@
             <p>Rename Folder:</p>
             <input type="text" placeholder="New Folder Name" style="margin-top: 0.4rem;" bind:value={folderRenamingName} bind:this={folderRenamingInput} onkeyup={(e) => {
                 if (e.key == "Enter") {
+                    if (ignoreEnterOnceRenameFolder) {
+                        ignoreEnterOnceRenameFolder = false;
+                        return;
+                    }
                     renameFolderOnclick();
                 }
             }}>
