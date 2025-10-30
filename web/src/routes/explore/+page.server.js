@@ -36,7 +36,6 @@ export async function load({ cookies }) {
         }
         
         return {
-            featuredCategories: apiRes?.data?.featuredCategories,
             authed: authed,
             authedUser: authedUser,
             allSubjects: apiRes?.data?.allSubjects,
