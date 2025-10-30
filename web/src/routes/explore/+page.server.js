@@ -19,15 +19,6 @@ export async function load({ cookies }) {
                 oauthGoogleEmail
                 modPerms
               }
-              recentStudysets {
-                id
-                title
-                user {
-                    displayName
-                }
-                termsCount
-                updatedAt
-              }
               allSubjects {
                 id
                 name
