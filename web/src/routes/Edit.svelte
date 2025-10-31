@@ -1171,6 +1171,7 @@
                     selectCallback={(subject) => {
                         selectedSubject = subject;
                         showSubjectPicker = false;
+                        unsavedChanges = true;
                     }}
                 >
                 </SubjectPicker>
