@@ -1,6 +1,5 @@
 <script>
     import { onMount } from "svelte";
-    import Searchbar from "$lib/components/Searchbar.svelte";
     let { data } = $props();
     let modPowersActive = $state(false);
     onMount(() => {
