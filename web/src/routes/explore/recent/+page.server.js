@@ -2,7 +2,8 @@ import { env } from '$env/dynamic/public';
 
 export async function load({ cookies, url }) {
     try {
-        const pageNum = url.searchParams.get("page") ?? 0;
+        const PER_PAGE = 24;
+        const pageNum = url.searchParams.get("page") ?? 1;
         const recentlyUpdated = url.searchParams.has("updated");
         let rawApiRes = await fetch(env.API_URL + "/graphql", {
           method: "POST",
@@ -22,7 +23,7 @@ export async function load({ cookies, url }) {
                 modPerms
               }
               recently${recentlyUpdated ? "Updated" : "Created"}Studysets(
-                limit: 24,
+                limit: ${PER_PAGE},
                 offset: $offset
               ) {
                 id
@@ -35,7 +36,7 @@ export async function load({ cookies, url }) {
               }
             }`,
             variables: {
-              offset: pageNum * 24
+              offset: (pageNum - 1) * PER_PAGE
             }
           })
         });
@@ -50,12 +51,14 @@ export async function load({ cookies, url }) {
         return {
             recentlyCreatedStudysets: apiRes?.data?.recentlyCreatedStudysets,
             recentlyUpdatedStudysets: apiRes?.data?.recentlyUpdatedStudysets,
+            recentlyUpdated,
             authed: authed,
             authedUser: authedUser,
             header: {
                 activePage: "explore"
             },
-            pageNum
+            pageNum,
+            PER_PAGE
         }
       } catch (err) {
         console.error(err);
@@ -64,7 +67,9 @@ export async function load({ cookies, url }) {
             header: {
                 activePage: "explore"
             },
-            pageNum
+            recentlyUpdated,
+            pageNum,
+            PER_PAGE
         }
       }
 }

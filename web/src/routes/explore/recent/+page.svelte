@@ -1,7 +1,13 @@
 <script>
     import { onMount } from "svelte";
+    import StudysetLinkBox from "$lib/components/StudysetLinkBox.svelte";
     import CheckmarkIcon from "$lib/icons/Checkmark.svelte";
+    import ArrowRightIcon from "$lib/icons/ArrowRight.svelte";
     let { data } = $props();
+
+    const theList = $derived(data.recentlyUpdated ? data.recentlyUpdatedStudysets : data.recentlyCreatedStudysets);
+    const pageNums = $derived(Array.from({length: data.pageNum}, (_, i) => i + 1));
+
     let modPowersActive = $state(false);
     onMount(() => {
         if (data.authedUser?.modPerms) {
@@ -30,16 +36,35 @@
     <div class="grid page">
         <div class="content">
             <div class="flex">
-                <a class="button button-box" href="/explore/recent?page={data?.pageNum}">
+                <a class="button button-box {!data.recentlyUpdated ? "selected" : ""}" href="/explore/recent">
                     <CheckmarkIcon class="button-box-selected-icon"></CheckmarkIcon>
                     Recently Created
                 </a>
-                <a class="button button-box" href="/explore/recent?updated&page={data?.pageNum}">
+                <a class="button button-box {data.recentlyUpdated ? "selected" : ""}" href="/explore/recent?updated">
                     <CheckmarkIcon class="button-box-selected-icon"></CheckmarkIcon>
                     Recently Updated
                 </a>
             </div>
             <div class="grid list">
+                {#each theList as studyset}
+                    <StudysetLinkBox
+                        {studyset}
+                        linkTemplateFunc={id => `/studysets/${id}`}
+                        showDropdown={false}
+                    ></StudysetLinkBox>
+                {/each}
+            </div>
+            <div class="combo-select">
+                {#each pageNums as n}
+                    <a href="/explore/recent?page={n}{ data.recentlyUpdated ? "&updated" : "" }" class="button {n == 1 ? "left" : (n == theList?.length - 1 && !(theList?.length >= data.PER_PAGE) ? "right" : "mid")} {n == data.pageNum ? "selected" : ""}">
+                        {n}
+                    </a>
+                {/each}
+                {#if theList?.length >= data.PER_PAGE}
+                    <a href="/explore/recent?page={data.pageNum - (-1)}" class="button right">
+                        Next <ArrowRightIcon></ArrowRightIcon>
+                    </a>
+                {/if}
             </div>
         </div>
     </div>
