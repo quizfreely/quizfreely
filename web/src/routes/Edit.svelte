@@ -223,8 +223,49 @@
             }
         })();
 
+        function moveUpButForKeydown(refocus) {
+            const index = focusedRow;
+            const newIndex = focusedRow - 1;
+            const wasDefFocused = defFocused;
 
-        function onKeydown(e) {
+            if (newIndex >= 0) {
+                moveTerm(index, newIndex);
+                unsavedChanges = true;
+
+                tick().then(() => {
+                    focusedRow = newIndex;
+                    if (refocus) {
+                        if (wasDefFocused) {
+                            terms?.[newIndex]?.defTextarea?.focus();
+                        } else {
+                            terms?.[newIndex]?.termTextarea?.focus();
+                        }
+                    }
+                });
+            }
+        }
+        function moveDownButForKeydown(refocus) {
+            const index = focusedRow;
+            const newIndex = focusedRow + 1;
+            const wasDefFocused = defFocused;
+
+            if (newIndex < terms?.length) {
+                moveTerm(index, newIndex);
+                unsavedChanges = true;
+
+                tick().then(() => {
+                    focusedRow = newIndex;
+                    if (refocus) {
+                        if (wasDefFocused) {
+                            terms?.[newIndex]?.defTextarea?.focus();
+                        } else {
+                            terms?.[newIndex]?.termTextarea?.focus();
+                        }
+                    }
+                });
+            }
+        }
+        function onKeydown(event) {
             if (event.key === "Enter" && event.ctrlKey && !event.altKey) {
                 event.preventDefault();
                 addTerm();
@@ -294,48 +335,16 @@
 
             if (event.key === "ArrowUp" && event.altKey && event.shiftKey) {
                 event.preventDefault();
-                const index = focusedRow;
-                const newIndex = focusedRow - 1;
-                const wasDefFocused = defFocused;
-
-                if (newIndex >= 0) {
-                    moveTerm(index, newIndex);
-                    unsavedChanges = true;
-
-                    tick().then(() => {
-                        focusedRow = newIndex;
-                        if (wasDefFocused) {
-                            terms?.[newIndex]?.defTextarea?.focus();
-                        } else {
-                            terms?.[newIndex]?.termTextarea?.focus();
-                        }
-                    });
-                }
+                moveUpButForKeydown(true);
                 return;
             }
             if (event.key === "ArrowDown" && event.altKey && event.shiftKey) {
                 event.preventDefault();
-                const index = focusedRow;
-                const newIndex = focusedRow + 1;
-                const wasDefFocused = defFocused;
-
-                if (newIndex < terms?.length) {
-                    moveTerm(index, newIndex);
-                    unsavedChanges = true;
-
-                    tick().then(() => {
-                        focusedRow = newIndex;
-                        if (wasDefFocused) {
-                            terms?.[newIndex]?.defTextarea?.focus();
-                        } else {
-                            terms?.[newIndex]?.termTextarea?.focus();
-                        }
-                    });
-                }
+                moveDownButForKeydown(true);
                 return;
             }
 
-            if ((event.key === "j" || event.key === "ArrowDown") && !(
+            if ((event.key === "j" || (event.key === "ArrowDown" && !event.shiftKey && !event.ctrlKey)) && !(
                 document.activeElement?.tagName === "INPUT" ||
                 document.activeElement?.tagName === "TEXTAREA" ||
                 document.activeElement?.isContentEditable
@@ -347,7 +356,7 @@
                 showFocusBorder = true;
                 return;
             }
-            if ((event.key === "k" || event.key === "ArrowUp") && !(
+            if ((event.key === "k" || (event.key === "ArrowUp" && !event.shiftKey && !event.ctrlKey)) && !(
                 document.activeElement?.tagName === "INPUT" ||
                 document.activeElement?.tagName === "TEXTAREA" ||
                 document.activeElement?.isContentEditable
@@ -379,6 +388,24 @@
                 event.preventDefault();
                 defFocused = true;
                 showFocusBorder = true;
+                return;
+            }
+            if (event.key === "ArrowDown" && (event.shiftKey || event.ctrlKey) && !(
+                document.activeElement?.tagName === "INPUT" ||
+                document.activeElement?.tagName === "TEXTAREA" ||
+                document.activeElement?.isContentEditable
+            )) {
+                event.preventDefault();
+                moveDownButForKeydown(false);
+                return;
+            }
+            if (event.key === "ArrowUp" && (event.shiftKey || event.ctrlKey) && !(
+                document.activeElement?.tagName === "INPUT" ||
+                document.activeElement?.tagName === "TEXTAREA" ||
+                document.activeElement?.isContentEditable
+            )) {
+                event.preventDefault();
+                moveUpButForKeydown(false);
                 return;
             }
             if (
