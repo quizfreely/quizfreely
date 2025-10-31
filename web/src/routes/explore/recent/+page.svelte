@@ -1,6 +1,6 @@
 <script>
     import { onMount } from "svelte";
-    import Searchbar from "$lib/components/Searchbar.svelte";
+    import CheckmarkIcon from "$lib/icons/Checkmark.svelte";
     let { data } = $props();
     let modPowersActive = $state(false);
     onMount(() => {
@@ -29,30 +29,17 @@
 <main>
     <div class="grid page">
         <div class="content">
-            <div class="grid list" style="margin-top: 2rem;">
-                <a class="button button-box aligndiffwhensmol" href="/categories/languages">
-                    World Languages
+            <div class="flex">
+                <a class="button button-box" href="/explore/recent?page={data?.pageNum}">
+                    <CheckmarkIcon class="button-box-selected-icon"></CheckmarkIcon>
+                    Recently Created
                 </a>
-                <a class="button button-box aligndiffwhensmol" href="/categories/social-studies">
-                    Social Studies
-                </a>
-                <a class="button button-box aligndiffwhensmol" href="/categories/stem">
-                    STEM
-                </a>
-                <a class="button button-box aligndiffwhensmol" href="/categories/math">
-                    Math
-                </a>
-                <a class="button button-box aligndiffwhensmol" href="/categories/language-arts">
-                    Language Arts
+                <a class="button button-box" href="/explore/recent?updated&page={data?.pageNum}">
+                    <CheckmarkIcon class="button-box-selected-icon"></CheckmarkIcon>
+                    Recently Updated
                 </a>
             </div>
-            <p class="fg0" style="margin-top: 4rem;">All Subjects</p>
             <div class="grid list">
-                {#each data?.allSubjects as subject}
-                    <a class="button button-box" style="text-align: start;" href="/subjects/{subject.id}">
-                        {subject.name}
-                    </a>
-                {/each}
             </div>
         </div>
     </div>

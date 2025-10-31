@@ -1,7 +1,9 @@
 import { env } from '$env/dynamic/public';
 
-export async function load({ cookies }) {
+export async function load({ cookies, url }) {
     try {
+        const pageNum = url.searchParams.get("page") ?? 0;
+        const recentlyUpdated = url.searchParams.has("updated");
         let rawApiRes = await fetch(env.API_URL + "/graphql", {
           method: "POST",
           headers: {
@@ -9,7 +11,7 @@ export async function load({ cookies }) {
             "Content-Type": "application/json"
           },
           body: JSON.stringify({
-            query: `query {
+            query: `query ($offset: Int) {
               authed
               authedUser {
                 id
@@ -19,7 +21,10 @@ export async function load({ cookies }) {
                 oauthGoogleEmail
                 modPerms
               }
-              recentStudysets {
+              recently${recentlyUpdated ? "Updated" : "Created"}Studysets(
+                limit: 24,
+                offset: $offset
+              ) {
                 id
                 title
                 user {
@@ -28,7 +33,10 @@ export async function load({ cookies }) {
                 termsCount
                 updatedAt
               }
-            }`
+            }`,
+            variables: {
+              offset: pageNum * 24
+            }
           })
         });
         let apiRes = await rawApiRes.json();
@@ -40,12 +48,14 @@ export async function load({ cookies }) {
         }
         
         return {
-            recentStudysets: apiRes?.data?.recentStudysets,
+            recentlyCreatedStudysets: apiRes?.data?.recentlyCreatedStudysets,
+            recentlyUpdatedStudysets: apiRes?.data?.recentlyUpdatedStudysets,
             authed: authed,
             authedUser: authedUser,
             header: {
                 activePage: "explore"
             },
+            pageNum
         }
       } catch (err) {
         console.error(err);
@@ -53,7 +63,8 @@ export async function load({ cookies }) {
             authed: false,
             header: {
                 activePage: "explore"
-            }
+            },
+            pageNum
         }
       }
 }
