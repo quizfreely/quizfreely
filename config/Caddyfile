@@ -16,6 +16,11 @@ quizfreely.org {
             file_server
         }
 
+        handle_path /_app/* {
+            root * /home/quizfreely/quizfreely/web/build/client
+            file_server
+        }
+
         redir /discord https://discord.gg/6qQrybf6kG
 }
 www.quizfreely.org, quizfreely.com, www.quizfreely.com {
