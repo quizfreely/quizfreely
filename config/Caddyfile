@@ -9,7 +9,7 @@ quizfreely.org {
             reverse_proxy localhost:8000
         }
 
-        handle_path /docs* {
+        handle /docs* {
             root * /srv/quizfreely-docs/www
             file_server
         }
@@ -18,14 +18,14 @@ quizfreely.org {
                 path /immutable/*
                 path /_app/immutable/*
         }
-        handle_path @immutable {
+        handle @immutable {
                 root * /srv/quizfreely-web/www
                 file_server
                 header {
                         Cache-Control "public, max-age=31536000, immutable"
                 }
         }
-        handle_path /_app/* {
+        handle /_app/* {
                 root * /srv/quizfreely-web/www
                 file_server
         }
