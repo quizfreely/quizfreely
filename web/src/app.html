@@ -8,7 +8,8 @@
         <link rel="apple-touch-icon" href="/apple-touch-icon.png">
         <link rel="stylesheet" href="%sveltekit.assets%/immutable/css/ehui-2025-10-26.min.css" />
         <link rel="stylesheet" href="%sveltekit.assets%/immutable/themes/%theme%-2025-10-26.min.css" />
-        <link rel="stylesheet" href="%sveltekit.assets%/immutable/fonts/inter-2025-05-30.css" />
+        <link rel="preload" href="%sveltekit.assets%/immutable/fonts-20251124/inter.css" as="style" onload="this.onload=null;this.rel='stylesheet'"/>
+        <noscript><link rel="stylesheet" href="/immutable/fonts-20251124/inter.css"></noscript>
         %sveltekit.head%
     </head>
     <body data-sveltekit-preload-data="hover">
