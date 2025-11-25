@@ -30,14 +30,13 @@ jobs:
             --exclude="*" \
             -e "ssh -i ~/.ssh/id_ed25519" \
             web/ quizfreely@server.quizfreely.org:/home/quizfreely/web/
-      - name: SSH into server, copy static files, & restart systemd service
+      - name: Rsync static files in /srv
+        run: |
+          rsync -av --delete --chown=caddy:caddy \
+            -e "ssh -i ~/.ssh/id_ed25519" \
+            web/build/client/ quizfreely@server.quizfreely.org:/srv/quizfreely-web/www/
+      - name: SSH into server & restart systemd service
         run: |
           ssh -i ~/.ssh/id_ed25519 \
             quizfreely@server.quizfreely.org \
-            "rm -rf /srv/quizfreely-web/www/_app; \
-            rm -rf /srv/quizfreely-web/www/immutable; \
-            mkdir -p /srv/quizfreely-web/www; \
-            cp -r /home/quizfreely/web/build/client/_app /srv/quizfreely-web/www/; \
-            cp -r /home/quizfreely/web/build/client/immutable /srv/quizfreely-web/www/; \
-            chown -R caddy:caddy /srv/quizfreely-web/www; \
-            sudo systemctl restart quizfreely-web.service"
+            "sudo systemctl restart quizfreely-web.service"
