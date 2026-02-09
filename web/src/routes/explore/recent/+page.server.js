@@ -3,7 +3,7 @@ import { env } from '$env/dynamic/public';
 export async function load({ cookies, url }) {
     try {
         const PER_PAGE = 24;
-        const pageNum = url.searchParams.get("page") ?? 1;
+        const pageNum = 1; // first page only until client-side pagination
         const recentlyUpdated = url.searchParams.has("updated");
         let rawApiRes = await fetch(env.API_URL + "/graphql", {
           method: "POST",
@@ -12,7 +12,7 @@ export async function load({ cookies, url }) {
             "Content-Type": "application/json"
           },
           body: JSON.stringify({
-            query: `query ($offset: Int) {
+            query: `query {
               authed
               authedUser {
                 id
@@ -22,22 +22,16 @@ export async function load({ cookies, url }) {
                 oauthGoogleEmail
                 modPerms
               }
-              recently${recentlyUpdated ? "Updated" : "Created"}Studysets(
-                limit: ${PER_PAGE},
-                offset: $offset
-              ) {
-                id
-                title
-                user {
-                    displayName
-                }
-                termsCount
-                updatedAt
+              recentlyCreatedStudysets(first: ${PER_PAGE}) {
+                edges { node { id title user { displayName } termsCount updatedAt } }
+                pageInfo { hasNextPage endCursor }
+              }
+              recentlyUpdatedStudysets(first: ${PER_PAGE}) {
+                edges { node { id title user { displayName } termsCount updatedAt } }
+                pageInfo { hasNextPage endCursor }
               }
             }`,
-            variables: {
-              offset: (pageNum - 1) * PER_PAGE
-            }
+            variables: {}
           })
         });
         let apiRes = await rawApiRes.json();
@@ -47,10 +41,11 @@ export async function load({ cookies, url }) {
           authed = apiRes.data.authed;
           authedUser = apiRes.data?.authedUser;
         }
-        
+        const createdConn = apiRes?.data?.recentlyCreatedStudysets;
+        const updatedConn = apiRes?.data?.recentlyUpdatedStudysets;
         return {
-            recentlyCreatedStudysets: apiRes?.data?.recentlyCreatedStudysets,
-            recentlyUpdatedStudysets: apiRes?.data?.recentlyUpdatedStudysets,
+            recentlyCreatedStudysets: createdConn?.edges?.map((e) => e.node) ?? [],
+            recentlyUpdatedStudysets: updatedConn?.edges?.map((e) => e.node) ?? [],
             recentlyUpdated,
             authed: authed,
             authedUser: authedUser,
@@ -67,6 +62,8 @@ export async function load({ cookies, url }) {
             header: {
                 activePage: "explore"
             },
+            recentlyCreatedStudysets: [],
+            recentlyUpdatedStudysets: [],
             recentlyUpdated,
             pageNum,
             PER_PAGE

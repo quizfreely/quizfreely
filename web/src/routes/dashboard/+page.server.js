@@ -55,31 +55,17 @@ export async function load({ cookies, locals, url }) {
             username
             displayName
           }
-          myStudysets(hideFoldered: true) {
-            id
-            title
-            private
-            termsCount
-            updatedAt
-            folder {
-                id
-                name
-            }
+          myStudysets(first: 500, hideFoldered: true) {
+            edges { node { id title private termsCount updatedAt folder { id name } } }
+            pageInfo { hasNextPage endCursor }
           }
-          mySavedStudysets {
-            id
-            title
-            private
-            termsCount
-            updatedAt
-            folder {
-                id
-                name
-            }
+          mySavedStudysets(first: 500) {
+            edges { node { id title private termsCount updatedAt folder { id name } } }
+            pageInfo { hasNextPage endCursor }
           }
-          myFolders {
-            id
-            name
+          myFolders(first: 500) {
+            edges { node { id name } }
+            pageInfo { hasNextPage endCursor }
           }
         }`
       })
@@ -87,13 +73,16 @@ export async function load({ cookies, locals, url }) {
     try {
     let apiRes = await rawApiRes.json();
         if (apiRes?.data?.authed) {
+            const myStudysets = apiRes.data.myStudysets?.edges?.map((e) => e.node) ?? [];
+            const mySavedStudysets = apiRes.data.mySavedStudysets?.edges?.map((e) => e.node) ?? [];
+            const myFolders = apiRes.data.myFolders?.edges?.map((e) => e.node) ?? [];
             return {
               dashboardPage: "dashboard",
               authed: apiRes.data.authed,
               authedUser: apiRes.data.authedUser,
-              studysetList: apiRes.data.myStudysets,
-              mySavedStudysets: apiRes.data.mySavedStudysets,
-              myFolders: apiRes.data.myFolders,
+              studysetList: myStudysets,
+              mySavedStudysets,
+              myFolders,
         header: { activePage: "home" },
               settingsDateTimeFormatHours: cookies.get(
                 "settingsdatetimeformathours"

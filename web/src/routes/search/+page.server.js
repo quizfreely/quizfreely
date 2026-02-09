@@ -26,14 +26,9 @@ if (searchQuery.length >= 1) {
               authType
               oauthGoogleEmail
             }
-            searchStudysets(q: $q) {
-              id
-              title
-              user {
-                id
-                displayName
-              }
-              termsCount
+            searchStudysets(q: $q, first: 100) {
+              edges { node { id title user { id displayName } termsCount } }
+              pageInfo { hasNextPage endCursor }
             }
           }`,
           variables: {
@@ -48,14 +43,16 @@ if (searchQuery.length >= 1) {
         authed = apiRes.data.authed;
         authedUser = apiRes.data?.authedUser
       }
-      if (apiRes?.data?.searchStudysets?.length >= 0 || apiRes?.data?.searchStudysets === null) {
+      const searchConn = apiRes?.data?.searchStudysets;
+      if (searchConn !== undefined && searchConn !== null) {
+        const results = searchConn.edges?.map((e) => e.node) ?? [];
         return {
           query: searchQuery,
           header: {
             activePage: "explore",
             searchQuery: searchQuery
           },
-          results: apiRes.data.searchStudysets ?? [],
+          results,
           authed: authed,
           authedUser: authedUser
         }

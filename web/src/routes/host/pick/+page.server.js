@@ -17,23 +17,17 @@ export async function load({ cookies, locals }) {
             username
             displayName
           }
-          myStudysets(hideFoldered: true) {
-            id
-            title
-            private
-            termsCount
-            updatedAt
+          myStudysets(first: 500, hideFoldered: true) {
+            edges { node { id title private termsCount updatedAt } }
+            pageInfo { hasNextPage endCursor }
           }
-          myFolders {
-            id
-            name
+          myFolders(first: 500) {
+            edges { node { id name } }
+            pageInfo { hasNextPage endCursor }
           }
-          mySavedStudysets {
-            id
-            title
-            private
-            termsCount
-            updatedAt
+          mySavedStudysets(first: 500) {
+            edges { node { id title private termsCount updatedAt } }
+            pageInfo { hasNextPage endCursor }
           }
         }`
       })
@@ -41,12 +35,15 @@ export async function load({ cookies, locals }) {
     try {
     let apiRes = await rawApiRes.json();
         if (apiRes?.data?.authed) {
+            const studysetList = apiRes.data.myStudysets?.edges?.map((e) => e.node) ?? [];
+            const myFolders = apiRes.data.myFolders?.edges?.map((e) => e.node) ?? [];
+            const mySavedStudysets = apiRes.data.mySavedStudysets?.edges?.map((e) => e.node) ?? [];
             return {
               authed: apiRes.data.authed,
               authedUser: apiRes.data.authedUser,
-              studysetList: apiRes.data.myStudysets,
-              myFolders: apiRes.data.myFolders,
-              mySavedStudysets: apiRes.data.mySavedStudysets,
+              studysetList,
+              myFolders,
+              mySavedStudysets,
               settingsDateTimeFormatHours: cookies.get(
                 "settingsdatetimeformathours"
               )

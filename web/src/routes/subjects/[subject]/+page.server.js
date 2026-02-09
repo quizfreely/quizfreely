@@ -27,15 +27,9 @@ export async function load({ params, cookies }) {
                 id
                 name
                 category
-                studysets {
-                  id
-                  title
-                  termsCount
-                  saved
-                  folder {
-                    id
-                    name
-                  }
+                studysets(first: 100) {
+                  edges { node { id title termsCount saved folder { id name } } }
+                  pageInfo { hasNextPage endCursor }
                 }
               }
             }`,
@@ -52,8 +46,15 @@ export async function load({ params, cookies }) {
             authedUser = apiRes.data?.authedUser;
           }
           if (apiRes?.data) {
+            const rawSubject = apiRes.data?.subject;
+            const subject = rawSubject
+              ? {
+                  ...rawSubject,
+                  studysets: rawSubject.studysets?.edges?.map((e) => e.node) ?? []
+                }
+              : null;
             return {
-              subject: apiRes.data?.subject,
+              subject,
               authed: authed,
               authedUser: authedUser,
               header: {
