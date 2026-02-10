@@ -1,18 +1,19 @@
 import { env } from '$env/dynamic/public';
 
 export async function load({ cookies, url }) {
-    try {
-        const PER_PAGE = 24;
-        const pageNum = 1; // first page only until client-side pagination
-        const recentlyUpdated = url.searchParams.has("updated");
-        let rawApiRes = await fetch(env.API_URL + "/graphql", {
-          method: "POST",
-          headers: {
-            "Authorization": "Bearer " + cookies.get("auth"),
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            query: `query {
+  try {
+    const PER_PAGE = 24;
+    const after = url.searchParams.get("after");
+    const before = url.searchParams.get("before");
+    const recentlyUpdated = url.searchParams.has("updated");
+    let rawApiRes = await fetch(env.API_URL + "/graphql", {
+      method: "POST",
+      headers: {
+        "Authorization": "Bearer " + cookies.get("auth"),
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        query: `query($after: String, $before: String) {
               authed
               authedUser {
                 id
@@ -22,51 +23,53 @@ export async function load({ cookies, url }) {
                 oauthGoogleEmail
                 modPerms
               }
-              recentlyCreatedStudysets(first: ${PER_PAGE}) {
+              recentlyCreatedStudysets(first: ${PER_PAGE}, after: $after, before: $before) {
                 edges { node { id title user { displayName } termsCount updatedAt } }
-                pageInfo { hasNextPage endCursor }
+                pageInfo { hasNextPage hasPreviousPage startCursor endCursor }
               }
-              recentlyUpdatedStudysets(first: ${PER_PAGE}) {
+              recentlyUpdatedStudysets(first: ${PER_PAGE}, after: $after, before: $before) {
                 edges { node { id title user { displayName } termsCount updatedAt } }
-                pageInfo { hasNextPage endCursor }
+                pageInfo { hasNextPage hasPreviousPage startCursor endCursor }
               }
             }`,
-            variables: {}
-          })
-        });
-        let apiRes = await rawApiRes.json();
-        let authed = false;
-        let authedUser;
-        if (apiRes?.data?.authed) {
-          authed = apiRes.data.authed;
-          authedUser = apiRes.data?.authedUser;
+        variables: {
+          after,
+          before
         }
-        const createdConn = apiRes?.data?.recentlyCreatedStudysets;
-        const updatedConn = apiRes?.data?.recentlyUpdatedStudysets;
-        return {
-            recentlyCreatedStudysets: createdConn?.edges?.map((e) => e.node) ?? [],
-            recentlyUpdatedStudysets: updatedConn?.edges?.map((e) => e.node) ?? [],
-            recentlyUpdated,
-            authed: authed,
-            authedUser: authedUser,
-            header: {
-                activePage: "explore"
-            },
-            pageNum,
-            PER_PAGE
-        }
-      } catch (err) {
-        console.error(err);
-        return {
-            authed: false,
-            header: {
-                activePage: "explore"
-            },
-            recentlyCreatedStudysets: [],
-            recentlyUpdatedStudysets: [],
-            recentlyUpdated,
-            pageNum,
-            PER_PAGE
-        }
-      }
+      })
+    });
+    let apiRes = await rawApiRes.json();
+    let authed = false;
+    let authedUser;
+    if (apiRes?.data?.authed) {
+      authed = apiRes.data.authed;
+      authedUser = apiRes.data?.authedUser;
+    }
+    const createdConn = apiRes?.data?.recentlyCreatedStudysets;
+    const updatedConn = apiRes?.data?.recentlyUpdatedStudysets;
+    return {
+      recentlyCreatedStudysets: createdConn?.edges?.map((e) => e.node) ?? [],
+      recentlyUpdatedStudysets: updatedConn?.edges?.map((e) => e.node) ?? [],
+      pageInfo: recentlyUpdated ? updatedConn?.pageInfo : createdConn?.pageInfo,
+      recentlyUpdated,
+      authed: authed,
+      authedUser: authedUser,
+      header: {
+        activePage: "explore"
+      },
+      PER_PAGE
+    }
+  } catch (err) {
+    console.error(err);
+    return {
+      authed: false,
+      header: {
+        activePage: "explore"
+      },
+      recentlyCreatedStudysets: [],
+      recentlyUpdatedStudysets: [],
+      recentlyUpdated,
+      PER_PAGE
+    }
+  }
 }
