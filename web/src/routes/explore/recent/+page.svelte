@@ -2,6 +2,7 @@
     import { onMount } from "svelte";
     import StudysetLinkBox from "$lib/components/StudysetLinkBox.svelte";
     import CheckmarkIcon from "$lib/icons/Checkmark.svelte";
+    import ArrowLeftIcon from "$lib/icons/ArrowLeft.svelte";
     import ArrowRightIcon from "$lib/icons/ArrowRight.svelte";
     let { data } = $props();
 
@@ -63,7 +64,7 @@
                     ></StudysetLinkBox>
                 {/each}
             </div>
-            <div class="combo-select">
+            <div class="{data.pageInfo?.hasNextPage && data.pageInfo?.hasPreviousPage ? "combo-select" : ""}">
                 {#if data.pageInfo?.hasPreviousPage}
                     <a
                         href="/explore/recent?before={data.pageInfo
@@ -72,10 +73,9 @@
                             : ''}"
                         class="button {data.pageInfo?.hasNextPage
                             ? 'left'
-                            : 'right'}"
+                            : 'alt'}"
                     >
-                        <ArrowRightIcon style="transform: rotate(180deg)"
-                        ></ArrowRightIcon> Previous
+                        <ArrowLeftIcon></ArrowLeftIcon> Previous
                     </a>
                 {/if}
                 {#if data.pageInfo?.hasNextPage}
@@ -84,7 +84,7 @@
                             .endCursor}{data.recentlyUpdated ? '&updated' : ''}"
                         class="button {data.pageInfo?.hasPreviousPage
                             ? 'right'
-                            : 'right'}"
+                            : 'alt'}"
                     >
                         Next <ArrowRightIcon></ArrowRightIcon>
                     </a>
