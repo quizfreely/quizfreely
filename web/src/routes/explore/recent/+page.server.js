@@ -1,11 +1,11 @@
 import { env } from '$env/dynamic/public';
 
 export async function load({ cookies, url }) {
+  const PER_PAGE = 24;
+  const recentlyUpdated = url.searchParams.has("updated");
   try {
-    const PER_PAGE = 24;
     const after = url.searchParams.get("after");
     const before = url.searchParams.get("before");
-    const recentlyUpdated = url.searchParams.has("updated");
     let rawApiRes = await fetch(env.API_URL + "/graphql", {
       method: "POST",
       headers: {
@@ -48,6 +48,7 @@ export async function load({ cookies, url }) {
     const createdConn = apiRes?.data?.recentlyCreatedStudysets;
     const updatedConn = apiRes?.data?.recentlyUpdatedStudysets;
     return {
+      explorePage: recentlyUpdated ? "recently-updated" : "recently-created",
       recentlyCreatedStudysets: createdConn?.edges?.map((e) => e.node) ?? [],
       recentlyUpdatedStudysets: updatedConn?.edges?.map((e) => e.node) ?? [],
       pageInfo: recentlyUpdated ? updatedConn?.pageInfo : createdConn?.pageInfo,
@@ -62,6 +63,7 @@ export async function load({ cookies, url }) {
   } catch (err) {
     console.error(err);
     return {
+      explorePage: recentlyUpdated ? "recently-updated" : "recently-created",
       authed: false,
       header: {
         activePage: "explore"

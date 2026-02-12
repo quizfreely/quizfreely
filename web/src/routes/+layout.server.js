@@ -7,6 +7,8 @@ export async function load({ url, route }) {
 		transPageKey = "/settings";
     } else if (transPageKey.startsWith("/dashboard")) {
 		transPageKey = "/dashboard";
+    } else if (transPageKey.startsWith("/explore")) {
+		transPageKey = "/explore";
 	// } else if (
 	//        /* we also make transPageKey not change for stuff under `(stream)` in classes
 	//        which we can check using route.id */

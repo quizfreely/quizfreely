@@ -36,6 +36,7 @@ export async function load({ cookies }) {
         }
         
         return {
+            explorePage: "subjects",
             authed: authed,
             authedUser: authedUser,
             allSubjects: apiRes?.data?.allSubjects,
@@ -46,6 +47,7 @@ export async function load({ cookies }) {
       } catch (err) {
         console.error(err);
         return {
+            explorePage: "subjects",
             authed: false,
             header: {
                 activePage: "explore"

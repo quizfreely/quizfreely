@@ -30,31 +30,6 @@
     <meta name="”robots”" content="index, follow" />
 </svelte:head>
 
-<main>
-    <div class="grid page">
-        <div class="content">
-            <div class="flex">
-                <a
-                    class="button button-box {!data.recentlyUpdated
-                        ? 'selected'
-                        : ''}"
-                    href="/explore/recent"
-                >
-                    <CheckmarkIcon class="button-box-selected-icon"
-                    ></CheckmarkIcon>
-                    Recently Created
-                </a>
-                <a
-                    class="button button-box {data.recentlyUpdated
-                        ? 'selected'
-                        : ''}"
-                    href="/explore/recent?updated"
-                >
-                    <CheckmarkIcon class="button-box-selected-icon"
-                    ></CheckmarkIcon>
-                    Recently Updated
-                </a>
-            </div>
             <div class="grid list">
                 {#each theList as studyset}
                     <StudysetLinkBox
@@ -95,9 +70,3 @@
                     </a>
                 {/if}
             </div>
-        </div>
-    </div>
-</main>
-
-<style>
-</style>

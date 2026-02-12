@@ -25,9 +25,6 @@
     <meta name=”robots” content="index, follow" />
 </svelte:head>
 
-<main>
-    <div class="grid page">
-        <div class="content">
             <div class="grid list" style="margin-top: 2rem;">
                 <a class="button button-box aligndiffwhensmol" href="/categories/languages">
                     World Languages
@@ -53,6 +50,3 @@
                     </a>
                 {/each}
             </div>
-        </div>
-    </div>
-</main>
