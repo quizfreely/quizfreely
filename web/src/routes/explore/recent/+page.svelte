@@ -64,16 +64,21 @@
                     ></StudysetLinkBox>
                 {/each}
             </div>
-            <div class="{data.pageInfo?.hasNextPage && data.pageInfo?.hasPreviousPage ? "combo-select" : ""}">
+            <div
+                class={data.pageInfo?.hasNextPage &&
+                data.pageInfo?.hasPreviousPage
+                    ? "combo-buttons"
+                    : ""}
+            >
                 {#if data.pageInfo?.hasPreviousPage}
                     <a
                         href="/explore/recent?before={data.pageInfo
                             .startCursor}{data.recentlyUpdated
                             ? '&updated'
                             : ''}"
-                        class="button {data.pageInfo?.hasNextPage
+                        class="button alt {data.pageInfo?.hasNextPage
                             ? 'left'
-                            : 'alt'}"
+                            : ''}"
                     >
                         <ArrowLeftIcon></ArrowLeftIcon> Previous
                     </a>
@@ -82,9 +87,9 @@
                     <a
                         href="/explore/recent?after={data.pageInfo
                             .endCursor}{data.recentlyUpdated ? '&updated' : ''}"
-                        class="button {data.pageInfo?.hasPreviousPage
+                        class="button alt {data.pageInfo?.hasPreviousPage
                             ? 'right'
-                            : 'alt'}"
+                            : ''}"
                     >
                         Next <ArrowRightIcon></ArrowRightIcon>
                     </a>
