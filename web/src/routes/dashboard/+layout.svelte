@@ -37,7 +37,7 @@
 <main>
   <div class="grid page">
     <div class="content">
-        <div class="top-menu-nav">
+        <!--<div class="top-menu-nav">
             <a class="top-menu-link {
                 page?.data?.dashboardPage == "dashboard" ?
                     "current" : ""
@@ -46,7 +46,7 @@
                 page?.data?.dashboardPage == "activities" ?
                     "current" : ""
             }" href="/dashboard/activities">Activities &amp; Games</a>
-        </div>
+        </div>-->
         {#key data.dashboardTransPageKey}
             <div style="margin-top: 1.4rem;" in:fade={{ duration: 120, delay: 120, easing: sineIn }} out:fade={{ duration: 120, easing: sineOut }}>
                 {@render children()}
