@@ -11,7 +11,8 @@
     import BookmarkIcon from "$lib/icons/Bookmark.svelte";
     import FolderIcon from "$lib/icons/Folder.svelte";
     import BackIcon from "$lib/icons/BackArrow.svelte";
-    import AngleRightIcon from "$lib/icons/AngleRight.svelte";
+    import ArrowLeftIcon from "$lib/icons/ArrowLeft.svelte";
+    import ArrowRightIcon from "$lib/icons/ArrowRight.svelte";
 
     let {
         data,
@@ -331,7 +332,7 @@
                                         onclick={() =>
                                             loadPage("cloud", "prev")}
                                     >
-                                        <BackIcon></BackIcon> Previous
+                                        <ArrowLeftIcon></ArrowLeftIcon> Previous
                                     </button>
                                 {/if}
                                 {#if hasNextPageFunc("cloud")}
@@ -344,9 +345,7 @@
                                         onclick={() =>
                                             loadPage("cloud", "next")}
                                     >
-                                        Next <AngleRightIcon
-                                            style="transform: rotate(0deg);"
-                                        ></AngleRightIcon>
+                                        Next <ArrowRightIcon></ArrowRightIcon>
                                     </button>
                                 {/if}
                             </div>
@@ -408,7 +407,7 @@
                                         : ''}"
                                     onclick={() => localPage--}
                                 >
-                                    <BackIcon></BackIcon> Previous
+                                    <ArrowLeftIcon></ArrowLeftIcon> Previous
                                 </button>
                             {/if}
                             {#if hasNextPageFunc("local")}
@@ -418,9 +417,7 @@
                                         : ''}"
                                     onclick={() => localPage++}
                                 >
-                                    Next <AngleRightIcon
-                                        style="transform: rotate(0deg);"
-                                    ></AngleRightIcon>
+                                    Next <ArrowRightIcon></ArrowRightIcon>
                                 </button>
                             {/if}
                         </div>
@@ -478,7 +475,7 @@
                                         onclick={() =>
                                             loadPage("saved", "prev")}
                                     >
-                                        <BackIcon></BackIcon> Previous
+                                        <ArrowLeftIcon></ArrowLeftIcon> Previous
                                     </button>
                                 {/if}
                                 {#if hasNextPageFunc("saved")}
@@ -491,9 +488,7 @@
                                         onclick={() =>
                                             loadPage("saved", "next")}
                                     >
-                                        Next <AngleRightIcon
-                                            style="transform: rotate(0deg);"
-                                        ></AngleRightIcon>
+                                        Next <ArrowRightIcon></ArrowRightIcon>
                                     </button>
                                 {/if}
                             </div>
