@@ -50,7 +50,7 @@
     });
 
     const COLLAPSE_LENGTH = 6;
-    const EXPANDED_PER_PAGE = 30;
+    const EXPANDED_PER_PAGE = 24;
 
     let cloudPage = $state(0);
     let localPage = $state(0);
