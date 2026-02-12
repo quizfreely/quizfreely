@@ -21,89 +21,79 @@ export async function load({ cookies, locals, url }) {
       sameSite: "lax"
     }
   );
-    if (cookies.get("settingsdatetimeformathours")) {
-        cookies.set(
-          "settingsdatetimeformathours",
-          cookies.get("settingsdatetimeformathours"),
-          {
-            /* 30 days * 24h * 60m * 60s = 2592000 sec for 30 days */
-            maxAge: 2592000,
-            path: "/",
-            httpOnly: true,
-            /* when secure is true,
-            browsers only send the cookie through https,
-            on localhost, browsers send it even if localhost isn't using https */
-            secure: true,
-            sameSite: "lax"
-          }
-        );
-    }
-    const folderId = url?.searchParams?.get("folder");
+  if (cookies.get("settingsdatetimeformathours")) {
+    cookies.set(
+      "settingsdatetimeformathours",
+      cookies.get("settingsdatetimeformathours"),
+      {
+        /* 30 days * 24h * 60m * 60s = 2592000 sec for 30 days */
+        maxAge: 2592000,
+        path: "/",
+        httpOnly: true,
+        /* when secure is true,
+        browsers only send the cookie through https,
+        on localhost, browsers send it even if localhost isn't using https */
+        secure: true,
+        sameSite: "lax"
+      }
+    );
+  }
+  const folderId = url?.searchParams?.get("folder");
   if (cookies.get("auth")) {
     try {
-    let rawApiRes = await fetch(env.API_URL + "/graphql", {
-      method: "POST",
-      headers: {
-        "Authorization": "Bearer " + cookies.get("auth"),
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        query: `query {
+      let rawApiRes = await fetch(env.API_URL + "/graphql", {
+        method: "POST",
+        headers: {
+          "Authorization": "Bearer " + cookies.get("auth"),
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          query: `query {
           authed
           authedUser {
             id
             username
             displayName
           }
-          myStudysets(first: 500, hideFoldered: true) {
+          myStudysets(first: 30, hideFoldered: true) {
             edges { node { id title private termsCount updatedAt folder { id name } } }
-            pageInfo { hasNextPage endCursor }
+            pageInfo { hasNextPage hasPreviousPage startCursor endCursor }
           }
-          mySavedStudysets(first: 500) {
+          mySavedStudysets(first: 30) {
             edges { node { id title private termsCount updatedAt folder { id name } } }
-            pageInfo { hasNextPage endCursor }
+            pageInfo { hasNextPage hasPreviousPage startCursor endCursor }
           }
-          myFolders(first: 500) {
+          myFolders(first: 30) {
             edges { node { id name } }
-            pageInfo { hasNextPage endCursor }
+            pageInfo { hasNextPage hasPreviousPage startCursor endCursor }
           }
         }`
-      })
-    });
-    try {
-    let apiRes = await rawApiRes.json();
+        })
+      });
+      try {
+        let apiRes = await rawApiRes.json();
         if (apiRes?.data?.authed) {
-            const myStudysets = apiRes.data.myStudysets?.edges?.map((e) => e.node) ?? [];
-            const mySavedStudysets = apiRes.data.mySavedStudysets?.edges?.map((e) => e.node) ?? [];
-            const myFolders = apiRes.data.myFolders?.edges?.map((e) => e.node) ?? [];
-            return {
-              dashboardPage: "dashboard",
-              authed: apiRes.data.authed,
-              authedUser: apiRes.data.authedUser,
-              studysetList: myStudysets,
-              mySavedStudysets,
-              myFolders,
-        header: { activePage: "home" },
-              settingsDateTimeFormatHours: cookies.get(
-                "settingsdatetimeformathours"
-              ),
-              folderId
-            }
+          const myStudysets = apiRes.data.myStudysets?.edges?.map((e) => e.node) ?? [];
+          const mySavedStudysets = apiRes.data.mySavedStudysets?.edges?.map((e) => e.node) ?? [];
+          const myFolders = apiRes.data.myFolders?.edges?.map((e) => e.node) ?? [];
+          return {
+            dashboardPage: "dashboard",
+            authed: apiRes.data.authed,
+            authedUser: apiRes.data.authedUser,
+            studysetList: myStudysets,
+            studysetListPageInfo: apiRes.data.myStudysets?.pageInfo,
+            mySavedStudysets,
+            mySavedStudysetsPageInfo: apiRes.data.mySavedStudysets?.pageInfo,
+            myFolders,
+            myFoldersPageInfo: apiRes.data.myFolders?.pageInfo,
+            header: { activePage: "home" },
+            settingsDateTimeFormatHours: cookies.get(
+              "settingsdatetimeformathours"
+            ),
+            folderId
+          }
         } else {
           return {
-              dashboardPage: "dashboard",
-            authed: false,
-      header: { activePage: "home" },
-              settingsDateTimeFormatHours: cookies.get(
-                "settingsdatetimeformathours"
-              ),
-              folderId
-          }
-        }
-      } catch (error) {
-        //request.log.error(error);
-        //reply.send("work in progress error message error during api response json parse")
-        return {
             dashboardPage: "dashboard",
             authed: false,
             header: { activePage: "home" },
@@ -111,6 +101,19 @@ export async function load({ cookies, locals, url }) {
               "settingsdatetimeformathours"
             ),
             folderId
+          }
+        }
+      } catch (error) {
+        //request.log.error(error);
+        //reply.send("work in progress error message error during api response json parse")
+        return {
+          dashboardPage: "dashboard",
+          authed: false,
+          header: { activePage: "home" },
+          settingsDateTimeFormatHours: cookies.get(
+            "settingsdatetimeformathours"
+          ),
+          folderId
         }
       }
     } catch (error) {
@@ -118,24 +121,24 @@ export async function load({ cookies, locals, url }) {
       //reply.send("work in progress error message error during api graphql fetch")
       // in addition to an error message, our dashboard.html view should still be sent so that stuff like local studysets are still usable
       return {
-            dashboardPage: "dashboard",
-            authed: false,
-            header: { activePage: "home" },
-            settingsDateTimeFormatHours: cookies.get(
-                "settingsdatetimeformathours"
-            ),
-            folderId
-      }
-    }
-  } else {
-    return {
         dashboardPage: "dashboard",
         authed: false,
         header: { activePage: "home" },
         settingsDateTimeFormatHours: cookies.get(
-            "settingsdatetimeformathours"
+          "settingsdatetimeformathours"
         ),
         folderId
+      }
+    }
+  } else {
+    return {
+      dashboardPage: "dashboard",
+      authed: false,
+      header: { activePage: "home" },
+      settingsDateTimeFormatHours: cookies.get(
+        "settingsdatetimeformathours"
+      ),
+      folderId
     }
   }
 };

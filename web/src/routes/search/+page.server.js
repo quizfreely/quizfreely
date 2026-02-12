@@ -3,13 +3,16 @@ import { error, redirect } from '@sveltejs/kit';
 import fetchAuthData from '$lib/fetchAuthData.server';
 
 export async function load({ cookies, url }) {
-let searchQuery = (url.searchParams.get("q") ?? "")
-if (searchQuery.replace(/\s+/g, '') == "") {
-  searchQuery = "";
-}
+  let searchQuery = (url.searchParams.get("q") ?? "")
+  if (searchQuery.replace(/\s+/g, '') == "") {
+    searchQuery = "";
+  }
 
-if (searchQuery.length >= 1) {
+  if (searchQuery.length >= 1) {
     try {
+      const PER_PAGE = 24;
+      const after = url.searchParams.get("after");
+      const before = url.searchParams.get("before");
       let rawApiRes = await fetch(env.API_URL + "/graphql", {
         method: "POST",
         headers: {
@@ -17,7 +20,7 @@ if (searchQuery.length >= 1) {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          query: `query SearchResults($q: String!) {
+          query: `query SearchResults($q: String!, $first: Int, $after: String, $last: Int, $before: String) {
             authed
             authedUser {
               id
@@ -26,13 +29,17 @@ if (searchQuery.length >= 1) {
               authType
               oauthGoogleEmail
             }
-            searchStudysets(q: $q, first: 100) {
+            searchStudysets(q: $q, first: $first, after: $after, last: $last, before: $before) {
               edges { node { id title user { id displayName } termsCount } }
-              pageInfo { hasNextPage endCursor }
+              pageInfo { hasNextPage hasPreviousPage startCursor endCursor }
             }
           }`,
           variables: {
-            q: url.searchParams.get("q")
+            q: url.searchParams.get("q"),
+            first: before ? null : PER_PAGE,
+            last: before ? PER_PAGE : null,
+            after,
+            before
           }
         })
       });
@@ -53,20 +60,22 @@ if (searchQuery.length >= 1) {
             searchQuery: searchQuery
           },
           results,
+          pageInfo: searchConn?.pageInfo,
+          PER_PAGE,
           authed: authed,
           authedUser: authedUser
         }
       } else {
         console.log("Error in search +page.server.js, api res: ", apiRes)
         error(500, {
-            message: "looks like this is broken, idk why though :("
+          message: "looks like this is broken, idk why though :("
         })
       }
     } catch (err) {
       console.error("Error in search +page.server.js: ", err);
       error(500, {
-            message: "something went wrong, idk"
-        }
+        message: "something went wrong, idk"
+      }
       )
     }
   } else {
