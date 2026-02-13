@@ -64,11 +64,11 @@ export async function load({ cookies, url }) {
     let totalCount = apiRes?.data?.countTotal ?? 0;
     let newCount = apiRes?.data?.countDay ?? 0;
     let newPeriod = "today";
-    if (newCount < 10) {
+    if (newCount <= 1 || (newCount < 10 && apiRes?.data?.countWeek >= 10)) {
       newCount = apiRes?.data?.countWeek ?? 0;
       newPeriod = "this week";
     }
-    if (newCount < 10) {
+    if (newCount < 10 && apiRes?.data?.countMonth >= 10) {
       newCount = apiRes?.data?.countMonth ?? 0;
       newPeriod = "this month";
     }
