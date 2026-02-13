@@ -271,6 +271,7 @@
     height: 1.4rem;
   }
 
+  button.noaccount-button,
   .button.noaccount-button {
     padding: 0.6rem 0.8rem;
     margin-bottom: 1rem;
