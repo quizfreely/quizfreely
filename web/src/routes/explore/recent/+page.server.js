@@ -6,6 +6,12 @@ export async function load({ cookies, url }) {
   try {
     const after = url.searchParams.get("after");
     const before = url.searchParams.get("before");
+
+    const now = new Date();
+    const dayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
+    const weekStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay()).toISOString();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+
     let rawApiRes = await fetch(env.API_URL + "/graphql", {
       method: "POST",
       headers: {
@@ -13,7 +19,7 @@ export async function load({ cookies, url }) {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        query: `query($after: String, $before: String) {
+        query: `query($after: String, $before: String, $day: String, $week: String, $month: String) {
               authed
               authedUser {
                 id
@@ -31,10 +37,17 @@ export async function load({ cookies, url }) {
                 edges { node { id title user { displayName } termsCount updatedAt } }
                 pageInfo { hasNextPage hasPreviousPage startCursor endCursor }
               }
+              countDay: ${recentlyUpdated ? 'studysetUpdateCount' : 'studysetCount'}(after: $day, includePrivate: true)
+              countWeek: ${recentlyUpdated ? 'studysetUpdateCount' : 'studysetCount'}(after: $week, includePrivate: true)
+              countMonth: ${recentlyUpdated ? 'studysetUpdateCount' : 'studysetCount'}(after: $month, includePrivate: true)
+              countTotal: ${recentlyUpdated ? 'studysetUpdateCount' : 'studysetCount'}(includePrivate: true)
             }`,
         variables: {
           after,
-          before
+          before,
+          day: dayStart,
+          week: weekStart,
+          month: monthStart
         }
       })
     });
@@ -47,12 +60,28 @@ export async function load({ cookies, url }) {
     }
     const createdConn = apiRes?.data?.recentlyCreatedStudysets;
     const updatedConn = apiRes?.data?.recentlyUpdatedStudysets;
+
+    let totalCount = apiRes?.data?.countTotal ?? 0;
+    let newCount = apiRes?.data?.countDay ?? 0;
+    let newPeriod = "today";
+    if (newCount < 10) {
+      newCount = apiRes?.data?.countWeek ?? 0;
+      newPeriod = "this week";
+    }
+    if (newCount < 10) {
+      newCount = apiRes?.data?.countMonth ?? 0;
+      newPeriod = "this month";
+    }
+
     return {
       explorePage: recentlyUpdated ? "recently-updated" : "recently-created",
       recentlyCreatedStudysets: createdConn?.edges?.map((e) => e.node) ?? [],
       recentlyUpdatedStudysets: updatedConn?.edges?.map((e) => e.node) ?? [],
       pageInfo: recentlyUpdated ? updatedConn?.pageInfo : createdConn?.pageInfo,
       recentlyUpdated,
+      newCount,
+      newPeriod,
+      totalCount,
       authed: authed,
       authedUser: authedUser,
       header: {

@@ -30,43 +30,53 @@
     <meta name="”robots”" content="index, follow" />
 </svelte:head>
 
-            <div class="grid list">
-                {#each theList as studyset}
-                    <StudysetLinkBox
-                        {studyset}
-                        linkTemplateFunc={(id) => `/studysets/${id}`}
-                        showDropdown={false}
-                    ></StudysetLinkBox>
-                {/each}
-            </div>
-            <div
-                class={data.pageInfo?.hasNextPage &&
-                data.pageInfo?.hasPreviousPage
-                    ? "combo-buttons"
-                    : ""}
-            >
-                {#if data.pageInfo?.hasPreviousPage}
-                    <a
-                        href="/explore/recent?before={data.pageInfo
-                            .startCursor}{data.recentlyUpdated
-                            ? '&updated'
-                            : ''}"
-                        class="button alt {data.pageInfo?.hasNextPage
-                            ? 'left'
-                            : ''}"
-                    >
-                        <ArrowLeftIcon></ArrowLeftIcon> Previous
-                    </a>
-                {/if}
-                {#if data.pageInfo?.hasNextPage}
-                    <a
-                        href="/explore/recent?after={data.pageInfo
-                            .endCursor}{data.recentlyUpdated ? '&updated' : ''}"
-                        class="button alt {data.pageInfo?.hasPreviousPage
-                            ? 'right'
-                            : ''}"
-                    >
-                        Next <ArrowRightIcon></ArrowRightIcon>
-                    </a>
-                {/if}
-            </div>
+<div class="flex center">
+    <div class="flex" style="flex-direction: column; gap: 0.2rem;">
+        <span style="font-size: 2rem;">{data.newCount}</span>
+        <div class="text fg0">
+            studyset{data.newCount === 1 ? "" : "s"}
+            {data.recentlyUpdated ? "updated" : "created"}
+            <span class="line">{data.newPeriod}</span>
+        </div>
+    </div>
+    <div class="flex" style="flex-direction: column; gap: 0.2rem;">
+        <span style="font-size: 2rem;">{data.totalCount}</span>
+        <div class="text fg0">
+            total studyset{data.totalCount === 1 ? "" : "s"}
+        </div>
+    </div>
+</div>
+
+<div class="grid list">
+    {#each theList as studyset}
+        <StudysetLinkBox
+            {studyset}
+            linkTemplateFunc={(id) => `/studysets/${id}`}
+            showDropdown={false}
+        ></StudysetLinkBox>
+    {/each}
+</div>
+<div
+    class={data.pageInfo?.hasNextPage && data.pageInfo?.hasPreviousPage
+        ? "combo-buttons"
+        : ""}
+>
+    {#if data.pageInfo?.hasPreviousPage}
+        <a
+            href="/explore/recent?before={data.pageInfo
+                .startCursor}{data.recentlyUpdated ? '&updated' : ''}"
+            class="button alt {data.pageInfo?.hasNextPage ? 'left' : ''}"
+        >
+            <ArrowLeftIcon></ArrowLeftIcon> Previous
+        </a>
+    {/if}
+    {#if data.pageInfo?.hasNextPage}
+        <a
+            href="/explore/recent?after={data.pageInfo
+                .endCursor}{data.recentlyUpdated ? '&updated' : ''}"
+            class="button alt {data.pageInfo?.hasPreviousPage ? 'right' : ''}"
+        >
+            Next <ArrowRightIcon></ArrowRightIcon>
+        </a>
+    {/if}
+</div>
