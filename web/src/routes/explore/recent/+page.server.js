@@ -64,7 +64,7 @@ export async function load({ cookies, url }) {
     let totalCount = apiRes?.data?.countTotal ?? 0;
     let newCount = apiRes?.data?.countDay ?? 0;
     let newPeriod = "today";
-    if (newCount <= 1 || (newCount < 10 && apiRes?.data?.countWeek >= 10)) {
+    if ((newCount <= 0 && apiRes?.data?.countWeek >= 1) || (newCount <= 2 && apiRes?.data?.countWeek > 3) || (newCount < 10 && apiRes?.data?.countWeek >= 10)) {
       newCount = apiRes?.data?.countWeek ?? 0;
       newPeriod = "this week";
     }
