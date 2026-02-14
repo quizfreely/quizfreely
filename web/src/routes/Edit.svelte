@@ -834,10 +834,10 @@
             }
         }
 
-        fetch("/dashboard/set-dashboard-state", {
-            method: "POST",
-            credentials: "include",
-        });
+        // fetch("/dashboard/set-dashboard-state", {
+        //     method: "POST",
+        //     credentials: "include",
+        // });
     }
 
     let importTermsTermDefDelimiterRadioSelect = $state("tab");
