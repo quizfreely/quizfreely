@@ -704,7 +704,9 @@ FRQs: ${numFRQsToAssign}`,
                         class="b {questionsCorrect / questions.length >= 0.9
                             ? 'yay'
                             : 'ohno'}"
-                        >{(questionsCorrect / questions.length) * 100}%</span
+                        >{Math.round(
+                            (questionsCorrect / questions.length) * 100,
+                        )}%</span
                     >
                     <span>{questionsCorrect}/{questions.length} Correct</span>
                 </div>
