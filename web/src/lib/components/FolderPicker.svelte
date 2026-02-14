@@ -3,7 +3,13 @@
     import { fade, slide } from "svelte/transition";
     import CloseXMarkIcon from "$lib/icons/CloseXMark.svelte";
     import FolderIcon from "$lib/icons/Folder.svelte";
-    let { closeCallback, selectCallback, errMsg, showNoneOption, noneCallback } = $props();
+    let {
+        closeCallback,
+        selectCallback,
+        errMsg,
+        showNoneOption,
+        noneCallback,
+    } = $props();
     let folders = $state([]);
     let showErrMsg = $state(false);
     let showActionErrMsg = $state(false);
@@ -14,20 +20,24 @@
             const raw = await fetch(`/api/graphql`, {
                 method: "POST",
                 headers: {
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
                     query: `{
     myFolders {
-        id
-        name
+        edges {
+            node {
+                id
+                name
+            }
+        }
     }
-}`
-                })
+}`,
+                }),
             });
             const resp = await raw.json();
             if (resp?.data) {
-                folders = resp.data.myFolders ?? [];
+                folders = resp.data.myFolders?.edges?.map((e) => e.node) ?? [];
             } else {
                 console.error("No data property in json response: ", resp);
                 showErrMsg = true;
@@ -36,7 +46,7 @@
             console.error("Error loading folders: ", err);
             showErrMsg = true;
         }
-    })
+    });
 
     async function newFolderButtonOnclick() {
         const folderName = newFolderName;
@@ -46,7 +56,7 @@
             const raw = await fetch(`/api/graphql`, {
                 method: "POST",
                 headers: {
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
                     query: `mutation ($name: String!) {
@@ -55,16 +65,16 @@
     }
 }`,
                     variables: {
-                        name: folderName
-                    }
-                })
+                        name: folderName,
+                    },
+                }),
             });
             const resp = await raw.json();
             if (resp?.data?.createFolder?.id) {
                 folders.push({
                     id: resp?.data?.createFolder?.id,
-                    name: folderName
-                })
+                    name: folderName,
+                });
             } else {
                 console.error("Unsuccessful json response: ", resp);
                 showCreateErrMsg = true;
@@ -75,9 +85,13 @@
         }
     }
 </script>
+
 <div class="modal" transition:fade={{ duration: 200 }}>
     <div class="content" style="min-width: 0px; padding-top: 0.6rem;">
-        <div class="flex" style="justify-content: space-between; align-items: center;">
+        <div
+            class="flex"
+            style="justify-content: space-between; align-items: center;"
+        >
             <span>Select a folder:</span>
             <button class="icon-only-button" onclick={closeCallback}>
                 <CloseXMarkIcon></CloseXMarkIcon>
@@ -86,47 +100,58 @@
         {#if showActionErrMsg}
             {@render errMsg?.()}
         {:else if showErrMsg}
-            <div class="box ohno" transition:slide={{duration: 400}}>
+            <div class="box ohno" transition:slide={{ duration: 400 }}>
                 <p>Error while loading folders :(</p>
             </div>
         {/if}
-        <div class="flex" style="gap: 0.6rem; flex-direction: column; flex-wrap: nowrap; max-height: 50vh; overflow-y: auto; margin-top: 0.6rem;">
+        <div
+            class="flex"
+            style="gap: 0.6rem; flex-direction: column; flex-wrap: nowrap; max-height: 50vh; overflow-y: auto; margin-top: 0.6rem;"
+        >
             {#if showNoneOption && folders?.length > 0}
-            <button class="button-box" onclick={() => noneCallback(
-                (show) => showActionErrMsg = show
-            )}>
-                None
-            </button>
+                <button
+                    class="button-box"
+                    onclick={() =>
+                        noneCallback((show) => (showActionErrMsg = show))}
+                >
+                    None
+                </button>
             {/if}
             {#each folders as folder}
-                <button class="button-box" style="text-align: start; display: flex; align-items: center; justify-content: start; gap: 0.6rem;" onclick={
-                    () => selectCallback(
-                        folder,
-                        (show) => showActionErrMsg = show
-                    )
-                }>
+                <button
+                    class="button-box"
+                    style="text-align: start; display: flex; align-items: center; justify-content: start; gap: 0.6rem;"
+                    onclick={() =>
+                        selectCallback(
+                            folder,
+                            (show) => (showActionErrMsg = show),
+                        )}
+                >
                     <FolderIcon></FolderIcon>
                     {folder.name}
                 </button>
             {:else}
-                <div class="box">
-                    No folders
-                </div>
+                <div class="box">No folders</div>
             {/each}
         </div>
         <p>Create a new folder?</p>
         <div class="flex" style="margin-top: 0.6rem;">
-            <input type="text" placeholder="Folder Name" bind:value={newFolderName} onkeyup={e => {
-                if (e.key == "Enter") {
-                    newFolderButtonOnclick();
-                }
-            }}>
+            <input
+                type="text"
+                placeholder="Folder Name"
+                bind:value={newFolderName}
+                onkeyup={(e) => {
+                    if (e.key == "Enter") {
+                        newFolderButtonOnclick();
+                    }
+                }}
+            />
             <button onclick={newFolderButtonOnclick}>Create</button>
         </div>
         {#if showCreateErrMsg}
-            <div class="box ohno" transition:slide={{duration: 400}}>
+            <div class="box ohno" transition:slide={{ duration: 400 }}>
                 <p>Error creating folder :(</p>
             </div>
         {/if}
-  </div>
+    </div>
 </div>

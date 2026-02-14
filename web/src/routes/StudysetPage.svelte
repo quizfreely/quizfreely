@@ -39,7 +39,7 @@
     so flipping same card does not add a new element
     so we can use the length/size to check how many cards have been seen (both sides) this session */
     let flashcardsSeenWhileMax = $state(new Set());
-    let showConfetti = $state(false)
+    let showConfetti = $state(false);
 
     function flashcardsFlip() {
         document.getElementById("flashcard").classList.toggle("flip");
@@ -49,12 +49,12 @@
     }
     function flashcardsPrev() {
         if (flashcardsIndex > 0) {
-            flashcardsIndex -= 1
+            flashcardsIndex -= 1;
         }
     }
     function flashcardsNext() {
-        if (flashcardsIndex < (terms?.length - 1)) {
-            flashcardsIndex += 1
+        if (flashcardsIndex < terms?.length - 1) {
+            flashcardsIndex += 1;
         }
 
         if (
@@ -72,16 +72,16 @@
         mounted = true;
         if (data.local) {
             (async () => {
-            const localStudyset = await idbApiLayer.getStudysetById(
-                data.localId,
-                {
-                    terms: {
-                        progress: true
-                    }
-                }
-            );
-            title = localStudyset?.title;
-            terms = localStudyset?.terms;
+                const localStudyset = await idbApiLayer.getStudysetById(
+                    data.localId,
+                    {
+                        terms: {
+                            progress: true,
+                        },
+                    },
+                );
+                title = localStudyset?.title;
+                terms = localStudyset?.terms;
             })();
         }
 
@@ -90,8 +90,8 @@
             if (
                 active &&
                 (active.tagName === "INPUT" ||
-                active.tagName === "TEXTAREA" ||
-                active.isContentEditable)
+                    active.tagName === "TEXTAREA" ||
+                    active.isContentEditable)
             ) {
                 return;
             }
@@ -107,7 +107,7 @@
                 case "k":
                     flashcardsNext();
                     break;
-                case " ": /* space */
+                case " " /* space */:
                     /* prevent scrolling,
                     but don't flip here in keydown,
                     to avoid spam-flipping */
@@ -122,8 +122,8 @@
             if (
                 active &&
                 (active.tagName === "INPUT" ||
-                active.tagName === "TEXTAREA" ||
-                active.isContentEditable)
+                    active.tagName === "TEXTAREA" ||
+                    active.isContentEditable)
             ) {
                 return;
             }
@@ -135,23 +135,15 @@
             }
         }
 
-        window.addEventListener(
-            "keydown", flashcardsOnKeyDown
-        );
-        window.addEventListener(
-            "keyup", flashcardsOnKeyUp
-        );
+        window.addEventListener("keydown", flashcardsOnKeyDown);
+        window.addEventListener("keyup", flashcardsOnKeyUp);
 
         /* return cleanup function to remove eventlisteners */
         return () => {
-            window.removeEventListener(
-                "keydown", flashcardsOnKeyDown
-            );
-            window.removeEventListener(
-                "keyup", flashcardsOnKeyUp
-            );
-        }
-    })
+            window.removeEventListener("keydown", flashcardsOnKeyDown);
+            window.removeEventListener("keyup", flashcardsOnKeyUp);
+        };
+    });
     async function deleteConfirmButtonClicked() {
         if (data.local) {
             await idbApiLayer.deleteStudyset(data.localId);
@@ -168,22 +160,23 @@
     deleteStudyset(id: $id)
 }`,
                     variables: {
-                        id: data.studyset.id
+                        id: data.studyset.id,
+                    },
+                }),
+            })
+                .then((response) => response.json())
+                .then((response) => {
+                    if (response.errors) {
+                        console.error(response.errors);
+                        alert("GraphQL error: " + response.errors[0].message);
+                    } else {
+                        goto("/dashboard");
                     }
                 })
-            }).then(
-                response => response.json()
-            ).then(response => {
-                if (response.errors) {
-                    console.error(response.errors);
-                    alert("GraphQL error: " + response.errors[0].message);
-                } else {
-                    goto("/dashboard");
-                }
-            }).catch(error => {
-                console.error(error);
-                alert("Network error while deleting studyset");
-            });
+                .catch((error) => {
+                    console.error(error);
+                    alert("Network error while deleting studyset");
+                });
         }
     }
 
@@ -191,11 +184,6 @@
     function maximizeFlashcards() {
         flashcardsMaximized = true;
         footerState.hideFooter = true;
-
-        fetch("/dashboard/set-dashboard-state", {
-            method: "POST",
-            credentials: "include"
-        });
     }
     function unmaximizeFlashcards() {
         flashcardsMaximized = false;
@@ -204,13 +192,543 @@
 
     beforeNavigate(() => {
         footerState.hideFooter = false;
-    })
+    });
 
     let saved = $state(data?.studyset?.saved ?? false);
     let folderId = $state(data?.studyset?.folder?.id ?? null);
     let folderName = $state(data?.studyset?.folder?.name ?? null);
     let showFolderChooser = $state(false);
 </script>
+
+<svelte:head>
+    {#if title}
+        <title>{title} - Quizfreely</title>
+    {:else}
+        <title>Quizfreely</title>
+    {/if}
+    <meta name="robots" content="noindex, follow" />
+</svelte:head>
+
+{#snippet folderPickerErrMsg()}
+    <div class="box ohno" transition:slide={{ duration: 400 }}>
+        <p>Error adding to/changing folder :(</p>
+    </div>
+{/snippet}
+
+{#if data.local}
+    <Noscript />
+{/if}
+
+{#snippet addToFolder()}
+    <button class="alt" onclick={() => (showFolderChooser = true)}>
+        <FolderIcon></FolderIcon>
+        {folderId != null ? "Change Folder" : "Add to Folder"}
+    </button>
+{/snippet}
+<main>
+    <div class="grid page">
+        <div class="content">
+            {#if !flashcardsMaximized}
+                <div id="title-and-menu-outer-div">
+                    {#if folderName}
+                        <div
+                            class="flex compact-gap"
+                            style="align-items: center;"
+                        >
+                            <a href="/dashboard" class="button faint">Folders</a
+                            >
+                            <AngleRIcon></AngleRIcon>
+                            <a
+                                href="/dashboard?folder={folderId}"
+                                class="button faint"
+                            >
+                                <FolderIcon></FolderIcon>
+                                {folderName}
+                            </a>
+                        </div>
+                    {/if}
+                    <h2
+                        class="caption"
+                        style="overflow-wrap: anywhere; margin-top: 0.4rem;"
+                    >
+                        {title ?? "Title"}
+                    </h2>
+                    {#if data.local}
+                        <p class="fg0">
+                            <IconLocal /> Local Studyset
+                        </p>
+                    {:else if data?.studyset?.private}
+                        <p class="fg0">
+                            <IconEyeSlash /> Private Studyset
+                        </p>
+                    {:else if data?.studyset?.user?.displayName != null}
+                        <!--<p>
+          Created by <a href="/users/{ data.studyset.user_id }">{ data.studyset.user_display_name }</a>
+        </p>-->
+                        <p>
+                            Created by {data.studyset.user.displayName}
+                        </p>
+                    {/if}
+                    {#if data.studyset && data.authed && data.authedUser.id == data.studyset.user?.id}
+                        <div
+                            id="edit-menu"
+                            class="flex"
+                            style="align-items: center;"
+                        >
+                            <a
+                                href="/studyset/edit/{data.studyset.id}"
+                                class="button"
+                            >
+                                <IconPencil />
+                                Edit
+                            </a>
+                            {@render addToFolder()}
+                            <Dropdown
+                                button={{
+                                    class: "dropdown-toggle",
+                                    "aria-label": "More Options Dropdown",
+                                }}
+                            >
+                                {#snippet buttonContent()}
+                                    <IconMoreDotsV />
+                                {/snippet}
+                                {#snippet divContent()}
+                                    <button
+                                        class="ohno"
+                                        id="delete-button"
+                                        onclick={() => {
+                                            showDeleteConfirmationModal = true;
+                                        }}
+                                        ><IconTrash /> Delete
+                                    </button>
+                                {/snippet}
+                            </Dropdown>
+                        </div>
+                    {:else if data.local}
+                        <div id="edit-menu" class="flex">
+                            <a
+                                href="/studyset/local/edit?id={data.localId}"
+                                class="button"
+                            >
+                                <IconPencil />
+                                Edit
+                            </a>
+                            <Dropdown
+                                button={{
+                                    class: "dropdown-toggle",
+                                    "aria-label": "More Options Dropdown",
+                                }}
+                            >
+                                {#snippet buttonContent()}
+                                    <IconMoreDotsV />
+                                {/snippet}
+                                {#snippet divContent()}
+                                    <button
+                                        class="ohno"
+                                        id="delete-button"
+                                        onclick={() => {
+                                            showDeleteConfirmationModal = true;
+                                        }}
+                                        ><IconTrash /> Delete
+                                    </button>
+                                {/snippet}
+                            </Dropdown>
+                        </div>
+                    {:else if data.authed}
+                        <div id="edit-menu" class="flex">
+                            {#if saved}
+                                <button
+                                    class="alt"
+                                    onclick={async () => {
+                                        try {
+                                            const respRaw = await fetch(
+                                                "/api/graphql",
+                                                {
+                                                    method: "POST",
+                                                    headers: {
+                                                        "Content-Type":
+                                                            "application/json",
+                                                    },
+                                                    body: JSON.stringify({
+                                                        query: `mutation unsaveStudyset($id: ID!) {
+    unsaveStudyset(studysetId: $id)
+}`,
+                                                        variables: {
+                                                            id: data?.studyset
+                                                                ?.id,
+                                                        },
+                                                    }),
+                                                },
+                                            );
+                                            const resp = await respRaw.json();
+                                            if (resp?.data?.unsaveStudyset) {
+                                                saved = false;
+                                            } else {
+                                                console.error(
+                                                    "idk, this happened: ",
+                                                    resp,
+                                                );
+                                            }
+                                        } catch (err) {
+                                            console.error(
+                                                "idk, this errored: ",
+                                                err,
+                                            );
+                                        }
+                                    }}
+                                >
+                                    <BookmarkIcon />
+                                    Unsave
+                                </button>
+                            {:else}
+                                <button
+                                    class="alt"
+                                    onclick={async () => {
+                                        try {
+                                            const respRaw = await fetch(
+                                                "/api/graphql",
+                                                {
+                                                    method: "POST",
+                                                    headers: {
+                                                        "Content-Type":
+                                                            "application/json",
+                                                    },
+                                                    body: JSON.stringify({
+                                                        query: `mutation saveStudyset($id: ID!) {
+    saveStudyset(studysetId: $id)
+}`,
+                                                        variables: {
+                                                            id: data?.studyset
+                                                                ?.id,
+                                                        },
+                                                    }),
+                                                },
+                                            );
+                                            const resp = await respRaw.json();
+                                            if (resp?.data?.saveStudyset) {
+                                                saved = true;
+                                            } else {
+                                                console.error(
+                                                    "idk, this happened: ",
+                                                    resp,
+                                                );
+                                            }
+                                        } catch (err) {
+                                            console.error(
+                                                "idk, this errored: ",
+                                                err,
+                                            );
+                                        }
+                                    }}
+                                >
+                                    <BookmarkIcon />
+                                    Save
+                                </button>
+                            {/if}
+                            {@render addToFolder()}
+                        </div>
+                    {/if}
+                </div>
+            {/if}
+            <div id="flashcards-outer-div">
+                {#if flashcardsMaximized}
+                    <div class="flex">
+                        <button
+                            id="flashcards-unmaximize"
+                            class="faint"
+                            onclick={unmaximizeFlashcards}
+                        >
+                            <IconBackArrow /> Back
+                        </button>
+                    </div>
+                {/if}
+                <div>
+                    <div
+                        class="card double"
+                        id="flashcard"
+                        onclick={flashcardsFlip}
+                    >
+                        <div class="content">
+                            <div
+                                class="front"
+                                id="flashcard-front"
+                                style="white-space:pre-wrap"
+                            >
+                                {terms?.[flashcardsIndex]?.term ?? "term"}
+                            </div>
+                            <div
+                                class="back"
+                                id="flashcard-back"
+                                style="white-space:pre-wrap"
+                            >
+                                {terms?.[flashcardsIndex]?.def ?? "definition"}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="caption">
+                        <div
+                            class="progress-bar thin yay"
+                            style="margin-left: 0.4rem; margin-right: 0.4rem;"
+                        >
+                            <div
+                                style="width: {terms != null
+                                    ? ((flashcardsIndex + 1) / terms?.length) *
+                                      100
+                                    : '20'}%"
+                            ></div>
+                        </div>
+                    </div>
+                    <div class="caption centerThree">
+                        <p id="flashcards-count">
+                            {flashcardsIndex + 1}/{terms?.length ?? "?"}
+                        </p>
+                        <div class="flex justifyselfcenter compact-gap">
+                            <button
+                                id="flashcards-prev-button"
+                                class="faint"
+                                aria-label="Previous Card"
+                                onclick={flashcardsPrev}
+                            >
+                                <IconArrowLeft />
+                            </button>
+                            <button
+                                id="flashcards-flip-button"
+                                class="faint"
+                                onclick={flashcardsFlip}>Flip</button
+                            >
+                            <button
+                                id="flashcards-next-button"
+                                class="faint"
+                                aria-label="Next Card"
+                                onclick={flashcardsNext}
+                            >
+                                <IconArrowRight />
+                            </button>
+                        </div>
+                        <div class="flex end">
+                            <!--<button id="flashcards-maximize-button">
+                <i class="nf nf-md-fullscreen"></i>
+              </button>
+              <button id="flashcards-unmaximize-button" class="hide">
+                <i class="nf nf-md-fullscreen_exit"></i>
+              </button>-->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {#if !flashcardsMaximized}
+                <div id="terms-and-stuff-outer-div">
+                    <div class="caption grid list">
+                        <button
+                            id="flashcards-maximize"
+                            class="alt"
+                            onclick={maximizeFlashcards}
+                        >
+                            <IconFlashcards />
+                            Flashcards
+                        </button>
+                        {#if data.local}
+                            <!-- <a href="/studyset/local/review-mode?id={ data.localId }" class="button alt"> -->
+                            <!--   <IconReviewModeBook /> -->
+                            <!--   Review Mode -->
+                            <!-- </a> -->
+                            <a
+                                href="/studyset/local/practice-test?id={data.localId}"
+                                class="button alt"
+                            >
+                                <IconPracticeTestChecklist />
+                                Practice Test
+                            </a>
+                            <a
+                                href="/host?localId={data.localId}"
+                                class="button alt"
+                            >
+                                <GroupIcon></GroupIcon>
+                                Review Game
+                            </a>
+                        {:else if data.studyset}
+                            <!-- <a href="/studysets/{ data.studyset.id }/review-mode" class="button alt"> -->
+                            <!--   <IconReviewModeBook /> -->
+                            <!--   Review Mode -->
+                            <!-- </a> -->
+                            <a
+                                href="/studysets/{data.studyset
+                                    .id}/practice-test"
+                                class="button alt"
+                            >
+                                <IconPracticeTestChecklist />
+                                Practice Test
+                            </a>
+                            <a
+                                href="/host?studysetId={data.studyset.id}"
+                                class="button alt"
+                            >
+                                <GroupIcon></GroupIcon>
+                                Review Game
+                            </a>
+                        {/if}
+                    </div>
+
+                    <div class="top-menu-nav">
+                        <a class="top-menu-link current" href="#">Terms</a>
+                        <a
+                            class="top-menu-link"
+                            style="display: flex; align-items: center; gap: 0.4rem;"
+                            href={data.local
+                                ? `/studyset/local/stats?id=${data.localId}`
+                                : `/studysets/${data.studyset.id}/stats`}
+                        >
+                            <IconGraph />
+                            Progress &amp; Stats
+                        </a>
+                    </div>
+                    <table class="outer caption box" id="terms-table">
+                        <tbody>
+                            <tr>
+                                <th>Term</th>
+                                <th>Definition</th>
+                            </tr>
+                            {#if terms != null}
+                                {#each terms as term}
+                                    <tr>
+                                        <td style="white-space:pre-wrap"
+                                            >{term.term}</td
+                                        >
+                                        <td style="white-space:pre-wrap"
+                                            >{term.def}</td
+                                        >
+                                    </tr>
+                                {/each}
+                            {/if}
+                        </tbody>
+                    </table>
+                </div>
+                {#if showDeleteConfirmationModal}
+                    <div class="modal" transition:fade={{ duration: 200 }}>
+                        <div class="content">
+                            <p>
+                                Are you sure you want to delete this studyset?
+                            </p>
+                            <div class="flex">
+                                <button
+                                    class="ohno"
+                                    onclick={deleteConfirmButtonClicked}
+                                >
+                                    <IconTrash />
+                                    Delete
+                                </button>
+                                <button
+                                    class="alt"
+                                    onclick={function () {
+                                        showDeleteConfirmationModal = false;
+                                    }}>Cancel</button
+                                >
+                            </div>
+                        </div>
+                    </div>
+                {/if}
+                {#if showFolderChooser}
+                    <FolderPicker
+                        closeCallback={() => (showFolderChooser = false)}
+                        errMsg={folderPickerErrMsg}
+                        selectCallback={async (
+                            selectedFolder,
+                            showErrorMsgCallback,
+                        ) => {
+                            showErrorMsgCallback(false);
+                            try {
+                                const raw = await fetch(`/api/graphql`, {
+                                    method: "POST",
+                                    headers: {
+                                        "Content-Type": "application/json",
+                                    },
+                                    body: JSON.stringify({
+                                        query: `mutation ($studysetId: ID!, $folderId: ID!) {
+    setStudysetFolder(studysetId: $studysetId, folderId: $folderId)
+}`,
+                                        variables: {
+                                            studysetId: data.studyset.id,
+                                            folderId: selectedFolder.id,
+                                        },
+                                    }),
+                                });
+                                const resp = await raw.json();
+                                if (resp?.data?.setStudysetFolder) {
+                                    folderId = selectedFolder.id;
+                                    folderName = selectedFolder.name;
+                                    showFolderChooser = false;
+                                } else {
+                                    console.error(
+                                        "Unsuccessful json response: ",
+                                        resp,
+                                    );
+                                    showErrorMsgCallback(true);
+                                }
+                            } catch (err) {
+                                console.error("Error adding to folder: ", err);
+                                showErrorMsgCallback(true);
+                            }
+                        }}
+                        showNoneOption={true}
+                        noneCallback={async (showErrorMsgCallback) => {
+                            showErrorMsgCallback(false);
+                            try {
+                                const raw = await fetch(`/api/graphql`, {
+                                    method: "POST",
+                                    headers: {
+                                        "Content-Type": "application/json",
+                                    },
+                                    body: JSON.stringify({
+                                        query: `mutation ($studysetId: ID!) {
+    removeStudysetFromFolder(studysetId: $studysetId)
+}`,
+                                        variables: {
+                                            studysetId: data.studyset.id,
+                                        },
+                                    }),
+                                });
+                                const resp = await raw.json();
+                                if (resp?.data?.removeStudysetFromFolder) {
+                                    folderId = null;
+                                    folderName = null;
+                                    showFolderChooser = false;
+                                } else {
+                                    console.error(
+                                        "Unsuccessful json response: ",
+                                        resp,
+                                    );
+                                    showErrorMsgCallback(true);
+                                }
+                            } catch (err) {
+                                console.error(
+                                    "Error removing from folder: ",
+                                    err,
+                                );
+                                showErrorMsgCallback(true);
+                            }
+                        }}
+                    ></FolderPicker>
+                {/if}
+            {/if}
+        </div>
+    </div>
+</main>
+{#if showConfetti}
+    <!-- fullscreen confetti -->
+    <div
+        style="position: fixed; top: -50px; left 0px; margin-top: 0px; height: 100vh; width: 100vw; display: flex; justify-content: center; overflow: hidden; pointer-events: none;"
+    >
+        <Confetti
+            x={[-5, 5]}
+            y={[0, 0.1]}
+            delay={[0, 6000]}
+            duration={4000}
+            amount="1000"
+            fallDistance="200vh"
+        />
+    </div>
+{/if}
+
 <style>
     .top-menu-link {
         margin-top: 0px;
@@ -238,364 +756,3 @@
         margin-bottom: 1rem;
     }
 </style>
-<svelte:head>
-    {#if title}
-        <title>{title} - Quizfreely</title>
-    {:else}
-        <title>Quizfreely</title>
-    {/if}
-</svelte:head>
-
-{#snippet folderPickerErrMsg()}
-    <div class="box ohno" transition:slide={{duration: 400}}>
-        <p>Error adding to/changing folder :(</p>
-    </div>
-{/snippet}
-
-{#if data.local}
-<Noscript />
-{/if}
-
-{#snippet addToFolder()}
-    <button class="alt" onclick={() => showFolderChooser = true}>
-        <FolderIcon></FolderIcon>
-        {folderId != null ? "Change Folder" : "Add to Folder"}
-    </button>
-{/snippet}
-<main>
-  <div class="grid page">
-    <div class="content">
-    {#if !flashcardsMaximized}
-      <div id="title-and-menu-outer-div">
-        {#if folderName}
-            <div class="flex compact-gap" style="align-items: center;">
-                <a href="/dashboard" class="button faint">Folders</a>
-                <AngleRIcon></AngleRIcon>
-                <a href="/dashboard?folder={folderId}" class="button faint">
-                    <FolderIcon></FolderIcon>
-                    {folderName}
-                </a>
-            </div>
-        {/if}
-        <h2 class="caption" style="overflow-wrap: anywhere; margin-top: 0.4rem;">{ title ?? "Title" }</h2>
-        {#if data.local}
-        <p class="fg0">
-          <IconLocal /> Local Studyset
-        </p>
-        {:else if data?.studyset?.private}
-        <p class="fg0">
-          <IconEyeSlash /> Private Studyset
-        </p>
-        {:else if data?.studyset?.user?.displayName != null}
-        <!--<p>
-          Created by <a href="/users/{ data.studyset.user_id }">{ data.studyset.user_display_name }</a>
-        </p>-->
-        <p>
-          Created by { data.studyset.user.displayName }
-        </p>
-        {/if}
-        {#if (data.studyset && data.authed && (data.authedUser.id == data.studyset.user?.id)) }
-        <div id="edit-menu" class="flex" style="align-items: center;">
-          <a href="/studyset/edit/{ data.studyset.id }" class="button">
-            <IconPencil />
-            Edit
-          </a>
-          {@render addToFolder()}
-          <Dropdown button={{class:"dropdown-toggle","aria-label":"More Options Dropdown"}}>
-            {#snippet buttonContent()}
-              <IconMoreDotsV />
-            {/snippet}
-            {#snippet divContent()}
-              <button class="ohno" id="delete-button" onclick={() => {showDeleteConfirmationModal = true}}><IconTrash /> Delete </button>
-            {/snippet}
-          </Dropdown>
-        </div>
-        {:else if (data.local) }
-        <div id="edit-menu" class="flex">
-          <a href="/studyset/local/edit?id={ data.localId }" class="button">
-            <IconPencil />
-            Edit
-          </a>
-          <Dropdown button={{class:"dropdown-toggle","aria-label":"More Options Dropdown"}}>
-            {#snippet buttonContent()}
-              <IconMoreDotsV />
-            {/snippet}
-            {#snippet divContent()}
-              <button class="ohno" id="delete-button" onclick={() => {showDeleteConfirmationModal = true}}><IconTrash /> Delete </button>
-            {/snippet}
-          </Dropdown>
-        </div>
-        {:else if data.authed}
-        <div id="edit-menu" class="flex">
-            {#if saved}
-            <button class="alt" onclick={async () => {
-                try {
-                    const respRaw = await fetch("/api/graphql", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json"
-                        },
-                        body: JSON.stringify({
-                            query: `mutation unsaveStudyset($id: ID!) {
-    unsaveStudyset(studysetId: $id)
-}`,
-                            variables: {
-                                id: data?.studyset?.id
-                            }
-                        })
-                    });
-                    const resp = await respRaw.json();
-                    if (resp?.data?.unsaveStudyset) {
-                        saved = false;
-                    } else {
-                        console.error("idk, this happened: ", resp);
-                    }
-                } catch (err) {
-                    console.error("idk, this errored: ", err);
-                }
-            }}>
-                <BookmarkIcon />
-                Unsave
-            </button>
-            {:else}
-            <button class="alt" onclick={async () => {
-                try {
-                    const respRaw = await fetch("/api/graphql", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json"
-                        },
-                        body: JSON.stringify({
-                            query: `mutation saveStudyset($id: ID!) {
-    saveStudyset(studysetId: $id)
-}`,
-                            variables: {
-                                id: data?.studyset?.id
-                            }
-                        })
-                    });
-                    const resp = await respRaw.json();
-                    if (resp?.data?.saveStudyset) {
-                        saved = true;
-                    } else {
-                        console.error("idk, this happened: ", resp);
-                    }
-                } catch (err) {
-                    console.error("idk, this errored: ", err);
-                }
-            }}>
-                <BookmarkIcon />
-                Save
-            </button>
-            {/if}
-            {@render addToFolder()}
-        </div>
-        {/if}
-      </div>
-    {/if}
-      <div id="flashcards-outer-div">
-        {#if flashcardsMaximized}
-        <div class="flex">
-            <button id="flashcards-unmaximize" class="faint" onclick={unmaximizeFlashcards}>
-                <IconBackArrow /> Back
-            </button>
-        </div>
-        {/if}
-        <div>
-          <div
-            class="card double"
-            id="flashcard"
-            onclick={flashcardsFlip}
-          >
-            <div class="content">
-              <div class="front" id="flashcard-front" style="white-space:pre-wrap">{ terms?.[flashcardsIndex]?.term ?? "term" }</div>
-              <div class="back" id="flashcard-back" style="white-space:pre-wrap">{ terms?.[flashcardsIndex]?.def ?? "definition" }</div>
-            </div>
-          </div>
-          <div class="caption">
-            <div class="progress-bar thin yay" style="margin-left: 0.4rem; margin-right: 0.4rem;">
-              <div style="width: {terms != null ?
-                  ((flashcardsIndex + 1) / terms?.length) * 100 :
-                  "20"
-              }%"></div>
-            </div>
-          </div>
-          <div class="caption centerThree">
-            <p id="flashcards-count">
-                {flashcardsIndex + 1}/{ terms?.length ?? "?" }
-            </p>
-            <div class="flex justifyselfcenter compact-gap">
-              <button
-                id="flashcards-prev-button"
-                class="faint"
-                aria-label="Previous Card"
-                onclick={flashcardsPrev}
-              >
-              <IconArrowLeft />
-              </button>
-              <button id="flashcards-flip-button" class="faint" onclick={flashcardsFlip}>Flip</button>
-              <button
-                id="flashcards-next-button"
-                class="faint"
-                aria-label="Next Card"
-                onclick={flashcardsNext}
-              >
-              <IconArrowRight />
-              </button>
-            </div>
-            <div class="flex end">
-              <!--<button id="flashcards-maximize-button">
-                <i class="nf nf-md-fullscreen"></i>
-              </button>
-              <button id="flashcards-unmaximize-button" class="hide">
-                <i class="nf nf-md-fullscreen_exit"></i>
-              </button>-->
-            </div>
-          </div>
-        </div>
-      </div>
-    {#if !flashcardsMaximized}
-      <div id="terms-and-stuff-outer-div">
-        <div class="caption grid list">
-          <button id="flashcards-maximize" class="alt" onclick={maximizeFlashcards}>
-            <IconFlashcards />
-            Flashcards
-          </button>
-          {#if data.local}
-          <!-- <a href="/studyset/local/review-mode?id={ data.localId }" class="button alt"> -->
-          <!--   <IconReviewModeBook /> -->
-          <!--   Review Mode -->
-          <!-- </a> -->
-          <a href="/studyset/local/practice-test?id={data.localId}" class="button alt">
-            <IconPracticeTestChecklist />
-            Practice Test
-          </a>
-          <a href="/studyset/local/stats?id={data.localId}" class="button alt">
-            <IconGraph />
-            Progress &amp; Stats
-          </a>
-          {:else if data.studyset}
-            <!-- <a href="/studysets/{ data.studyset.id }/review-mode" class="button alt"> -->
-            <!--   <IconReviewModeBook /> -->
-            <!--   Review Mode -->
-            <!-- </a> -->
-            <a href="/studysets/{data.studyset.id}/practice-test" class="button alt">
-              <IconPracticeTestChecklist />
-              Practice Test
-            </a>
-            <a href="/studysets/{data.studyset.id}/stats" class="button alt">
-              <IconGraph />
-              Progress &amp; Stats
-            </a>
-          {/if}
-          
-        </div>
-
-        <table class="outer caption box" id="terms-table">
-          <tbody>
-            <tr>
-              <th>Term</th>
-              <th>Definition</th>
-            </tr>
-            {#if terms != null}
-                {#each terms as term }
-                    <tr>
-                      <td style="white-space:pre-wrap">{ term.term }</td>
-                      <td style="white-space:pre-wrap">{ term.def }</td>
-                    </tr>
-                {/each}
-            {/if}
-          </tbody>
-        </table>
-      </div>
-      {#if showDeleteConfirmationModal }
-      <div class="modal" transition:fade={{ duration: 200 }}>
-        <div class="content">
-          <p>Are you sure you want to delete this studyset?</p>
-          <div class="flex">
-            <button class="ohno" onclick={deleteConfirmButtonClicked}>
-              <IconTrash />
-              Delete
-            </button>
-            <button class="alt" onclick={function () { showDeleteConfirmationModal = false }}>Cancel</button>
-          </div>
-        </div>
-      </div>
-      {/if}
-      {#if showFolderChooser}
-        <FolderPicker closeCallback={() => showFolderChooser = false} errMsg={folderPickerErrMsg} selectCallback={async (selectedFolder, showErrorMsgCallback) => {
-                showErrorMsgCallback(false);
-                try {
-                    const raw = await fetch(`/api/graphql`, {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json"
-                        },
-                        body: JSON.stringify({
-                        query: `mutation ($studysetId: ID!, $folderId: ID!) {
-    setStudysetFolder(studysetId: $studysetId, folderId: $folderId)
-}`,
-                            variables: {
-                                studysetId: data.studyset.id,
-                                folderId: selectedFolder.id
-                            }
-                        })
-                    });
-                    const resp = await raw.json();
-                    if (resp?.data?.setStudysetFolder) {
-                        folderId = selectedFolder.id;
-                        folderName = selectedFolder.name;
-                        showFolderChooser = false;
-                    } else {
-                        console.error("Unsuccessful json response: ", resp);
-                        showErrorMsgCallback(true);
-                    }
-                } catch (err) {
-                    console.error("Error adding to folder: ", err);
-                    showErrorMsgCallback(true);
-                }
-            }}
-            showNoneOption={true}
-            noneCallback={async (showErrorMsgCallback) => {
-                showErrorMsgCallback(false);
-                try {
-                    const raw = await fetch(`/api/graphql`, {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json"
-                        },
-                        body: JSON.stringify({
-                        query: `mutation ($studysetId: ID!) {
-    removeStudysetFromFolder(studysetId: $studysetId)
-}`,
-                            variables: {
-                                studysetId: data.studyset.id,
-                            }
-                        })
-                    });
-                    const resp = await raw.json();
-                    if (resp?.data?.removeStudysetFromFolder) {
-                        folderId = null;
-                        folderName = null;
-                        showFolderChooser = false;
-                    } else {
-                        console.error("Unsuccessful json response: ", resp);
-                        showErrorMsgCallback(true);
-                    }
-                } catch (err) {
-                    console.error("Error removing from folder: ", err);
-                    showErrorMsgCallback(true);
-                }
-            }}
-        ></FolderPicker>
-      {/if}
-    {/if}
-    </div>
-  </div>
-</main>
-{#if showConfetti}
-    <!-- fullscreen confetti -->
-    <div style="position: fixed; top: -50px; left 0px; margin-top: 0px; height: 100vh; width: 100vw; display: flex; justify-content: center; overflow: hidden; pointer-events: none;">
-        <Confetti x={[-5, 5]} y={[0, 0.1]} delay={[0, 6000]} duration={4000} amount=1000 fallDistance="200vh"/>
-    </div>
-{/if}

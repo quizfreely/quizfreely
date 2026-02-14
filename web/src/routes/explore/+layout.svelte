@@ -9,7 +9,7 @@
 <style>
     .top-menu-link {
         margin-top: 0px;
-        color: var(--fg-1);
+        color: var(--fg-0);
         padding: 0.4rem 0.8rem;
         border-radius: 0.8rem;
     }
@@ -37,19 +37,22 @@
 <main>
   <div class="grid page">
     <div class="content">
-        <!--<div class="top-menu-nav">
+        <div class="top-menu-nav">
             <a class="top-menu-link {
-                page?.data?.dashboardPage == "dashboard" ?
+                page?.data?.explorePage == "subjects" ?
                     "current" : ""
-            }" href="/dashboard">Dashboard</a>
+            }" href="/explore">Subjects</a>
             <a class="top-menu-link {
-                page?.data?.dashboardPage == "activities" ?
+                page?.data?.explorePage == "recently-created" ?
                     "current" : ""
-            }" href="/dashboard/activities">Activities &amp; Games</a>
-        </div>-->
-        {#key data.dashboardTransPageKey}
-            <!-- uncomment out the style too when you uncomment the meun above -->
-            <div style="/*margin-top: 1.4rem;*/" in:fade={{ duration: 120, delay: 120, easing: sineIn }} out:fade={{ duration: 120, easing: sineOut }}>
+            }" href="/explore/recent">Recently Created</a>
+            <a class="top-menu-link {
+                page?.data?.explorePage == "recently-updated" ?
+                    "current" : ""
+            }" href="/explore/recent?updated">Recently Updated</a>
+        </div>
+        {#key data.exploreTransPageKey}
+            <div style="margin-top: 1.4rem;" in:fade={{ duration: 120, delay: 120, easing: sineIn }} out:fade={{ duration: 120, easing: sineOut }}>
                 {@render children()}
             </div>
         {/key}
