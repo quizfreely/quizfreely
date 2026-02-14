@@ -5,63 +5,96 @@
   import HeartIcon from "$lib/icons/Heart.svelte";
 </script>
 
-<div id="footer-wave" class="wave-top bg0" transition:slide={{duration:400}}></div>
-<footer id="footer" class="background-bg0" transition:slide={{duration:400}} style="border: none; margin: 0px; padding-top: 1rem; padding-bottom: 8rem;">
-    <h2>Quizfreely</h2>
-    <p style="max-width: 24rem; margin-left: auto; margin-right: auto;">
-        Quizfreely is a free and open source nonprofit project
-        made by Ehan A &amp; contributors
+<div
+  id="footer-wave"
+  class="wave-top bg0"
+  transition:slide={{ duration: 400 }}
+></div>
+<footer
+  id="footer"
+  class="background-bg0"
+  transition:slide={{ duration: 400 }}
+  style="border: none; margin: 0px; padding-top: 1rem; padding-bottom: 8rem;"
+>
+  <h2>Quizfreely</h2>
+  <p style="max-width: 24rem; margin-left: auto; margin-right: auto;">
+    Quizfreely is a free and open source nonprofit project made by Ehan A &amp;
+    contributors
+  </p>
+  <div class="flex center compact-gap">
+    <a href="https://codeberg.org/quizfreely/quizfreely" class="button faint">
+      <IconCodeberg />
+      Codeberg
+    </a>
+    <a href="https://github.com/quizfreely/quizfreely" class="button faint">
+      <IconGitHub />
+      GitHub
+    </a>
+    <a
+      href="https://hcb.hackclub.com/donations/start/quizfreely"
+      class="button faint love"
+      style="margin-left: 0.2rem;"
+    >
+      <HeartIcon></HeartIcon> Donate
+    </a>
+  </div>
+  <div
+    class="grid list"
+    style="text-align: start; padding: 2rem; margin-top: 2rem;"
+  >
+    <div>
+      <p class="fg0">About</p>
+      <div
+        class="flex col compact-gap"
+        style="width:fit-content; margin-top: 0.6rem;"
+      >
+        <a href="/landing-page">Landing Page</a>
+        <a href="/privacy">Privacy Policy</a>
+        <a href="/terms">Terms of Service</a>
+        <a href="https://hcb.hackclub.com/quizfreely">Transparent Finances</a>
+      </div>
+    </div>
+    <div>
+      <p class="fg0">Development</p>
+      <div
+        class="flex col compact-gap"
+        style="width:fit-content; margin-top: 0.6rem;"
+      >
+        <a href="https://codeberg.org/quizfreely/quizfreely"
+          >Source Code (Codeberg)</a
+        >
+        <a href="https://github.com/quizfreely/quizfreely"
+          >Source Code (GitHub)</a
+        >
+        <a href="https://quizfreely.org/docs">Documentation</a>
+      </div>
+    </div>
+    <div>
+      <p class="fg0">Community</p>
+      <div
+        class="flex col compact-gap"
+        style="width:fit-content; margin-top: 0.6rem;"
+      >
+        <a href="https://matrix.to/#/#quizfreely-space:matrix.org"
+          >Matrix Space</a
+        >
+        <a href="https://quizfreely.org/discord">Discord Server</a>
+      </div>
+    </div>
+  </div>
+  <div style="text-align: start; padding: 0px 2rem">
+    <!-- <p> -->
+    <!--   v0.32.1 · <a href="https://codeberg.org/quizfreely/quizfreely/releases">Changelog (on Codeberg)</a> or <a href="https://github.com/quizfreely/quizfreely/releases">on GitHub</a> -->
+    <!-- </p> -->
+    <p class="fg0" style="font-size: 0.9rem;">
+      © 2022-2026 Ehan Ahamed and contributors
+      <span class="line">Licensed under AGPL-3.0</span>
     </p>
-    <div class="flex center compact-gap">
-      <a href="https://codeberg.org/quizfreely/quizfreely" class="button faint">
-        <IconCodeberg />
-        Codeberg
-      </a>
-      <a href="https://github.com/quizfreely/quizfreely" class="button faint">
-        <IconGitHub />
-        GitHub
-      </a>
-      <a href="https://hcb.hackclub.com/donations/start/quizfreely" class="button faint love" style="margin-left: 0.2rem;">
-        <HeartIcon></HeartIcon> Donate
-      </a>
-    </div>
-    <div class="grid list" style="text-align: start; padding: 2rem; margin-top: 2rem;">
-      <div>
-        <p class="fg0">About</p>
-        <div class="flex col compact-gap" style="width:fit-content; margin-top: 0.6rem;">
-          <a href="/landing-page">Landing Page</a>
-          <a href="/privacy">Privacy Policy</a>
-          <a href="/terms">Terms of Service</a>
-          <a href="https://hcb.hackclub.com/quizfreely">Transparent Finances</a>
-        </div>
-      </div>
-      <div>
-        <p class="fg0">Development</p>
-        <div class="flex col compact-gap" style="width:fit-content; margin-top: 0.6rem;">
-          <a href="https://codeberg.org/quizfreely/quizfreely">Source Code (Codeberg)</a>
-          <a href="https://github.com/quizfreely/quizfreely">Source Code (GitHub)</a>
-          <a href="https://quizfreely.org/docs">Documentation</a>
-        </div>
-      </div>
-      <div>
-        <p class="fg0">Community</p>
-        <div class="flex col compact-gap" style="width:fit-content; margin-top: 0.6rem;">
-          <a href="https://matrix.to/#/#quizfreely-space:matrix.org">Matrix Space</a>
-          <a href="https://quizfreely.org/discord">Discord Server</a>
-        </div>
-      </div>
-    </div>
-    <div style="text-align: start; padding: 0px 2rem">
-      <!-- <p> -->
-      <!--   v0.32.1 · <a href="https://codeberg.org/quizfreely/quizfreely/releases">Changelog (on Codeberg)</a> or <a href="https://github.com/quizfreely/quizfreely/releases">on GitHub</a> -->
-      <!-- </p> -->
-      <p class="fg0" style="font-size: 0.9rem;">
-        © 2022-2025 Ehan Ahamed and contributors
-        <span class="line">Licensed under AGPL-3.0</span>
-      </p>
-      <p class="fg0" style="font-size: 0.9rem;">
-        Quizfreely is fiscally sponsored by The Hack Foundation,
-        <span class="optional-line-500px">a 501(c)(3) nonprofit (EIN: 81-2908499)</span>
-      </p>
-    </div>
+    <p class="fg0" style="font-size: 0.9rem;">
+      Quizfreely is fiscally sponsored by The Hack Foundation,
+      <span class="optional-line-500px"
+        >a 501(c)(3) nonprofit (EIN: 81-2908499)</span
+      >
+    </p>
+  </div>
 </footer>
