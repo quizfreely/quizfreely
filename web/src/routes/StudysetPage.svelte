@@ -206,6 +206,7 @@
     {:else}
         <title>Quizfreely</title>
     {/if}
+    <meta name="robots" content="noindex, follow" />
 </svelte:head>
 
 {#snippet folderPickerErrMsg()}
