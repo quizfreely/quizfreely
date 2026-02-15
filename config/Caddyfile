@@ -11,6 +11,12 @@ quizfreely.org {
         handle_path /docs* {
             root * /srv/quizfreely-docs/www
             file_server
+
+            handle_errors {
+                @notfound expression {http.error.status_code} == 404
+                rewrite @notfound /404.html
+                file_server
+            }
         }
 
         @immutable {
