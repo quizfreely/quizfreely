@@ -14,20 +14,20 @@
 
 <div class="grid page">
     <div class="content">
-        <div class="flex">
-            <UserIcon></UserIcon>
+        <div class="flex" style="margin-top: 1rem;">
+            <UserIcon width="2rem" height="2rem" style="margin-top: 0.4rem;"
+            ></UserIcon>
             <div
                 class="flex"
-                style="flex-direction: column; gap: 0.5rem; margin-bottom: 2rem;"
+                style="flex-direction: column; gap: 0.2rem; margin-bottom: 2rem;"
             >
-                <h1 style="margin: 0;">{data.user.displayName}</h1>
+                <h1 style="font-size: 2rem; margin-bottom: 0px;">
+                    {data.user.displayName}
+                </h1>
                 {#if data.user.username}
-                    <h2
-                        class="fg0"
-                        style="margin: 0; font-weight: normal; font-size: 1.2rem;"
-                    >
+                    <p class="text fg0" style="font-size: 1.2rem;">
                         @{data.user.username}
-                    </h2>
+                    </p>
                 {/if}
             </div>
         </div>
