@@ -58,6 +58,8 @@
 
     let inFolder = $state(false);
     let currentFolder = $state(null);
+    let folderPage = $state(0);
+    let folderPageInfo = $state(null);
     let showErrorBox = $state(false);
     let errorBoxText = $state("");
 
@@ -77,6 +79,28 @@
                     pageInfo { hasNextPage hasPreviousPage startCursor endCursor }
                 }
             }`;
+        } else if (type === "folder") {
+            cursor =
+                direction === "next"
+                    ? folderPageInfo?.endCursor
+                    : folderPageInfo?.startCursor;
+
+            // Note: server loader for folder isn't updated to take vars, but we are querying via client side graphql here in loadPage
+            // We need to use `folder(id: ...)` query but with pagination args on studysets field?
+            // Actually the query structure is `folder(id: $id) { studysets(first:...) ... }`
+            // So we need to pass folder ID too.
+            // But `loadPage` generic structure doesn't easily support extra args unless we use state.
+
+            // Re-using currentFolder.id
+            query = `query ($id: ID!, $first: Int, $after: String, $last: Int, $before: String) {
+                folder(id: $id) {
+                    studysets(first: $first, after: $after, last: $last, before: $before) {
+                        edges { node { id title private termsCount updatedAt folder { id name } } }
+                        pageInfo { hasNextPage hasPreviousPage startCursor endCursor }
+                    }
+                }
+            }`;
+            variables.id = currentFolder?.id;
         } else if (type === "saved") {
             cursor =
                 direction === "next"
@@ -118,6 +142,11 @@
                     data.mySavedStudysetsPageInfo = connection.pageInfo;
                     savedPage += direction === "next" ? 1 : -1;
                 }
+            } else if (type === "folder" && resp?.data?.folder?.studysets) {
+                const connection = resp.data.folder.studysets;
+                currentFolder.studysets = connection.edges.map((e) => e.node);
+                folderPageInfo = connection.pageInfo;
+                folderPage += direction === "next" ? 1 : -1;
             }
         } catch (err) {
             console.error("Error loading page:", err);
@@ -140,6 +169,9 @@
                 return data.studysetList?.length > COLLAPSE_LENGTH;
             return data.studysetListPageInfo?.hasNextPage;
         }
+        if (type === "folder") {
+            return folderPageInfo?.hasNextPage;
+        }
         if (type === "saved") {
             if (savedCurrentlyCollapsed)
                 return data.mySavedStudysets?.length > COLLAPSE_LENGTH;
@@ -159,6 +191,9 @@
         if (type === "cloud") {
             if (cloudCurrentlyCollapsed) return false;
             return data.studysetListPageInfo?.hasPreviousPage;
+        }
+        if (type === "folder") {
+            return folderPageInfo?.hasPreviousPage;
         }
         if (type === "saved") {
             if (savedCurrentlyCollapsed) return false;
@@ -182,13 +217,23 @@
     folder(id: $id) {
         id
         name
-        studysets {
-            id
-            title
-            termsCount
-            folder {
-                id
-                name
+        studysets(first: 24) {
+            edges {
+                node {
+                    id
+                    title
+                    termsCount
+                    folder {
+                        id
+                        name
+                    }
+                }
+            }
+            pageInfo {
+                hasNextPage
+                hasPreviousPage
+                startCursor
+                endCursor
             }
         }
     }
@@ -201,8 +246,16 @@
             const resp = await respRaw.json();
             if (resp?.data?.folder) {
                 currentFolder = resp.data.folder;
+                // Initialize studysets list from edges
+                if (currentFolder.studysets && currentFolder.studysets.edges) {
+                    folderPageInfo = currentFolder.studysets.pageInfo;
+                    currentFolder.studysets = currentFolder.studysets.edges.map(
+                        (e) => e.node,
+                    );
+                }
                 showErrorBox = false;
                 inFolder = true;
+                folderPage = 0;
             } else {
                 console.log(
                     "unsucessful response while loading folder: ",
@@ -264,6 +317,40 @@
                         ></StudysetLinkBox>
                     {/each}
                 </div>
+                {#if folderPageInfo?.hasNextPage || folderPageInfo?.hasPreviousPage}
+                    <div
+                        class="flex center"
+                        style="width: 100%; margin-top: 0.6rem; flex-direction: column; align-items: center; gap: 0.8rem;"
+                    >
+                        <div
+                            class={hasNextPageFunc("folder") &&
+                            hasPrevPageFunc("folder")
+                                ? "combo-buttons"
+                                : ""}
+                        >
+                            {#if hasPrevPageFunc("folder")}
+                                <button
+                                    class="button alt {hasNextPageFunc('folder')
+                                        ? 'left'
+                                        : ''}"
+                                    onclick={() => loadPage("folder", "prev")}
+                                >
+                                    <ArrowLeftIcon></ArrowLeftIcon> Previous
+                                </button>
+                            {/if}
+                            {#if hasNextPageFunc("folder")}
+                                <button
+                                    class="button alt {hasPrevPageFunc('folder')
+                                        ? 'right'
+                                        : ''}"
+                                    onclick={() => loadPage("folder", "next")}
+                                >
+                                    Next <ArrowRightIcon></ArrowRightIcon>
+                                </button>
+                            {/if}
+                        </div>
+                    </div>
+                {/if}
             {:else}
                 <div class="box">
                     <p class="fg0">This folder is empty</p>

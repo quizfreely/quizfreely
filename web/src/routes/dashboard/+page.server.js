@@ -55,15 +55,15 @@ export async function load({ cookies, locals, url }) {
             username
             displayName
           }
-          myStudysets(first: 30, hideFoldered: true) {
+          myStudysets(first: 24, hideFoldered: true) {
             edges { node { id title private termsCount updatedAt folder { id name } } }
             pageInfo { hasNextPage hasPreviousPage startCursor endCursor }
           }
-          mySavedStudysets(first: 30) {
+          mySavedStudysets(first: 24) {
             edges { node { id title private termsCount updatedAt folder { id name } } }
             pageInfo { hasNextPage hasPreviousPage startCursor endCursor }
           }
-          myFolders(first: 30) {
+          myFolders(first: 24) {
             edges { node { id name } }
             pageInfo { hasNextPage hasPreviousPage startCursor endCursor }
           }
