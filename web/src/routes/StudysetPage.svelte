@@ -262,11 +262,10 @@
                             <IconEyeSlash /> Private Studyset
                         </p>
                     {:else if data?.studyset?.user?.displayName != null}
-                        <!--<p>
-          Created by <a href="/users/{ data.studyset.user_id }">{ data.studyset.user_display_name }</a>
-        </p>-->
                         <p>
-                            Created by {data.studyset.user.displayName}
+                            Created by <a href="/users/{data.studyset.user.id}"
+                                >{data.studyset.user.displayName}</a
+                            >
                         </p>
                     {/if}
                     {#if data.studyset && data.authed && data.authedUser.id == data.studyset.user?.id}
