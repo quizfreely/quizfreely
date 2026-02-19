@@ -16,6 +16,12 @@ export async function load({ cookies, params, url }) {
             },
             body: JSON.stringify({
                 query: `query($id: ID!, $first: Int, $after: String, $before: String) {
+              authed
+              authedUser {
+                id
+                username
+                displayName
+              }
               user(id: $id) {
                 id
                 username
@@ -32,6 +38,7 @@ export async function load({ cookies, params, url }) {
                   }
                   pageInfo { hasNextPage hasPreviousPage startCursor endCursor }
                 }
+                studysetCount
               }
             }`,
                 variables: {
@@ -58,6 +65,8 @@ export async function load({ cookies, params, url }) {
         const studysetsConn = user.studysets;
 
         return {
+            authed: apiRes?.data?.authed,
+            authedUser: apiRes?.data?.authedUser,
             user: {
                 id: user.id,
                 username: user.username,
@@ -66,6 +75,7 @@ export async function load({ cookies, params, url }) {
             studysets: studysetsConn?.edges?.map((e) => e.node) ?? [],
             pageInfo: studysetsConn?.pageInfo,
             PER_PAGE,
+            studysetCount: user?.studysetCount,
             // header: {
             //     activePage: ""
             // }
