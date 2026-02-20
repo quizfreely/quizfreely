@@ -1,6 +1,7 @@
 <script>
     import { tick, onMount } from "svelte";
     import { slide, fade } from "svelte/transition";
+    import { pushState } from "$app/navigation";
     import Dropdown from "$lib/components/Dropdown.svelte";
     import Noscript from "$lib/components/Noscript.svelte";
     import StudysetList from "$lib/components/StudysetList.svelte";
@@ -347,6 +348,12 @@
         {savedDropdownContent}
         {topMenu}
         {folderMenu}
+        onFolderEnter={(folder) => {
+            pushState(`/dashboard?folder=${folder.id}`);
+        }}
+        onFolderExit={(folder) => {
+            pushState("/dashboard");
+        }}
     ></StudysetList>
 </div>
 {#if showNewFolderModal}
