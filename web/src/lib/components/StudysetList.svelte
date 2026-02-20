@@ -32,6 +32,8 @@
         savedDropdownContent,
         topMenu,
         folderMenu,
+        onFolderEnter,
+        onFolderExit,
     } = $props();
 
     let localStudysetList = $state([]);
@@ -256,6 +258,9 @@
                 showErrorBox = false;
                 inFolder = true;
                 folderPage = 0;
+                if (onFolderEnter) {
+                    onFolderEnter(currentFolder);
+                }
             } else {
                 console.log(
                     "unsucessful response while loading folder: ",
@@ -273,6 +278,9 @@
 
     export function exitFolderView() {
         inFolder = false;
+        if (onFolderExit) {
+            onFolderExit();
+        }
     }
 
     export function getFolderData() {
@@ -292,12 +300,7 @@
         {/if}
         {#if inFolder}
             <div class="flex">
-                <button
-                    class="faint"
-                    onclick={() => {
-                        inFolder = false;
-                    }}
-                >
+                <button class="faint" onclick={exitFolderView}>
                     <BackIcon></BackIcon> Back
                 </button>
             </div>
