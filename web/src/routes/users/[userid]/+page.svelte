@@ -48,8 +48,8 @@
         </div>
 
         {#if data?.studysetCount > 0}
-            <p class="fg0" style="text-align: end;">
-                {data?.studysetCount} public studysets
+            <p class="fg0">
+                {data?.studysetCount} Public Studysets
             </p>
         {/if}
         <div class="grid list">
