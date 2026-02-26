@@ -2,6 +2,7 @@
     import Noscript from "$lib/components/Noscript.svelte";
     import { onMount, mount, tick } from "svelte";
     import idbApiLayer from "$lib/idb-api-layer/idb-api-layer.js";
+    import idbLayerImg from "$lib/idb-api-layer/images.js";
     import { goto, beforeNavigate } from "$app/navigation";
     import { cancelNprogressTimeout } from "$lib/stores/nprogressTimeout.js";
     let { data } = $props();
@@ -17,6 +18,7 @@
     import IconArrowDown from "$lib/icons/ArrowDown.svelte";
     import IconPlus from "$lib/icons/Plus.svelte";
     import MenuIcon from "$lib/icons/Menu.svelte";
+    import ImageIcon from "$lib/icons/Image.svelte";
 
     import { flip } from "svelte/animate";
     import { scale, fade } from "svelte/transition";
@@ -940,74 +942,84 @@
                         animate:flip={{ duration: 400 }}
                         transition:scale={{ duration: 400 }}
                     >
-                        <AutoResizeTextarea
-                            div={{
-                                class: "term-row-box-term",
-                            }}
-                            textarea={{
-                                placeholder: "Term",
-                                rows: "2",
-                                oninput: () => {
-                                    if (!unsavedChanges) {
-                                        unsavedChanges = true;
-                                    }
-                                },
-                                onfocus: () => {
-                                    defFocused = false;
-                                    focusedRow = index;
-                                    showFocusBorder = false;
-                                    resetKeySeq();
-                                },
-                                style: `transition-duration: 0.2s; ${
-                                    showFocusBorder &&
-                                    useOhnoColorFocusBorder &&
-                                    !defFocused &&
-                                    focusedRow == index
-                                        ? "border-color: var(--ohno);"
-                                        : showFocusBorder &&
-                                            !defFocused &&
-                                            focusedRow == index
-                                          ? "border-color: var(--main)"
-                                          : ""
-                                }`,
-                            }}
-                            bind:value={term.term}
-                            bind:textareaElement={term.termTextarea}
-                        />
-                        <AutoResizeTextarea
-                            div={{
-                                class: "term-row-box-def",
-                            }}
-                            textarea={{
-                                placeholder: "Definition",
-                                rows: "2",
-                                oninput: () => {
-                                    if (!unsavedChanges) {
-                                        unsavedChanges = true;
-                                    }
-                                },
-                                onfocus: () => {
-                                    defFocused = true;
-                                    focusedRow = index;
-                                    showFocusBorder = false;
-                                    resetKeySeq();
-                                },
-                                style: `transition-duration: 0.2s; ${
-                                    showFocusBorder &&
-                                    useOhnoColorFocusBorder &&
-                                    defFocused &&
-                                    focusedRow == index
-                                        ? "border-color: var(--ohno);"
-                                        : showFocusBorder &&
-                                            defFocused &&
-                                            focusedRow == index
-                                          ? "border-color: var(--main)"
-                                          : ""
-                                }`,
-                            }}
-                            bind:value={term.def}
-                            bind:textareaElement={term.defTextarea}
-                        />
+                        <div>
+                            <AutoResizeTextarea
+                                div={{
+                                    class: "term-row-box-term",
+                                }}
+                                textarea={{
+                                    placeholder: "Term",
+                                    rows: "2",
+                                    oninput: () => {
+                                        if (!unsavedChanges) {
+                                            unsavedChanges = true;
+                                        }
+                                    },
+                                    onfocus: () => {
+                                        defFocused = false;
+                                        focusedRow = index;
+                                        showFocusBorder = false;
+                                        resetKeySeq();
+                                    },
+                                    style: `transition-duration: 0.2s; ${
+                                        showFocusBorder &&
+                                        useOhnoColorFocusBorder &&
+                                        !defFocused &&
+                                        focusedRow == index
+                                            ? "border-color: var(--ohno);"
+                                            : showFocusBorder &&
+                                                !defFocused &&
+                                                focusedRow == index
+                                              ? "border-color: var(--main)"
+                                              : ""
+                                    }`,
+                                }}
+                                bind:value={term.term}
+                                bind:textareaElement={term.termTextarea}
+                            />
+                            <div class="flex" style="margin-top: 0x;">e</div>
+                        </div>
+                        <div>
+                            <AutoResizeTextarea
+                                div={{
+                                    class: "term-row-box-def",
+                                }}
+                                textarea={{
+                                    placeholder: "Definition",
+                                    rows: "2",
+                                    oninput: () => {
+                                        if (!unsavedChanges) {
+                                            unsavedChanges = true;
+                                        }
+                                    },
+                                    onfocus: () => {
+                                        defFocused = true;
+                                        focusedRow = index;
+                                        showFocusBorder = false;
+                                        resetKeySeq();
+                                    },
+                                    style: `transition-duration: 0.2s; ${
+                                        showFocusBorder &&
+                                        useOhnoColorFocusBorder &&
+                                        defFocused &&
+                                        focusedRow == index
+                                            ? "border-color: var(--ohno);"
+                                            : showFocusBorder &&
+                                                defFocused &&
+                                                focusedRow == index
+                                              ? "border-color: var(--main)"
+                                              : ""
+                                    }`,
+                                }}
+                                bind:value={term.def}
+                                bind:textareaElement={term.defTextarea}
+                            />
+                            <div class="flex" style="margin-top: 0.2rem;">
+                                <button class="faint img-button-thin-fit"
+                                    ><ImageIcon></ImageIcon> Add Image</button
+                                >
+                            </div>
+                        </div>
                         <div class="flex center term-row-box-actions">
                             <Dropdown
                                 button={{
@@ -1497,5 +1509,11 @@
 
     .slightly-smaller-textbox {
         width: 10rem;
+    }
+
+    button.img-button-thin-fit,
+    .button.img-button-thin-fit {
+        padding: 0.2rem;
+        font-size: 0.9rem;
     }
 </style>
