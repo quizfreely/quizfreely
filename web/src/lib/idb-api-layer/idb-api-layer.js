@@ -1,12 +1,13 @@
 /*!
  * Quizfreely IDB API Layer, licensed under GPL-3.0-or-later.
- * Copyright (c) 2025 Ehan Ahamed and contributors
+ * Copyright (c) 2025-2026 Ehan Ahamed and contributors
  *
  * https://codeberg.org/quizfreely/idb-api-layer
  * https://github.com/quizfreely/idb-api-layer
  */
 import Dexie from 'dexie';
 import db from "./db.js";
+import idbLayerImg from "./images.js";
 
 function isTitleValid(newTitle) {
     return (
@@ -87,6 +88,22 @@ export default {
                             this.getTopReverseConfusionPairs(term.id)
                         );
                     }
+                    if (resolveProps?.termImageUrl) {
+                        if (term.termImageKey == null) {
+                            term.termImageUrl = null;
+                        } else {
+                            indicies.termImageUrl = promises.length;
+                            promises.push(idbLayerImg.getTermImageObjectUrl(term.termImageKey));
+                        }
+                    }
+                    if (resolveProps?.defImageUrl) {
+                        if (term.defImageKey == null) {
+                            term.defImageUrl = null;
+                        } else {
+                            indicies.defImageUrl = promises.length;
+                            promises.push(idbLayerImg.getTermImageObjectUrl(term.defImageKey));
+                        }
+                    }
                     const results = await Promise.all(promises);
                     if (resolveProps?.progress) {
                         term.progress = results[indicies.progress]?.[0] ?? null;
@@ -99,6 +116,12 @@ export default {
                     }
                     if (resolveProps?.topReverseConfusionPairs) {
                         term.topReverseConfusionPairs = results[indicies.topReverseConfusionPairs];
+                    }
+                    if (resolveProps?.termImageUrl && term.termImageKey != null) {
+                        term.termImageUrl = results[indicies.termImageUrl];
+                    }
+                    if (resolveProps?.defImageUrl && term.defImageKey != null) {
+                        term.defImageUrl = results[indicies.defImageUrl];
                     }
                 })
             );

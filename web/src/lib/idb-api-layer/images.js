@@ -1,6 +1,6 @@
 /*!
  * Quizfreely IDB API Layer, licensed under GPL-3.0-or-later.
- * Copyright (c) 2026 Ehan Ahamed and contributors
+ * Copyright (c) 2025-2026 Ehan Ahamed and contributors
  *
  * https://codeberg.org/quizfreely/idb-api-layer
  * https://github.com/quizfreely/idb-api-layer
@@ -92,5 +92,10 @@ export default {
         await db.terms.update(termId, updates);
 
         return blob;
+    },
+    getTermImageObjectUrl: async function (key) {
+        return URL.createObjectURL(
+            (await db.termImages.get(key)).blob
+        );
     }
 }
