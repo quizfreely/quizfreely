@@ -618,15 +618,19 @@
         }
 
         (async () => {
-            await idbApiLayer.updateStudyset(
-                {
-                    id: data.localId,
-                    title: document.getElementById("edit-title").value,
-                },
-                existingTerms,
-                newTerms,
-                existingTermIdsToDelete,
-            );
+            await idbApiLayer.updateStudyset({
+                id: data.localId,
+                title: document.getElementById("edit-title").value,
+            });
+            if (existingTerms.length > 0) {
+                await idbApiLayer.updateTerms(existingTerms);
+            }
+            if (newTerms.length > 0) {
+                await idbApiLayer.createTerms(data.localId, newTerms);
+            }
+            if (existingTermIdsToDelete.length > 0) {
+                await idbApiLayer.deleteTerms(existingTermIdsToDelete);
+            }
             goto("/studyset/local?id=" + data.localId);
         })();
     }
@@ -652,12 +656,12 @@
         }
 
         (async () => {
-            const newId = await idbApiLayer.createStudyset(
-                {
-                    title: document.getElementById("edit-title").value,
-                },
-                newTerms,
-            );
+            const newId = await idbApiLayer.createStudyset({
+                title: document.getElementById("edit-title").value,
+            });
+            if (newTerms.length > 0) {
+                await idbApiLayer.createTerms(newId, newTerms);
+            }
             goto("/studyset/local?id=" + newId);
         })();
     }

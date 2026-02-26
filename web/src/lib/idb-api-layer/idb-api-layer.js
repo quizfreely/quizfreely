@@ -10,14 +10,14 @@ import db from "./db.js";
 
 function isTitleValid(newTitle) {
     return (
-      newTitle.length > 0 &&
-      newTitle.length < 9000 &&
-      /*
-          use regex to make sure title is not just a bunch of spaces
-          (if removing all spaces makes it equal to an empty string, it's all spaces)
-          notice the exclamation mark for negation
-      */
-      !(newTitle.replace(/[\s\p{C}]+/gu, "") == "")
+        newTitle.length > 0 &&
+        newTitle.length < 9000 &&
+        /*
+            use regex to make sure title is not just a bunch of spaces
+            (if removing all spaces makes it equal to an empty string, it's all spaces)
+            notice the exclamation mark for negation
+        */
+        !(newTitle.replace(/[\s\p{C}]+/gu, "") == "")
     );
 }
 
@@ -27,7 +27,7 @@ export default {
         if (studysets.length == 0) {
             return null;
         }
-        
+
         if (resolveProps?.terms) {
             studysets[0].terms = await this.getTermsByStudysetId(
                 id,
@@ -128,7 +128,7 @@ export default {
 
         return term;
     },
-    createStudyset: async function ({ title }, terms) {
+    createStudyset: async function ({ title }) {
         const rnISOString = (new Date()).toISOString();
         const newId = await db.studysets.add({
             title: isTitleValid(title) ?
@@ -136,29 +136,33 @@ export default {
             createdAt: rnISOString,
             updatedAt: rnISOString
         });
-        
-        let newTerms = [];
-        terms.forEach(term => {
-            newTerms.push({
-                term: term.term,
-                def: term.def,
-                studysetId: newId,
-                sortOrder: term.sortOrder,
-                createdAt: rnISOString,
-                updatedAt: rnISOString,
-            })
-        })
-        await db.terms.bulkAdd(newTerms);
         return newId;
     },
-    updateStudyset: async function ({ id, title }, terms, newTerms, deleteTermIDs) {
+    updateStudyset: async function ({ id, title }) {
         const rnISOString = (new Date()).toISOString();
         await db.studysets.update(id, {
             title: isTitleValid(title) ?
                 title : "Untitled Studyset",
             updatedAt: rnISOString
         });
-
+    },
+    createTerms: async function (studysetId, newTerms) {
+        const rnISOString = (new Date()).toISOString();
+        let bulkAddNewTerms = [];
+        newTerms.forEach(term => {
+            bulkAddNewTerms.push({
+                term: term.term,
+                def: term.def,
+                studysetId: studysetId,
+                sortOrder: term.sortOrder,
+                createdAt: rnISOString,
+                updatedAt: rnISOString,
+            })
+        })
+        await db.terms.bulkAdd(bulkAddNewTerms);
+    },
+    updateTerms: async function (terms) {
+        const rnISOString = (new Date()).toISOString();
         let bulkUpdateTerms = [];
         terms.forEach(term => {
             bulkUpdateTerms.push({
@@ -174,20 +178,8 @@ export default {
         if (bulkUpdateTerms.length > 0) {
             await db.terms.bulkUpdate(bulkUpdateTerms);
         }
-
-        let bulkAddNewTerms = [];
-        newTerms.forEach(term => {
-            bulkAddNewTerms.push({
-                term: term.term,
-                def: term.def,
-                studysetId: id,
-                sortOrder: term.sortOrder,
-                createdAt: rnISOString,
-                updatedAt: rnISOString,
-            })
-        })
-        await db.terms.bulkAdd(bulkAddNewTerms);
-
+    },
+    deleteTerms: async function (deleteTermIDs) {
         await db.terms.bulkDelete(deleteTermIDs);
     },
     deleteStudyset: async function (id) {
