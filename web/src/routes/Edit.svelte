@@ -27,12 +27,11 @@
 
     var showImportTermsModal = $state(false);
     var showExitConfirmationModal = $state(false);
-
     var showSubjectPicker = $state(false);
     let selectedSubject = $state(null);
-
     var unsavedChanges = false;
     var bypassUnsavedChangesConfirmation = false;
+    let objectURLs = [];
 
     var terms = $state([]);
     var existingTermIdsToDelete = [];
@@ -879,6 +878,9 @@
 <svelte:head>
     <title>Quizfreely</title>
 </svelte:head>
+
+{#snippet termImage(side)}
+{/snippet}
 
 <Noscript />
 <main>
