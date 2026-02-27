@@ -4,6 +4,7 @@
     let filesArray = $state([]);
     let dropArea;
     let fileInput;
+    let highlightDropArea = $state(false);
 
     export function clear() {
         fileInput.value = "";
@@ -24,33 +25,36 @@
     flex-wrap: nowrap;
     align-items: center;
     justify-content: center;
+    transition: border-color 0.2s ease-out;
 }
-.drop-area.highlight {
+.drop-area.highlight,
+.drop-area.flex.highlight {
     border-color: var(--main);
 }
 </style>
 
-<div class="drop-area flex"
+<div class="drop-area flex {highlightDropArea ? "highlight" : ""}"
     bind:this={dropArea}
     ondragenter={e => {
         e.preventDefault();
         e.stopPropagation();
-        dropArea.classList.add("highlight");
+        highlightDropArea = true;
+        console.log("did it work")
     }}
     ondragover={e => {
         e.preventDefault();
         e.stopPropagation();
-        dropArea.classList.add("highlight");
+        highlightDropArea = true;
     }}
     ondragleave={e => {
         e.preventDefault();
         e.stopPropagation();
-        dropArea.classList.remove("highlight");
+        highlightDropArea = false;
     }}
     ondrop={e => {
         e.preventDefault();
         e.stopPropagation();
-        dropArea.classList.remove("highlight");
+        highlightDropArea = false;
         files = e.dataTransfer.files;
         filesArray = Array.from(files);
         if (onChangeCallback) {
