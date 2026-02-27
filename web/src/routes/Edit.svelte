@@ -31,7 +31,10 @@
     let selectedSubject = $state(null);
     var unsavedChanges = false;
     var bypassUnsavedChangesConfirmation = false;
-    let objectURLs = [];
+    let objectUrls = [];
+    let showTermImageModal = $state(false);
+    let termImageTerm;
+    let termImageIsDefSide = false;
 
     var terms = $state([]);
     var existingTermIdsToDelete = [];
@@ -83,13 +86,18 @@
         }
     }
 
-    function termsTo2DArray() {
-        var arr = [];
-        for (var index = 0; index < terms.length; index++) {
-            arr.push([terms[index].term, terms[index].def]);
-        }
-        return arr;
-    }
+    // NOTE: this old function only handles term/def text, no id, sort order, or term/def image
+    // if we ever want to use it for exporting terms to raw text/CSV we'll need this but mabye updated
+    // like how addTermsFrom2DArray is used for importing terms from CSV/text
+    //
+    // function termsTo2DArray() {
+    //     var arr = [];
+    //     for (var index = 0; index < terms.length; index++) {
+    //         arr.push([terms[index].term, terms[index].def]);
+    //     }
+    //     return arr;
+    // }
+
     function addTermsFrom2DArray(arr) {
         for (var row = 0; row < arr.length; row++) {
             addTerm(arr[row][0], arr[row][1]);
@@ -174,6 +182,8 @@
                                             id
                                             term
                                             def
+                                            termImageUrl
+                                            defImageUrl
                                         }
                                     }
                                 }
@@ -220,7 +230,12 @@
             if (data.local && !data.new) {
                 const studysetRecord = await idbApiLayer.getStudysetById(
                     data.localId,
-                    { terms: true },
+                    {
+                        terms: {
+                            termImageUrl: true,
+                            defImageUrl: true
+                        }
+                    },
                 );
                 if (studysetRecord) {
                     document.getElementById("edit-title").value =
@@ -228,6 +243,12 @@
                     if (studysetRecord.terms != null) {
                         studysetRecord.terms.forEach((t) => {
                             addTerm(t.term, t.def, t.id);
+                            if (t.termImageUrl != null) {
+                                objectUrls.push(t.termImageUrl);
+                            }
+                            if (t.defImageUrl != null) {
+                                objectUrls.push(t.defImageUrl);
+                            }
                         });
                     }
                 }
@@ -585,6 +606,9 @@
         return () => {
             window.removeEventListener("keydown", onKeydown);
             window.removeEventListener("keyup", onKeyup);
+            objectUrls.forEach(objectUrl => {
+                URL.revokeObjectURL(objectUrl);
+            })
         };
     });
 
@@ -879,7 +903,22 @@
     <title>Quizfreely</title>
 </svelte:head>
 
-{#snippet termImage(side)}
+{#snippet termImage(term, isDefSide)}
+    {#if term[isDefSide ? "defImageUrl" : "termImageUrl"] == null}
+        <div class="flex" style="margin-top: 0.2rem;">
+            <button class="faint img-button-thin-fit text fg0" onclick={() => {
+                showTermImageModal = true;
+                termImageTerm = term;
+                termImageIsDefSide = isDefSide;
+            }}>
+                <ImageIcon></ImageIcon> Add Image
+            </button>
+        </div>
+    {:else}
+        <div class="flex" style="margin-top: 0.2rem;">
+            {term[isDefSide ? "defImageUrl" : "termImageUrl"]}
+        </div>
+    {/if}
 {/snippet}
 
 <Noscript />
@@ -979,7 +1018,7 @@
                                 bind:value={term.term}
                                 bind:textareaElement={term.termTextarea}
                             />
-                            <div class="flex" style="margin-top: 0x;">e</div>
+                            {@render termImage(term, false)}
                         </div>
                         <div>
                             <AutoResizeTextarea
@@ -1016,11 +1055,7 @@
                                 bind:value={term.def}
                                 bind:textareaElement={term.defTextarea}
                             />
-                            <div class="flex" style="margin-top: 0.2rem;">
-                                <button class="faint img-button-thin-fit"
-                                    ><ImageIcon></ImageIcon> Add Image</button
-                                >
-                            </div>
+                            {@render termImage(term, true)}
                         </div>
                         <div class="flex center term-row-box-actions">
                             <Dropdown
@@ -1456,6 +1491,18 @@
                     </div>
                 </div>
             {/if}
+            {#if showTermImageModal}
+                <div class="modal" transition:fade={{ duration: 200 }}>
+                    <div class="content">
+                        <h4>{(termImageTerm[termImageIsDefSide ? "defImageUrl" : "termImageUrl"] == null) ? "Add Image" : "Update Image"}</h4>
+                        <div class="flex">
+                            <button class="alt" onclick={() => showTermImageModal = false}>
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            {/if}
         </div>
     </div>
 </main>
@@ -1466,6 +1513,7 @@
         grid-template-rows: auto;
         grid-template-columns: 1fr 1fr auto;
         grid-template-areas: "term def actions";
+        padding-bottom: 0.4rem;
     }
 
     .term-row-box > :global(.term-row-box-term) {
@@ -1515,7 +1563,7 @@
 
     button.img-button-thin-fit,
     .button.img-button-thin-fit {
-        padding: 0.2rem;
+        padding: 0.4rem 0.6rem;
         font-size: 0.9rem;
     }
 </style>
