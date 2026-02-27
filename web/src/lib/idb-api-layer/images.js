@@ -45,7 +45,7 @@ export default {
                         if (!blob) return reject(new Error("Canvas is empty"));
                         resolve(blob);
                     },
-                    "image/jpeg",
+                    "image/webp",
                     quality
                 );
             };
