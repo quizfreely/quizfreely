@@ -24,6 +24,7 @@
     import { scale, fade } from "svelte/transition";
 
     import AutoResizeTextarea from "$lib/components/AutoResizeTextarea.svelte";
+    import FileInputBox from "$lib/components/FileInputBox.svelte";
 
     var showImportTermsModal = $state(false);
     var showExitConfirmationModal = $state(false);
@@ -1495,6 +1496,7 @@
                 <div class="modal" transition:fade={{ duration: 200 }}>
                     <div class="content">
                         <h4>{(termImageTerm[termImageIsDefSide ? "defImageUrl" : "termImageUrl"] == null) ? "Add Image" : "Update Image"}</h4>
+                        <FileInputBox accept="image/jpeg, image/png, image/webp, .jpeg, .jpg, .png, .webp" multiple></FileInputBox>
                         <div class="flex">
                             <button class="alt" onclick={() => showTermImageModal = false}>
                                 Cancel
