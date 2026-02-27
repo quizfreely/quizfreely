@@ -1496,7 +1496,7 @@
                 <div class="modal" transition:fade={{ duration: 200 }}>
                     <div class="content">
                         <h4>{(termImageTerm[termImageIsDefSide ? "defImageUrl" : "termImageUrl"] == null) ? "Add Image" : "Update Image"}</h4>
-                        <FileInputBox accept="image/jpeg, image/png, image/webp, .jpeg, .jpg, .png, .webp" multiple></FileInputBox>
+                        <FileInputBox accept="image/jpeg, image/png, image/webp, .jpeg, .jpg, .png, .webp"></FileInputBox>
                         <div class="flex">
                             <button class="alt" onclick={() => showTermImageModal = false}>
                                 Cancel
