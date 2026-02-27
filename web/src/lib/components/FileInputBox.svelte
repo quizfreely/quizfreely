@@ -7,9 +7,14 @@
     let highlightDropArea = $state(false);
 
     export function clear() {
+        files = new DataTransfer().files
         fileInput.value = "";
+        filesArray = [];
     }
 
+    export function getFiles() {
+        return files;
+    }
 </script>
 
 <style>
@@ -30,6 +35,12 @@
 .drop-area.highlight,
 .drop-area.flex.highlight {
     border-color: var(--main);
+}
+@media only screen and (min-width: 1000px) {
+    .drop-area,
+    .drop-area.flex {
+        width: 60vw;
+    }
 }
 </style>
 
@@ -73,7 +84,7 @@
         }}>
     </label>
     {#if filesArray.length > 0}
-    <div style="width: 100%; padding-bottom: 0px; padding-top: 2rem; padding-left: 0px; padding-right: 0px;">
+    <div style="width: 100%; padding-bottom: 0px; padding-top: 1rem; padding-left: 0px; padding-right: 0px;">
     <span class="fg0">Selected:</span>
     <div class="flex compact-gap" style="margin-top: 0.4rem; flex-direction: column; align-items: start;">
         {#each filesArray as file}

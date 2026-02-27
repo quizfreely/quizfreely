@@ -34,8 +34,10 @@
     var bypassUnsavedChangesConfirmation = false;
     let objectUrls = [];
     let showTermImageModal = $state(false);
-    let termImageTerm;
-    let termImageIsDefSide = false;
+    let termImageModalTerm;
+    let termImageModalIsDefSide = false;
+    let termImageModalFiles = $state();
+    let termImageModalFileInputBox;
 
     var terms = $state([]);
     var existingTermIdsToDelete = [];
@@ -909,8 +911,8 @@
         <div class="flex" style="margin-top: 0.2rem;">
             <button class="faint img-button-thin-fit text fg0" onclick={() => {
                 showTermImageModal = true;
-                termImageTerm = term;
-                termImageIsDefSide = isDefSide;
+                termImageModalTerm = term;
+                termImageModalIsDefSide = isDefSide;
             }}>
                 <ImageIcon></ImageIcon> Add Image
             </button>
@@ -1495,10 +1497,16 @@
             {#if showTermImageModal}
                 <div class="modal" transition:fade={{ duration: 200 }}>
                     <div class="content">
-                        <h4>{(termImageTerm[termImageIsDefSide ? "defImageUrl" : "termImageUrl"] == null) ? "Add Image" : "Update Image"}</h4>
-                        <FileInputBox accept="image/jpeg, image/png, image/webp, .jpeg, .jpg, .png, .webp"></FileInputBox>
+                        <h4>{(termImageModalTerm[termImageModalIsDefSide ? "defImageUrl" : "termImageUrl"] == null) ? "Add Image" : "Update Image"}</h4>
+                        <FileInputBox accept="image/jpeg, image/png, image/webp, .jpeg, .jpg, .png, .webp" bind:this={termImageModalFileInputBox} onChangeCallback={(files) => termImageModalFiles = files}></FileInputBox>
                         <div class="flex">
-                            <button class="alt" onclick={() => showTermImageModal = false}>
+                            <button class="pretty-button-disableable" disabled={termImageModalFiles == null || termImageModalFiles.length == 0}>
+                                <IconCheckmark></IconCheckmark> Save
+                            </button>
+                            <button class="alt" onclick={() => {
+                                showTermImageModal = false;
+                                termImageModalFileInputBox.clear();
+                            }}>
                                 Cancel
                             </button>
                         </div>
@@ -1567,5 +1575,12 @@
     .button.img-button-thin-fit {
         padding: 0.4rem 0.6rem;
         font-size: 0.9rem;
+    }
+
+    button.pretty-button-disableable:disabled,
+    .button.pretty-button-disableable:disabled,
+    button.pretty-button-disableable.disabled,
+    .button.pretty-button-disableable.disabled {
+        opacity: 0.6;
     }
 </style>
