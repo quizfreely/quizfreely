@@ -43,11 +43,13 @@
     let savedCurrentlyCollapsed = $state(true);
 
     onMount(async function () {
-        localStudysetList = await db.studysets.orderBy("updatedAt").toArray();
+        localStudysetList = await db.studysets.where("[updatedAt+draft]").between(
+            [Dexie.minKey, false], [Dexie.maxKey, false]
+        ).toArray();
         for (const studyset of localStudysetList) {
-            studyset.termsCount =
-                (await idbApiLayer.getTermsByStudysetId(studyset.id))?.length ??
-                0;
+            studyset.termsCount = (
+                await idbApiLayer.getTermsByStudysetId(studyset.id)
+            )?.length ?? 0;
         }
     });
 
