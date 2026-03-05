@@ -88,21 +88,9 @@ export default {
                             this.getTopReverseConfusionPairs(term.id)
                         );
                     }
-                    if (resolveProps?.termImageUrl) {
-                        if (term.termImageKey == null) {
-                            term.termImageUrl = null;
-                        } else {
-                            indicies.termImageUrl = promises.length;
-                            promises.push(idbLayerImg.getTermImageObjectUrl(term.termImageKey));
-                        }
-                    }
-                    if (resolveProps?.defImageUrl) {
-                        if (term.defImageKey == null) {
-                            term.defImageUrl = null;
-                        } else {
-                            indicies.defImageUrl = promises.length;
-                            promises.push(idbLayerImg.getTermImageObjectUrl(term.defImageKey));
-                        }
+                    if (resolveProps?.termDefImages) {
+                        indicies.termDefImages = promises.length;
+                        promises.push(idbLayerImg.getTermDefImageObjectUrls(term.id));
                     }
                     const results = await Promise.all(promises);
                     if (resolveProps?.progress) {
@@ -117,11 +105,8 @@ export default {
                     if (resolveProps?.topReverseConfusionPairs) {
                         term.topReverseConfusionPairs = results[indicies.topReverseConfusionPairs];
                     }
-                    if (resolveProps?.termImageUrl && term.termImageKey != null) {
-                        term.termImageUrl = results[indicies.termImageUrl];
-                    }
-                    if (resolveProps?.defImageUrl && term.defImageKey != null) {
-                        term.defImageUrl = results[indicies.defImageUrl];
+                    if (resolveProps?.termDefImages) {
+                        term.termDefImages = results[indicies.termDefImages];
                     }
                 })
             );
@@ -151,21 +136,23 @@ export default {
 
         return term;
     },
-    createStudyset: async function ({ title }) {
+    createStudyset: async function ({ title, draft }) {
         const rnISOString = (new Date()).toISOString();
         const newId = await db.studysets.add({
             title: isTitleValid(title) ?
                 title : "Untitled Studyset",
+            draft,
             createdAt: rnISOString,
             updatedAt: rnISOString
         });
         return newId;
     },
-    updateStudyset: async function ({ id, title }) {
+    updateStudyset: async function ({ id, title, draft }) {
         const rnISOString = (new Date()).toISOString();
         await db.studysets.update(id, {
             title: isTitleValid(title) ?
                 title : "Untitled Studyset",
+            draft,
             updatedAt: rnISOString
         });
     },
@@ -203,13 +190,15 @@ export default {
         }
     },
     deleteTerms: async function (deleteTermIDs) {
+        await idbLayerImg.deleteTermImages(deleteTermIDs);
+        await db.termProgress.where("termId").anyOf(deleteTermIDs).delete();
         await db.terms.bulkDelete(deleteTermIDs);
     },
     deleteStudyset: async function (id) {
-        const termIds = await db.terms.where("studysetId").equals(id).primaryKeys(); /* get term IDs using studyset ID */
-        await db.termProgress.where("termId").anyOf(termIds).delete(); /* delete progress using term IDs */
-        await db.terms.where("studysetId").equals(id).delete(); /* delete terms using studyset ID */
-        await db.studysets.delete(id); /* delete studyset */
+        await this.deleteTerms(
+            await db.terms.where("studysetId").equals(id).primaryKeys()
+        );
+        await db.studysets.delete(id);
     },
     updateTermProgress: async function (termProgressArray) {
         for (const {
@@ -330,6 +319,11 @@ export default {
     },
     recordConfusionPairs: async function (confusionPairs) {
         for (const confusionPairInput of confusionPairs) {
+            if (confusionPairInput.termId == confusionPairInput.confusedTermId) {
+                console.log("Skipped confusion pair with same term & confused term ID when recording confusion pairs");
+                continue;
+            }
+
             const existingRow = await db.termConfusionPairs.where(
                 "[termId+confusedTermId]"
             ).equals([
