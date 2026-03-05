@@ -53,49 +53,38 @@ export default {
             reader.readAsDataURL(file);
         });
     },
-    processAndUpdateTermImage: async function (termId, termDefSide, file) {
+    processAndUpdateTermImage: async function (termId, defSide, file) {
         const MAX_WIDTH = 1200;
         const MAX_HEIGHT = 1200;
         const QUALITY = 0.8;
 
-        const side = termDefSide.toUpperCase();
-        if (side != "TERM" && side != "DEF") {
-            console.error("processAndUpdateTermImage: termDefSide param must be \"TERM\" or \"DEF\"");
+        if (defSide !== true && defSide != false) {
+            console.error("processAndUpdateTermImage: defSide param must be a boolean");
             return null;
         }
 
-        const terms = await db.terms.where("studysetId").equals(termId).toArray();
-        if (terms?.length != 1) {
-            console.error("processAndUpdateTermImage: No terms found with termId " + termId);
+        const term = await db.terms.get(termId);
+        if (term === undefined) {
+            console.error("processAndUpdateTermImage: No term found with termId " + termId);
             return null;
         }
-
-        const term = terms[0];
 
         const blob = await this.processImage(file, MAX_WIDTH, MAX_HEIGHT, QUALITY);
-        const newKey = await db.termImages.add({ blob: blob });
 
-        const oldKey = term[side == "DEF" ? "defImageKey" : "termImageKey"];
-        if (oldKey != null) {
-            await db.termImages.delete(oldKey);
-        }
-
-        const rnISOString = (new Date()).toISOString();
-        let updates = {
-            updatedAt: rnISOString
-        }
-        if (side == "DEF") {
-            updates.defImageKey = newKey;
-        } else {
-            updates.termImageKey = newKey;
-        }
-        await db.terms.update(termId, updates);
+        await db.termImages.delete([termId, defSide]);
+        await db.termImages.add({ termId, defSide, blob: blob });
 
         return blob;
     },
-    getTermImageObjectUrl: async function (key) {
-        return URL.createObjectURL(
-            (await db.termImages.get(key)).blob
-        );
+    getTermDefImageObjectUrls: async function (termId) {
+        const termImage = await db.termImages.get([termId, false]);
+        const defImage = await db.termImages.get([termId, true]);
+        return {
+            termImageUrl: termImage === undefined ? null : URL.createObjectURL(termImage.blob),
+            defImageUrl: defImage === undefined ? null : URL.createObjectURL(defImage.blob)
+        }
+    },
+    deleteTermImages: async function (termIds) {
+        await db.termImages.where("termId").anyOf(termIds).delete();
     }
 }

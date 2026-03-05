@@ -43,13 +43,14 @@
     let savedCurrentlyCollapsed = $state(true);
 
     onMount(async function () {
-        localStudysetList = await db.studysets.where("[updatedAt+draft]").between(
-            [Dexie.minKey, false], [Dexie.maxKey, false]
-        ).toArray();
+        localStudysetList = await db.studysets
+            .orderBy("updatedAt")
+            .filter((studyset) => studyset.draft == false)
+            .toArray();
         for (const studyset of localStudysetList) {
-            studyset.termsCount = (
-                await idbApiLayer.getTermsByStudysetId(studyset.id)
-            )?.length ?? 0;
+            studyset.termsCount =
+                (await idbApiLayer.getTermsByStudysetId(studyset.id))?.length ??
+                0;
         }
     });
 
@@ -84,8 +85,10 @@
                 }
             }`;
         } else if (type === "folder") {
-            cursor = direction === "next" ?
-                folderPageInfo?.endCursor : folderPageInfo?.startCursor;
+            cursor =
+                direction === "next"
+                    ? folderPageInfo?.endCursor
+                    : folderPageInfo?.startCursor;
             query = `query ($id: ID!, $first: Int, $after: String, $last: Int, $before: String) {
                 folder(id: $id) {
                     studysets(first: $first, after: $after, last: $last, before: $before) {
@@ -397,26 +400,20 @@
                         >
                             {#if hasPrevPageFunc("cloud")}
                                 <button
-                                    class="button alt {hasNextPageFunc(
-                                        'cloud',
-                                    )
+                                    class="button alt {hasNextPageFunc('cloud')
                                         ? 'left'
                                         : ''}"
-                                    onclick={() =>
-                                        loadPage("cloud", "prev")}
+                                    onclick={() => loadPage("cloud", "prev")}
                                 >
                                     <ArrowLeftIcon></ArrowLeftIcon> Previous
                                 </button>
                             {/if}
                             {#if hasNextPageFunc("cloud")}
                                 <button
-                                    class="button alt {hasPrevPageFunc(
-                                        'cloud',
-                                    )
+                                    class="button alt {hasPrevPageFunc('cloud')
                                         ? 'right'
                                         : ''}"
-                                    onclick={() =>
-                                        loadPage("cloud", "next")}
+                                    onclick={() => loadPage("cloud", "next")}
                                 >
                                     Next <ArrowRightIcon></ArrowRightIcon>
                                 </button>
@@ -540,26 +537,20 @@
                         >
                             {#if hasPrevPageFunc("saved")}
                                 <button
-                                    class="button alt {hasNextPageFunc(
-                                        'saved',
-                                    )
+                                    class="button alt {hasNextPageFunc('saved')
                                         ? 'left'
                                         : ''}"
-                                    onclick={() =>
-                                        loadPage("saved", "prev")}
+                                    onclick={() => loadPage("saved", "prev")}
                                 >
                                     <ArrowLeftIcon></ArrowLeftIcon> Previous
                                 </button>
                             {/if}
                             {#if hasNextPageFunc("saved")}
                                 <button
-                                    class="button alt {hasPrevPageFunc(
-                                        'saved',
-                                    )
+                                    class="button alt {hasPrevPageFunc('saved')
                                         ? 'right'
                                         : ''}"
-                                    onclick={() =>
-                                        loadPage("saved", "next")}
+                                    onclick={() => loadPage("saved", "next")}
                                 >
                                     Next <ArrowRightIcon></ArrowRightIcon>
                                 </button>
