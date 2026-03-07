@@ -43,18 +43,66 @@
     var terms = $state([]);
     var existingTermIdsToDelete = [];
     var key = 0;
-    function addTerm(term, def, id) {
+    async function initTerm(sortOrder, term, def) {
+        if (data.local) {
+            return await idbApiLayer.createTerms(data.localId, [{
+                term: term ?? "",
+                def: def ?? ""
+            }]); /* returns last key */
+        } else {
+            const raw = await fetch("/api/graphql", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    query: `mutation initTerm($studysetId: ID!, $term: String, $def: String, $sortOrder: Int!) {
+    createTerms(
+        studysetId: $studysetId,
+        terms: [{
+            term: $term,
+            def: $def,
+            sortOrder: $sortOrder
+        }]
+    ) {
+        id
+    }
+}`,
+                    variables: {
+                        studysetId: data.studysetId,
+                        term: term ?? "",
+                        def: def ?? "",
+                        sortOrder: sortOrder
+                    }
+                })
+            });
+            const res = await raw.json();
+            if (res.errors != null || res?.data == null) {
+                console.error("Err(s) in initTerm query/res: ", res);
+            }
+            return res.data.createTerms[0].id;
+        }
+    }
+    function addTerm(term, def, existingId) {
+        let id = existingId;
+        if (id == null) {
+            id = await initTerm(terms.length, term, def);
+        }
         terms.push({
-            id: id ?? undefined,
+            id: id,
             term: term ?? "",
             def: def ?? "",
             key: key,
         });
         key++;
     }
-    function insertTerm(index, term, def, id) {
+    function insertTerm(index, term, def, existingId) {
+        let id = existingId;
+        if (id == null) {
+            id = await initTerm(terms.length, term, def);
+        }
         terms.splice(index, 0, {
-            id: id ?? undefined,
+            id: id,
             term: term ?? "",
             def: def ?? "",
             key: key,
@@ -231,6 +279,8 @@
                                 }
                             }
                         });
+                } else {
+                    console.error("Unexpected situation: studyset is not local but user is not logged in")
                 }
             } else {
                 const studysetRecord = await idbApiLayer.getStudysetById(
