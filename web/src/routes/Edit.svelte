@@ -655,6 +655,7 @@
             await idbApiLayer.updateStudyset({
                 id: data.localId,
                 title: document.getElementById("edit-title").value,
+                draft: false
             });
             if (existingTerms.length > 0) {
                 await idbApiLayer.updateTerms(existingTerms);
@@ -708,7 +709,7 @@
             credentials: "same-origin",
             body: JSON.stringify({
                 query: `mutation UpdateStudysetAndTerms($id: ID!, $studyset: StudysetInput, $terms: [TermInput!]!, $newTerms: [NewTermInput!]!, $deleteTerms: [ID!]!) {
-                    updateStudyset(id: $id, studyset: $studyset) { id }
+                    updateStudyset(id: $id, studyset: $studyset, draft: false) { id }
                     updateTerms(studysetId: $id, terms: $terms) { id }
                     createTerms(studysetId: $id, terms: $newTerms) { id }
                     deleteTerms(studysetId: $id, ids: $deleteTerms)
