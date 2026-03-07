@@ -298,10 +298,10 @@
                         studysetRecord.terms.forEach((t) => {
                             addTerm(t.term, t.def, t.id);
                             if (t?.termDefImages?.termImageUrl != null) {
-                                objectUrls.push(t.termImageUrl);
+                                objectUrls.push(t.termDefImages.termImageUrl);
                             }
                             if (t?.termDefImages?.defImageUrl != null) {
-                                objectUrls.push(t.defImageUrl);
+                                objectUrls.push(t.termDefImages.defImageUrl);
                             }
                         });
                     }
@@ -838,7 +838,7 @@
 </svelte:head>
 
 {#snippet termImage(term, isDefSide)}
-    {#if term[isDefSide ? "defImageUrl" : "termImageUrl"] == null}
+    {#if term?.termDefImages?.[isDefSide ? "defImageUrl" : "termImageUrl"] == null}
         <div class="flex" style="margin-top: 0.2rem;">
             <button class="faint img-button-thin-fit text fg0" onclick={() => {
                 showTermImageModal = true;
@@ -850,7 +850,7 @@
         </div>
     {:else}
         <div class="flex" style="margin-top: 0.2rem;">
-            {term[isDefSide ? "defImageUrl" : "termImageUrl"]}
+            {term?.termDefImages?.[isDefSide ? "defImageUrl" : "termImageUrl"]}
         </div>
     {/if}
 {/snippet}
@@ -1408,10 +1408,12 @@
             {#if showTermImageModal}
                 <div class="modal" transition:fade={{ duration: 200 }}>
                     <div class="content">
-                        <h4>{(termImageModalTerm[termImageModalIsDefSide ? "defImageUrl" : "termImageUrl"] == null) ? "Add Image" : "Update Image"}</h4>
+                        <h4>{(termImageModalTerm?.termDefImages?.[termImageModalIsDefSide ? "defImageUrl" : "termImageUrl"] == null) ? "Add Image" : "Update Image"}</h4>
                         <FileInputBox accept="image/jpeg, image/png, image/webp, .jpeg, .jpg, .png, .webp" bind:this={termImageModalFileInputBox} onChangeCallback={(files) => termImageModalFiles = files}></FileInputBox>
                         <div class="flex">
-                            <button class="pretty-button-disableable" disabled={termImageModalFiles == null || termImageModalFiles.length == 0}>
+                            <button class="pretty-button-disableable" disabled={termImageModalFiles == null || termImageModalFiles.length == 0} onclick={async () => {
+                                console.log(termImageModalTerm.id)
+                            }}>
                                 <IconCheckmark></IconCheckmark> Save
                             </button>
                             <button class="alt" onclick={() => {
