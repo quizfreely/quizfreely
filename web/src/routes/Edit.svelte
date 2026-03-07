@@ -83,7 +83,7 @@
             return res.data.createTerms[0].id;
         }
     }
-    function addTerm(term, def, existingId) {
+    async function addTerm(term, def, existingId) {
         let id = existingId;
         if (id == null) {
             id = await initTerm(terms.length, term, def);
@@ -96,7 +96,7 @@
         });
         key++;
     }
-    function insertTerm(index, term, def, existingId) {
+    async function insertTerm(index, term, def, existingId) {
         let id = existingId;
         if (id == null) {
             id = await initTerm(terms.length, term, def);
@@ -356,10 +356,10 @@
                 });
             }
         }
-        function onKeydown(event) {
+        async function onKeydown(event) {
             if (event.key === "Enter" && event.ctrlKey && !event.altKey) {
                 event.preventDefault();
-                addTerm();
+                await addTerm();
                 unsavedChanges = true;
                 tick().then(() => {
                     terms?.[terms?.length - 1]?.termTextarea?.focus();
@@ -380,7 +380,7 @@
                 if (focusedRow + 1 <= terms?.length) {
                     indexWeWant = focusedRow + 1;
                 }
-                insertTerm(indexWeWant);
+                await insertTerm(indexWeWant);
                 unsavedChanges = true;
 
                 tick().then(() => {
@@ -398,7 +398,7 @@
                 )
             ) {
                 event.preventDefault();
-                insertTerm(focusedRow);
+                await insertTerm(focusedRow);
                 unsavedChanges = true;
 
                 tick().then(() => {
@@ -543,7 +543,7 @@
                 return;
             }
         }
-        function onKeyup(event) {
+        async function onKeyup(event) {
             if (event.key === "Escape") {
                 document?.activeElement?.blur();
                 resetKeySeq();
@@ -587,7 +587,7 @@
                     if (focusedRow + 1 <= terms?.length) {
                         indexWeWant = focusedRow + 1;
                     }
-                    insertTerm(
+                    await insertTerm(
                         indexWeWant,
                         deletedTermRegister?.term,
                         deletedTermRegister?.def,
@@ -618,7 +618,7 @@
                 )
             ) {
                 if (deletedTermRegister) {
-                    insertTerm(
+                    await insertTerm(
                         focusedRow,
                         deletedTermRegister?.term,
                         deletedTermRegister?.def,
@@ -1023,8 +1023,8 @@
                                         <IconArrowDown /> Move down
                                     </button>
                                     <button
-                                        onclick={function (event) {
-                                            insertTerm(index + 1);
+                                        onclick={async function (event) {
+                                            await insertTerm(index + 1);
                                             unsavedChanges = true;
                                             hide();
                                         }}
@@ -1059,8 +1059,8 @@
             <div class="box">
                 <div class="flex">
                     <button
-                        onclick={function () {
-                            addTerm();
+                        onclick={async function () {
+                            await addTerm();
                             unsavedChanges = true;
                             tick().then(() =>
                                 terms?.[
