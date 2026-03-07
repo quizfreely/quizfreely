@@ -50,7 +50,6 @@
         e.preventDefault();
         e.stopPropagation();
         highlightDropArea = true;
-        console.log("did it work")
     }}
     ondragover={e => {
         e.preventDefault();
