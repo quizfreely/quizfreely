@@ -43,51 +43,7 @@
     var terms = $state([]);
     var existingTermIdsToDelete = [];
     var key = 0;
-    async function initTerm(sortOrder, term, def) {
-        if (data.local) {
-            return await idbApiLayer.createTerms(data.localId, [{
-                term: term ?? "",
-                def: def ?? ""
-            }]); /* returns last key */
-        } else {
-            const raw = await fetch("/api/graphql", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    query: `mutation initTerm($studysetId: ID!, $term: String, $def: String, $sortOrder: Int!) {
-    createTerms(
-        studysetId: $studysetId,
-        terms: [{
-            term: $term,
-            def: $def,
-            sortOrder: $sortOrder
-        }]
-    ) {
-        id
-    }
-}`,
-                    variables: {
-                        studysetId: data.studysetId,
-                        term: term ?? "",
-                        def: def ?? "",
-                        sortOrder: sortOrder
-                    }
-                })
-            });
-            const res = await raw.json();
-            if (res.errors != null || res?.data == null) {
-                console.error("Err(s) in initTerm query/res: ", res);
-            }
-            return res.data.createTerms[0].id;
-        }
-    }
-    async function addTerm(term, def, existingId) {
-        let id = existingId;
-        if (id == null) {
-            id = await initTerm(terms.length, term, def);
-        }
+    function addTerm(term, def, id) {
         terms.push({
             id: id,
             term: term ?? "",
@@ -96,11 +52,7 @@
         });
         key++;
     }
-    async function insertTerm(index, term, def, existingId) {
-        let id = existingId;
-        if (id == null) {
-            id = await initTerm(terms.length, term, def);
-        }
+    function insertTerm(index, term, def, id) {
         terms.splice(index, 0, {
             id: id,
             term: term ?? "",
@@ -153,6 +105,52 @@
     function addTermsFrom2DArray(arr) {
         for (var row = 0; row < arr.length; row++) {
             addTerm(arr[row][0], arr[row][1]);
+        }
+    }
+
+    async function initTerm(termsCount, term, def) {
+        let sortOrder = termsCount;
+        if (termsCount == null) {
+            sortOrder = terms.length;
+        }
+        if (data.local) {
+            return await idbApiLayer.createTerms(data.localId, [{
+                term: term ?? "",
+                def: def ?? "",
+                sortOrder: sortOrder
+            }]); /* returns last key */
+        } else {
+            const raw = await fetch("/api/graphql", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    query: `mutation initTerm($studysetId: ID!, $term: String, $def: String, $sortOrder: Int!) {
+    createTerms(
+        studysetId: $studysetId,
+        terms: [{
+            term: $term,
+            def: $def,
+            sortOrder: $sortOrder
+        }]
+    ) {
+        id
+    }
+}`,
+                    variables: {
+                        studysetId: data.studysetId,
+                        term: term ?? "",
+                        def: def ?? "",
+                        sortOrder: sortOrder
+                    }
+                })
+            });
+            const resp = await raw.json();
+            if (resp.errors != null || resp?.data == null) {
+                console.error("Err(s) in initTerm query/resp: ", resp);
+            }
+            return resp.data.createTerms[0].id;
         }
     }
 
@@ -229,10 +227,8 @@
                                             id
                                             term
                                             def
-                                            termDefImages {
-                                                termImageUrl
-                                                defImageUrl
-                                            }
+                                            termImageUrl
+                                            defImageUrl
                                         }
                                     }
                                 }
@@ -287,7 +283,8 @@
                     data.localId,
                     {
                         terms: {
-                            termDefImages: true,
+                            termImageUrl: true,
+                            defImageUrl: true
                         }
                     },
                 );
@@ -297,11 +294,11 @@
                     if (studysetRecord.terms != null) {
                         studysetRecord.terms.forEach((t) => {
                             addTerm(t.term, t.def, t.id);
-                            if (t?.termDefImages?.termImageUrl != null) {
-                                objectUrls.push(t.termDefImages.termImageUrl);
+                            if (t?.termImageUrl != null) {
+                                objectUrls.push(t.termImageUrl);
                             }
-                            if (t?.termDefImages?.defImageUrl != null) {
-                                objectUrls.push(t.termDefImages.defImageUrl);
+                            if (t?.defImageUrl != null) {
+                                objectUrls.push(t.defImageUrl);
                             }
                         });
                     }
@@ -356,10 +353,10 @@
                 });
             }
         }
-        async function onKeydown(event) {
+        function onKeydown(event) {
             if (event.key === "Enter" && event.ctrlKey && !event.altKey) {
                 event.preventDefault();
-                await addTerm();
+                addTerm();
                 unsavedChanges = true;
                 tick().then(() => {
                     terms?.[terms?.length - 1]?.termTextarea?.focus();
@@ -380,7 +377,7 @@
                 if (focusedRow + 1 <= terms?.length) {
                     indexWeWant = focusedRow + 1;
                 }
-                await insertTerm(indexWeWant);
+                insertTerm(indexWeWant);
                 unsavedChanges = true;
 
                 tick().then(() => {
@@ -398,7 +395,7 @@
                 )
             ) {
                 event.preventDefault();
-                await insertTerm(focusedRow);
+                insertTerm(focusedRow);
                 unsavedChanges = true;
 
                 tick().then(() => {
@@ -543,7 +540,7 @@
                 return;
             }
         }
-        async function onKeyup(event) {
+        function onKeyup(event) {
             if (event.key === "Escape") {
                 document?.activeElement?.blur();
                 resetKeySeq();
@@ -587,7 +584,7 @@
                     if (focusedRow + 1 <= terms?.length) {
                         indexWeWant = focusedRow + 1;
                     }
-                    await insertTerm(
+                    insertTerm(
                         indexWeWant,
                         deletedTermRegister?.term,
                         deletedTermRegister?.def,
@@ -618,7 +615,7 @@
                 )
             ) {
                 if (deletedTermRegister) {
-                    await insertTerm(
+                    insertTerm(
                         focusedRow,
                         deletedTermRegister?.term,
                         deletedTermRegister?.def,
@@ -838,9 +835,13 @@
 </svelte:head>
 
 {#snippet termImage(term, isDefSide)}
-    {#if term?.termDefImages?.[isDefSide ? "defImageUrl" : "termImageUrl"] == null}
+    {#if term?.[isDefSide ? "defImageUrl" : "termImageUrl"] == null}
         <div class="flex" style="margin-top: 0.2rem;">
-            <button class="faint img-button-thin-fit text fg0" onclick={() => {
+            <button class="faint img-button-thin-fit text fg0" onclick={async () => {
+                if (term.id == null) {
+                    term.id = await initTerm(); /* returns ID */
+                }
+
                 showTermImageModal = true;
                 termImageModalTerm = term;
                 termImageModalIsDefSide = isDefSide;
@@ -850,7 +851,7 @@
         </div>
     {:else}
         <div class="flex" style="margin-top: 0.2rem;">
-            {term?.termDefImages?.[isDefSide ? "defImageUrl" : "termImageUrl"]}
+            {term?.[isDefSide ? "defImageUrl" : "termImageUrl"]}
         </div>
     {/if}
 {/snippet}
@@ -1023,8 +1024,8 @@
                                         <IconArrowDown /> Move down
                                     </button>
                                     <button
-                                        onclick={async function (event) {
-                                            await insertTerm(index + 1);
+                                        onclick={function (event) {
+                                            insertTerm(index + 1);
                                             unsavedChanges = true;
                                             hide();
                                         }}
@@ -1059,8 +1060,8 @@
             <div class="box">
                 <div class="flex">
                     <button
-                        onclick={async function () {
-                            await addTerm();
+                        onclick={function () {
+                            addTerm();
                             unsavedChanges = true;
                             tick().then(() =>
                                 terms?.[
@@ -1408,11 +1409,29 @@
             {#if showTermImageModal}
                 <div class="modal" transition:fade={{ duration: 200 }}>
                     <div class="content">
-                        <h4>{(termImageModalTerm?.termDefImages?.[termImageModalIsDefSide ? "defImageUrl" : "termImageUrl"] == null) ? "Add Image" : "Update Image"}</h4>
+                        <h4>{(termImageModalTerm?.[termImageModalIsDefSide ? "defImageUrl" : "termImageUrl"] == null) ? "Add Image" : "Update Image"}</h4>
                         <FileInputBox accept="image/jpeg, image/png, image/webp, .jpeg, .jpg, .png, .webp" bind:this={termImageModalFileInputBox} onChangeCallback={(files) => termImageModalFiles = files}></FileInputBox>
                         <div class="flex">
                             <button class="pretty-button-disableable" disabled={termImageModalFiles == null || termImageModalFiles.length == 0} onclick={async () => {
-                                console.log(termImageModalTerm.id)
+                                if (data.local) {
+                                    const returnedBlob = idbLayerImg.processAndUpdateTermImage(termImageModalTerm.id, termImageModalIsDefSide, termImageModalFiles[0]);
+                                    if (returnedBlob != null) {
+                                        const newObjectUrl = URL.createObjectURL(returnedBlob);
+                                        termImageModalTerm[termImageModalIsDefSide ? "defImageUrl" : "termImageUrl"] = newObjectUrl;
+                                        objectUrls.push(newObjectUrl);
+                                    }
+                                } else {
+                                    const raw = await fetch(`/api/term-images/${termImageModalTerm.id}/${termImageModalIsDefSide ? "def" : "term"}`, {
+                                        method: "PUT",
+                                        body: termImageModalFiles[0]
+                                    });
+                                    const resp = await raw.json();
+                                    if (resp?.data?.imageUrl == null) {
+                                        console.error("Error in term-image-upload resp: ", resp);
+                                    } else {
+                                        termImageModalTerm[termImageModalIsDefSide ? "defImageUrl" : "termImageUrl"] = resp.data.imageUrl;
+                                    }
+                                }
                             }}>
                                 <IconCheckmark></IconCheckmark> Save
                             </button>
