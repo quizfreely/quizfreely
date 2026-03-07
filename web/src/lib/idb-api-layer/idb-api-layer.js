@@ -169,7 +169,7 @@ export default {
                 updatedAt: rnISOString,
             })
         })
-        await db.terms.bulkAdd(bulkAddNewTerms);
+        return await db.terms.bulkAdd(bulkAddNewTerms);
     },
     updateTerms: async function (terms) {
         const rnISOString = (new Date()).toISOString();
