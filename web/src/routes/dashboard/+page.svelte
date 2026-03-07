@@ -1,7 +1,7 @@
 <script>
     import { tick, onMount } from "svelte";
     import { slide, fade } from "svelte/transition";
-    import { pushState } from "$app/navigation";
+    import { goto, pushState } from "$app/navigation";
     import Dropdown from "$lib/components/Dropdown.svelte";
     import Noscript from "$lib/components/Noscript.svelte";
     import StudysetList from "$lib/components/StudysetList.svelte";
@@ -89,7 +89,42 @@
         showDeleteFolderModal = false;
         showDeleteFolderErr = false;
     }
-
+    
+    async function newStudysetButton(folderId) {
+        if (data.authed) {
+            const raw = await fetch("/api/graphql", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    query: `mutation createStudysetDraft($folderId: ID) {
+    createStudyset(
+        studyset: {
+            title: "",
+            private: false
+        },
+        draft: true,
+        folderId: $folderId
+    ) {
+        id
+    }
+}`,
+                    variables: {
+                        folderId
+                    }
+                })
+            });
+            const res = await raw.json();
+            goto(`/studyset/edit/${res?.data?.createStudyset?.id}`)
+        } else {
+            const id = await idbApiLayer.createStudyset({
+                title: "",
+                draft: true
+            });
+            goto(`/studyset/local/edit?id=${id}`)
+        }
+    }
     async function newFolderOnclick() {
         try {
             const raw = await fetch("/api/graphql", {
@@ -224,10 +259,10 @@
     {/if}
     {#snippet topMenu()}
         <div class="flex">
-            <a href="/studyset/create" class="button">
+            <button onclick={() => newStudysetButton()}>
                 <IconPlus />
                 New Studyset
-            </a>
+            </button>
             {#if data.authed}
                 <button class="alt" onclick={() => openNewFolderModal()}>
                     <FolderIcon></FolderIcon>
@@ -238,10 +273,10 @@
     {/snippet}
     {#snippet folderMenu(folder)}
         <div class="flex" style="align-items: center;">
-            <a href="/studyset/create?folderId={folder?.id}" class="button">
+            <button onclick={() => newStudysetButton(folder?.id)}>
                 <IconPlus />
                 New Studyset
-            </a>
+            </button>
             <button class="alt" onclick={() => showFolderRenaming(folder)}>
                 <PencilIcon />
                 Rename Folder
