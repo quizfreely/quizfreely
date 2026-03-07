@@ -139,7 +139,7 @@ export default {
     createStudyset: async function ({ title, draft }) {
         const rnISOString = (new Date()).toISOString();
         const newId = await db.studysets.add({
-            title: isTitleValid(title) ?
+            title: isTitleValid(title) || (draft && title == "") ?
                 title : "Untitled Studyset",
             draft,
             createdAt: rnISOString,
@@ -150,7 +150,7 @@ export default {
     updateStudyset: async function ({ id, title, draft }) {
         const rnISOString = (new Date()).toISOString();
         await db.studysets.update(id, {
-            title: isTitleValid(title) ?
+            title: isTitleValid(title) || (draft && title == "") ?
                 title : "Untitled Studyset",
             draft,
             updatedAt: rnISOString
