@@ -71,20 +71,31 @@ export default {
 
         const blob = await this.processImage(file, MAX_WIDTH, MAX_HEIGHT, QUALITY);
 
-        await db.termImages.delete([termId, defSide]);
-        await db.termImages.add({ termId, defSide, blob: blob });
+        const oldKey = term[defSide ? "defImageKey" : "termImageKey"];
+        if (oldKey != null) {
+            await db.images.delete(oldKey);
+        }
+
+        const newKey = await db.images.add({ blob: blob });
+
+        const rnISOString = (new Date()).toISOString();
+        let changes = {
+            updatedAt: rnISOString
+        };
+        if (defSide) {
+            changes.defImageKey = newKey;
+        } else {
+            changes.termImageKey = newKey;
+        }
+        await db.terms.update(termId, changes);
 
         return blob;
     },
-    getTermDefImageObjectUrls: async function (termId) {
-        const termImage = await db.termImages.get([termId, false]);
-        const defImage = await db.termImages.get([termId, true]);
-        return {
-            termImageUrl: termImage === undefined ? null : URL.createObjectURL(termImage.blob),
-            defImageUrl: defImage === undefined ? null : URL.createObjectURL(defImage.blob)
-        }
+    getImageObjectUrl: async function (key) {
+        const image = await db.images.get(key);
+        return image === undefined ? null : URL.createObjectURL(image.blob);
     },
-    deleteTermImages: async function (termIds) {
-        await db.termImages.where("termId").anyOf(termIds).delete();
+    deleteImages: async function (keys) {
+        await db.images.bulkDelete(keys);
     }
 }

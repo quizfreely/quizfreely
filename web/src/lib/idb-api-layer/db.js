@@ -156,7 +156,7 @@ db.version(14).stores({
     termProgressHistory: "++id, timestamp, termId, termCorrectCount, termIncorrectCount, defCorrectCount, defIncorrectCount"
 })
 db.version(15).stores({
-    termImages: "[termId+defSide], termId"
+    images: "++key"
 }).upgrade(async tx => {
     await tx.studysets.toCollection().modify(studyset => {
         studyset.draft = false;
