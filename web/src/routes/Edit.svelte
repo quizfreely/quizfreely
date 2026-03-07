@@ -38,6 +38,7 @@
     let termImageModalIsDefSide = false;
     let termImageModalFiles = $state();
     let termImageModalFileInputBox;
+    let isDraft = $state(false);
 
     var terms = $state([]);
     var existingTermIdsToDelete = [];
@@ -156,13 +157,7 @@
                             .classList.add("selected");
                     });
             }
-            if (data.new) {
-                addTerm();
-                if (data.authed) {
-                    /* and data.new is true (creating a new studyset, not updating one) */
-                }
-            } else if (data.studysetId) {
-                /* data.new is false (updating an existing studyset, not creating one) */
+            if (data.studysetId) {
                 if (data.authed) {
                     fetch("/api/graphql", {
                         method: "POST",
@@ -177,6 +172,7 @@
                                     studyset(id: $id) {
                                         title
                                         private
+                                        draft
                                         subject {
                                             name
                                             id
@@ -185,8 +181,10 @@
                                             id
                                             term
                                             def
-                                            termImageUrl
-                                            defImageUrl
+                                            termDefImages {
+                                                termImageUrl
+                                                defImageUrl
+                                            }
                                         }
                                     }
                                 }
@@ -226,17 +224,20 @@
                                     });
                                 }
                                 selectedSubject = studyset.subject;
+                                isDraft = studyset.draft;
+
+                                if (studyset.draft && terms.length == 0) {
+                                    addTerm();
+                                }
                             }
                         });
                 }
-            }
-            if (data.local && !data.new) {
+            } else {
                 const studysetRecord = await idbApiLayer.getStudysetById(
                     data.localId,
                     {
                         terms: {
-                            termImageUrl: true,
-                            defImageUrl: true
+                            termDefImages: true,
                         }
                     },
                 );
@@ -246,13 +247,18 @@
                     if (studysetRecord.terms != null) {
                         studysetRecord.terms.forEach((t) => {
                             addTerm(t.term, t.def, t.id);
-                            if (t.termImageUrl != null) {
+                            if (t?.termDefImages?.termImageUrl != null) {
                                 objectUrls.push(t.termImageUrl);
                             }
-                            if (t.defImageUrl != null) {
+                            if (t?.termDefImages?.defImageUrl != null) {
                                 objectUrls.push(t.defImageUrl);
                             }
                         });
+                    }
+                    isDraft = studysetRecord.draft;
+
+                    if (studysetRecord.draft && terms.length == 0) {
+                        addTerm();
                     }
                 }
             }
@@ -663,36 +669,6 @@
         })();
     }
 
-    var createLocalStudysetCooldown = false;
-    function createLocalStudyset() {
-        if (createLocalStudysetCooldown) {
-            return;
-        }
-
-        createLocalStudysetCooldown = true;
-        setTimeout(function () {
-            createLocalStudysetCooldown = false;
-        }, 2000);
-
-        let newTerms = [];
-        for (let index = 0; index < terms.length; index++) {
-            newTerms.push({
-                term: terms[index].term,
-                def: terms[index].def,
-                sortOrder: index,
-            });
-        }
-
-        (async () => {
-            const newId = await idbApiLayer.createStudyset({
-                title: document.getElementById("edit-title").value,
-            });
-            if (newTerms.length > 0) {
-                await idbApiLayer.createTerms(newId, newTerms);
-            }
-            goto("/studyset/local?id=" + newId);
-        })();
-    }
     var updateCloudStudysetCooldown = false;
     function updateCloudStudyset() {
         if (updateCloudStudysetCooldown) {
@@ -762,108 +738,12 @@
                 }
             });
     }
-    var createCloudStudysetCooldown = false;
-    function createCloudStudyset() {
-        if (createCloudStudysetCooldown) {
-            return;
-        }
-
-        createCloudStudysetCooldown = true;
-        setTimeout(function () {
-            createCloudStudysetCooldown = false;
-        }, 2000);
-        const title = document.getElementById("edit-title").value;
-        const isPrivate = document
-            .getElementById("edit-private-true")
-            .classList.contains("selected");
-        let newTerms = [];
-        for (let index = 0; index < terms.length; index++) {
-            newTerms.push({
-                term: terms[index].term,
-                def: terms[index].def,
-                sortOrder: index,
-            });
-        }
-        const query = `
-            mutation CreateStudyset($studyset: StudysetInput!, $folderId: ID) {
-                createStudyset(studyset: $studyset, folderId: $folderId) {
-                    id
-                }
-            }
-        `;
-
-        const variables = {
-            studyset: {
-                title,
-                private: isPrivate,
-                subjectId: selectedSubject?.id ?? null,
-            },
-            folderId: data?.folderId,
-        };
-
-        fetch("/api/graphql", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                Accept: "application/json",
-            },
-            body: JSON.stringify({
-                query,
-                variables,
-            }),
-        })
-            .then((response) => response.json())
-            .then((result) => {
-                if (result.errors) {
-                    alert("Error creating studyset");
-                    console.error(result.errors);
-                } else if (result.data?.createStudyset) {
-                    const newStudysetId = result.data.createStudyset.id;
-                    if (newTerms.length > 0) {
-                        fetch("/api/graphql", {
-                            method: "POST",
-                            headers: {
-                                "Content-Type": "application/json",
-                                Accept: "application/json",
-                            },
-                            body: JSON.stringify({
-                                query: `mutation CreateTerms($studysetId: ID!, $terms: [NewTermInput!]!) {
-                                createTerms(studysetId: $studysetId, terms: $terms) { id }
-                            }`,
-                                variables: {
-                                    studysetId: newStudysetId,
-                                    terms: newTerms,
-                                },
-                            }),
-                        }).then(() => {
-                            goto("/studysets/" + newStudysetId);
-                        });
-                    } else {
-                        goto("/studysets/" + newStudysetId);
-                    }
-                } else {
-                    alert("Unexpected response when creating studyset");
-                }
-            })
-            .catch((error) => {
-                alert("Network error");
-                console.error(error);
-            });
-    }
-    function saveButtonOrCreateButton() {
+    function saveButton() {
         bypassUnsavedChangesConfirmation = true;
-        if (data.new) {
-            if (data.authed) {
-                createCloudStudyset();
-            } else {
-                createLocalStudyset();
-            }
+        if (data.local) {
+            updateLocalStudyset();
         } else {
-            if (data.local) {
-                updateLocalStudyset();
-            } else {
-                updateCloudStudyset();
-            }
+            updateCloudStudyset();
         }
 
         // fetch("/dashboard/set-dashboard-state", {
@@ -932,11 +812,13 @@
                 <a
                     class="button faint"
                     data-sveltekit-preload-data="false"
-                    href={data.new
-                        ? "/dashboard"
-                        : data.local
-                          ? "/studyset/local?id=" + data.localId
-                          : "/studysets/" + data.studysetId}
+                    href={isDraft ?
+                        "/dashboard" :
+                        (data.local ?
+                            "/studyset/local?id=" + data.localId :
+                            "/studysets/" + data.studysetId
+                        )
+                    }
                 >
                     <IconArrowLeft />
                     Back
@@ -1153,10 +1035,10 @@
             <div class="flex" style="align-items:center;">
                 <button
                     data-sveltekit-preload-data="false"
-                    onclick={saveButtonOrCreateButton}
+                    onclick={saveButton}
                 >
                     <IconCheckmark />
-                    {#if data.new}
+                    {#if isDraft}
                         Create
                     {:else}
                         Save
@@ -1165,38 +1047,16 @@
                 <a
                     class="button alt"
                     data-sveltekit-preload-data="false"
-                    href={data.new
-                        ? "/dashboard"
-                        : data.local
-                          ? "/studyset/local?id=" + data.localId
-                          : "/studysets/" + data.studysetId}
+                    href={isDraft ?
+                        "/dashboard" :
+                        (data.local ?
+                            "/studyset/local?id=" + data.localId :
+                            "/studysets/" + data.studysetId
+                        )
+                    }
                 >
                     Cancel
                 </a>
-                {#if data.new && data.authed}
-                    <Dropdown
-                        button={{
-                            class: "dropdown-toggle",
-                            "aria-label": "saving options dropdown",
-                        }}
-                    >
-                        {#snippet buttonContent()}
-                            <IconMoreDotsV />
-                        {/snippet}
-                        {#snippet divContent()}
-                            <button
-                                data-sveltekit-preload-data="false"
-                                onclick={() => {
-                                    bypassUnsavedChangesConfirmation = true;
-                                    createLocalStudyset();
-                                }}
-                            >
-                                <IconLocal />
-                                Save Locally
-                            </button>
-                        {/snippet}
-                    </Dropdown>
-                {/if}
             </div>
             {#if showImportTermsModal}
                 <div class="modal" transition:fade={{ duration: 200 }}>
@@ -1467,7 +1327,7 @@
                         <div class="flex flexcolonmobile">
                             <button
                                 data-sveltekit-preload-data="false"
-                                onclick={saveButtonOrCreateButton}
+                                onclick={saveButton}
                                 class="yay alt"
                             >
                                 <IconCheckmark />
