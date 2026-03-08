@@ -861,7 +861,7 @@
     {:else}
         <div class="flex" style="flex-direction: column; flex-wrap: nowrap; gap: 0.2rem; margin-top: 0.6rem;">
             <div><img src={term?.[isDefSide ? "defImageUrl" : "termImageUrl"]} class="term-image"></div>
-            <div class="flex" style="margin-top: 0px;">
+            <div class="flex" style="margin-top: 0px; row-gap: 0.2rem; column-gap: 0.4rem;">
                 <button class="faint img-button-thin-fit text fg0" onclick={async () => {
                     showTermImageModal = true;
                     termImageModalTerm = term;
