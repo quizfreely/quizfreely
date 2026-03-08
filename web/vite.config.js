@@ -23,7 +23,7 @@ export default defineConfig({
 				}
 			},
 			"/usercontent/": {
-				target: process?.env?.USERCONTENT_URL ?? "http://usercontent.localhost:3902",
+				target: process?.env?.USERCONTENT_URL ?? "http://usercontent.web.garage.localhost:3902",
 				changeOrigin: true,
 				rewrite: function (path) {
 					return path.replace(/^\/usercontent/, "");
@@ -56,7 +56,7 @@ export default defineConfig({
 				}
 			},
 			"/usercontent/": {
-				target: process?.env?.USERCONTENT_URL ?? "http://usercontent.localhost:3902",
+				target: process?.env?.USERCONTENT_URL ?? "http://usercontent.web.garage.localhost:3902",
 				changeOrigin: true,
 				rewrite: function (path) {
 					return path.replace(/^\/usercontent/, "");
