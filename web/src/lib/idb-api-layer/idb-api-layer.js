@@ -314,8 +314,7 @@ export default {
         if (resolveProps?.confusedTerm) {
             await Promise.all(
                 confusionPairs.map(async confusionPair => {
-                    const confusedTerm = await db.terms.where("id").equals(confusionPair.confusedTermId);
-                    confusionPair.confusedTerm = confusedTerm?.[0] ?? null;
+                    confusionPair.confusedTerm = await this.getTermById(confusionPair.confusedTermId, resolveProps?.confusedTerm);
                 })
             );
         }
@@ -335,8 +334,7 @@ export default {
         if (resolveProps?.term) {
             await Promise.all(
                 confusionPairs.map(async confusionPair => {
-                    const term = await db.terms.where("id").equals(confusionPair.termId);
-                    confusionPair.term = term?.[0] ?? null;
+                    confusionPair.term = await this.getTermById(confusionPair.termId, resolveProps?.term);
                 })
             );
         }
