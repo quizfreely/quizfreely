@@ -249,7 +249,7 @@
                         >
                             <a href="/dashboard" class="button faint">Folders</a
                             >
-                            <AngleRIcon></AngleRIcon>
+                            <AngleRIcon class="text fg0"></AngleRIcon>
                             <a
                                 href="/dashboard?folder={folderId}"
                                 class="button faint"

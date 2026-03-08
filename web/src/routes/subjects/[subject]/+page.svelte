@@ -24,7 +24,7 @@
     <div class="content">
         <div class="flex compact-gap" style="align-items: center;">
             <a class="button faint" href="/explore"> Explore </a>
-            <AngleRightIcon></AngleRightIcon>
+            <AngleRightIcon class="text fg0"></AngleRightIcon>
             <a class="button faint" href="/categories/{categoryPath}">
                 {categoryName}
             </a>
