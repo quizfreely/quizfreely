@@ -88,11 +88,11 @@ export default {
                             this.getTopReverseConfusionPairs(term.id)
                         );
                     }
-                    if (resolveProps?.termImageUrl) {
+                    if (resolveProps?.termImageUrl && term.termImageKey != null) {
                         indicies.termImageUrl = promises.length;
                         promises.push(idbLayerImg.getImageObjectUrl(term.termImageKey));
                     }
-                    if (resolveProps?.defImageUrl) {
+                    if (resolveProps?.defImageUrl && term.defImageKey != null) {
                         indicies.defImageUrl = promises.length;
                         promises.push(idbLayerImg.getImageObjectUrl(term.defImageKey));
                     }
@@ -110,10 +110,10 @@ export default {
                         term.topReverseConfusionPairs = results[indicies.topReverseConfusionPairs];
                     }
                     if (resolveProps?.termImageUrl) {
-                        term.termImageUrl = results[indicies.termImageUrl];
+                        term.termImageUrl = term.termImageKey == null ? null : results[indicies.termImageUrl];
                     }
                     if (resolveProps?.defImageUrl) {
-                        term.defImageUrl = results[indicies.defImageUrl];
+                        term.defImageUrl = term.defImageKey == null ? null : results[indicies.defImageUrl];
                     }
                 })
             );
@@ -141,10 +141,10 @@ export default {
             term.topReverseConfusionPairs = await this.getTopReverseConfusionPairs(term.id);
         }
         if (resolveProps?.termImageUrl) {
-            term.termImageUrl = await idbLayerImg.getImageObjectUrl(term.termImageKey);
+            term.termImageUrl = term.termImageKey == null ? null : await idbLayerImg.getImageObjectUrl(term.termImageKey);
         }
         if (resolveProps?.defImageUrl) {
-            term.defImageUrl = await idbLayerImg.getImageObjectUrl(term.defImageKey);
+            term.defImageUrl = term.defImageKey == null ? null : await idbLayerImg.getImageObjectUrl(term.defImageKey);
         }
 
         return term;
