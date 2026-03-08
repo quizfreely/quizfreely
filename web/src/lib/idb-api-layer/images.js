@@ -91,6 +91,35 @@ export default {
 
         return blob;
     },
+    removeTermImage: async function (termId, defSide) {
+        if (defSide !== true && defSide != false) {
+            console.error("processAndUpdateTermImage: defSide param must be a boolean");
+            return false;
+        }
+
+        const term = await db.terms.get(termId);
+        if (term === undefined) {
+            console.error("processAndUpdateTermImage: No term found with termId " + termId);
+            return false;
+        }
+
+        const oldKey = term[defSide ? "defImageKey" : "termImageKey"];
+        if (oldKey != null) {
+            await db.images.delete(oldKey);
+        }
+
+        const rnISOString = (new Date()).toISOString();
+        let changes = {
+            updatedAt: rnISOString
+        };
+        if (defSide) {
+            changes.defImageKey = null;
+        } else {
+            changes.termImageKey = null;
+        }
+        await db.terms.update(termId, changes);
+        return true;
+    },
     getImageObjectUrl: async function (key) {
         const image = await db.images.get(key);
         return image === undefined ? null : URL.createObjectURL(image.blob);

@@ -19,6 +19,8 @@
     import IconPlus from "$lib/icons/Plus.svelte";
     import MenuIcon from "$lib/icons/Menu.svelte";
     import ImageIcon from "$lib/icons/Image.svelte";
+    import XMarkIcon from "$lib/icons/CloseXMark.svelte";
+    import PencilIcon from "$lib/icons/Pencil.svelte";
 
     import { flip } from "svelte/animate";
     import { scale, fade } from "svelte/transition";
@@ -34,29 +36,36 @@
     var bypassUnsavedChangesConfirmation = false;
     let objectUrls = [];
     let showTermImageModal = $state(false);
-    let termImageModalTerm;
-    let termImageModalIsDefSide = false;
+    let termImageModalTerm = $state();
+    let termImageModalIsDefSide = $state(false);
     let termImageModalFiles = $state();
-    let termImageModalFileInputBox;
+    let termImageModalFileInputBox = $state();
     let isDraft = $state(false);
+    let showRemoveTermImageModal = $state(false);
+    let removeTermImageModalTerm;
+    let removeTermImageModalIsDefSide;
 
     var terms = $state([]);
     var existingTermIdsToDelete = [];
     var key = 0;
-    function addTerm(term, def, id) {
+    function addTerm(term, def, id, termImageUrl, defImageUrl) {
         terms.push({
             id: id,
             term: term ?? "",
             def: def ?? "",
+            termImageUrl,
+            defImageUrl,
             key: key,
         });
         key++;
     }
-    function insertTerm(index, term, def, id) {
+    function insertTerm(index, term, def, id, termImageUrl, defImageUrl) {
         terms.splice(index, 0, {
             id: id,
             term: term ?? "",
             def: def ?? "",
+            termImageUrl,
+            defImageUrl,
             key: key,
         });
         key++;
@@ -240,6 +249,7 @@
                     })
                         .then((response) => response.json())
                         .then((result) => {
+                            console.log(result)
                             if (result.errors) {
                                 alert("Error loading studyset");
                                 console.error(result.errors);
@@ -264,7 +274,7 @@
                                 }
                                 if (studyset.terms != null) {
                                     studyset.terms.forEach((t) => {
-                                        addTerm(t.term, t.def, t.id);
+                                        addTerm(t.term, t.def, t.id, t.termImageUrl, t.defImageUrl);
                                     });
                                 }
                                 selectedSubject = studyset.subject;
@@ -293,7 +303,7 @@
                         studysetRecord.title;
                     if (studysetRecord.terms != null) {
                         studysetRecord.terms.forEach((t) => {
-                            addTerm(t.term, t.def, t.id);
+                            addTerm(t.term, t.def, t.id, t.termImageUrl, t.defImageUrl);
                             if (t?.termImageUrl != null) {
                                 objectUrls.push(t.termImageUrl);
                             }
@@ -850,8 +860,24 @@
             </button>
         </div>
     {:else}
-        <div class="flex" style="margin-top: 0.2rem;">
-            {term?.[isDefSide ? "defImageUrl" : "termImageUrl"]}
+        <div class="flex" style="flex-direction: column; flex-wrap: nowrap; gap: 0.2rem; margin-top: 0.6rem;">
+            <div><img src={term?.[isDefSide ? "defImageUrl" : "termImageUrl"]} class="term-image"></div>
+            <div class="flex" style="margin-top: 0px;">
+                <button class="faint img-button-thin-fit text fg0" onclick={async () => {
+                    showTermImageModal = true;
+                    termImageModalTerm = term;
+                    termImageModalIsDefSide = isDefSide;
+                }}>
+                    <PencilIcon></PencilIcon> Edit Image
+                </button>
+                <button class="faint img-button-thin-fit text fg0" onclick={async () => {
+                    showRemoveTermImageModal = true;
+                    removeTermImageModalTerm = term;
+                    removeTermImageModalIsDefSide = isDefSide;
+                }}>
+                    <XMarkIcon></XMarkIcon> Remove Image
+                </button>
+            </div>
         </div>
     {/if}
 {/snippet}
@@ -1420,6 +1446,8 @@
                                         termImageModalTerm[termImageModalIsDefSide ? "defImageUrl" : "termImageUrl"] = newObjectUrl;
                                         objectUrls.push(newObjectUrl);
                                     }
+                                    showTermImageModal = false;
+                                    termImageModalFileInputBox.clear();
                                 } else {
                                     const raw = await fetch(`/api/term-images/${termImageModalTerm.id}/${termImageModalIsDefSide ? "def" : "term"}`, {
                                         method: "PUT",
@@ -1431,6 +1459,8 @@
                                     } else {
                                         termImageModalTerm[termImageModalIsDefSide ? "defImageUrl" : "termImageUrl"] = resp.data.imageUrl;
                                     }
+                                    showTermImageModal = false;
+                                    termImageModalFileInputBox.clear();
                                 }
                             }}>
                                 <IconCheckmark></IconCheckmark> Save
@@ -1438,6 +1468,50 @@
                             <button class="alt" onclick={() => {
                                 showTermImageModal = false;
                                 termImageModalFileInputBox.clear();
+                            }}>
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            {/if}
+            {#if showRemoveTermImageModal}
+                <div class="modal" transition:fade={{ duration: 200 }}>
+                    <div class="content">
+                        <h4>Remove Image?</h4>
+                        <p>Are you sure you want to remove this term's image?</p>
+                        <div class="flex">
+                            <button class="ohno" onclick={async () => {
+                                if (data.local) {
+                                    const oldObjectUrl = removeTermImageModalTerm[
+                                        removeTermImageModalIsDefSide ? "defImageUrl" : "termImageUrl"
+                                    ];
+
+                                    const success = await idbLayerImg.removeTermImage(removeTermImageModalTerm.id, removeTermImageModalIsDefSide);
+                                    if (success) {
+                                        removeTermImageModalTerm[removeTermImageModalIsDefSide ? "defImageUrl" : "termImageUrl"] = null;
+                                        URL.revokeObjectURL(oldObjectUrl);
+                                    } else {
+                                        alert("Error removing term image :(")
+                                    }
+                                    showRemoveTermImageModal = false;
+                                } else {
+                                    const raw = await fetch(`/api/term-images/${removeTermImageModalTerm.id}/${removeTermImageModalIsDefSide ? "def" : "term"}`, {
+                                        method: "DELETE"
+                                    });
+                                    const resp = await raw.json();
+                                    if (resp?.error) {
+                                        console.error("Error in remove-term-image resp: ", resp);
+                                    } else {
+                                        removeTermImageModalTerm[removeTermImageModalIsDefSide ? "defImageUrl" : "termImageUrl"] = null;
+                                    }
+                                    showRemoveTermImageModal = false;
+                                }
+                            }}>
+                                <IconTrash></IconTrash> Remove
+                            </button>
+                            <button class="alt" onclick={() => {
+                                showRemoveTermImageModal = false;
                             }}>
                                 Cancel
                             </button>
@@ -1514,5 +1588,13 @@
     button.pretty-button-disableable.disabled,
     .button.pretty-button-disableable.disabled {
         opacity: 0.6;
+    }
+
+    .term-image {
+        max-width: 400px;
+        max-height: 300px;
+        margin: 0px;
+        padding: 0px;
+        border-radius: 0.8rem;
     }
 </style>

@@ -22,6 +22,13 @@ export default defineConfig({
 					return path.replace(/^\/realtime/, "");
 				}
 			},
+			"/usercontent/": {
+				target: process?.env?.USERCONTENT_URL ?? "http://usercontent.localhost:3902",
+				changeOrigin: true,
+				rewrite: function (path) {
+					return path.replace(/^\/usercontent/, "");
+				}
+			},
 			// "/classes/api/": {
 			// 	target: process?.env?.CLASSES_API_URL ?? "http://localhost:3000",
 			// 	changeOrigin: true,
@@ -46,6 +53,13 @@ export default defineConfig({
 				changeOrigin: true,
 				rewrite: function (path) {
 					return path.replace(/^\/realtime/, "");
+				}
+			},
+			"/usercontent/": {
+				target: process?.env?.USERCONTENT_URL ?? "http://usercontent.localhost:3902",
+				changeOrigin: true,
+				rewrite: function (path) {
+					return path.replace(/^\/usercontent/, "");
 				}
 			},
 			// "/classes/api/": {
