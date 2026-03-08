@@ -23,7 +23,11 @@
                 answerWith: answerWith,
                 correct: answeredBool == correctAnswerBool,
                 answeredBool: answeredBool,
-                distractor: distractor
+                distractor: {
+                    id: distractor.id,
+                    term: distractor.term,
+                    def: distractor.def
+                }
             }
         }
     }

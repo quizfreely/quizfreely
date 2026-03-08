@@ -66,7 +66,13 @@
                 correct: answeredIndex == correctAnswerIndex,
                 answeredTerm: answeredIndex >= 0 ?
                     answers[answeredIndex] : null,
-                distractors: distractors,
+                distractors: distractors.map(distractor => {
+                    return {
+                        id: distractor.id,
+                        term: distractor.term,
+                        def: distractor.def
+                    }
+                }),
                 correctChoiceIndex: correctAnswerIndex
             }
         }
@@ -113,7 +119,7 @@
                     answerWith == "DEF" ?
                         answer.def : answer.term
                 }</span>
-                {#if (answerWith == "DEF" ? answer.defImageUrl : answer.termImageUrl) != null}
+                {#if (()=>{console.log(answer);return true;})() && (answerWith == "DEF" ? answer.defImageUrl : answer.termImageUrl) != null}
                     <div><img src={answerWith == "DEF" ? answer.defImageUrl : answer.termImageUrl} class="term-image" alt="answer choice image"></div>
                 {/if}
                 </div>
