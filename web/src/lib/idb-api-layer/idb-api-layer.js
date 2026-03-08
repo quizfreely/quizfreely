@@ -1,23 +1,24 @@
 /*!
  * Quizfreely IDB API Layer, licensed under GPL-3.0-or-later.
- * Copyright (c) 2025 Ehan Ahamed and contributors
+ * Copyright (c) 2025-2026 Ehan Ahamed and contributors
  *
  * https://codeberg.org/quizfreely/idb-api-layer
  * https://github.com/quizfreely/idb-api-layer
  */
 import Dexie from 'dexie';
 import db from "./db.js";
+import idbLayerImg from "./images.js";
 
 function isTitleValid(newTitle) {
     return (
-      newTitle.length > 0 &&
-      newTitle.length < 9000 &&
-      /*
-          use regex to make sure title is not just a bunch of spaces
-          (if removing all spaces makes it equal to an empty string, it's all spaces)
-          notice the exclamation mark for negation
-      */
-      !(newTitle.replace(/[\s\p{C}]+/gu, "") == "")
+        newTitle.length > 0 &&
+        newTitle.length < 9000 &&
+        /*
+            use regex to make sure title is not just a bunch of spaces
+            (if removing all spaces makes it equal to an empty string, it's all spaces)
+            notice the exclamation mark for negation
+        */
+        !(newTitle.replace(/[\s\p{C}]+/gu, "") == "")
     );
 }
 
@@ -27,7 +28,7 @@ export default {
         if (studysets.length == 0) {
             return null;
         }
-        
+
         if (resolveProps?.terms) {
             studysets[0].terms = await this.getTermsByStudysetId(
                 id,
@@ -57,7 +58,9 @@ export default {
         if (resolveProps?.progress ||
             resolveProps?.progressHistory ||
             resolveProps?.topConfusionPairs ||
-            resolveProps?.topReverseConfusionPairs
+            resolveProps?.topReverseConfusionPairs ||
+            resolveProps?.termImageUrl ||
+            resolveProps?.defImageUrl
         ) {
             await Promise.all(
                 terms.map(async term => {
@@ -87,6 +90,14 @@ export default {
                             this.getTopReverseConfusionPairs(term.id)
                         );
                     }
+                    if (resolveProps?.termImageUrl && term.termImageKey != null) {
+                        indicies.termImageUrl = promises.length;
+                        promises.push(idbLayerImg.getImageObjectUrl(term.termImageKey));
+                    }
+                    if (resolveProps?.defImageUrl && term.defImageKey != null) {
+                        indicies.defImageUrl = promises.length;
+                        promises.push(idbLayerImg.getImageObjectUrl(term.defImageKey));
+                    }
                     const results = await Promise.all(promises);
                     if (resolveProps?.progress) {
                         term.progress = results[indicies.progress]?.[0] ?? null;
@@ -99,6 +110,12 @@ export default {
                     }
                     if (resolveProps?.topReverseConfusionPairs) {
                         term.topReverseConfusionPairs = results[indicies.topReverseConfusionPairs];
+                    }
+                    if (resolveProps?.termImageUrl) {
+                        term.termImageUrl = term.termImageKey == null ? null : results[indicies.termImageUrl];
+                    }
+                    if (resolveProps?.defImageUrl) {
+                        term.defImageUrl = term.defImageKey == null ? null : results[indicies.defImageUrl];
                     }
                 })
             );
@@ -125,40 +142,52 @@ export default {
         if (resolveProps?.topReverseConfusionPairs) {
             term.topReverseConfusionPairs = await this.getTopReverseConfusionPairs(term.id);
         }
+        if (resolveProps?.termImageUrl) {
+            term.termImageUrl = term.termImageKey == null ? null : await idbLayerImg.getImageObjectUrl(term.termImageKey);
+        }
+        if (resolveProps?.defImageUrl) {
+            term.defImageUrl = term.defImageKey == null ? null : await idbLayerImg.getImageObjectUrl(term.defImageKey);
+        }
 
         return term;
     },
-    createStudyset: async function ({ title }, terms) {
+    createStudyset: async function ({ title, draft }) {
         const rnISOString = (new Date()).toISOString();
         const newId = await db.studysets.add({
-            title: isTitleValid(title) ?
+            title: isTitleValid(title) || (draft && title == "") ?
                 title : "Untitled Studyset",
+            draft,
             createdAt: rnISOString,
             updatedAt: rnISOString
         });
-        
-        let newTerms = [];
-        terms.forEach(term => {
-            newTerms.push({
+        return newId;
+    },
+    updateStudyset: async function ({ id, title, draft }) {
+        const rnISOString = (new Date()).toISOString();
+        await db.studysets.update(id, {
+            title: isTitleValid(title) || (draft && title == "") ?
+                title : "Untitled Studyset",
+            draft,
+            updatedAt: rnISOString
+        });
+    },
+    createTerms: async function (studysetId, newTerms) {
+        const rnISOString = (new Date()).toISOString();
+        let bulkAddNewTerms = [];
+        newTerms.forEach(term => {
+            bulkAddNewTerms.push({
                 term: term.term,
                 def: term.def,
-                studysetId: newId,
+                studysetId: studysetId,
                 sortOrder: term.sortOrder,
                 createdAt: rnISOString,
                 updatedAt: rnISOString,
             })
         })
-        await db.terms.bulkAdd(newTerms);
-        return newId;
+        return await db.terms.bulkAdd(bulkAddNewTerms);
     },
-    updateStudyset: async function ({ id, title }, terms, newTerms, deleteTermIDs) {
+    updateTerms: async function (terms) {
         const rnISOString = (new Date()).toISOString();
-        await db.studysets.update(id, {
-            title: isTitleValid(title) ?
-                title : "Untitled Studyset",
-            updatedAt: rnISOString
-        });
-
         let bulkUpdateTerms = [];
         terms.forEach(term => {
             bulkUpdateTerms.push({
@@ -174,27 +203,27 @@ export default {
         if (bulkUpdateTerms.length > 0) {
             await db.terms.bulkUpdate(bulkUpdateTerms);
         }
-
-        let bulkAddNewTerms = [];
-        newTerms.forEach(term => {
-            bulkAddNewTerms.push({
-                term: term.term,
-                def: term.def,
-                studysetId: id,
-                sortOrder: term.sortOrder,
-                createdAt: rnISOString,
-                updatedAt: rnISOString,
-            })
+    },
+    deleteTerms: async function (deleteTermIDs) {
+        const terms = await db.terms.bulkGet(deleteTermIDs);
+        imageKeysToDelete = [];
+        terms.forEach(t => {
+            if (t.termImageKey != null) {
+                imageKeysToDelete.push(t.termImageKey);
+            }
+            if (t.defImageKey != null) {
+                imageKeysToDelete.push(t.defImageKey);
+            }
         })
-        await db.terms.bulkAdd(bulkAddNewTerms);
-
+        await idbLayerImg.deleteImages(imageKeysToDelete);
+        await db.termProgress.where("termId").anyOf(deleteTermIDs).delete();
         await db.terms.bulkDelete(deleteTermIDs);
     },
     deleteStudyset: async function (id) {
-        const termIds = await db.terms.where("studysetId").equals(id).primaryKeys(); /* get term IDs using studyset ID */
-        await db.termProgress.where("termId").anyOf(termIds).delete(); /* delete progress using term IDs */
-        await db.terms.where("studysetId").equals(id).delete(); /* delete terms using studyset ID */
-        await db.studysets.delete(id); /* delete studyset */
+        await this.deleteTerms(
+            await db.terms.where("studysetId").equals(id).primaryKeys()
+        );
+        await db.studysets.delete(id);
     },
     updateTermProgress: async function (termProgressArray) {
         for (const {
@@ -272,7 +301,7 @@ export default {
         }
     },
     getTopConfusionPairs: async function (termId, resolveProps) {
-        const confusionPairs = db.termConfusionPairs
+        const confusionPairs = await db.termConfusionPairs
             .where("[termId+confusedCount]")
             .between(
                 [termId, Dexie.minKey],
@@ -285,15 +314,14 @@ export default {
         if (resolveProps?.confusedTerm) {
             await Promise.all(
                 confusionPairs.map(async confusionPair => {
-                    const confusedTerm = await db.terms.where("id").equals(confusionPair.confusedTermId);
-                    confusionPair.confusedTerm = confusedTerm?.[0] ?? null;
+                    confusionPair.confusedTerm = await this.getTermById(confusionPair.confusedTermId, resolveProps?.confusedTerm);
                 })
             );
         }
         return confusionPairs;
     },
     getTopReverseConfusionPairs: async function (confusedTermId, resolveProps) {
-        const confusionPairs = db.termConfusionPairs
+        const confusionPairs = await db.termConfusionPairs
             .where("[confusedTermId+confusedCount]")
             .between(
                 [confusedTermId, Dexie.minKey],
@@ -306,8 +334,7 @@ export default {
         if (resolveProps?.term) {
             await Promise.all(
                 confusionPairs.map(async confusionPair => {
-                    const term = await db.terms.where("id").equals(confusionPair.termId);
-                    confusionPair.term = term?.[0] ?? null;
+                    confusionPair.term = await this.getTermById(confusionPair.termId, resolveProps?.term);
                 })
             );
         }
@@ -315,6 +342,11 @@ export default {
     },
     recordConfusionPairs: async function (confusionPairs) {
         for (const confusionPairInput of confusionPairs) {
+            if (confusionPairInput.termId == confusionPairInput.confusedTermId) {
+                console.log("Skipped confusion pair with same term & confused term ID when recording confusion pairs");
+                continue;
+            }
+
             const existingRow = await db.termConfusionPairs.where(
                 "[termId+confusedTermId]"
             ).equals([

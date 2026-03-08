@@ -23,7 +23,11 @@
                 answerWith: answerWith,
                 correct: answeredBool == correctAnswerBool,
                 answeredBool: answeredBool,
-                distractor: distractor
+                distractor: {
+                    id: distractor.id,
+                    term: distractor.term,
+                    def: distractor.def
+                }
             }
         }
     }
@@ -34,6 +38,13 @@
         term : distractor;
 </script>
 <style>
+.term-image {
+    max-width: 300px;
+    max-height: 200px;
+    margin: 0px;
+    padding: 0px;
+    border-radius: 0.8rem;
+}
 .gridsplitthing {
     grid-template-columns: 1fr 1fr;
     grid-template-rows: auto;
@@ -61,6 +72,9 @@
             }" style="white-space: pre-wrap; margin-top: 0.2rem;">{answerWith == "DEF" ?
                 term.term : term.def
             }</p>
+            {#if (answerWith == "DEF" ? term.termImageUrl : term.defImageUrl) != null}
+                <div><img src={answerWith == "DEF" ? term.termImageUrl : term.defImageUrl} class="term-image" alt="{answerWith == "DEF" ? "term" : "definition"} image"></div>
+            {/if}
         </div>
         <div>
             <p class="fg0">{answerWith == "DEF" ?
@@ -74,6 +88,9 @@
             }" style="white-space: pre-wrap; margin-top: 0.2rem;">{answerWith == "DEF" ?
                 presentedAnswer.def : presentedAnswer.term
             }</p>
+            {#if (answerWith == "DEF" ? presentedAnswer.defImageUrl : presentedAnswer.termImageUrl) != null}
+                <div><img src={answerWith == "DEF" ? presentedAnswer.defImageUrl : presentedAnswer.termImageUrl} class="term-image" alt="{answerWith == "DEF" ? "definition" : "term"} image"></div>
+            {/if}
         </div>
     </div>
     <div class="flex">

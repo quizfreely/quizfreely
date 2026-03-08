@@ -3,4 +3,4 @@
     let { data } = $props();
 </script>
 
-<Edit data={{ ...data, new: false, local: true }}/>
+<Edit data={{ ...data, local: true }}/>

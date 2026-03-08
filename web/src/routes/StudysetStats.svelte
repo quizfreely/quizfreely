@@ -66,152 +66,174 @@
     let chartCanvas;
 
     let mounted = $state(false);
-    onMount(async () => {
-        mounted = true;
-        if (data?.settingsDateTimeFmtHours == "24") {
-            fancyTimestamp.hours = 24;
-        } else if (data?.settingsDateTimeFmtHours == "12") {
-            fancyTimestamp.hours = 12;
-        }
-
-        if (data.local) {
-            /* studyset is local, so regardless of wheater the user is logged in or not,
-            we load the studyset and progress locally */
-            const studyset = await idbApiLayer.getStudysetById(data.localId, {
-                terms: {
-                    progress: true,
-                    topConfusionPairs: {
-                        confusedTerm: true
-                    },
-                    topReverseConfusionPairs: {
-                        term: true
-                    }
-                },
-                practiceTests: true
-            })
-            terms = studyset.terms;
-            practiceTests = studyset?.practiceTests;
-        }
-
-        if (!data.authed && !data.local) {
-            /* not logged in, so user data is local,
-            but studyset is a cloud studyset,
-            so we need to map local progress to cloud terms
-
-            `terms` has already been populated during SSR (above, before onMount) */
-            practiceTests = await db.practiceTests.where("studysetId").equals(data.studysetId).toArray();
-            practiceTests?.sort(
-                /* timestamps are ISO strings in UTC,
-                so lexical/alphanumeric sorting is the same as chronological sorting
-                also you see we're comparing `b` to `a`, so its descending,
-                so most recent is first */
-                (a, b) => b.timestamp.localeCompare(a.timestamp)
-            );
-            practiceTests = practiceTests;
-
-            for (const term of terms) {
-                term.progress = (await db.termProgress.where("termId").equals(term.id).toArray())?.[0];
-                term.topConfusionPairs = await idbApiLayer.getTopConfusionPairs(term.id)
-                term.topReverseConfusionPairs = await idbApiLayer.getTopReverseConfusionPairs(term.id)
+    onMount(() => {
+        let chart;
+        let objectUrls = [];
+        (async () => {
+            mounted = true;
+            if (data?.settingsDateTimeFmtHours == "24") {
+                fancyTimestamp.hours = 24;
+            } else if (data?.settingsDateTimeFmtHours == "12") {
+                fancyTimestamp.hours = 12;
             }
-        }
 
-        Chart.defaults.font.size = 16;
-        const rootStyles = getComputedStyle(document.documentElement);
-        const mainColor = rootStyles.getPropertyValue("--main").trim();
-        const fg1Color = rootStyles.getPropertyValue("--fg-1").trim();
-        const bg2Color = rootStyles.getPropertyValue("--bg-2").trim();
-        const borderColor = rootStyles.getPropertyValue("--border").trim();
-        const yayColor = rootStyles.getPropertyValue("--yay").trim();
-        const ohnoColor = rootStyles.getPropertyValue("--ohno").trim();
-        const bg3Color = rootStyles.getPropertyValue("--bg-3").trim();
-        Chart.defaults.backgroundColor = mainColor;
-        Chart.defaults.borderColor = borderColor;
-        Chart.defaults.color = fg1Color;
-        new Chart(
-            chartCanvas,
-            {
-                type: "line",
-                data: {
-                    datasets: [
-                        ...(practiceTests?.length > 0 ? [{
-                            label: "Practice Test Scores",
-                            fill: false,
-                            tension: 0,
-                            borderColor: mainColor,
-                            backgroundColor: mainColor,
-                            pointStyle: "circle",
-                            pointRadius: 6,
-                            pointHoverRadius: 8,
-                            data: practiceTests.map(pt => ({
-                                x: Date.parse(pt.timestamp),
-                                y: pt.questionsCorrect / pt.questionsTotal
-                            }))
-                        }] : [])
-                    ]
-                },
-                options: {
-                    scales: {
-                        x: {
-                            type: "timeseries",
-                            suggestedMax: Date.now(),
-                            time: {
-                                unit: "day",
-                                tooltipFormat: data?.settingsDateTimeFmtHours != null ?
-                                    (data?.settingsDateTimeFmtHours == "24" ?
-                                        "dd MMM yyyy, HH:mm" :
-                                        "dd MMM yyyy, h:mm a"
-                                    ) :
-                                    undefined
-                            }
+            if (data.local) {
+                /* studyset is local, so regardless of wheater the user is logged in or not,
+                we load the studyset and progress locally */
+                const studyset = await idbApiLayer.getStudysetById(data.localId, {
+                    terms: {
+                        progress: true,
+                        topConfusionPairs: {
+                            confusedTerm: true
                         },
-                        y: {
-                            suggestedMax: 1,
-                            suggestedMin: 0,
-                            ticks: {
-                                stepSize: 0.2,
-                                format: {
-                                    style: "percent",
-                                    minimumFractionDigits: 0,
-                                    maximumFractionDigits: 0
+                        topReverseConfusionPairs: {
+                            term: true
+                        },
+                        termImageUrl: true,
+                        defImageUrl: true
+                    },
+                    practiceTests: true
+                })
+                terms = studyset.terms;
+                terms.forEach(term => {
+                    if (term.termImageUrl != null) {
+                        objectUrls.push(term.termImageUrl);
+                    }
+                    if (term.defImageUrl != null) {
+                        objectUrls.push(term.defImageUrl);
+                    }
+                })
+                practiceTests = studyset?.practiceTests;
+            }
+
+            if (!data.authed && !data.local) {
+                /* not logged in, so user data is local,
+                but studyset is a cloud studyset,
+                so we need to map local progress to cloud terms
+
+                `terms` has already been populated during SSR (above, before onMount) */
+                practiceTests = await db.practiceTests.where("studysetId").equals(data.studysetId).toArray();
+                practiceTests?.sort(
+                    /* timestamps are ISO strings in UTC,
+                    so lexical/alphanumeric sorting is the same as chronological sorting
+                    also you see we're comparing `b` to `a`, so its descending,
+                    so most recent is first */
+                    (a, b) => b.timestamp.localeCompare(a.timestamp)
+                );
+                practiceTests = practiceTests;
+
+                for (const term of terms) {
+                    term.progress = (await db.termProgress.where("termId").equals(term.id).toArray())?.[0];
+                    term.topConfusionPairs = await idbApiLayer.getTopConfusionPairs(term.id)
+                    term.topReverseConfusionPairs = await idbApiLayer.getTopReverseConfusionPairs(term.id)
+                }
+            }
+
+            Chart.defaults.font.size = 16;
+            const rootStyles = getComputedStyle(document.documentElement);
+            const mainColor = rootStyles.getPropertyValue("--main").trim();
+            const fg1Color = rootStyles.getPropertyValue("--fg-1").trim();
+            const bg2Color = rootStyles.getPropertyValue("--bg-2").trim();
+            const borderColor = rootStyles.getPropertyValue("--border").trim();
+            const yayColor = rootStyles.getPropertyValue("--yay").trim();
+            const ohnoColor = rootStyles.getPropertyValue("--ohno").trim();
+            const bg3Color = rootStyles.getPropertyValue("--bg-3").trim();
+            Chart.defaults.backgroundColor = mainColor;
+            Chart.defaults.borderColor = borderColor;
+            Chart.defaults.color = fg1Color;
+            chart = new Chart(
+                chartCanvas,
+                {
+                    type: "line",
+                    data: {
+                        datasets: [
+                            ...(practiceTests?.length > 0 ? [{
+                                label: "Practice Test Scores",
+                                fill: false,
+                                tension: 0,
+                                borderColor: mainColor,
+                                backgroundColor: mainColor,
+                                pointStyle: "circle",
+                                pointRadius: 6,
+                                pointHoverRadius: 8,
+                                data: practiceTests.map(pt => ({
+                                    x: Date.parse(pt.timestamp),
+                                    y: pt.questionsCorrect / pt.questionsTotal
+                                }))
+                            }] : [])
+                        ]
+                    },
+                    options: {
+                        scales: {
+                            x: {
+                                type: "timeseries",
+                                suggestedMax: Date.now(),
+                                time: {
+                                    unit: "day",
+                                    tooltipFormat: data?.settingsDateTimeFmtHours != null ?
+                                        (data?.settingsDateTimeFmtHours == "24" ?
+                                            "dd MMM yyyy, HH:mm" :
+                                            "dd MMM yyyy, h:mm a"
+                                        ) :
+                                        undefined
+                                }
+                            },
+                            y: {
+                                suggestedMax: 1,
+                                suggestedMin: 0,
+                                ticks: {
+                                    stepSize: 0.2,
+                                    format: {
+                                        style: "percent",
+                                        minimumFractionDigits: 0,
+                                        maximumFractionDigits: 0
+                                    }
                                 }
                             }
-                        }
-                    },
-                    interaction: {
-                        intersect: false,
-                        mode: "nearest",
-                        axis: "xy"
-                    },
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        title: {
-                            display: true,
-                            text: "Practice Test Scores",
-                            font: { weight: "normal" }
                         },
-                        tooltip: {
-                            backgroundColor: bg2Color,
-                            titleColor: fg1Color,
-                            bodyColor: fg1Color,
-                            footerColor: fg1Color,
-                            titleFont: { weight: "normal" },
-                            displayColors: false,
-                            callbacks: {
-                                label: ctx => Math.floor(ctx.raw.y * 100) + "%"
+                        interaction: {
+                            intersect: false,
+                            mode: "nearest",
+                            axis: "xy"
+                        },
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: "Practice Test Scores",
+                                font: { weight: "normal" }
+                            },
+                            tooltip: {
+                                backgroundColor: bg2Color,
+                                titleColor: fg1Color,
+                                bodyColor: fg1Color,
+                                footerColor: fg1Color,
+                                titleFont: { weight: "normal" },
+                                displayColors: false,
+                                callbacks: {
+                                    label: ctx => Math.floor(ctx.raw.y * 100) + "%"
+                                }
+                            },
+                            legend: {
+                                display: false
+                                // labels: {
+                                //     usePointStyle: true
+                                // }
                             }
-                        },
-                        legend: {
-                            display: false
-                            // labels: {
-                            //     usePointStyle: true
-                            // }
                         }
                     }
                 }
+            );
+        })();
+        return () => {
+            objectUrls.forEach(objectUrl => {
+                URL.revokeObjectURL(objectUrl);
+            });
+            if (chart) {
+                chart.destroy();
             }
-        );
+        }
     })
 
     let showAllTerms = $state(false);
@@ -307,6 +329,13 @@
     .shy-h4 {
         font-size: 1.2rem;
     }
+    .term-image {
+        max-width: 300px;
+        max-height: 200px;
+        margin: 0px;
+        padding: 0px;
+        border-radius: 0.8rem;
+    }
 </style>
 <div class="grid page">
     <div class="content">
@@ -343,22 +372,22 @@
                             <div>
                             <p class="fg0">Term</p>
                             <p class="{
-                                term.term.trim().split("\n")[0].length <= 20 ?
+                                term.term.length <= 20 ?
                                     "shy-h4" : ""
-                            }" style="margin-top: 0px;">{term.term.trim().split("\n")[0]}{
-                                term.term.length > term.term.trim().split("\n")[0].length ?
-                                    "..." : ""
-                                }</p>
+                            }" style="margin-top: 0px;">{term.term}</p>
+                            {#if term.termImageUrl != null}
+                            <div><img src={term.termImageUrl} alt="term image" class="term-image"></div>
+                            {/if}
                             </div>
                             <div>
                             <p class="fg0">Definition</p>
                             <p class="{
-                                term.def.trim().split("\n")[0].length <= 20 ?
+                                term.def.length <= 20 ?
                                     "shy-h4" : ""
-                            }" style="margin-top: 0px;">{term.def.trim().split("\n")[0]}{
-                                term.def.length > term.def.trim().split("\n")[0].length ?
-                                    "..." : ""
-                                }</p>
+                            }" style="margin-top: 0px;">{term.def}</p>
+                            {#if term.defImageUrl != null}
+                            <div><img src={term.defImageUrl} alt="definition image" class="term-image"></div>
+                            {/if}
                             </div>
                         </div>
                         {#if !(term.progress && (

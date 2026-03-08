@@ -20,6 +20,8 @@ export async function load({ cookies, params}) {
         id
         term
         def
+        termImageUrl
+        defImageUrl
         progress {
             termFirstReviewedAt
             termLastReviewedAt
@@ -44,6 +46,8 @@ export async function load({ cookies, params}) {
                 id
                 term
                 def
+                termImageUrl
+                defImageUrl
             }
             answeredWith
             confusedCount
@@ -53,6 +57,8 @@ export async function load({ cookies, params}) {
                 id
                 term
                 def
+                termImageUrl
+                defImageUrl
             }
             answeredWith
             confusedCount
