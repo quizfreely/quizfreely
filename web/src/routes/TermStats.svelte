@@ -31,17 +31,17 @@
             }
 
             topConfusionPairsUnique.set(
-                pair.confusedTerm.id,
+                pair?.confusedTerm?.id,
                 {
-                    ...topConfusionPairsUnique.get(pair.confusedTerm.id),
+                    ...topConfusionPairsUnique.get(pair?.confusedTerm?.id),
                     ...obj
                 }
             )
 
-            if (pair.confusedTerm.termImageUrl != null) {
+            if (pair?.confusedTerm?.termImageUrl != null) {
                 objectUrls.push(pair.confusedTerm.termImageUrl);
             }
-            if (pair.confusedTerm.defImageUrl != null) {
+            if (pair?.confusedTerm?.defImageUrl != null) {
                 objectUrls.push(pair.confusedTerm.defImageUrl);
             }
         })
@@ -58,17 +58,17 @@
             }
 
             topReverseConfusionPairsUnique.set(
-                pair.term.id,
+                pair?.term?.id,
                 {
-                    ...topReverseConfusionPairsUnique.get(pair.term.id),
+                    ...topReverseConfusionPairsUnique.get(pair?.term?.id),
                     ...obj
                 }
             )
 
-            if (pair.term.termImageUrl != null) {
+            if (pair?.term?.termImageUrl != null) {
                 objectUrls.push(pair.term.termImageUrl);
             }
-            if (pair.term.defImageUrl != null) {
+            if (pair?.term?.defImageUrl != null) {
                 objectUrls.push(pair.term.defImageUrl);
             }
         })
@@ -430,7 +430,7 @@
             <div>
                 {#each topConfusionPairsUniqueArray as confusionPair }
                     <div class="box">
-                        {confusionPair.confusedTerm?.term}
+                        {confusionPair?.confusedTerm?.term}
                     </div>
                 {:else}
                     <div class="box center text fg0">
@@ -443,7 +443,7 @@
             <div>
                 {#each topReverseConfusionPairsUniqueArray as confusionPair }
                     <div class="box">
-                        {confusionPair.term?.term}
+                        {confusionPair?.term?.term}
                     </div>
                 {:else}
                     <div class="box center text fg0">
