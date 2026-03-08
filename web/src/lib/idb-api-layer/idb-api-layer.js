@@ -58,7 +58,9 @@ export default {
         if (resolveProps?.progress ||
             resolveProps?.progressHistory ||
             resolveProps?.topConfusionPairs ||
-            resolveProps?.topReverseConfusionPairs
+            resolveProps?.topReverseConfusionPairs ||
+            resolveProps?.termImageUrl ||
+            resolveProps?.defImageUrl
         ) {
             await Promise.all(
                 terms.map(async term => {
