@@ -301,7 +301,7 @@ export default {
         }
     },
     getTopConfusionPairs: async function (termId, resolveProps) {
-        const confusionPairs = db.termConfusionPairs
+        const confusionPairs = await db.termConfusionPairs
             .where("[termId+confusedCount]")
             .between(
                 [termId, Dexie.minKey],
@@ -321,7 +321,7 @@ export default {
         return confusionPairs;
     },
     getTopReverseConfusionPairs: async function (confusedTermId, resolveProps) {
-        const confusionPairs = db.termConfusionPairs
+        const confusionPairs = await db.termConfusionPairs
             .where("[confusedTermId+confusedCount]")
             .between(
                 [confusedTermId, Dexie.minKey],
