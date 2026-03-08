@@ -70,6 +70,7 @@
     let mounted = $state(false);
     onMount(function () {
         mounted = true;
+        let objectUrls = [];
         if (data.local) {
             (async () => {
                 const localStudyset = await idbApiLayer.getStudysetById(
@@ -77,11 +78,21 @@
                     {
                         terms: {
                             progress: true,
+                            termImageUrl: true,
+                            defImageUrl: true
                         },
                     },
                 );
                 title = localStudyset?.title;
                 terms = localStudyset?.terms;
+                terms.forEach(term => {
+                    if (term.termImageUrl != null) {
+                        objectUrls.push(term.termImageUrl);
+                    }
+                    if (term.defImageUrl != null) {
+                        objectUrls.push(term.defImageUrl);
+                    }
+                })
             })();
         }
 
@@ -138,10 +149,11 @@
         window.addEventListener("keydown", flashcardsOnKeyDown);
         window.addEventListener("keyup", flashcardsOnKeyUp);
 
-        /* return cleanup function to remove eventlisteners */
+        /* return cleanup function to remove eventlisteners & cleanup object urls */
         return () => {
             window.removeEventListener("keydown", flashcardsOnKeyDown);
             window.removeEventListener("keyup", flashcardsOnKeyUp);
+            objectUrls.forEach(objectUrl => URL.revokeObjectURL(objectUrl));
         };
     });
     async function deleteConfirmButtonClicked() {
