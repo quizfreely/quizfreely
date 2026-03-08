@@ -119,7 +119,7 @@
                     answerWith == "DEF" ?
                         answer.def : answer.term
                 }</span>
-                {#if (()=>{console.log(answer);return true;})() && (answerWith == "DEF" ? answer.defImageUrl : answer.termImageUrl) != null}
+                {#if (answerWith == "DEF" ? answer.defImageUrl : answer.termImageUrl) != null}
                     <div><img src={answerWith == "DEF" ? answer.defImageUrl : answer.termImageUrl} class="term-image" alt="answer choice image"></div>
                 {/if}
                 </div>
