@@ -84,6 +84,7 @@
 
     let mounted = $state(false);
     onMount(() => {
+        let chart;
         (async () => {
             mounted = true;
             if (data?.settingsDateTimeFmtHours == "24") {
@@ -144,7 +145,7 @@
             Chart.defaults.backgroundColor = mainColor;
             Chart.defaults.borderColor = borderColor;
             Chart.defaults.color = fg1Color;
-            const chart = new Chart(
+            chart = new Chart(
                 chartCanvas,
                 {
                     type: "line",
@@ -263,7 +264,9 @@
             objectUrls.forEach(objectUrl => {
                 URL.revokeObjectURL(objectUrl);
             });
-            chart.destroy();
+            if (chart) {
+                chart.destroy();
+            }
         }
     })
 </script>
