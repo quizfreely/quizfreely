@@ -70,6 +70,7 @@
     let mounted = $state(false);
     onMount(function () {
         mounted = true;
+        let objectUrls = [];
         if (data.local) {
             (async () => {
                 const localStudyset = await idbApiLayer.getStudysetById(
@@ -77,11 +78,21 @@
                     {
                         terms: {
                             progress: true,
+                            termImageUrl: true,
+                            defImageUrl: true
                         },
                     },
                 );
                 title = localStudyset?.title;
                 terms = localStudyset?.terms;
+                terms.forEach(term => {
+                    if (term.termImageUrl != null) {
+                        objectUrls.push(term.termImageUrl);
+                    }
+                    if (term.defImageUrl != null) {
+                        objectUrls.push(term.defImageUrl);
+                    }
+                })
             })();
         }
 
@@ -138,10 +149,11 @@
         window.addEventListener("keydown", flashcardsOnKeyDown);
         window.addEventListener("keyup", flashcardsOnKeyUp);
 
-        /* return cleanup function to remove eventlisteners */
+        /* return cleanup function to remove eventlisteners & cleanup object urls */
         return () => {
             window.removeEventListener("keydown", flashcardsOnKeyDown);
             window.removeEventListener("keyup", flashcardsOnKeyUp);
+            objectUrls.forEach(objectUrl => URL.revokeObjectURL(objectUrl));
         };
     });
     async function deleteConfirmButtonClicked() {
@@ -237,7 +249,7 @@
                         >
                             <a href="/dashboard" class="button faint">Folders</a
                             >
-                            <AngleRIcon></AngleRIcon>
+                            <AngleRIcon class="text fg0"></AngleRIcon>
                             <a
                                 href="/dashboard?folder={folderId}"
                                 class="button faint"
@@ -262,11 +274,10 @@
                             <IconEyeSlash /> Private Studyset
                         </p>
                     {:else if data?.studyset?.user?.displayName != null}
-                        <!--<p>
-          Created by <a href="/users/{ data.studyset.user_id }">{ data.studyset.user_display_name }</a>
-        </p>-->
                         <p>
-                            Created by {data.studyset.user.displayName}
+                            Created by <a href="/users/{data.studyset.user.id}"
+                                >{data.studyset.user.displayName}</a
+                            >
                         </p>
                     {/if}
                     {#if data.studyset && data.authed && data.authedUser.id == data.studyset.user?.id}
@@ -452,16 +463,24 @@
                             <div
                                 class="front"
                                 id="flashcard-front"
-                                style="white-space:pre-wrap"
                             >
-                                {terms?.[flashcardsIndex]?.term ?? "term"}
+                                <div>
+                                <div style="white-space:pre-wrap">{terms?.[flashcardsIndex]?.term ?? "term"}</div>
+                                {#if terms?.[flashcardsIndex]?.termImageUrl != null}
+                                <div><img src={terms[flashcardsIndex].termImageUrl} alt="term image" class="flashcard-term-image"></div>
+                                {/if}
+                                </div>
                             </div>
                             <div
                                 class="back"
                                 id="flashcard-back"
-                                style="white-space:pre-wrap"
                             >
-                                {terms?.[flashcardsIndex]?.def ?? "definition"}
+                                <div>
+                                <div style="white-space:pre-wrap">{terms?.[flashcardsIndex]?.def ?? "definition"}</div>
+                                {#if terms?.[flashcardsIndex]?.defImageUrl != null}
+                                <div><img src={terms[flashcardsIndex].defImageUrl} alt="definition image" class="flashcard-term-image"></div>
+                                {/if}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -578,12 +597,18 @@
                             {#if terms != null}
                                 {#each terms as term}
                                     <tr>
-                                        <td style="white-space:pre-wrap"
-                                            >{term.term}</td
-                                        >
-                                        <td style="white-space:pre-wrap"
-                                            >{term.def}</td
-                                        >
+                                        <td style="vertical-align: top; padding: 0px;">
+                                            <div style="white-space: pre-wrap; padding-left: 1rem; padding-right: 1rem; padding-top: 1rem; padding-bottom: 0px;">{term.term}</div>
+                                            {#if term?.termImageUrl != null}
+                                                <div><img src={term.termImageUrl} alt="term image" class="term-image"></div>
+                                            {/if}
+                                        </td>
+                                        <td style="vertical-align: top; padding: 0px;">
+                                            <div style="white-space: pre-wrap; padding-left: 1rem; padding-right: 1rem; padding-top: 1rem; padding-bottom: 0px;">{term.def}</div>
+                                            {#if term?.defImageUrl != null}
+                                                <div style="padding-left: 0.6rem;"><img src={term.defImageUrl} alt="definition image" class="term-image"></div>
+                                            {/if}
+                                        </td>
                                     </tr>
                                 {/each}
                             {/if}
@@ -715,3 +740,20 @@
         />
     </div>
 {/if}
+
+<style>
+    .term-image {
+        max-width: 18.6rem;
+        max-height: 300px;
+        margin: 0px;
+        padding: 0px;
+        border-radius: 0.8rem;
+    }
+    .flashcard-term-image {
+        max-width: 300px;
+        max-height: 200px;
+        margin: 0px;
+        padding: 0px;
+        border-radius: 0.8rem;
+    }
+</style>

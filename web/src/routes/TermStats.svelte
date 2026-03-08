@@ -12,6 +12,7 @@
     import { slide } from "svelte/transition";
     let { data } = $props();
     let term = $state();
+    let objectUrls = [];
 
     let topConfusionPairsUniqueArray = $state([]);
     let topReverseConfusionPairsUniqueArray = $state([]);
@@ -30,12 +31,19 @@
             }
 
             topConfusionPairsUnique.set(
-                pair.confusedTerm.id,
+                pair?.confusedTerm?.id,
                 {
-                    ...topConfusionPairsUnique.get(pair.confusedTerm.id),
+                    ...topConfusionPairsUnique.get(pair?.confusedTerm?.id),
                     ...obj
                 }
             )
+
+            if (pair?.confusedTerm?.termImageUrl != null) {
+                objectUrls.push(pair.confusedTerm.termImageUrl);
+            }
+            if (pair?.confusedTerm?.defImageUrl != null) {
+                objectUrls.push(pair.confusedTerm.defImageUrl);
+            }
         })
         topConfusionPairsUniqueArray = [...topConfusionPairsUnique.values()];
 
@@ -50,12 +58,19 @@
             }
 
             topReverseConfusionPairsUnique.set(
-                pair.term.id,
+                pair?.term?.id,
                 {
-                    ...topReverseConfusionPairsUnique.get(pair.term.id),
+                    ...topReverseConfusionPairsUnique.get(pair?.term?.id),
                     ...obj
                 }
             )
+
+            if (pair?.term?.termImageUrl != null) {
+                objectUrls.push(pair.term.termImageUrl);
+            }
+            if (pair?.term?.defImageUrl != null) {
+                objectUrls.push(pair.term.defImageUrl);
+            }
         })
         topReverseConfusionPairsUniqueArray = [...topReverseConfusionPairsUnique.values()];
     }
@@ -68,167 +83,191 @@
     let chartCanvas;
 
     let mounted = $state(false);
-    onMount(async () => {
-        mounted = true;
-        if (data?.settingsDateTimeFmtHours == "24") {
-            fancyTimestamp.hours = 24;
-        } else if (data?.settingsDateTimeFmtHours == "12") {
-            fancyTimestamp.hours = 12;
-        }
+    onMount(() => {
+        let chart;
+        (async () => {
+            mounted = true;
+            if (data?.settingsDateTimeFmtHours == "24") {
+                fancyTimestamp.hours = 24;
+            } else if (data?.settingsDateTimeFmtHours == "12") {
+                fancyTimestamp.hours = 12;
+            }
 
-        if (data.local) {
-            term = await idbApiLayer.getTermById(data.localTermId, {
-                progress: true,
-                progressHistory: true,
-                topConfusionPairs: {
-                    confusedTerm: true
-                },
-                topReverseConfusionPairs: {
-                    term: true
-                }
-            })
-
-            combineConfusionPairs();
-        }
-
-        if (!data.authed && !data.local) {
-            /* not logged in, so user data is local,
-            but studyset is a cloud studyset,
-            so we need to map local progress to cloud terms
-
-            `term` has already been populated during SSR (above, before onMount) */
-            term.progress = (await db.termProgress.where("termId").equals(term.id).toArray())?.[0];
-            term.progressHistory = await db.termProgressHistory.where("termId").equals(term.id).toArray();
-            term.topConfusionPairs = await idbApiLayer.getTopConfusionPairs(term.id)
-            term.topReverseConfusionPairs = await idbApiLayer.getTopReverseConfusionPairs(term.id)
-
-            combineConfusionPairs();
-        }
-
-        Chart.defaults.font.size = 16;
-        const rootStyles = getComputedStyle(document.documentElement);
-        const mainColor = rootStyles.getPropertyValue("--main").trim();
-        const fg1Color = rootStyles.getPropertyValue("--fg-1").trim();
-        const bg2Color = rootStyles.getPropertyValue("--bg-2").trim();
-        const borderColor = rootStyles.getPropertyValue("--border").trim();
-        const extraColor = rootStyles.getPropertyValue("--extra").trim();
-        Chart.defaults.backgroundColor = mainColor;
-        Chart.defaults.borderColor = borderColor;
-        Chart.defaults.color = fg1Color;
-        new Chart(
-            chartCanvas,
-            {
-                type: "line",
-                data: {
-                    datasets: [{
-                        label: "Term Accuracy",
-                        fill: false,
-                        tension: 0,
-                        borderColor: mainColor,
-                        backgroundColor: mainColor,
-                        pointStyle: "circle",
-                        pointRadius: 6,
-                        pointHoverRadius: 8,
-                        data: (() => {
-                            let data = [];
-                            term?.progressHistory?.forEach(ph => {
-                                if (ph.termCorrectCount + ph.termIncorrectCount > 0) {
-                                    data.push({
-                                        x: Date.parse(ph.timestamp),
-                                        y: ph.termCorrectCount / (
-                                            ph.termCorrectCount +
-                                            ph.termIncorrectCount
-                                        )
-                                    })
-                                }
-                            });
-                            return data;
-                        })()
-                    }, {
-                        label: "Definition Accuracy",
-                        fill: false,
-                        tension: 0,
-                        borderColor: extraColor,
-                        backgroundColor: extraColor,
-                        pointStyle: "circle",
-                        pointRadius: 6,
-                        pointHoverRadius: 8,
-                        data: (() => {
-                            let data = [];
-                            term?.progressHistory?.forEach(ph => {
-                                if (ph.defCorrectCount + ph.defIncorrectCount > 0) {
-                                    data.push({
-                                        x: Date.parse(ph.timestamp),
-                                        y: ph.defCorrectCount / (
-                                            ph.defCorrectCount +
-                                            ph.defIncorrectCount
-                                        )
-                                    })
-                                }
-                            });
-                            return data;
-                        })()
-                    }]
-                },
-                options: {
-                    scales: {
-                        x: {
-                            type: "timeseries",
-                            suggestedMax: Date.now(),
-                            time: {
-                                unit: "day",
-                                tooltipFormat: data?.settingsDateTimeFmtHours != null ?
-                                    (data?.settingsDateTimeFmtHours == "24" ?
-                                        "dd MMM yyyy, HH:mm" :
-                                        "dd MMM yyyy, h:mm a"
-                                    ) :
-                                    undefined
-                            }
-                        },
-                        y: {
-                            suggestedMax: 1,
-                            suggestedMin: 0,
-                            ticks: {
-                                stepSize: 0.2,
-                                format: {
-                                    style: "percent",
-                                    minimumFractionDigits: 0,
-                                    maximumFractionDigits: 0
-                                }
-                            }
+            if (data.local) {
+                term = await idbApiLayer.getTermById(data.localTermId, {
+                    progress: true,
+                    progressHistory: true,
+                    topConfusionPairs: {
+                        confusedTerm: {
+                            termImageUrl: true,
+                            defImageUrl: true
                         }
                     },
-                    interaction: {
-                        intersect: false,
-                        mode: "nearest",
-                        axis: "xy"
+                    topReverseConfusionPairs: {
+                        term: {
+                            termImageUrl: true,
+                            defImageUrl: true
+                        }
                     },
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        tooltip: {
-                            backgroundColor: bg2Color,
-                            titleColor: fg1Color,
-                            bodyColor: fg1Color,
-                            footerColor: fg1Color,
-                            titleFont: { weight: "normal" },
-                            displayColors: false,
-                            callbacks: {
-                                label: ctx => Math.floor(ctx.raw.y * 100) + "%"
+                    termImageUrl: true,
+                    defImageUrl: true
+                })
+                if (term.termImageUrl != null) {
+                    objectUrls.push(term.termImageUrl);
+                }
+                if (term.defImageUrl != null) {
+                    objectUrls.push(term.defImageUrl);
+                }
+                combineConfusionPairs();
+            }
+
+            if (!data.authed && !data.local) {
+                /* not logged in, so user data is local,
+                but studyset is a cloud studyset,
+                so we need to map local progress to cloud terms
+
+                `term` has already been populated during SSR (above, before onMount) */
+                term.progress = (await db.termProgress.where("termId").equals(term.id).toArray())?.[0];
+                term.progressHistory = await db.termProgressHistory.where("termId").equals(term.id).toArray();
+                term.topConfusionPairs = await idbApiLayer.getTopConfusionPairs(term.id)
+                term.topReverseConfusionPairs = await idbApiLayer.getTopReverseConfusionPairs(term.id)
+
+                combineConfusionPairs();
+            }
+
+            Chart.defaults.font.size = 16;
+            const rootStyles = getComputedStyle(document.documentElement);
+            const mainColor = rootStyles.getPropertyValue("--main").trim();
+            const fg1Color = rootStyles.getPropertyValue("--fg-1").trim();
+            const bg2Color = rootStyles.getPropertyValue("--bg-2").trim();
+            const borderColor = rootStyles.getPropertyValue("--border").trim();
+            const extraColor = rootStyles.getPropertyValue("--extra").trim();
+            Chart.defaults.backgroundColor = mainColor;
+            Chart.defaults.borderColor = borderColor;
+            Chart.defaults.color = fg1Color;
+            chart = new Chart(
+                chartCanvas,
+                {
+                    type: "line",
+                    data: {
+                        datasets: [{
+                            label: "Term Accuracy",
+                            fill: false,
+                            tension: 0,
+                            borderColor: mainColor,
+                            backgroundColor: mainColor,
+                            pointStyle: "circle",
+                            pointRadius: 6,
+                            pointHoverRadius: 8,
+                            data: (() => {
+                                let data = [];
+                                term?.progressHistory?.forEach(ph => {
+                                    if (ph.termCorrectCount + ph.termIncorrectCount > 0) {
+                                        data.push({
+                                            x: Date.parse(ph.timestamp),
+                                            y: ph.termCorrectCount / (
+                                                ph.termCorrectCount +
+                                                ph.termIncorrectCount
+                                            )
+                                        })
+                                    }
+                                });
+                                return data;
+                            })()
+                        }, {
+                            label: "Definition Accuracy",
+                            fill: false,
+                            tension: 0,
+                            borderColor: extraColor,
+                            backgroundColor: extraColor,
+                            pointStyle: "circle",
+                            pointRadius: 6,
+                            pointHoverRadius: 8,
+                            data: (() => {
+                                let data = [];
+                                term?.progressHistory?.forEach(ph => {
+                                    if (ph.defCorrectCount + ph.defIncorrectCount > 0) {
+                                        data.push({
+                                            x: Date.parse(ph.timestamp),
+                                            y: ph.defCorrectCount / (
+                                                ph.defCorrectCount +
+                                                ph.defIncorrectCount
+                                            )
+                                        })
+                                    }
+                                });
+                                return data;
+                            })()
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            x: {
+                                type: "timeseries",
+                                suggestedMax: Date.now(),
+                                time: {
+                                    unit: "day",
+                                    tooltipFormat: data?.settingsDateTimeFmtHours != null ?
+                                        (data?.settingsDateTimeFmtHours == "24" ?
+                                            "dd MMM yyyy, HH:mm" :
+                                            "dd MMM yyyy, h:mm a"
+                                        ) :
+                                        undefined
+                                }
+                            },
+                            y: {
+                                suggestedMax: 1,
+                                suggestedMin: 0,
+                                ticks: {
+                                    stepSize: 0.2,
+                                    format: {
+                                        style: "percent",
+                                        minimumFractionDigits: 0,
+                                        maximumFractionDigits: 0
+                                    }
+                                }
                             }
                         },
-                        legend: {
-                            labels: {
-                                boxWidth: 16,
-                                boxHeight: 16,
-                                useBorderRadius: true,
-                                borderRadius: 8
+                        interaction: {
+                            intersect: false,
+                            mode: "nearest",
+                            axis: "xy"
+                        },
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            tooltip: {
+                                backgroundColor: bg2Color,
+                                titleColor: fg1Color,
+                                bodyColor: fg1Color,
+                                footerColor: fg1Color,
+                                titleFont: { weight: "normal" },
+                                displayColors: false,
+                                callbacks: {
+                                    label: ctx => Math.floor(ctx.raw.y * 100) + "%"
+                                }
+                            },
+                            legend: {
+                                labels: {
+                                    boxWidth: 16,
+                                    boxHeight: 16,
+                                    useBorderRadius: true,
+                                    borderRadius: 8
+                                }
                             }
                         }
                     }
                 }
+            );
+        })();
+        return () => {
+            objectUrls.forEach(objectUrl => {
+                URL.revokeObjectURL(objectUrl);
+            });
+            if (chart) {
+                chart.destroy();
             }
-        );
+        }
     })
 </script>
 <style>
@@ -263,6 +302,13 @@
     .shy-h4 {
         font-size: 1.2rem;
     }
+    .term-image {
+        max-width: 300px;
+        max-height: 200px;
+        margin: 0px;
+        padding: 0px;
+        border-radius: 0.8rem;
+    }
 </style>
 <div class="grid page">
     <div class="content">
@@ -282,10 +328,16 @@
             <div>
                 <p class="fg0">Term</p>
                 <p class="shy-h3" style="margin-top: 0px;">{term?.term}</p>
+                {#if term?.termImageUrl != null}
+                    <div><img src={term.termImageUrl} alt="term image" class="term-image"></div>
+                {/if}
             </div>
             <div>
                 <p class="fg0">Definition</p>
                 <p class="shy-h3" style="margin-top: 0px;">{term?.def}</p>
+                {#if term?.defImageUrl != null}
+                    <div><img src={term.defImageUrl} alt="definition image" class="term-image"></div>
+                {/if}
             </div>
         </div>
         {#if term?.progress && (
@@ -381,7 +433,7 @@
             <div>
                 {#each topConfusionPairsUniqueArray as confusionPair }
                     <div class="box">
-                        {confusionPair.confusedTerm?.term}
+                        {confusionPair?.confusedTerm?.term}
                     </div>
                 {:else}
                     <div class="box center text fg0">
@@ -392,9 +444,9 @@
             <p class="h4" style="margin-top: 2rem;">Reverse-Confused Terms</p>
             <p class="fg0">This term is a frequently selected incorrect answer for these terms.</p>
             <div>
-                {#each term?.topReverseConfusionPairs as confusionPair }
+                {#each topReverseConfusionPairsUniqueArray as confusionPair }
                     <div class="box">
-                        {confusionPair.term?.term}
+                        {confusionPair?.term?.term}
                     </div>
                 {:else}
                     <div class="box center text fg0">

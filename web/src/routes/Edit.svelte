@@ -2,6 +2,7 @@
     import Noscript from "$lib/components/Noscript.svelte";
     import { onMount, mount, tick } from "svelte";
     import idbApiLayer from "$lib/idb-api-layer/idb-api-layer.js";
+    import idbLayerImg from "$lib/idb-api-layer/images.js";
     import { goto, beforeNavigate } from "$app/navigation";
     import { cancelNprogressTimeout } from "$lib/stores/nprogressTimeout.js";
     let { data } = $props();
@@ -17,38 +18,54 @@
     import IconArrowDown from "$lib/icons/ArrowDown.svelte";
     import IconPlus from "$lib/icons/Plus.svelte";
     import MenuIcon from "$lib/icons/Menu.svelte";
+    import ImageIcon from "$lib/icons/Image.svelte";
+    import XMarkIcon from "$lib/icons/CloseXMark.svelte";
+    import PencilIcon from "$lib/icons/Pencil.svelte";
 
     import { flip } from "svelte/animate";
     import { scale, fade } from "svelte/transition";
 
     import AutoResizeTextarea from "$lib/components/AutoResizeTextarea.svelte";
+    import FileInputBox from "$lib/components/FileInputBox.svelte";
 
     var showImportTermsModal = $state(false);
     var showExitConfirmationModal = $state(false);
-
     var showSubjectPicker = $state(false);
     let selectedSubject = $state(null);
-
     var unsavedChanges = false;
     var bypassUnsavedChangesConfirmation = false;
+    let objectUrls = [];
+    let showTermImageModal = $state(false);
+    let termImageModalTerm = $state();
+    let termImageModalIsDefSide = $state(false);
+    let termImageModalFiles = $state();
+    let termImageModalFileInputBox = $state();
+    let isDraft = $state(false);
+    let showRemoveTermImageModal = $state(false);
+    let removeTermImageModalTerm;
+    let removeTermImageModalIsDefSide;
 
     var terms = $state([]);
     var existingTermIdsToDelete = [];
     var key = 0;
-    function addTerm(term, def, id) {
+    function addTerm(term, def, id, termImageUrl, defImageUrl) {
         terms.push({
-            id: id ?? undefined,
+            id: id,
             term: term ?? "",
             def: def ?? "",
+            termImageUrl,
+            defImageUrl,
             key: key,
         });
         key++;
     }
-    function insertTerm(index, term, def, id) {
+    function insertTerm(index, term, def, id, termImageUrl, defImageUrl) {
         terms.splice(index, 0, {
-            id: id ?? undefined,
+            id: id,
             term: term ?? "",
             def: def ?? "",
+            termImageUrl,
+            defImageUrl,
             key: key,
         });
         key++;
@@ -82,16 +99,67 @@
         }
     }
 
-    function termsTo2DArray() {
-        var arr = [];
-        for (var index = 0; index < terms.length; index++) {
-            arr.push([terms[index].term, terms[index].def]);
-        }
-        return arr;
-    }
+    // NOTE: this old function only handles term/def text, no id, sort order, or term/def image
+    // if we ever want to use it for exporting terms to raw text/CSV we'll need this but mabye updated
+    // like how addTermsFrom2DArray is used for importing terms from CSV/text
+    //
+    // function termsTo2DArray() {
+    //     var arr = [];
+    //     for (var index = 0; index < terms.length; index++) {
+    //         arr.push([terms[index].term, terms[index].def]);
+    //     }
+    //     return arr;
+    // }
+
     function addTermsFrom2DArray(arr) {
         for (var row = 0; row < arr.length; row++) {
             addTerm(arr[row][0], arr[row][1]);
+        }
+    }
+
+    async function initTerm(termsCount, term, def) {
+        let sortOrder = termsCount;
+        if (termsCount == null) {
+            sortOrder = terms.length;
+        }
+        if (data.local) {
+            return await idbApiLayer.createTerms(data.localId, [{
+                term: term ?? "",
+                def: def ?? "",
+                sortOrder: sortOrder
+            }]); /* returns last key */
+        } else {
+            const raw = await fetch("/api/graphql", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    query: `mutation initTerm($studysetId: ID!, $term: String, $def: String, $sortOrder: Int!) {
+    createTerms(
+        studysetId: $studysetId,
+        terms: [{
+            term: $term,
+            def: $def,
+            sortOrder: $sortOrder
+        }]
+    ) {
+        id
+    }
+}`,
+                    variables: {
+                        studysetId: data.studysetId,
+                        term: term ?? "",
+                        def: def ?? "",
+                        sortOrder: sortOrder
+                    }
+                })
+            });
+            const resp = await raw.json();
+            if (resp.errors != null || resp?.data == null) {
+                console.error("Err(s) in initTerm query/resp: ", resp);
+            }
+            return resp.data.createTerms[0].id;
         }
     }
 
@@ -144,13 +212,7 @@
                             .classList.add("selected");
                     });
             }
-            if (data.new) {
-                addTerm();
-                if (data.authed) {
-                    /* and data.new is true (creating a new studyset, not updating one) */
-                }
-            } else if (data.studysetId) {
-                /* data.new is false (updating an existing studyset, not creating one) */
+            if (data.studysetId) {
                 if (data.authed) {
                     fetch("/api/graphql", {
                         method: "POST",
@@ -165,6 +227,7 @@
                                     studyset(id: $id) {
                                         title
                                         private
+                                        draft
                                         subject {
                                             name
                                             id
@@ -173,6 +236,8 @@
                                             id
                                             term
                                             def
+                                            termImageUrl
+                                            defImageUrl
                                         }
                                     }
                                 }
@@ -208,26 +273,48 @@
                                 }
                                 if (studyset.terms != null) {
                                     studyset.terms.forEach((t) => {
-                                        addTerm(t.term, t.def, t.id);
+                                        addTerm(t.term, t.def, t.id, t.termImageUrl, t.defImageUrl);
                                     });
                                 }
                                 selectedSubject = studyset.subject;
+                                isDraft = studyset.draft;
+
+                                if (studyset.draft && terms.length == 0) {
+                                    addTerm();
+                                }
                             }
                         });
+                } else {
+                    console.error("Unexpected situation: studyset is not local but user is not logged in")
                 }
-            }
-            if (data.local && !data.new) {
+            } else {
                 const studysetRecord = await idbApiLayer.getStudysetById(
                     data.localId,
-                    { terms: true },
+                    {
+                        terms: {
+                            termImageUrl: true,
+                            defImageUrl: true
+                        }
+                    },
                 );
                 if (studysetRecord) {
                     document.getElementById("edit-title").value =
                         studysetRecord.title;
                     if (studysetRecord.terms != null) {
                         studysetRecord.terms.forEach((t) => {
-                            addTerm(t.term, t.def, t.id);
+                            addTerm(t.term, t.def, t.id, t.termImageUrl, t.defImageUrl);
+                            if (t?.termImageUrl != null) {
+                                objectUrls.push(t.termImageUrl);
+                            }
+                            if (t?.defImageUrl != null) {
+                                objectUrls.push(t.defImageUrl);
+                            }
                         });
+                    }
+                    isDraft = studysetRecord.draft;
+
+                    if (studysetRecord.draft && terms.length == 0) {
+                        addTerm();
                     }
                 }
             }
@@ -584,6 +671,9 @@
         return () => {
             window.removeEventListener("keydown", onKeydown);
             window.removeEventListener("keyup", onKeyup);
+            objectUrls.forEach(objectUrl => {
+                URL.revokeObjectURL(objectUrl);
+            })
         };
     });
 
@@ -618,49 +708,24 @@
         }
 
         (async () => {
-            await idbApiLayer.updateStudyset(
-                {
-                    id: data.localId,
-                    title: document.getElementById("edit-title").value,
-                },
-                existingTerms,
-                newTerms,
-                existingTermIdsToDelete,
-            );
+            await idbApiLayer.updateStudyset({
+                id: data.localId,
+                title: document.getElementById("edit-title").value,
+                draft: false
+            });
+            if (existingTerms.length > 0) {
+                await idbApiLayer.updateTerms(existingTerms);
+            }
+            if (newTerms.length > 0) {
+                await idbApiLayer.createTerms(data.localId, newTerms);
+            }
+            if (existingTermIdsToDelete.length > 0) {
+                await idbApiLayer.deleteTerms(existingTermIdsToDelete);
+            }
             goto("/studyset/local?id=" + data.localId);
         })();
     }
 
-    var createLocalStudysetCooldown = false;
-    function createLocalStudyset() {
-        if (createLocalStudysetCooldown) {
-            return;
-        }
-
-        createLocalStudysetCooldown = true;
-        setTimeout(function () {
-            createLocalStudysetCooldown = false;
-        }, 2000);
-
-        let newTerms = [];
-        for (let index = 0; index < terms.length; index++) {
-            newTerms.push({
-                term: terms[index].term,
-                def: terms[index].def,
-                sortOrder: index,
-            });
-        }
-
-        (async () => {
-            const newId = await idbApiLayer.createStudyset(
-                {
-                    title: document.getElementById("edit-title").value,
-                },
-                newTerms,
-            );
-            goto("/studyset/local?id=" + newId);
-        })();
-    }
     var updateCloudStudysetCooldown = false;
     function updateCloudStudyset() {
         if (updateCloudStudysetCooldown) {
@@ -700,7 +765,7 @@
             credentials: "same-origin",
             body: JSON.stringify({
                 query: `mutation UpdateStudysetAndTerms($id: ID!, $studyset: StudysetInput, $terms: [TermInput!]!, $newTerms: [NewTermInput!]!, $deleteTerms: [ID!]!) {
-                    updateStudyset(id: $id, studyset: $studyset) { id }
+                    updateStudyset(id: $id, studyset: $studyset, draft: false) { id }
                     updateTerms(studysetId: $id, terms: $terms) { id }
                     createTerms(studysetId: $id, terms: $newTerms) { id }
                     deleteTerms(studysetId: $id, ids: $deleteTerms)
@@ -730,108 +795,12 @@
                 }
             });
     }
-    var createCloudStudysetCooldown = false;
-    function createCloudStudyset() {
-        if (createCloudStudysetCooldown) {
-            return;
-        }
-
-        createCloudStudysetCooldown = true;
-        setTimeout(function () {
-            createCloudStudysetCooldown = false;
-        }, 2000);
-        const title = document.getElementById("edit-title").value;
-        const isPrivate = document
-            .getElementById("edit-private-true")
-            .classList.contains("selected");
-        let newTerms = [];
-        for (let index = 0; index < terms.length; index++) {
-            newTerms.push({
-                term: terms[index].term,
-                def: terms[index].def,
-                sortOrder: index,
-            });
-        }
-        const query = `
-            mutation CreateStudyset($studyset: StudysetInput!, $folderId: ID) {
-                createStudyset(studyset: $studyset, folderId: $folderId) {
-                    id
-                }
-            }
-        `;
-
-        const variables = {
-            studyset: {
-                title,
-                private: isPrivate,
-                subjectId: selectedSubject?.id ?? null,
-            },
-            folderId: data?.folderId,
-        };
-
-        fetch("/api/graphql", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                Accept: "application/json",
-            },
-            body: JSON.stringify({
-                query,
-                variables,
-            }),
-        })
-            .then((response) => response.json())
-            .then((result) => {
-                if (result.errors) {
-                    alert("Error creating studyset");
-                    console.error(result.errors);
-                } else if (result.data?.createStudyset) {
-                    const newStudysetId = result.data.createStudyset.id;
-                    if (newTerms.length > 0) {
-                        fetch("/api/graphql", {
-                            method: "POST",
-                            headers: {
-                                "Content-Type": "application/json",
-                                Accept: "application/json",
-                            },
-                            body: JSON.stringify({
-                                query: `mutation CreateTerms($studysetId: ID!, $terms: [NewTermInput!]!) {
-                                createTerms(studysetId: $studysetId, terms: $terms) { id }
-                            }`,
-                                variables: {
-                                    studysetId: newStudysetId,
-                                    terms: newTerms,
-                                },
-                            }),
-                        }).then(() => {
-                            goto("/studysets/" + newStudysetId);
-                        });
-                    } else {
-                        goto("/studysets/" + newStudysetId);
-                    }
-                } else {
-                    alert("Unexpected response when creating studyset");
-                }
-            })
-            .catch((error) => {
-                alert("Network error");
-                console.error(error);
-            });
-    }
-    function saveButtonOrCreateButton() {
+    function saveButton() {
         bypassUnsavedChangesConfirmation = true;
-        if (data.new) {
-            if (data.authed) {
-                createCloudStudyset();
-            } else {
-                createLocalStudyset();
-            }
+        if (data.local) {
+            updateLocalStudyset();
         } else {
-            if (data.local) {
-                updateLocalStudyset();
-            } else {
-                updateCloudStudyset();
-            }
+            updateCloudStudyset();
         }
 
         // fetch("/dashboard/set-dashboard-state", {
@@ -874,6 +843,44 @@
     <title>Quizfreely</title>
 </svelte:head>
 
+{#snippet termImage(term, isDefSide)}
+    {#if term?.[isDefSide ? "defImageUrl" : "termImageUrl"] == null}
+        <div class="flex" style="margin-top: 0.2rem;">
+            <button class="faint img-button-thin-fit text fg0" onclick={async () => {
+                if (term.id == null) {
+                    term.id = await initTerm(); /* returns ID */
+                }
+
+                showTermImageModal = true;
+                termImageModalTerm = term;
+                termImageModalIsDefSide = isDefSide;
+            }}>
+                <ImageIcon></ImageIcon> Add Image
+            </button>
+        </div>
+    {:else}
+        <div class="flex" style="flex-direction: column; flex-wrap: nowrap; gap: 0.2rem; margin-top: 0.6rem;">
+            <div><img src={term?.[isDefSide ? "defImageUrl" : "termImageUrl"]} class="term-image"></div>
+            <div class="flex" style="margin-top: 0px; row-gap: 0.2rem; column-gap: 0.4rem;">
+                <button class="faint img-button-thin-fit text fg0" onclick={async () => {
+                    showTermImageModal = true;
+                    termImageModalTerm = term;
+                    termImageModalIsDefSide = isDefSide;
+                }}>
+                    <PencilIcon></PencilIcon> Edit Image
+                </button>
+                <button class="faint img-button-thin-fit text fg0" onclick={async () => {
+                    showRemoveTermImageModal = true;
+                    removeTermImageModalTerm = term;
+                    removeTermImageModalIsDefSide = isDefSide;
+                }}>
+                    <XMarkIcon></XMarkIcon> Remove Image
+                </button>
+            </div>
+        </div>
+    {/if}
+{/snippet}
+
 <Noscript />
 <main>
     <div class="grid page" style="min-height: 80vh;">
@@ -882,11 +889,13 @@
                 <a
                     class="button faint"
                     data-sveltekit-preload-data="false"
-                    href={data.new
-                        ? "/dashboard"
-                        : data.local
-                          ? "/studyset/local?id=" + data.localId
-                          : "/studysets/" + data.studysetId}
+                    href={isDraft ?
+                        "/dashboard" :
+                        (data.local ?
+                            "/studyset/local?id=" + data.localId :
+                            "/studysets/" + data.studysetId
+                        )
+                    }
                 >
                     <IconArrowLeft />
                     Back
@@ -936,74 +945,80 @@
                         animate:flip={{ duration: 400 }}
                         transition:scale={{ duration: 400 }}
                     >
-                        <AutoResizeTextarea
-                            div={{
-                                class: "term-row-box-term",
-                            }}
-                            textarea={{
-                                placeholder: "Term",
-                                rows: "2",
-                                oninput: () => {
-                                    if (!unsavedChanges) {
-                                        unsavedChanges = true;
-                                    }
-                                },
-                                onfocus: () => {
-                                    defFocused = false;
-                                    focusedRow = index;
-                                    showFocusBorder = false;
-                                    resetKeySeq();
-                                },
-                                style: `transition-duration: 0.2s; ${
-                                    showFocusBorder &&
-                                    useOhnoColorFocusBorder &&
-                                    !defFocused &&
-                                    focusedRow == index
-                                        ? "border-color: var(--ohno);"
-                                        : showFocusBorder &&
-                                            !defFocused &&
-                                            focusedRow == index
-                                          ? "border-color: var(--main)"
-                                          : ""
-                                }`,
-                            }}
-                            bind:value={term.term}
-                            bind:textareaElement={term.termTextarea}
-                        />
-                        <AutoResizeTextarea
-                            div={{
-                                class: "term-row-box-def",
-                            }}
-                            textarea={{
-                                placeholder: "Definition",
-                                rows: "2",
-                                oninput: () => {
-                                    if (!unsavedChanges) {
-                                        unsavedChanges = true;
-                                    }
-                                },
-                                onfocus: () => {
-                                    defFocused = true;
-                                    focusedRow = index;
-                                    showFocusBorder = false;
-                                    resetKeySeq();
-                                },
-                                style: `transition-duration: 0.2s; ${
-                                    showFocusBorder &&
-                                    useOhnoColorFocusBorder &&
-                                    defFocused &&
-                                    focusedRow == index
-                                        ? "border-color: var(--ohno);"
-                                        : showFocusBorder &&
-                                            defFocused &&
-                                            focusedRow == index
-                                          ? "border-color: var(--main)"
-                                          : ""
-                                }`,
-                            }}
-                            bind:value={term.def}
-                            bind:textareaElement={term.defTextarea}
-                        />
+                        <div>
+                            <AutoResizeTextarea
+                                div={{
+                                    class: "term-row-box-term",
+                                }}
+                                textarea={{
+                                    placeholder: "Term",
+                                    rows: "2",
+                                    oninput: () => {
+                                        if (!unsavedChanges) {
+                                            unsavedChanges = true;
+                                        }
+                                    },
+                                    onfocus: () => {
+                                        defFocused = false;
+                                        focusedRow = index;
+                                        showFocusBorder = false;
+                                        resetKeySeq();
+                                    },
+                                    style: `transition-duration: 0.2s; ${
+                                        showFocusBorder &&
+                                        useOhnoColorFocusBorder &&
+                                        !defFocused &&
+                                        focusedRow == index
+                                            ? "border-color: var(--ohno);"
+                                            : showFocusBorder &&
+                                                !defFocused &&
+                                                focusedRow == index
+                                              ? "border-color: var(--main)"
+                                              : ""
+                                    }`,
+                                }}
+                                bind:value={term.term}
+                                bind:textareaElement={term.termTextarea}
+                            />
+                            {@render termImage(term, false)}
+                        </div>
+                        <div>
+                            <AutoResizeTextarea
+                                div={{
+                                    class: "term-row-box-def",
+                                }}
+                                textarea={{
+                                    placeholder: "Definition",
+                                    rows: "2",
+                                    oninput: () => {
+                                        if (!unsavedChanges) {
+                                            unsavedChanges = true;
+                                        }
+                                    },
+                                    onfocus: () => {
+                                        defFocused = true;
+                                        focusedRow = index;
+                                        showFocusBorder = false;
+                                        resetKeySeq();
+                                    },
+                                    style: `transition-duration: 0.2s; ${
+                                        showFocusBorder &&
+                                        useOhnoColorFocusBorder &&
+                                        defFocused &&
+                                        focusedRow == index
+                                            ? "border-color: var(--ohno);"
+                                            : showFocusBorder &&
+                                                defFocused &&
+                                                focusedRow == index
+                                              ? "border-color: var(--main)"
+                                              : ""
+                                    }`,
+                                }}
+                                bind:value={term.def}
+                                bind:textareaElement={term.defTextarea}
+                            />
+                            {@render termImage(term, true)}
+                        </div>
                         <div class="flex center term-row-box-actions">
                             <Dropdown
                                 button={{
@@ -1097,10 +1112,10 @@
             <div class="flex" style="align-items:center;">
                 <button
                     data-sveltekit-preload-data="false"
-                    onclick={saveButtonOrCreateButton}
+                    onclick={saveButton}
                 >
                     <IconCheckmark />
-                    {#if data.new}
+                    {#if isDraft}
                         Create
                     {:else}
                         Save
@@ -1109,38 +1124,16 @@
                 <a
                     class="button alt"
                     data-sveltekit-preload-data="false"
-                    href={data.new
-                        ? "/dashboard"
-                        : data.local
-                          ? "/studyset/local?id=" + data.localId
-                          : "/studysets/" + data.studysetId}
+                    href={isDraft ?
+                        "/dashboard" :
+                        (data.local ?
+                            "/studyset/local?id=" + data.localId :
+                            "/studysets/" + data.studysetId
+                        )
+                    }
                 >
                     Cancel
                 </a>
-                {#if data.new && data.authed}
-                    <Dropdown
-                        button={{
-                            class: "dropdown-toggle",
-                            "aria-label": "saving options dropdown",
-                        }}
-                    >
-                        {#snippet buttonContent()}
-                            <IconMoreDotsV />
-                        {/snippet}
-                        {#snippet divContent()}
-                            <button
-                                data-sveltekit-preload-data="false"
-                                onclick={() => {
-                                    bypassUnsavedChangesConfirmation = true;
-                                    createLocalStudyset();
-                                }}
-                            >
-                                <IconLocal />
-                                Save Locally
-                            </button>
-                        {/snippet}
-                    </Dropdown>
-                {/if}
             </div>
             {#if showImportTermsModal}
                 <div class="modal" transition:fade={{ duration: 200 }}>
@@ -1411,7 +1404,7 @@
                         <div class="flex flexcolonmobile">
                             <button
                                 data-sveltekit-preload-data="false"
-                                onclick={saveButtonOrCreateButton}
+                                onclick={saveButton}
                                 class="yay alt"
                             >
                                 <IconCheckmark />
@@ -1438,6 +1431,93 @@
                     </div>
                 </div>
             {/if}
+            {#if showTermImageModal}
+                <div class="modal" transition:fade={{ duration: 200 }}>
+                    <div class="content">
+                        <h4>{(termImageModalTerm?.[termImageModalIsDefSide ? "defImageUrl" : "termImageUrl"] == null) ? "Add Image" : "Update Image"}</h4>
+                        <FileInputBox accept="image/jpeg, image/png, image/webp, .jpeg, .jpg, .png, .webp" bind:this={termImageModalFileInputBox} onChangeCallback={(files) => termImageModalFiles = files}></FileInputBox>
+                        <div class="flex">
+                            <button class="pretty-button-disableable" disabled={termImageModalFiles == null || termImageModalFiles.length == 0} onclick={async () => {
+                                if (data.local) {
+                                    const returnedBlob = await idbLayerImg.processAndUpdateTermImage(termImageModalTerm.id, termImageModalIsDefSide, termImageModalFiles[0]);
+                                    if (returnedBlob != null) {
+                                        const newObjectUrl = URL.createObjectURL(returnedBlob);
+                                        termImageModalTerm[termImageModalIsDefSide ? "defImageUrl" : "termImageUrl"] = newObjectUrl;
+                                        objectUrls.push(newObjectUrl);
+                                    }
+                                    showTermImageModal = false;
+                                    termImageModalFileInputBox.clear();
+                                } else {
+                                    const raw = await fetch(`/api/term-images/${termImageModalTerm.id}/${termImageModalIsDefSide ? "def" : "term"}`, {
+                                        method: "PUT",
+                                        body: termImageModalFiles[0]
+                                    });
+                                    const resp = await raw.json();
+                                    if (resp?.data?.imageUrl == null) {
+                                        console.error("Error in term-image-upload resp: ", resp);
+                                    } else {
+                                        termImageModalTerm[termImageModalIsDefSide ? "defImageUrl" : "termImageUrl"] = resp.data.imageUrl;
+                                    }
+                                    showTermImageModal = false;
+                                    termImageModalFileInputBox.clear();
+                                }
+                            }}>
+                                <IconCheckmark></IconCheckmark> Save
+                            </button>
+                            <button class="alt" onclick={() => {
+                                showTermImageModal = false;
+                                termImageModalFileInputBox.clear();
+                            }}>
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            {/if}
+            {#if showRemoveTermImageModal}
+                <div class="modal" transition:fade={{ duration: 200 }}>
+                    <div class="content">
+                        <h4>Remove Image?</h4>
+                        <p>Are you sure you want to remove this term's image?</p>
+                        <div class="flex">
+                            <button class="ohno" onclick={async () => {
+                                if (data.local) {
+                                    const oldObjectUrl = removeTermImageModalTerm[
+                                        removeTermImageModalIsDefSide ? "defImageUrl" : "termImageUrl"
+                                    ];
+
+                                    const success = await idbLayerImg.removeTermImage(removeTermImageModalTerm.id, removeTermImageModalIsDefSide);
+                                    if (success) {
+                                        removeTermImageModalTerm[removeTermImageModalIsDefSide ? "defImageUrl" : "termImageUrl"] = null;
+                                        URL.revokeObjectURL(oldObjectUrl);
+                                    } else {
+                                        alert("Error removing term image :(")
+                                    }
+                                    showRemoveTermImageModal = false;
+                                } else {
+                                    const raw = await fetch(`/api/term-images/${removeTermImageModalTerm.id}/${removeTermImageModalIsDefSide ? "def" : "term"}`, {
+                                        method: "DELETE"
+                                    });
+                                    const resp = await raw.json();
+                                    if (resp?.error) {
+                                        console.error("Error in remove-term-image resp: ", resp);
+                                    } else {
+                                        removeTermImageModalTerm[removeTermImageModalIsDefSide ? "defImageUrl" : "termImageUrl"] = null;
+                                    }
+                                    showRemoveTermImageModal = false;
+                                }
+                            }}>
+                                <IconTrash></IconTrash> Remove
+                            </button>
+                            <button class="alt" onclick={() => {
+                                showRemoveTermImageModal = false;
+                            }}>
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            {/if}
         </div>
     </div>
 </main>
@@ -1448,6 +1528,7 @@
         grid-template-rows: auto;
         grid-template-columns: 1fr 1fr auto;
         grid-template-areas: "term def actions";
+        padding-bottom: 0.4rem;
     }
 
     .term-row-box > :global(.term-row-box-term) {
@@ -1493,5 +1574,26 @@
 
     .slightly-smaller-textbox {
         width: 10rem;
+    }
+
+    button.img-button-thin-fit,
+    .button.img-button-thin-fit {
+        padding: 0.4rem 0.6rem;
+        font-size: 0.9rem;
+    }
+
+    button.pretty-button-disableable:disabled,
+    .button.pretty-button-disableable:disabled,
+    button.pretty-button-disableable.disabled,
+    .button.pretty-button-disableable.disabled {
+        opacity: 0.6;
+    }
+
+    .term-image {
+        max-width: 400px;
+        max-height: 300px;
+        margin: 0px;
+        padding: 0px;
+        border-radius: 0.8rem;
     }
 </style>

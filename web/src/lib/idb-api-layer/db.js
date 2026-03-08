@@ -1,6 +1,6 @@
 /*!
  * Quizfreely IDB API Layer, licensed under GPL-3.0-or-later.
- * Copyright (c) 2025 Ehan Ahamed and contributors
+ * Copyright (c) 2025-2026 Ehan Ahamed and contributors
  *
  * https://codeberg.org/quizfreely/idb-api-layer
  * https://github.com/quizfreely/idb-api-layer
@@ -154,5 +154,12 @@ db.version(13).stores({
 })
 db.version(14).stores({
     termProgressHistory: "++id, timestamp, termId, termCorrectCount, termIncorrectCount, defCorrectCount, defIncorrectCount"
+})
+db.version(15).stores({
+    images: "++key"
+}).upgrade(async tx => {
+    await tx.studysets.toCollection().modify(studyset => {
+        studyset.draft = false;
+    });
 })
 export default db;

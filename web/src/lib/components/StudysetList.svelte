@@ -32,6 +32,8 @@
         savedDropdownContent,
         topMenu,
         folderMenu,
+        onFolderEnter,
+        onFolderExit,
     } = $props();
 
     let localStudysetList = $state([]);
@@ -41,7 +43,10 @@
     let savedCurrentlyCollapsed = $state(true);
 
     onMount(async function () {
-        localStudysetList = await db.studysets.orderBy("updatedAt").toArray();
+        localStudysetList = await db.studysets
+            .orderBy("updatedAt")
+            .filter((studyset) => studyset.draft == false)
+            .toArray();
         for (const studyset of localStudysetList) {
             studyset.termsCount =
                 (await idbApiLayer.getTermsByStudysetId(studyset.id))?.length ??
@@ -58,6 +63,8 @@
 
     let inFolder = $state(false);
     let currentFolder = $state(null);
+    let folderPage = $state(0);
+    let folderPageInfo = $state(null);
     let showErrorBox = $state(false);
     let errorBoxText = $state("");
 
@@ -77,6 +84,20 @@
                     pageInfo { hasNextPage hasPreviousPage startCursor endCursor }
                 }
             }`;
+        } else if (type === "folder") {
+            cursor =
+                direction === "next"
+                    ? folderPageInfo?.endCursor
+                    : folderPageInfo?.startCursor;
+            query = `query ($id: ID!, $first: Int, $after: String, $last: Int, $before: String) {
+                folder(id: $id) {
+                    studysets(first: $first, after: $after, last: $last, before: $before) {
+                        edges { node { id title private termsCount updatedAt folder { id name } } }
+                        pageInfo { hasNextPage hasPreviousPage startCursor endCursor }
+                    }
+                }
+            }`;
+            variables.id = currentFolder?.id;
         } else if (type === "saved") {
             cursor =
                 direction === "next"
@@ -118,6 +139,11 @@
                     data.mySavedStudysetsPageInfo = connection.pageInfo;
                     savedPage += direction === "next" ? 1 : -1;
                 }
+            } else if (type === "folder" && resp?.data?.folder?.studysets) {
+                const connection = resp.data.folder.studysets;
+                currentFolder.studysets = connection.edges.map((e) => e.node);
+                folderPageInfo = connection.pageInfo;
+                folderPage += direction === "next" ? 1 : -1;
             }
         } catch (err) {
             console.error("Error loading page:", err);
@@ -140,6 +166,9 @@
                 return data.studysetList?.length > COLLAPSE_LENGTH;
             return data.studysetListPageInfo?.hasNextPage;
         }
+        if (type === "folder") {
+            return folderPageInfo?.hasNextPage;
+        }
         if (type === "saved") {
             if (savedCurrentlyCollapsed)
                 return data.mySavedStudysets?.length > COLLAPSE_LENGTH;
@@ -159,6 +188,9 @@
         if (type === "cloud") {
             if (cloudCurrentlyCollapsed) return false;
             return data.studysetListPageInfo?.hasPreviousPage;
+        }
+        if (type === "folder") {
+            return folderPageInfo?.hasPreviousPage;
         }
         if (type === "saved") {
             if (savedCurrentlyCollapsed) return false;
@@ -182,13 +214,23 @@
     folder(id: $id) {
         id
         name
-        studysets {
-            id
-            title
-            termsCount
-            folder {
-                id
-                name
+        studysets(first: 24) {
+            edges {
+                node {
+                    id
+                    title
+                    termsCount
+                    folder {
+                        id
+                        name
+                    }
+                }
+            }
+            pageInfo {
+                hasNextPage
+                hasPreviousPage
+                startCursor
+                endCursor
             }
         }
     }
@@ -201,8 +243,19 @@
             const resp = await respRaw.json();
             if (resp?.data?.folder) {
                 currentFolder = resp.data.folder;
+                // Initialize studysets list from edges
+                if (currentFolder.studysets && currentFolder.studysets.edges) {
+                    folderPageInfo = currentFolder.studysets.pageInfo;
+                    currentFolder.studysets = currentFolder.studysets.edges.map(
+                        (e) => e.node,
+                    );
+                }
                 showErrorBox = false;
                 inFolder = true;
+                folderPage = 0;
+                if (onFolderEnter) {
+                    onFolderEnter(currentFolder);
+                }
             } else {
                 console.log(
                     "unsucessful response while loading folder: ",
@@ -220,6 +273,9 @@
 
     export function exitFolderView() {
         inFolder = false;
+        if (onFolderExit) {
+            onFolderExit();
+        }
     }
 
     export function getFolderData() {
@@ -239,12 +295,7 @@
         {/if}
         {#if inFolder}
             <div class="flex">
-                <button
-                    class="faint"
-                    onclick={() => {
-                        inFolder = false;
-                    }}
-                >
+                <button class="faint" onclick={exitFolderView}>
                     <BackIcon></BackIcon> Back
                 </button>
             </div>
@@ -264,6 +315,35 @@
                         ></StudysetLinkBox>
                     {/each}
                 </div>
+                {#if folderPageInfo?.hasNextPage || folderPageInfo?.hasPreviousPage}
+                    <div
+                        class={hasNextPageFunc("folder") &&
+                        hasPrevPageFunc("folder")
+                            ? "combo-buttons"
+                            : ""}
+                    >
+                        {#if hasPrevPageFunc("folder")}
+                            <button
+                                class="button alt {hasNextPageFunc('folder')
+                                    ? 'left'
+                                    : ''}"
+                                onclick={() => loadPage("folder", "prev")}
+                            >
+                                <ArrowLeftIcon></ArrowLeftIcon> Previous
+                            </button>
+                        {/if}
+                        {#if hasNextPageFunc("folder")}
+                            <button
+                                class="button alt {hasPrevPageFunc('folder')
+                                    ? 'right'
+                                    : ''}"
+                                onclick={() => loadPage("folder", "next")}
+                            >
+                                Next <ArrowRightIcon></ArrowRightIcon>
+                            </button>
+                        {/if}
+                    </div>
+                {/if}
             {:else}
                 <div class="box">
                     <p class="fg0">This folder is empty</p>
@@ -311,45 +391,39 @@
                     {/if}
                 </div>
                 {#if (collapseCloud && data.studysetList?.length > COLLAPSE_LENGTH) || (!cloudCurrentlyCollapsed && (data.studysetListPageInfo?.hasNextPage || data.studysetListPageInfo?.hasPreviousPage))}
+                    {#if !cloudCurrentlyCollapsed && (hasNextPageFunc("cloud") || hasPrevPageFunc("cloud"))}
+                        <div
+                            class={hasNextPageFunc("cloud") &&
+                            hasPrevPageFunc("cloud")
+                                ? "combo-buttons"
+                                : ""}
+                        >
+                            {#if hasPrevPageFunc("cloud")}
+                                <button
+                                    class="button alt {hasNextPageFunc('cloud')
+                                        ? 'left'
+                                        : ''}"
+                                    onclick={() => loadPage("cloud", "prev")}
+                                >
+                                    <ArrowLeftIcon></ArrowLeftIcon> Previous
+                                </button>
+                            {/if}
+                            {#if hasNextPageFunc("cloud")}
+                                <button
+                                    class="button alt {hasPrevPageFunc('cloud')
+                                        ? 'right'
+                                        : ''}"
+                                    onclick={() => loadPage("cloud", "next")}
+                                >
+                                    Next <ArrowRightIcon></ArrowRightIcon>
+                                </button>
+                            {/if}
+                        </div>
+                    {/if}
                     <div
                         class="flex center"
                         style="width: 100%; margin-top: 0.6rem; flex-direction: column; align-items: center; gap: 0.8rem;"
                     >
-                        {#if !cloudCurrentlyCollapsed && (hasNextPageFunc("cloud") || hasPrevPageFunc("cloud"))}
-                            <div
-                                class={hasNextPageFunc("cloud") &&
-                                hasPrevPageFunc("cloud")
-                                    ? "combo-buttons"
-                                    : ""}
-                            >
-                                {#if hasPrevPageFunc("cloud")}
-                                    <button
-                                        class="button alt {hasNextPageFunc(
-                                            'cloud',
-                                        )
-                                            ? 'left'
-                                            : ''}"
-                                        onclick={() =>
-                                            loadPage("cloud", "prev")}
-                                    >
-                                        <ArrowLeftIcon></ArrowLeftIcon> Previous
-                                    </button>
-                                {/if}
-                                {#if hasNextPageFunc("cloud")}
-                                    <button
-                                        class="button alt {hasPrevPageFunc(
-                                            'cloud',
-                                        )
-                                            ? 'right'
-                                            : ''}"
-                                        onclick={() =>
-                                            loadPage("cloud", "next")}
-                                    >
-                                        Next <ArrowRightIcon></ArrowRightIcon>
-                                    </button>
-                                {/if}
-                            </div>
-                        {/if}
                         <button
                             class="faint"
                             onclick={() => {
@@ -389,39 +463,39 @@
                 {/if}
             </div>
             {#if (collapseLocal && localStudysetList?.length > COLLAPSE_LENGTH) || (!localCurrentlyCollapsed && localStudysetList?.length > EXPANDED_PER_PAGE)}
+                {#if !localCurrentlyCollapsed && (hasNextPageFunc("local") || hasPrevPageFunc("local"))}
+                    <div
+                        class={hasNextPageFunc("local") &&
+                        hasPrevPageFunc("local")
+                            ? "combo-buttons"
+                            : ""}
+                    >
+                        {#if hasPrevPageFunc("local")}
+                            <button
+                                class="button alt {hasNextPageFunc('local')
+                                    ? 'left'
+                                    : ''}"
+                                onclick={() => localPage--}
+                            >
+                                <ArrowLeftIcon></ArrowLeftIcon> Previous
+                            </button>
+                        {/if}
+                        {#if hasNextPageFunc("local")}
+                            <button
+                                class="button alt {hasPrevPageFunc('local')
+                                    ? 'right'
+                                    : ''}"
+                                onclick={() => localPage++}
+                            >
+                                Next <ArrowRightIcon></ArrowRightIcon>
+                            </button>
+                        {/if}
+                    </div>
+                {/if}
                 <div
                     class="flex center"
                     style="width: 100%; margin-top: 0.6rem; flex-direction: column; align-items: center; gap: 0.8rem;"
                 >
-                    {#if !localCurrentlyCollapsed && (hasNextPageFunc("local") || hasPrevPageFunc("local"))}
-                        <div
-                            class={hasNextPageFunc("local") &&
-                            hasPrevPageFunc("local")
-                                ? "combo-buttons"
-                                : ""}
-                        >
-                            {#if hasPrevPageFunc("local")}
-                                <button
-                                    class="button alt {hasNextPageFunc('local')
-                                        ? 'left'
-                                        : ''}"
-                                    onclick={() => localPage--}
-                                >
-                                    <ArrowLeftIcon></ArrowLeftIcon> Previous
-                                </button>
-                            {/if}
-                            {#if hasNextPageFunc("local")}
-                                <button
-                                    class="button alt {hasPrevPageFunc('local')
-                                        ? 'right'
-                                        : ''}"
-                                    onclick={() => localPage++}
-                                >
-                                    Next <ArrowRightIcon></ArrowRightIcon>
-                                </button>
-                            {/if}
-                        </div>
-                    {/if}
                     <button
                         class="faint"
                         onclick={() => {
@@ -454,45 +528,39 @@
                     {/each}
                 </div>
                 {#if (collapseSaved && data.mySavedStudysets?.length > COLLAPSE_LENGTH) || (!savedCurrentlyCollapsed && (data.mySavedStudysetsPageInfo?.hasNextPage || data.mySavedStudysetsPageInfo?.hasPreviousPage))}
+                    {#if !savedCurrentlyCollapsed && (hasNextPageFunc("saved") || hasPrevPageFunc("saved"))}
+                        <div
+                            class={hasNextPageFunc("saved") &&
+                            hasPrevPageFunc("saved")
+                                ? "combo-buttons"
+                                : ""}
+                        >
+                            {#if hasPrevPageFunc("saved")}
+                                <button
+                                    class="button alt {hasNextPageFunc('saved')
+                                        ? 'left'
+                                        : ''}"
+                                    onclick={() => loadPage("saved", "prev")}
+                                >
+                                    <ArrowLeftIcon></ArrowLeftIcon> Previous
+                                </button>
+                            {/if}
+                            {#if hasNextPageFunc("saved")}
+                                <button
+                                    class="button alt {hasPrevPageFunc('saved')
+                                        ? 'right'
+                                        : ''}"
+                                    onclick={() => loadPage("saved", "next")}
+                                >
+                                    Next <ArrowRightIcon></ArrowRightIcon>
+                                </button>
+                            {/if}
+                        </div>
+                    {/if}
                     <div
                         class="flex center"
                         style="width: 100%; margin-top: 0.6rem; flex-direction: column; align-items: center; gap: 0.8rem;"
                     >
-                        {#if !savedCurrentlyCollapsed && (hasNextPageFunc("saved") || hasPrevPageFunc("saved"))}
-                            <div
-                                class={hasNextPageFunc("saved") &&
-                                hasPrevPageFunc("saved")
-                                    ? "combo-buttons"
-                                    : ""}
-                            >
-                                {#if hasPrevPageFunc("saved")}
-                                    <button
-                                        class="button alt {hasNextPageFunc(
-                                            'saved',
-                                        )
-                                            ? 'left'
-                                            : ''}"
-                                        onclick={() =>
-                                            loadPage("saved", "prev")}
-                                    >
-                                        <ArrowLeftIcon></ArrowLeftIcon> Previous
-                                    </button>
-                                {/if}
-                                {#if hasNextPageFunc("saved")}
-                                    <button
-                                        class="button alt {hasPrevPageFunc(
-                                            'saved',
-                                        )
-                                            ? 'right'
-                                            : ''}"
-                                        onclick={() =>
-                                            loadPage("saved", "next")}
-                                    >
-                                        Next <ArrowRightIcon></ArrowRightIcon>
-                                    </button>
-                                {/if}
-                            </div>
-                        {/if}
                         <button
                             class="faint"
                             onclick={() => {

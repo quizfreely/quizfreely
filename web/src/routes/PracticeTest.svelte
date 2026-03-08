@@ -40,82 +40,122 @@
     }
     let alreadyOverLocalPTStudysetId = $state(-1);
     let mounted = $state(false);
-    onMount(async () => {
-        mounted = true;
-        if (data?.settingsDateTimeFmtHours == "24") {
-            fancyTimestamp.hours = 24;
-        } else if (data?.settingsDateTimeFmtHours == "12") {
-            fancyTimestamp.hours = 12;
-        }
-
-        if (data.local && data.alreadyOver) {
-            const pt = (
-                await db.practiceTests
-                    .where("id")
-                    .equals(data.practiceTestId)
-                    .toArray()
-            )?.[0];
-            if (pt == null) {
-                alert("invalid local practice test id");
-                console.error("local practice test not found");
-            } else {
-                questions = pt.questions.map(
-                    mapPracticeTestQuestionToQuestionComponentFormat,
-                );
-                questionsCorrect = pt.questionsCorrect;
-                alreadyOverLocalPTStudysetId = pt.studysetId;
+    onMount(() => {
+        let objectKeys = [];
+        (async () => {
+            mounted = true;
+            if (data?.settingsDateTimeFmtHours == "24") {
+                fancyTimestamp.hours = 24;
+            } else if (data?.settingsDateTimeFmtHours == "12") {
+                fancyTimestamp.hours = 12;
             }
-        }
 
-        if (data.local && !data.alreadyOver) {
-            /* studyset is local, so regardless of wheater the user is logged in or not,
-            we load the studyset and progress locally */
-            const studyset = await idbApiLayer.getStudysetById(data.localId, {
-                terms: {
-                    progress: true,
-                    topConfusionPairs: {
-                        confusedTerm: true,
-                    },
-                    topReverseConfusionPairs: {
-                        term: true,
-                    },
-                },
-                practiceTests: true,
-            });
-            terms = studyset.terms;
-            practiceTests = studyset?.practiceTests;
-        }
-
-        if (!data.authed && !data.local && !data.alreadyOver) {
-            /* not logged in, so user data is local,
-            but studyset is a cloud studyset,
-            so we need to map local progress to cloud terms
-
-            `terms` has already been populated during SSR (above, before onMount) */
-            practiceTests = await db.practiceTests
-                .where("studysetId")
-                .equals(data.studysetId)
-                .toArray();
-            practiceTests?.sort(
-                /* timestamps are ISO strings in UTC,
-                so lexical/alphanumeric sorting is the same as chronological sorting
-                also you see we're comparing `b` to `a`, so its descending,
-                so most recent is first */
-                (a, b) => b.timestamp.localeCompare(a.timestamp),
-            );
-            practiceTests = practiceTests;
-
-            for (const term of terms) {
-                term.progress = await db.termProgress
-                    .where("termId")
-                    .equals(term.id)
-                    .toArray()?.[0];
-                term.topConfusionPairs = await idbApiLayer.getTopConfusionPairs(
-                    term.id,
-                );
-                term.topReverseConfusionPairs =
-                    await idbApiLayer.getTopReverseConfusionPairs(term.id);
+            if (data.local && data.alreadyOver) {
+                const pt = (
+                    await db.practiceTests
+                        .where("id")
+                        .equals(data.practiceTestId)
+                        .toArray()
+                )?.[0];
+                if (pt == null) {
+                    alert("invalid local practice test id");
+                    console.error("local practice test not found");
+                } else {
+                    questions = pt.questions.map(
+                        mapPracticeTestQuestionToQuestionComponentFormat,
+                    );
+                    questionsCorrect = pt.questionsCorrect;
+                    alreadyOverLocalPTStudysetId = pt.studysetId;
+                }
             }
+
+            if (data.local && !data.alreadyOver) {
+                /* studyset is local, so regardless of wheater the user is logged in or not,
+                we load the studyset and progress locally */
+                const studyset = await idbApiLayer.getStudysetById(data.localId, {
+                    terms: {
+                        progress: true,
+                        topConfusionPairs: {
+                            confusedTerm: {
+                                termImageUrl: true,
+                                defImageUrl: true
+                            },
+                        },
+                        topReverseConfusionPairs: {
+                            term: {
+                                termImageUrl: true,
+                                defImageUrl: true
+                            },
+                        },
+                        termImageUrl: true,
+                        defImageUrl: true
+                    },
+                    practiceTests: true,
+                });
+                terms = studyset.terms;
+                terms.forEach(term => {
+                    if (term.termImageUrl != null) {
+                        objectKeys.push(term.termImageUrl);
+                    }
+                    if (term.defImageUrl != null) {
+                        objectKeys.push(term.defImageUrl);
+                    }
+                    term.topConfusionPairs.forEach(confusionPair => {
+                        if (confusionPair?.confusedTerm?.termImageUrl != null) {
+                            objectKeys.push(confusionPair.confusedTerm.termImageUrl);
+                        }
+                        if (confusionPair?.confusedTerm?.defImageUrl != null) {
+                            objectKeys.push(confusionPair.confusedTerm.defImageUrl);
+                        }
+                    });
+                    term.topReverseConfusionPairs.forEach(confusionPair => {
+                        if (confusionPair?.confusedTerm?.termImageUrl != null) {
+                            objectKeys.push(confusionPair.confusedTerm.termImageUrl);
+                        }
+                        if (confusionPair?.confusedTerm?.defImageUrl != null) {
+                            objectKeys.push(confusionPair.confusedTerm.defImageUrl);
+                        }
+                    });
+                });
+                practiceTests = studyset?.practiceTests;
+            }
+
+            if (!data.authed && !data.local && !data.alreadyOver) {
+                /* not logged in, so user data is local,
+                but studyset is a cloud studyset,
+                so we need to map local progress to cloud terms
+
+                `terms` has already been populated during SSR (above, before onMount) */
+                practiceTests = await db.practiceTests
+                    .where("studysetId")
+                    .equals(data.studysetId)
+                    .toArray();
+                practiceTests?.sort(
+                    /* timestamps are ISO strings in UTC,
+                    so lexical/alphanumeric sorting is the same as chronological sorting
+                    also you see we're comparing `b` to `a`, so its descending,
+                    so most recent is first */
+                    (a, b) => b.timestamp.localeCompare(a.timestamp),
+                );
+                practiceTests = practiceTests;
+
+                for (const term of terms) {
+                    term.progress = await db.termProgress
+                        .where("termId")
+                        .equals(term.id)
+                        .toArray()?.[0];
+                    term.topConfusionPairs = await idbApiLayer.getTopConfusionPairs(
+                        term.id,
+                    );
+                    term.topReverseConfusionPairs =
+                        await idbApiLayer.getTopReverseConfusionPairs(term.id);
+                }
+            }
+        })();
+        return () => {
+            objectKeys.forEach(objectKey => {
+                URL.revokeObjectURL(objectKey);
+            })
         }
     });
 
@@ -340,6 +380,8 @@ FRQs: ${numFRQsToAssign}`,
                     id: term.id,
                     term: term.term,
                     def: term.def,
+                    termImageUrl: term.termImageUrl,
+                    defImageUrl: term.defImageUrl
                 },
                 answerWith: pickedAnswerWith,
             };
@@ -421,6 +463,8 @@ FRQs: ${numFRQsToAssign}`,
                         id: confusionPairDistractors[0].id,
                         term: confusionPairDistractors[0].term,
                         def: confusionPairDistractors[0].def,
+                        termImageUrl: confusionPairDistractors[0].termImageUrl,
+                        defImageUrl: confusionPairDistractors[0].defImageUrl
                     });
                 }
                 if (
@@ -431,6 +475,8 @@ FRQs: ${numFRQsToAssign}`,
                         id: confusionPairDistractors[1].id,
                         term: confusionPairDistractors[1].term,
                         def: confusionPairDistractors[1].def,
+                        termImageUrl: confusionPairDistractors[1].termImageUrl,
+                        defImageUrl: confusionPairDistractors[1].defImageUrl
                     });
                 }
             }
@@ -479,6 +525,8 @@ FRQs: ${numFRQsToAssign}`,
                     id: randomTerm?.id,
                     term: randomTerm?.term,
                     def: randomTerm?.def,
+                    termImageUrl: randomTerm?.termImageUrl,
+                    defImageUrl: randomTerm?.defImageUrl
                 });
 
                 if (
@@ -505,6 +553,8 @@ FRQs: ${numFRQsToAssign}`,
                     id: term.id,
                     term: term.term,
                     def: term.def,
+                    termImageUrl: term.termImageUrl,
+                    defImageUrl: term.defImageUrl
                 },
                 answerWith:
                     answerWith == "BOTH"
@@ -522,6 +572,8 @@ FRQs: ${numFRQsToAssign}`,
                             id: p.confusedTerm.id,
                             term: p.confusedTerm.term,
                             def: p.confusedTerm.def,
+                            termImageUrl: p.confusedTerm.termImageUrl,
+                            defImageUrl: p.confusedTerm.defImageUrl
                         });
                     }
                 });
@@ -533,6 +585,8 @@ FRQs: ${numFRQsToAssign}`,
                             id: p.term.id,
                             term: p.term.term,
                             def: p.term.def,
+                            termImageUrl: p.term.termImageUrl,
+                            defImageUrl: p.term.defImageUrl
                         });
                     }
                 });
@@ -555,6 +609,8 @@ FRQs: ${numFRQsToAssign}`,
                             id: randomTerm.id,
                             term: randomTerm.term,
                             def: randomTerm.def,
+                            termImageUrl: randomTerm.termImageUrl,
+                            defImageUrl: randomTerm.defImageUrl
                         };
                     }
                 }
@@ -567,6 +623,8 @@ FRQs: ${numFRQsToAssign}`,
                         id: term.id,
                         term: term.term,
                         def: term.def,
+                        termImageUrl: term.termImageUrl,
+                        defImageUrl: term.defImageUrl
                     };
                 }
             }

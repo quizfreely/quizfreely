@@ -41,6 +41,8 @@ export async function load({ params, cookies }) {
                     id
                     term
                     def
+                    termImageUrl
+                    defImageUrl
                 }
               }
             }`,
