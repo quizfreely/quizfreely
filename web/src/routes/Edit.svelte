@@ -249,7 +249,6 @@
                     })
                         .then((response) => response.json())
                         .then((result) => {
-                            console.log(result)
                             if (result.errors) {
                                 alert("Error loading studyset");
                                 console.error(result.errors);
