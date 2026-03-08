@@ -463,16 +463,24 @@
                             <div
                                 class="front"
                                 id="flashcard-front"
-                                style="white-space:pre-wrap"
                             >
-                                {terms?.[flashcardsIndex]?.term ?? "term"}
+                                <div>
+                                <div style="white-space:pre-wrap">{terms?.[flashcardsIndex]?.term ?? "term"}</div>
+                                {#if terms?.[flashcardsIndex]?.termImageUrl != null}
+                                <div><img src={terms[flashcardsIndex].termImageUrl} alt="term image" class="flashcard-term-image"></div>
+                                {/if}
+                                </div>
                             </div>
                             <div
                                 class="back"
                                 id="flashcard-back"
-                                style="white-space:pre-wrap"
                             >
-                                {terms?.[flashcardsIndex]?.def ?? "definition"}
+                                <div>
+                                <div style="white-space:pre-wrap">{terms?.[flashcardsIndex]?.def ?? "definition"}</div>
+                                {#if terms?.[flashcardsIndex]?.defImageUrl != null}
+                                <div><img src={terms[flashcardsIndex].defImageUrl} alt="definition image" class="flashcard-term-image"></div>
+                                {/if}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -775,6 +783,13 @@
     .term-image {
         max-width: 18.6rem;
         max-height: 300px;
+        margin: 0px;
+        padding: 0px;
+        border-radius: 0.8rem;
+    }
+    .flashcard-term-image {
+        max-width: 300px;
+        max-height: 200px;
         margin: 0px;
         padding: 0px;
         border-radius: 0.8rem;
