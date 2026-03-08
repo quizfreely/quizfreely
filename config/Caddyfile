@@ -46,3 +46,11 @@ quizfreely.org {
 www.quizfreely.org, quizfreely.com, www.quizfreely.com {
         redir https://quizfreely.org{uri} permanent
 }
+*.static.quizfreely.org {
+	reverse_proxy localhost:3902 {
+                health_uri       /health
+                health_port      3903
+                #health_interval 15s
+                #health_timeout  5s
+        }
+}
