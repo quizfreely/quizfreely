@@ -1439,7 +1439,7 @@
                         <div class="flex">
                             <button class="pretty-button-disableable" disabled={termImageModalFiles == null || termImageModalFiles.length == 0} onclick={async () => {
                                 if (data.local) {
-                                    const returnedBlob = idbLayerImg.processAndUpdateTermImage(termImageModalTerm.id, termImageModalIsDefSide, termImageModalFiles[0]);
+                                    const returnedBlob = await idbLayerImg.processAndUpdateTermImage(termImageModalTerm.id, termImageModalIsDefSide, termImageModalFiles[0]);
                                     if (returnedBlob != null) {
                                         const newObjectUrl = URL.createObjectURL(returnedBlob);
                                         termImageModalTerm[termImageModalIsDefSide ? "defImageUrl" : "termImageUrl"] = newObjectUrl;
