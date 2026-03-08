@@ -65,7 +65,11 @@
                 answerWith: answerWith,
                 correct: answeredIndex == correctAnswerIndex,
                 answeredTerm: answeredIndex >= 0 ?
-                    answers[answeredIndex] : null,
+                    ({
+                        id: answers[answeredIndex]?.id,
+                        term: answers[answeredIndex]?.term,
+                        def: answers[answeredIndex]?.def
+                    }) : null,
                 distractors: distractors.map(distractor => {
                     return {
                         id: distractor.id,
