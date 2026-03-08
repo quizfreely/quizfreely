@@ -22,7 +22,9 @@
                 {
                     id: term.id,
                     term: term.term,
-                    def: term.def
+                    def: term.def,
+                    termImageUrl: term.termImageUrl,
+                    defImageUrl: term.defImageUrl
                 },
                 ...distractors.slice(correctAnswerIndex)
             ] : [
@@ -32,7 +34,9 @@
                 {
                     id: term.id,
                     term: term.term,
-                    def: term.def
+                    def: term.def,
+                    termImageUrl: term.termImageUrl,
+                    defImageUrl: term.defImageUrl
                 },
                 ...distractors.slice(
                     correctChoiceIndex
@@ -71,11 +75,23 @@
         return answeredIndex >= 0;
     }
 </script>
+<style>
+    .term-image {
+        max-width: 300px;
+        max-height: 200px;
+        margin: 0px;
+        padding: 0px;
+        border-radius: 0.8rem;
+    }
+</style>
 <div>
     <p class="fg0">Select the matching { answerWith == "DEF" ? "definition" : "term"}</p>
     <p class="h4" style="white-space: pre-wrap;">{ answerWith == "DEF" ?
         term.term : term.def
     }</p>
+    {#if (answerWith == "DEF" ? term.termImageUrl : term.defImageUrl) != null}
+        <div><img src={answerWith == "DEF" ? term.termImageUrl : term.defImageUrl} class="term-image" alt="{answerWith == "DEF" ? "term" : "definition"} image"></div>
+    {/if}
     <div style="display: grid; gap: 0.2rem; grid-template-columns: auto; justify-content: start; margin-top: 0.6rem;">
         {#each answers as answer, index}
             <button style="display: flex; justify-items: start; justify-content: start; text-align: start; margin-top: 0px;" class="button-box with-bordercolor-border { answeredIndex == index ? "selected" : ""} {showAccuracy && showCorrectAnswer && correctAnswerIndex == index ? "selected yay" : ""} {
@@ -92,10 +108,15 @@
                 {:else}
                     <CheckmarkIcon class="button-box-selected-icon"></CheckmarkIcon>
                 {/if}
+                <div style="margin-top: 0px;">
                 <span style="white-space: pre-wrap; margin-top: 0px;">{
                     answerWith == "DEF" ?
                         answer.def : answer.term
                 }</span>
+                {#if (answerWith == "DEF" ? answer.defImageUrl : answer.termImageUrl) != null}
+                    <div><img src={answerWith == "DEF" ? answer.defImageUrl : answer.termImageUrl} class="term-image" alt="answer choice image"></div>
+                {/if}
+                </div>
             </button>
         {/each}
     </div>

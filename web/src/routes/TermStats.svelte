@@ -300,7 +300,7 @@
         font-size: 1.2rem;
     }
     .term-image {
-        max-width: 300rem;
+        max-width: 300px;
         max-height: 200px;
         margin: 0px;
         padding: 0px;
