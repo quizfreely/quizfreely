@@ -1,5 +1,5 @@
 <script lang="ts">
-    import idbApiLayer from "$lib/idb-api-layer/idb-api-layer.js";
+    import { idbApiLayer } from "@quizfreely/idb-api-layer";
     let { data } = $props();
 </script>
 <div class="grid page">
