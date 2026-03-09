@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { idbApiLayer, db }from "@quizfreely/idb-api-layer";
+    import { idbApiLayer, db }from "$lib/idb-api-layer";
     import { onMount } from "svelte";
     import StudysetLinkBox from "$lib/components/StudysetLinkBox.svelte";
     import CheckmarkIcon from "$lib/icons/Checkmark.svelte";

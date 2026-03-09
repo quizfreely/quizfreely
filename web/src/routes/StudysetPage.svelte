@@ -1,7 +1,7 @@
 <script lang="ts">
     import Noscript from "$lib/components/Noscript.svelte";
     import { onMount } from "svelte";
-    import { idbApiLayer } from "@quizfreely/idb-api-layer";
+    import { idbApiLayer } from "$lib/idb-api-layer";
     import { goto, beforeNavigate } from "$app/navigation";
     import { fade } from "svelte/transition";
     let { data } = $props();
