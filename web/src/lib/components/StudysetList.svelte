@@ -1,6 +1,6 @@
 <script lang="ts">
     import { fancyTimestamp } from "$lib/fancyTimestamp";
-    import { idbApiLayer, db } from "@quizfreely/idb-api-layer";
+    import { idbApiLayer, db } from "$lib/idb-api-layer";
     import { onMount } from "svelte";
     import { slide, fade, scale } from "svelte/transition";
     import { sineIn, sineOut } from "svelte/easing";

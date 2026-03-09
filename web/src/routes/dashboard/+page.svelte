@@ -2,7 +2,7 @@
     import { tick, onMount } from "svelte";
     import { slide, fade } from "svelte/transition";
     import { goto, pushState } from "$app/navigation";
-    import { idbApiLayer } from "@quizfreely/idb-api-layer";
+    import { idbApiLayer } from "$lib/idb-api-layer";
     import Dropdown from "$lib/components/Dropdown.svelte";
     import Noscript from "$lib/components/Noscript.svelte";
     import StudysetList from "$lib/components/StudysetList.svelte";

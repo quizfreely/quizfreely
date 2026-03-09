@@ -2,7 +2,7 @@
     import Noscript from "$lib/components/Noscript.svelte";
     import { onMount, mount, tick } from "svelte";
     import { env } from '$env/dynamic/public';
-    import { idbApiLayer, idbLayerImg } from "@quizfreely/idb-api-layer";
+    import { idbApiLayer, idbLayerImg } from "$lib/idb-api-layer";
     import { goto, beforeNavigate } from "$app/navigation";
     import { cancelNprogressTimeout } from "$lib/stores/nprogressTimeout.js";
     let { data } = $props();
