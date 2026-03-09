@@ -1,6 +1,7 @@
 <script>
     import Noscript from "$lib/components/Noscript.svelte";
     import { onMount, mount, tick } from "svelte";
+    import { env } from '$env/dynamic/public';
     import idbApiLayer from "$lib/idb-api-layer/idb-api-layer.js";
     import idbLayerImg from "$lib/idb-api-layer/images.js";
     import { goto, beforeNavigate } from "$app/navigation";
@@ -980,7 +981,9 @@
                                 bind:value={term.term}
                                 bind:textareaElement={term.termTextarea}
                             />
+                            {#if env.ENABLE_TERM_IMAGES != "false"}
                             {@render termImage(term, false)}
+                            {/if}
                         </div>
                         <div>
                             <AutoResizeTextarea
@@ -1017,7 +1020,9 @@
                                 bind:value={term.def}
                                 bind:textareaElement={term.defTextarea}
                             />
+                            {#if env.ENABLE_TERM_IMAGES != "false"}
                             {@render termImage(term, true)}
+                            {/if}
                         </div>
                         <div class="flex center term-row-box-actions">
                             <Dropdown
