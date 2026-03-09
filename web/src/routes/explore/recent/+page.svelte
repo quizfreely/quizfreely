@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     import { onMount } from "svelte";
     import StudysetLinkBox from "$lib/components/StudysetLinkBox.svelte";
     import CheckmarkIcon from "$lib/icons/Checkmark.svelte";

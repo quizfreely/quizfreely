@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     import Noscript from "$lib/components/Noscript.svelte";
     import { onMount, mount, tick } from "svelte";
     import { env } from '$env/dynamic/public';

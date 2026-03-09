@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     import StudysetList from "$lib/components/StudysetList.svelte";
     import BackIcon from "$lib/icons/BackArrow.svelte";
 

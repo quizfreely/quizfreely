@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     import { env } from "$env/dynamic/public";
     import { scale } from "svelte/transition";
     import Lobby from "$lib/multiplayer/Lobby.svelte";

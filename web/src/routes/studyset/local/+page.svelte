@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     import StudysetPage from "../../StudysetPage.svelte";
     let { data } = $props();
 </script>

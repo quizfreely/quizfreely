@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     import PracticeTest from "../../PracticeTest.svelte"
     let { data } = $props();
 </script>

@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     import ReviewMode from "../../../ReviewMode.svelte"
     let { data } = $props();
 </script>

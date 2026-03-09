@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     import BackIcon from "$lib/icons/BackArrow.svelte";
     let { data } = $props();
     const categoryName = {

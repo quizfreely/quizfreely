@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     let props = $props();
     import { tick } from "svelte";
     import { slide } from "svelte/transition";

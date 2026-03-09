@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     import StudysetLinkBox from "$lib/components/StudysetLinkBox.svelte";
     import Noscript from "$lib/components/Noscript.svelte";
     import Searchbar from "$lib/components/Searchbar.svelte";

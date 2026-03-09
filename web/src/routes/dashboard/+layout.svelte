@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     import { page } from "$app/state";
     import { fade } from "svelte/transition";
     import { sineIn, sineOut } from "svelte/easing";

@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     import { env } from "$env/dynamic/public";
     import { onMount } from "svelte";
     import idbApiLayer from "$lib/idb-api-layer/idb-api-layer.js";

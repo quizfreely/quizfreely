@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import { slide } from "svelte/transition";
   import IconCodeberg from "$lib/icons/Codeberg.svelte";
   import IconGitHub from "$lib/icons/GitHub.svelte";

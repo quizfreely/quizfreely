@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     import idbApiLayer from "$lib/idb-api-layer/idb-api-layer.js";
     let { data } = $props();
 </script>
