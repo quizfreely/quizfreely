@@ -1,7 +1,6 @@
 <script lang="ts">
     import { onMount } from "svelte";
-    import db from "$lib/idb-api-layer/db.js";
-    import idbApiLayer from "$lib/idb-api-layer/idb-api-layer.js";
+    import { idbApiLayer, db } from "@quizfreely/idb-api-layer";
     import averageAccuracy from "$lib/average-accuracy.js";
     import Chart from 'chart.js/auto';
     import 'chartjs-adapter-luxon';

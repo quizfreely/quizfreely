@@ -1,6 +1,5 @@
 <script lang="ts">
-    import db from "$lib/idb-api-layer/db.js";
-    import idbApiLayer from "$lib/idb-api-layer/idb-api-layer.js";
+    import { idbApiLayer, db }from "@quizfreely/idb-api-layer";
     import { onMount } from "svelte";
     import StudysetLinkBox from "$lib/components/StudysetLinkBox.svelte";
     import CheckmarkIcon from "$lib/icons/Checkmark.svelte";
