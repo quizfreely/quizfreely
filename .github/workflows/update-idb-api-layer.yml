@@ -1,0 +1,24 @@
+name: Update quizfreely/idb-api-layer
+on:
+  workflow_dispatch:
+jobs:
+  build:
+    name: Update site
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone quizfreely/quizfreely (from GitHub)
+        run: git clone https://github.com/quizfreely/quizfreely.git
+      - name: Clone quizfreely/idb-api-layer (from GitHub)
+        run: git clone https://github.com/quizfreely/idb-api-layer.git
+      - name: Copy to web/src/lib/ in quizfreely/quizfreely
+        run: |
+          mkdir -p quizfreely/web/src/lib/idb-api-layer
+          cp -r idb-api-layer/dist/* quizfreely/web/src/lib/idb-api-layer/
+      - name: Commit & push to quizfreely/quizfreely (gh)
+        run: |
+          cd quizfreely
+          git add .
+          git config --global user.name "Ehan A"
+          git config --global user.email "ehan@quizfreely.org"
+          git commit -m "Update quizfreely/idb-api-layer"
+          git push https://ehanahamed:${{ secrets.GH_TOKEN }}@github.com/quizfreely/quizfreely.git --all
