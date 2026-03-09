@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     let { accept, multiple = false, onChangeCallback } = $props();
     let files;
     let filesArray = $state([]);

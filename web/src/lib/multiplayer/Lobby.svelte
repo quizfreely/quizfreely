@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     import { onMount } from "svelte";
     import { scale } from "svelte/transition";
     import GroupIcon from "$lib/icons/GroupUsers.svelte";

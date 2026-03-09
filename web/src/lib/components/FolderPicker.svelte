@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     import { onMount } from "svelte";
     import { fade, slide } from "svelte/transition";
     import CloseXMarkIcon from "$lib/icons/CloseXMark.svelte";

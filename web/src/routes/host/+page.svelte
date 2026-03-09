@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     import db from "$lib/idb-api-layer/db.js";
     import idbApiLayer from "$lib/idb-api-layer/idb-api-layer.js";
     import { onMount } from "svelte";

@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     import Noscript from "$lib/components/Noscript.svelte";
     import { onMount } from "svelte";
     import idbApiLayer from "$lib/idb-api-layer/idb-api-layer.js";

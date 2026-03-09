@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     import TermStats from "../../../../TermStats.svelte";
     let { data } = $props();
 </script>

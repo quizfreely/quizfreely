@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     let { data } = $props();
     import HeartIcon from "$lib/icons/Heart.svelte";
     import IconCodeberg from "$lib/icons/Codeberg.svelte";

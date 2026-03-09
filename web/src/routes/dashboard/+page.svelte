@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     import { tick, onMount } from "svelte";
     import { slide, fade } from "svelte/transition";
     import { goto, pushState } from "$app/navigation";

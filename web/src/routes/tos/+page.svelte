@@ -1,4 +1,4 @@
-<style>
+<style lang="ts">
     .nice-paragraph-size {
         max-width: 40rem;
     }

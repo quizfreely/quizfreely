@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     import Edit from "../../../Edit.svelte";
     let { data } = $props();
 </script>

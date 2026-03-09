@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     import { onMount } from "svelte";
     let { ws, gameCode, studyset, answerWith, ...props } = $props();
     let players = $state(props?.players ?? []);

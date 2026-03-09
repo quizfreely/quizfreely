@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     import CheckmarkIcon from "$lib/icons/Checkmark.svelte";
     import XMarkIcon from "$lib/icons/CloseXMark.svelte";
     let { term, answerWith, distractors, viewOnly, showAccuracy, answerUpdateCallback, answeredTerm, correctChoiceIndex, showCorrectAnswer } = $props();

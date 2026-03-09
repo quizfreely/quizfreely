@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     import StudysetLinkBox from "$lib/components/StudysetLinkBox.svelte";
     import ArrowLeftIcon from "$lib/icons/ArrowLeft.svelte";
     import ArrowRightIcon from "$lib/icons/ArrowRight.svelte";

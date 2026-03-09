@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import Searchbar from "$lib/components/Searchbar.svelte";
   import { page } from "$app/state";
   import { beforeNavigate } from "$app/navigation";
