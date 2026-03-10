@@ -36,10 +36,10 @@
     var bypassUnsavedChangesConfirmation = false;
     let objectUrls: string[] = [];
     let showTermImageModal = $state(false);
-    let termImageModalTerm = $state();
+    let termImageModalTerm: Term | undefined = $state();
     let termImageModalIsDefSide = $state(false);
-    let termImageModalFiles = $state();
-    let termImageModalFileInputBox = $state();
+    let termImageModalFiles: FileList | undefined = $state();
+    let termImageModalFileInputBox: FileInputBox | undefined = $state();
     let isDraft = $state(false);
     let showRemoveTermImageModal = $state(false);
     let removeTermImageModalTerm: Term;
@@ -868,7 +868,7 @@
     let importTermsTermDefDelimiterRadioSelect = $state("tab");
     let importTermsRowDelimiterRadioSelect = $state("newline");
 
-    let navigatingToURL = $state();
+    let navigatingToURL: URL | undefined = $state();
     beforeNavigate(function (navigation) {
         if (unsavedChanges && !bypassUnsavedChangesConfirmation) {
             navigatingToURL = navigation?.to?.url;
@@ -1474,7 +1474,9 @@
                                 data-sveltekit-preload-data="false"
                                 onclick={function () {
                                     bypassUnsavedChangesConfirmation = true;
-                                    goto(navigatingToURL);
+                                    if (navigatingToURL !== undefined) {
+                                        goto(navigatingToURL);
+                                    }
                                 }}
                             >
                                 <IconTrash />
@@ -1499,7 +1501,7 @@
                         <FileInputBox
                             accept="image/jpeg, image/png, image/webp, .jpeg, .jpg, .png, .webp"
                             bind:this={termImageModalFileInputBox}
-                            onChangeCallback={(files) =>
+                            onChangeCallback={(files: FileList) =>
                                 (termImageModalFiles = files)}
                         ></FileInputBox>
                         <div class="flex">
@@ -1508,6 +1510,10 @@
                                 disabled={termImageModalFiles == null ||
                                     termImageModalFiles.length == 0}
                                 onclick={async () => {
+                                    if (termImageModalTerm === undefined || termImageModalFiles === undefined) {
+                                        console.error("term image save button: termImageModalTerm or termImageModalFiles is undefined");
+                                        return;
+                                    }
                                     if (data.local) {
                                         const returnedBlob =
                                             await idbLayerImg.processAndUpdateTermImage(
@@ -1528,7 +1534,7 @@
                                             objectUrls.push(newObjectUrl);
                                         }
                                         showTermImageModal = false;
-                                        termImageModalFileInputBox.clear();
+                                        termImageModalFileInputBox?.clear();
                                     } else {
                                         const raw = await fetch(
                                             `/api/term-images/${termImageModalTerm.id}/${termImageModalIsDefSide ? "def" : "term"}`,
@@ -1551,7 +1557,7 @@
                                             ] = resp.data.imageUrl;
                                         }
                                         showTermImageModal = false;
-                                        termImageModalFileInputBox.clear();
+                                        termImageModalFileInputBox?.clear();
                                     }
                                 }}
                             >
@@ -1561,7 +1567,7 @@
                                 class="alt"
                                 onclick={() => {
                                     showTermImageModal = false;
-                                    termImageModalFileInputBox.clear();
+                                    termImageModalFileInputBox?.clear();
                                 }}
                             >
                                 Cancel
