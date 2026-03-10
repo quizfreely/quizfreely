@@ -1,16 +1,12 @@
 import { env } from "$env/dynamic/public";
 import { error } from '@sveltejs/kit';
+import type { PublicStudysetQuery, PublicStudysetQueryVariables } from "../../../../graphql";
 
 export async function load({ params, cookies }) {
-    let headers = {
-        "Content-Type": "application/json"
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+        ...(cookies.get("auth") ? { "Authorization": `Bearer ${cookies.get("auth")}` } : {})
       };
-      if (cookies.get("auth")) {
-        headers = {
-          "Authorization": "Bearer " + cookies.get("auth"),
-          "Content-Type": "application/json"
-        };
-      }
       try {
         let rawApiRes = await fetch(env.API_URL + "/graphql", {
           method: "POST",
@@ -48,7 +44,7 @@ export async function load({ params, cookies }) {
             }`,
             variables: {
               id: params.id
-            }
+            } as PublicStudysetQueryVariables
           })
         })
         let apiRes = await rawApiRes.json();
