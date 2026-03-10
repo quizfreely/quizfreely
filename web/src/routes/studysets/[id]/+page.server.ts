@@ -1,6 +1,5 @@
 import { env } from "$env/dynamic/public";
 import { error } from '@sveltejs/kit';
-import type { PublicStudysetQuery, PublicStudysetQueryVariables } from "../../../../graphql";
 
 export async function load({ params, cookies }) {
       const headers: Record<string, string> = {
@@ -44,7 +43,7 @@ export async function load({ params, cookies }) {
             }`,
             variables: {
               id: params.id
-            } as PublicStudysetQueryVariables
+            }
           })
         })
         let apiRes = await rawApiRes.json();
