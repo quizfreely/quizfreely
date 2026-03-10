@@ -6,25 +6,25 @@
         flip,
         shift,
         offset,
-        autoUpdate
+        autoUpdate,
     } from "@floating-ui/dom";
     let {
         button,
         buttonContent,
-        div,
+        div = {},
         divContent,
-        container,
+        container = {},
         ...props /*
             offset,
             shiftPadding,
             placement
         */
     } = $props();
-    let buttonEl;
-    let divEl = $state(null);
+    let buttonEl: HTMLButtonElement;
+    let divEl: HTMLDivElement | undefined = $state();
     let show = $state(false);
 
-    let cleanUpAutoUpdate;
+    let cleanUpAutoUpdate: () => void;
     function hide() {
         show = false;
         cleanUp();
@@ -34,31 +34,41 @@
         if (show) {
             document.addEventListener("click", outsideClickHandler);
             tick().then(() => {
-                cleanUpAutoUpdate = autoUpdate(
-                    buttonEl, divEl, update
-                )
+                if (divEl !== undefined) {
+                    cleanUpAutoUpdate = autoUpdate(buttonEl, divEl, update);
+                }
             });
         } else {
             cleanUp();
         }
     }
     function update() {
-        if (show) {
+        if (show && divEl !== undefined) {
             computePosition(buttonEl, divEl, {
                 placement: props?.placement ?? "bottom-start",
-                middleware: [offset(props?.offset ?? 4), flip(), shift({
-                    padding: props?.shiftPadding ?? 10
-                })]
-            }).then(({x, y}) => {
-                Object.assign(divEl.style, {
-                    left: `${x}px`,
-                    top: `${y}px`
-                });
+                middleware: [
+                    offset(props?.offset ?? 4),
+                    flip(),
+                    shift({
+                        padding: props?.shiftPadding ?? 10,
+                    }),
+                ],
+            }).then(({ x, y }) => {
+                if (divEl !== undefined) {
+                    Object.assign(divEl.style, {
+                        left: `${x}px`,
+                        top: `${y}px`,
+                    });
+                }
             });
         }
     }
-    function outsideClickHandler(e) {
-        if (!buttonEl.contains(e.target) && !divEl.contains(e.target)) {
+    function outsideClickHandler(e: PointerEvent) {
+        if (
+            e.target instanceof Node &&
+            !buttonEl.contains(e.target) &&
+            !divEl?.contains(e.target)
+        ) {
             show = false;
             cleanUpOutsideClickHandler();
         }
@@ -74,6 +84,25 @@
         return cleanUp;
     });
 </script>
+
+<div {...container}>
+    <button onclick={() => toggle()} bind:this={buttonEl} {...button}>
+        {@render buttonContent?.()}
+    </button>
+    {#if show}
+        <div
+            transition:slide={{ duration: 200 }}
+            bind:this={divEl}
+            {...div}
+            class="raw-dropdown qzfr-raw-dropdown {div?.class}"
+            onintrostart={update}
+            onintroend={update}
+        >
+            {@render divContent?.(hide)}
+        </div>
+    {/if}
+</div>
+
 <style>
     .qzfr-raw-dropdown {
         position: absolute;
@@ -82,24 +111,3 @@
         left: 0;
     }
 </style>
-<div {...container}>
-<button
-    onclick={() => toggle()}
-    bind:this={buttonEl}
-    {...button}
->
-    {@render buttonContent?.()}
-</button>
-{#if show}
-    <div
-        transition:slide={{duration: 200}}
-        bind:this={divEl}
-        {...div}
-        class="raw-dropdown qzfr-raw-dropdown {div?.class}"
-        onintrostart={update /* compute position before animation */}
-        onintroend={update /* compute again after animation */}
-    >
-        {@render divContent?.(hide)}
-    </div>
-{/if}
-</div>

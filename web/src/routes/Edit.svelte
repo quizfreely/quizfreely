@@ -1,7 +1,7 @@
 <script lang="ts">
     import Noscript from "$lib/components/Noscript.svelte";
     import { onMount, mount, tick } from "svelte";
-    import { env } from '$env/dynamic/public';
+    import { env } from "$env/dynamic/public";
     import { idbApiLayer, idbLayerImg } from "$lib/idb-api-layer";
     import { goto, beforeNavigate } from "$app/navigation";
     import { cancelNprogressTimeout } from "$lib/stores/nprogressTimeout.js";
@@ -31,10 +31,10 @@
     var showImportTermsModal = $state(false);
     var showExitConfirmationModal = $state(false);
     var showSubjectPicker = $state(false);
-    let selectedSubject = $state(null);
+    let selectedSubject: { id: string; name: string } | null = $state(null);
     var unsavedChanges = false;
     var bypassUnsavedChangesConfirmation = false;
-    let objectUrls = [];
+    let objectUrls: string[] = [];
     let showTermImageModal = $state(false);
     let termImageModalTerm = $state();
     let termImageModalIsDefSide = $state(false);
@@ -42,13 +42,33 @@
     let termImageModalFileInputBox = $state();
     let isDraft = $state(false);
     let showRemoveTermImageModal = $state(false);
-    let removeTermImageModalTerm;
-    let removeTermImageModalIsDefSide;
+    let removeTermImageModalTerm: Term;
+    let removeTermImageModalIsDefSide: boolean;
+    let editTitleInputValue: string = $state("");
+    let importTermsCustomRowDelimiterValue: string = $state("");
+    let importTermsCustomTermDefDelimiterValue: string = $state("");
+    let importTermsPasteValue: string = $state("");
 
-    var terms = $state([]);
-    var existingTermIdsToDelete = [];
+    interface Term {
+        key: number;
+        id?: string | number;
+        term: string;
+        def: string;
+        termImageUrl?: string;
+        defImageUrl?: string;
+        termTextarea?: HTMLTextAreaElement;
+        defTextarea?: HTMLTextAreaElement;
+    }
+    var terms: Term[] = $state([]);
+    var existingTermIdsToDelete: (string | number)[] = [];
     var key = 0;
-    function addTerm(term, def, id, termImageUrl, defImageUrl) {
+    function addTerm(
+        term?: string,
+        def?: string,
+        id?: string | number,
+        termImageUrl?: string,
+        defImageUrl?: string,
+    ) {
         terms.push({
             id: id,
             term: term ?? "",
@@ -59,7 +79,14 @@
         });
         key++;
     }
-    function insertTerm(index, term, def, id, termImageUrl, defImageUrl) {
+    function insertTerm(
+        index: number,
+        term?: string,
+        def?: string,
+        id?: string | number,
+        termImageUrl?: string,
+        defImageUrl?: string,
+    ) {
         terms.splice(index, 0, {
             id: id,
             term: term ?? "",
@@ -70,7 +97,7 @@
         });
         key++;
     }
-    function moveTerm(oldIndex, newIndex) {
+    function moveTerm(oldIndex: number, newIndex: number) {
         if (
             oldIndex >= 0 &&
             oldIndex < terms.length &&
@@ -82,8 +109,8 @@
             terms.splice(newIndex, 0, term);
         }
     }
-    let deletedTermRegister;
-    function deleteTerm(index, copyToRegister) {
+    let deletedTermRegister: Term;
+    function deleteTerm(index: number, copyToRegister?: boolean) {
         if (terms[index].id != null) {
             existingTermIdsToDelete.push(terms[index].id);
         }
@@ -92,7 +119,7 @@
             deletedTermRegister = deletedTerm;
         }
     }
-    function unmarkForDeletion(id) {
+    function unmarkForDeletion(id: string | number) {
         const index = existingTermIdsToDelete.indexOf(id);
         if (index >= 0) {
             existingTermIdsToDelete.splice(index, 1);
@@ -111,28 +138,30 @@
     //     return arr;
     // }
 
-    function addTermsFrom2DArray(arr) {
+    function addTermsFrom2DArray(arr: string[][]) {
         for (var row = 0; row < arr.length; row++) {
             addTerm(arr[row][0], arr[row][1]);
         }
     }
 
-    async function initTerm(termsCount, term, def) {
+    async function initTerm(termsCount?: number, term?: string, def?: string) {
         let sortOrder = termsCount;
         if (termsCount == null) {
             sortOrder = terms.length;
         }
         if (data.local) {
-            return await idbApiLayer.createTerms(data.localId, [{
-                term: term ?? "",
-                def: def ?? "",
-                sortOrder: sortOrder
-            }]); /* returns last key */
+            return await idbApiLayer.createTerms(data.localId, [
+                {
+                    term: term ?? "",
+                    def: def ?? "",
+                    sortOrder: sortOrder,
+                },
+            ]); /* returns last key */
         } else {
             const raw = await fetch("/api/graphql", {
                 method: "POST",
                 headers: {
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
                     query: `mutation initTerm($studysetId: ID!, $term: String, $def: String, $sortOrder: Int!) {
@@ -151,9 +180,9 @@
                         studysetId: data.studysetId,
                         term: term ?? "",
                         def: def ?? "",
-                        sortOrder: sortOrder
-                    }
-                })
+                        sortOrder: sortOrder,
+                    },
+                }),
             });
             const resp = await raw.json();
             if (resp.errors != null || resp?.data == null) {
@@ -167,8 +196,8 @@
     let focusedRow = $state(0);
     let showFocusBorder = $state(false);
     let useOhnoColorFocusBorder = $state(false);
-    let keySeq = [];
-    function addToKeySeq(key) {
+    let keySeq: string[] = [];
+    function addToKeySeq(key: string) {
         if ("hjkl".includes(key)) {
             resetKeySeq();
             /* dont return cause we want to remove ohnocolorfocusborder below */
@@ -193,23 +222,23 @@
             if (data.authed && !data.local) {
                 document
                     .getElementById("edit-private-false")
-                    .addEventListener("click", function () {
+                    ?.addEventListener("click", function () {
                         document
                             .getElementById("edit-private-false")
-                            .classList.add("selected");
+                            ?.classList.add("selected");
                         document
                             .getElementById("edit-private-true")
-                            .classList.remove("selected");
+                            ?.classList.remove("selected");
                     });
                 document
                     .getElementById("edit-private-true")
-                    .addEventListener("click", function () {
+                    ?.addEventListener("click", function () {
                         document
                             .getElementById("edit-private-false")
-                            .classList.remove("selected");
+                            ?.classList.remove("selected");
                         document
                             .getElementById("edit-private-true")
-                            .classList.add("selected");
+                            ?.classList.add("selected");
                     });
             }
             if (data.studysetId) {
@@ -254,26 +283,31 @@
                                 console.error(result.errors);
                             } else {
                                 const studyset = result.data.studyset;
-                                document.getElementById("edit-title").value =
-                                    studyset.title;
+                                editTitleInputValue = studyset.title;
                                 if (studyset.private) {
                                     document
                                         .getElementById("edit-private-false")
-                                        .classList.remove("selected");
+                                        ?.classList.remove("selected");
                                     document
                                         .getElementById("edit-private-true")
-                                        .classList.add("selected");
+                                        ?.classList.add("selected");
                                 } else {
                                     document
                                         .getElementById("edit-private-false")
-                                        .classList.add("selected");
+                                        ?.classList.add("selected");
                                     document
                                         .getElementById("edit-private-true")
-                                        .classList.remove("selected");
+                                        ?.classList.remove("selected");
                                 }
                                 if (studyset.terms != null) {
-                                    studyset.terms.forEach((t) => {
-                                        addTerm(t.term, t.def, t.id, t.termImageUrl, t.defImageUrl);
+                                    studyset.terms.forEach((t: any) => {
+                                        addTerm(
+                                            t.term,
+                                            t.def,
+                                            t.id,
+                                            t.termImageUrl,
+                                            t.defImageUrl,
+                                        );
                                     });
                                 }
                                 selectedSubject = studyset.subject;
@@ -285,7 +319,9 @@
                             }
                         });
                 } else {
-                    console.error("Unexpected situation: studyset is not local but user is not logged in")
+                    console.error(
+                        "Unexpected situation: studyset is not local but user is not logged in",
+                    );
                 }
             } else {
                 const studysetRecord = await idbApiLayer.getStudysetById(
@@ -293,16 +329,21 @@
                     {
                         terms: {
                             termImageUrl: true,
-                            defImageUrl: true
-                        }
+                            defImageUrl: true,
+                        },
                     },
                 );
                 if (studysetRecord) {
-                    document.getElementById("edit-title").value =
-                        studysetRecord.title;
+                    editTitleInputValue = studysetRecord.title;
                     if (studysetRecord.terms != null) {
-                        studysetRecord.terms.forEach((t) => {
-                            addTerm(t.term, t.def, t.id, t.termImageUrl, t.defImageUrl);
+                        studysetRecord.terms.forEach((t: any) => {
+                            addTerm(
+                                t.term,
+                                t.def,
+                                t.id,
+                                t.termImageUrl,
+                                t.defImageUrl,
+                            );
                             if (t?.termImageUrl != null) {
                                 objectUrls.push(t.termImageUrl);
                             }
@@ -320,7 +361,7 @@
             }
         })();
 
-        function moveUpButForKeydown(refocus) {
+        function moveUpButForKeydown(refocus?: boolean) {
             const index = focusedRow;
             const newIndex = focusedRow - 1;
             const wasDefFocused = defFocused;
@@ -341,7 +382,7 @@
                 });
             }
         }
-        function moveDownButForKeydown(refocus) {
+        function moveDownButForKeydown(refocus?: boolean) {
             const index = focusedRow;
             const newIndex = focusedRow + 1;
             const wasDefFocused = defFocused;
@@ -362,7 +403,7 @@
                 });
             }
         }
-        function onKeydown(event) {
+        function onKeydown(event: KeyboardEvent) {
             if (event.key === "Enter" && event.ctrlKey && !event.altKey) {
                 event.preventDefault();
                 addTerm();
@@ -378,7 +419,8 @@
                     !(
                         document.activeElement?.tagName === "INPUT" ||
                         document.activeElement?.tagName === "TEXTAREA" ||
-                        document.activeElement?.isContentEditable
+                        (document.activeElement instanceof HTMLElement &&
+                            document.activeElement?.isContentEditable)
                     ))
             ) {
                 event.preventDefault();
@@ -400,7 +442,8 @@
                 !(
                     document.activeElement?.tagName === "INPUT" ||
                     document.activeElement?.tagName === "TEXTAREA" ||
-                    document.activeElement?.isContentEditable
+                    (document.activeElement instanceof HTMLElement &&
+                        document.activeElement?.isContentEditable)
                 )
             ) {
                 event.preventDefault();
@@ -451,7 +494,8 @@
                 !(
                     document.activeElement?.tagName === "INPUT" ||
                     document.activeElement?.tagName === "TEXTAREA" ||
-                    document.activeElement?.isContentEditable
+                    (document.activeElement instanceof HTMLElement &&
+                        document.activeElement?.isContentEditable)
                 )
             ) {
                 event.preventDefault();
@@ -469,7 +513,8 @@
                 !(
                     document.activeElement?.tagName === "INPUT" ||
                     document.activeElement?.tagName === "TEXTAREA" ||
-                    document.activeElement?.isContentEditable
+                    (document.activeElement instanceof HTMLElement &&
+                        document.activeElement?.isContentEditable)
                 )
             ) {
                 event.preventDefault();
@@ -484,7 +529,8 @@
                 !(
                     document.activeElement?.tagName === "INPUT" ||
                     document.activeElement?.tagName === "TEXTAREA" ||
-                    document.activeElement?.isContentEditable
+                    (document.activeElement instanceof HTMLElement &&
+                        document.activeElement?.isContentEditable)
                 )
             ) {
                 event.preventDefault();
@@ -497,7 +543,8 @@
                 !(
                     document.activeElement?.tagName === "INPUT" ||
                     document.activeElement?.tagName === "TEXTAREA" ||
-                    document.activeElement?.isContentEditable
+                    (document.activeElement instanceof HTMLElement &&
+                        document.activeElement?.isContentEditable)
                 )
             ) {
                 event.preventDefault();
@@ -511,7 +558,8 @@
                 !(
                     document.activeElement?.tagName === "INPUT" ||
                     document.activeElement?.tagName === "TEXTAREA" ||
-                    document.activeElement?.isContentEditable
+                    (document.activeElement instanceof HTMLElement &&
+                        document.activeElement?.isContentEditable)
                 )
             ) {
                 event.preventDefault();
@@ -524,7 +572,8 @@
                 !(
                     document.activeElement?.tagName === "INPUT" ||
                     document.activeElement?.tagName === "TEXTAREA" ||
-                    document.activeElement?.isContentEditable
+                    (document.activeElement instanceof HTMLElement &&
+                        document.activeElement?.isContentEditable)
                 )
             ) {
                 event.preventDefault();
@@ -536,7 +585,8 @@
                 !(
                     document.activeElement?.tagName === "INPUT" ||
                     document.activeElement?.tagName === "TEXTAREA" ||
-                    document.activeElement?.isContentEditable
+                    (document.activeElement instanceof HTMLElement &&
+                        document.activeElement?.isContentEditable)
                 ) &&
                 (event.key === "i" || event.key === "Enter")
             ) {
@@ -549,8 +599,11 @@
                 return;
             }
         }
-        function onKeyup(event) {
-            if (event.key === "Escape") {
+        function onKeyup(event: KeyboardEvent) {
+            if (
+                event.key === "Escape" &&
+                document?.activeElement instanceof HTMLElement
+            ) {
                 document?.activeElement?.blur();
                 resetKeySeq();
                 if (showFocusBorder) {
@@ -585,7 +638,8 @@
                 !(
                     document.activeElement?.tagName === "INPUT" ||
                     document.activeElement?.tagName === "TEXTAREA" ||
-                    document.activeElement?.isContentEditable
+                    (document.activeElement instanceof HTMLElement &&
+                        document.activeElement?.isContentEditable)
                 )
             ) {
                 if (deletedTermRegister) {
@@ -620,7 +674,8 @@
                 !(
                     document.activeElement?.tagName === "INPUT" ||
                     document.activeElement?.tagName === "TEXTAREA" ||
-                    document.activeElement?.isContentEditable
+                    (document.activeElement instanceof HTMLElement &&
+                        document.activeElement?.isContentEditable)
                 )
             ) {
                 if (deletedTermRegister) {
@@ -646,7 +701,8 @@
                 !(
                     document.activeElement?.tagName === "INPUT" ||
                     document.activeElement?.tagName === "TEXTAREA" ||
-                    document.activeElement?.isContentEditable
+                    (document.activeElement instanceof HTMLElement &&
+                        document.activeElement?.isContentEditable)
                 )
             ) {
                 const newKeySeq = addToKeySeq(event.key);
@@ -671,9 +727,9 @@
         return () => {
             window.removeEventListener("keydown", onKeydown);
             window.removeEventListener("keyup", onKeyup);
-            objectUrls.forEach(objectUrl => {
+            objectUrls.forEach((objectUrl) => {
                 URL.revokeObjectURL(objectUrl);
-            })
+            });
         };
     });
 
@@ -710,8 +766,8 @@
         (async () => {
             await idbApiLayer.updateStudyset({
                 id: data.localId,
-                title: document.getElementById("edit-title").value,
-                draft: false
+                title: editTitleInputValue,
+                draft: false,
             });
             if (existingTerms.length > 0) {
                 await idbApiLayer.updateTerms(existingTerms);
@@ -773,10 +829,10 @@
                 variables: {
                     id: data.studysetId,
                     studyset: {
-                        title: document.getElementById("edit-title").value,
+                        title: editTitleInputValue,
                         private: document
                             .getElementById("edit-private-true")
-                            .classList.contains("selected"),
+                            ?.classList.contains("selected"),
                         subjectId: selectedSubject?.id ?? null,
                     },
                     terms: existingTerms,
@@ -812,7 +868,7 @@
     let importTermsTermDefDelimiterRadioSelect = $state("tab");
     let importTermsRowDelimiterRadioSelect = $state("newline");
 
-    let navigatingToURL = $state("");
+    let navigatingToURL = $state();
     beforeNavigate(function (navigation) {
         if (unsavedChanges && !bypassUnsavedChangesConfirmation) {
             navigatingToURL = navigation?.to?.url;
@@ -843,37 +899,58 @@
     <title>Quizfreely</title>
 </svelte:head>
 
-{#snippet termImage(term, isDefSide)}
+{#snippet termImage(term: Term, isDefSide: boolean)}
     {#if term?.[isDefSide ? "defImageUrl" : "termImageUrl"] == null}
         <div class="flex" style="margin-top: 0.2rem;">
-            <button class="faint img-button-thin-fit text fg0" onclick={async () => {
-                if (term.id == null) {
-                    term.id = await initTerm(); /* returns ID */
-                }
+            <button
+                class="faint img-button-thin-fit text fg0"
+                onclick={async () => {
+                    if (term.id == null) {
+                        term.id = await initTerm(); /* returns ID */
+                    }
 
-                showTermImageModal = true;
-                termImageModalTerm = term;
-                termImageModalIsDefSide = isDefSide;
-            }}>
+                    showTermImageModal = true;
+                    termImageModalTerm = term;
+                    termImageModalIsDefSide = isDefSide;
+                }}
+            >
                 <ImageIcon></ImageIcon> Add Image
             </button>
         </div>
     {:else}
-        <div class="flex" style="flex-direction: column; flex-wrap: nowrap; gap: 0.2rem; margin-top: 0.6rem;">
-            <div><img src={term?.[isDefSide ? "defImageUrl" : "termImageUrl"]} class="term-image"></div>
-            <div class="flex" style="margin-top: 0px; row-gap: 0.2rem; column-gap: 0.4rem;">
-                <button class="faint img-button-thin-fit text fg0" onclick={async () => {
-                    showTermImageModal = true;
-                    termImageModalTerm = term;
-                    termImageModalIsDefSide = isDefSide;
-                }}>
+        <div
+            class="flex"
+            style="flex-direction: column; flex-wrap: nowrap; gap: 0.2rem; margin-top: 0.6rem;"
+        >
+            <div>
+                <img
+                    src={term?.[isDefSide ? "defImageUrl" : "termImageUrl"]}
+                    alt="{isDefSide ? 'definition' : 'term'} image"
+                    class="term-image"
+                />
+            </div>
+            <div
+                class="flex"
+                style="margin-top: 0px; row-gap: 0.2rem; column-gap: 0.4rem;"
+            >
+                <button
+                    class="faint img-button-thin-fit text fg0"
+                    onclick={async () => {
+                        showTermImageModal = true;
+                        termImageModalTerm = term;
+                        termImageModalIsDefSide = isDefSide;
+                    }}
+                >
                     <PencilIcon></PencilIcon> Edit Image
                 </button>
-                <button class="faint img-button-thin-fit text fg0" onclick={async () => {
-                    showRemoveTermImageModal = true;
-                    removeTermImageModalTerm = term;
-                    removeTermImageModalIsDefSide = isDefSide;
-                }}>
+                <button
+                    class="faint img-button-thin-fit text fg0"
+                    onclick={async () => {
+                        showRemoveTermImageModal = true;
+                        removeTermImageModalTerm = term;
+                        removeTermImageModalIsDefSide = isDefSide;
+                    }}
+                >
                     <XMarkIcon></XMarkIcon> Remove Image
                 </button>
             </div>
@@ -889,19 +966,21 @@
                 <a
                     class="button faint"
                     data-sveltekit-preload-data="false"
-                    href={isDraft ?
-                        "/dashboard" :
-                        (data.local ?
-                            "/studyset/local?id=" + data.localId :
-                            "/studysets/" + data.studysetId
-                        )
-                    }
+                    href={isDraft
+                        ? "/dashboard"
+                        : data.local
+                          ? "/studyset/local?id=" + data.localId
+                          : "/studysets/" + data.studysetId}
                 >
                     <IconArrowLeft />
                     Back
                 </a>
             </div>
-            <input id="edit-title" type="text" placeholder="Title" />
+            <input
+                type="text"
+                placeholder="Title"
+                bind:value={editTitleInputValue}
+            />
             {#if data.authed && !data.local}
                 <div id="edit-private-div">
                     <div class="flex">
@@ -981,7 +1060,7 @@
                                 bind:textareaElement={term.termTextarea}
                             />
                             {#if env.ENABLE_TERM_IMAGES != "false"}
-                            {@render termImage(term, false)}
+                                {@render termImage(term, false)}
                             {/if}
                         </div>
                         <div>
@@ -1020,7 +1099,7 @@
                                 bind:textareaElement={term.defTextarea}
                             />
                             {#if env.ENABLE_TERM_IMAGES != "false"}
-                            {@render termImage(term, true)}
+                                {@render termImage(term, true)}
                             {/if}
                         </div>
                         <div class="flex center term-row-box-actions">
@@ -1033,12 +1112,12 @@
                                 {#snippet buttonContent()}
                                     <IconMoreDotsV />
                                 {/snippet}
-                                {#snippet divContent(hide)}
+                                {#snippet divContent(hide: any)}
                                     <button
                                         onclick={function (event) {
                                             moveTerm(index, index - 1);
                                             unsavedChanges = true;
-                                            hide();
+                                            hide?.();
                                         }}
                                     >
                                         <IconArrowUp /> Move up
@@ -1047,7 +1126,7 @@
                                         onclick={function (event) {
                                             moveTerm(index, index + 1);
                                             unsavedChanges = true;
-                                            hide();
+                                            hide?.();
                                         }}
                                     >
                                         <IconArrowDown /> Move down
@@ -1056,7 +1135,7 @@
                                         onclick={function (event) {
                                             insertTerm(index + 1);
                                             unsavedChanges = true;
-                                            hide();
+                                            hide?.();
                                         }}
                                     >
                                         <IconPlus /> Add Below
@@ -1128,13 +1207,11 @@
                 <a
                     class="button alt"
                     data-sveltekit-preload-data="false"
-                    href={isDraft ?
-                        "/dashboard" :
-                        (data.local ?
-                            "/studyset/local?id=" + data.localId :
-                            "/studysets/" + data.studysetId
-                        )
-                    }
+                    href={isDraft
+                        ? "/dashboard"
+                        : data.local
+                          ? "/studyset/local?id=" + data.localId
+                          : "/studysets/" + data.studysetId}
                 >
                     Cancel
                 </a>
@@ -1201,7 +1278,9 @@
                                     <input
                                         type="text"
                                         placeholder="Term Delimiter"
-                                        id="import-terms-custom-termdef-delimiter-input"
+                                        bind:value={
+                                            importTermsCustomTermDefDelimiterValue
+                                        }
                                         class="slightly-smaller-textbox"
                                         transition:scale={{ duration: 400 }}
                                     />
@@ -1265,7 +1344,9 @@
                                     <input
                                         type="text"
                                         placeholder="Row Delimiter"
-                                        id="import-terms-custom-row-delimiter-input"
+                                        bind:value={
+                                            importTermsCustomRowDelimiterValue
+                                        }
                                         class="slightly-smaller-textbox"
                                         transition:scale={{ duration: 400 }}
                                     />
@@ -1274,6 +1355,7 @@
                         </div>
                         <textarea
                             id="import-terms-paste-textarea"
+                            bind:value={importTermsPasteValue}
                             class="vertical"
                             rows="3"
                             placeholder="Paste data here, then press the import button"
@@ -1281,8 +1363,8 @@
                         <div class="flex">
                             <button
                                 onclick={function () {
-                                    var termDefDelimiter;
-                                    var rowDelimiter;
+                                    var termDefDelimiter: string;
+                                    var rowDelimiter: string;
                                     if (
                                         importTermsTermDefDelimiterRadioSelect ==
                                         "tab"
@@ -1298,9 +1380,7 @@
                                         "custom"
                                     ) {
                                         termDefDelimiter =
-                                            document.getElementById(
-                                                "import-terms-custom-termdef-delimiter-input",
-                                            ).value;
+                                            importTermsCustomTermDefDelimiterValue;
                                         if (termDefDelimiter == "") {
                                             alert(
                                                 "Custom delimiter can't be blank >:(",
@@ -1322,9 +1402,8 @@
                                         importTermsRowDelimiterRadioSelect ==
                                         "custom"
                                     ) {
-                                        rowDelimiter = document.getElementById(
-                                            "import-terms-custom-row-delimiter-input",
-                                        ).value;
+                                        rowDelimiter =
+                                            importTermsCustomRowDelimiterValue;
                                         if (rowDelimiter == "") {
                                             alert(
                                                 "Custom delimiter can't be blank >:(",
@@ -1346,9 +1425,7 @@
                                         terms.splice(0, 1);
                                     }
 
-                                    var pastedData = document.getElementById(
-                                        "import-terms-paste-textarea",
-                                    ).value;
+                                    var pastedData = importTermsPasteValue;
                                     addTermsFrom2DArray(
                                         pastedData
                                             .split(rowDelimiter)
@@ -1438,40 +1515,83 @@
             {#if showTermImageModal}
                 <div class="modal" transition:fade={{ duration: 200 }}>
                     <div class="content">
-                        <h4>{(termImageModalTerm?.[termImageModalIsDefSide ? "defImageUrl" : "termImageUrl"] == null) ? "Add Image" : "Update Image"}</h4>
-                        <FileInputBox accept="image/jpeg, image/png, image/webp, .jpeg, .jpg, .png, .webp" bind:this={termImageModalFileInputBox} onChangeCallback={(files) => termImageModalFiles = files}></FileInputBox>
+                        <h4>
+                            {termImageModalTerm?.[
+                                termImageModalIsDefSide
+                                    ? "defImageUrl"
+                                    : "termImageUrl"
+                            ] == null
+                                ? "Add Image"
+                                : "Update Image"}
+                        </h4>
+                        <FileInputBox
+                            accept="image/jpeg, image/png, image/webp, .jpeg, .jpg, .png, .webp"
+                            bind:this={termImageModalFileInputBox}
+                            onChangeCallback={(files) =>
+                                (termImageModalFiles = files)}
+                        ></FileInputBox>
                         <div class="flex">
-                            <button class="pretty-button-disableable" disabled={termImageModalFiles == null || termImageModalFiles.length == 0} onclick={async () => {
-                                if (data.local) {
-                                    const returnedBlob = await idbLayerImg.processAndUpdateTermImage(termImageModalTerm.id, termImageModalIsDefSide, termImageModalFiles[0]);
-                                    if (returnedBlob != null) {
-                                        const newObjectUrl = URL.createObjectURL(returnedBlob);
-                                        termImageModalTerm[termImageModalIsDefSide ? "defImageUrl" : "termImageUrl"] = newObjectUrl;
-                                        objectUrls.push(newObjectUrl);
-                                    }
-                                    showTermImageModal = false;
-                                    termImageModalFileInputBox.clear();
-                                } else {
-                                    const raw = await fetch(`/api/term-images/${termImageModalTerm.id}/${termImageModalIsDefSide ? "def" : "term"}`, {
-                                        method: "PUT",
-                                        body: termImageModalFiles[0]
-                                    });
-                                    const resp = await raw.json();
-                                    if (resp?.data?.imageUrl == null) {
-                                        console.error("Error in term-image-upload resp: ", resp);
+                            <button
+                                class="pretty-button-disableable"
+                                disabled={termImageModalFiles == null ||
+                                    termImageModalFiles.length == 0}
+                                onclick={async () => {
+                                    if (data.local) {
+                                        const returnedBlob =
+                                            await idbLayerImg.processAndUpdateTermImage(
+                                                termImageModalTerm.id,
+                                                termImageModalIsDefSide,
+                                                termImageModalFiles[0],
+                                            );
+                                        if (returnedBlob != null) {
+                                            const newObjectUrl =
+                                                URL.createObjectURL(
+                                                    returnedBlob,
+                                                );
+                                            termImageModalTerm[
+                                                termImageModalIsDefSide
+                                                    ? "defImageUrl"
+                                                    : "termImageUrl"
+                                            ] = newObjectUrl;
+                                            objectUrls.push(newObjectUrl);
+                                        }
+                                        showTermImageModal = false;
+                                        termImageModalFileInputBox.clear();
                                     } else {
-                                        termImageModalTerm[termImageModalIsDefSide ? "defImageUrl" : "termImageUrl"] = resp.data.imageUrl;
+                                        const raw = await fetch(
+                                            `/api/term-images/${termImageModalTerm.id}/${termImageModalIsDefSide ? "def" : "term"}`,
+                                            {
+                                                method: "PUT",
+                                                body: termImageModalFiles[0],
+                                            },
+                                        );
+                                        const resp = await raw.json();
+                                        if (resp?.data?.imageUrl == null) {
+                                            console.error(
+                                                "Error in term-image-upload resp: ",
+                                                resp,
+                                            );
+                                        } else {
+                                            termImageModalTerm[
+                                                termImageModalIsDefSide
+                                                    ? "defImageUrl"
+                                                    : "termImageUrl"
+                                            ] = resp.data.imageUrl;
+                                        }
+                                        showTermImageModal = false;
+                                        termImageModalFileInputBox.clear();
                                     }
-                                    showTermImageModal = false;
-                                    termImageModalFileInputBox.clear();
-                                }
-                            }}>
+                                }}
+                            >
                                 <IconCheckmark></IconCheckmark> Save
                             </button>
-                            <button class="alt" onclick={() => {
-                                showTermImageModal = false;
-                                termImageModalFileInputBox.clear();
-                            }}>
+                            <button
+                                class="alt"
+                                onclick={() => {
+                                    showTermImageModal = false;
+                                    termImageModalFileInputBox.clear();
+                                }}
+                            >
                                 Cancel
                             </button>
                         </div>
@@ -1482,40 +1602,75 @@
                 <div class="modal" transition:fade={{ duration: 200 }}>
                     <div class="content">
                         <h4>Remove Image?</h4>
-                        <p>Are you sure you want to remove this term's image?</p>
+                        <p>
+                            Are you sure you want to remove this term's image?
+                        </p>
                         <div class="flex">
-                            <button class="ohno" onclick={async () => {
-                                if (data.local) {
-                                    const oldObjectUrl = removeTermImageModalTerm[
-                                        removeTermImageModalIsDefSide ? "defImageUrl" : "termImageUrl"
-                                    ];
+                            <button
+                                class="ohno"
+                                onclick={async () => {
+                                    if (data.local) {
+                                        const oldObjectUrl =
+                                            removeTermImageModalTerm[
+                                                removeTermImageModalIsDefSide
+                                                    ? "defImageUrl"
+                                                    : "termImageUrl"
+                                            ];
 
-                                    const success = await idbLayerImg.removeTermImage(removeTermImageModalTerm.id, removeTermImageModalIsDefSide);
-                                    if (success) {
-                                        removeTermImageModalTerm[removeTermImageModalIsDefSide ? "defImageUrl" : "termImageUrl"] = null;
-                                        URL.revokeObjectURL(oldObjectUrl);
+                                        const success =
+                                            await idbLayerImg.removeTermImage(
+                                                removeTermImageModalTerm.id,
+                                                removeTermImageModalIsDefSide,
+                                            );
+                                        if (success) {
+                                            removeTermImageModalTerm[
+                                                removeTermImageModalIsDefSide
+                                                    ? "defImageUrl"
+                                                    : "termImageUrl"
+                                            ] = undefined;
+                                            if (oldObjectUrl !== undefined) {
+                                                URL.revokeObjectURL(
+                                                    oldObjectUrl,
+                                                );
+                                            }
+                                        } else {
+                                            alert(
+                                                "Error removing term image :(",
+                                            );
+                                        }
+                                        showRemoveTermImageModal = false;
                                     } else {
-                                        alert("Error removing term image :(")
+                                        const raw = await fetch(
+                                            `/api/term-images/${removeTermImageModalTerm.id}/${removeTermImageModalIsDefSide ? "def" : "term"}`,
+                                            {
+                                                method: "DELETE",
+                                            },
+                                        );
+                                        const resp = await raw.json();
+                                        if (resp?.error) {
+                                            console.error(
+                                                "Error in remove-term-image resp: ",
+                                                resp,
+                                            );
+                                        } else {
+                                            removeTermImageModalTerm[
+                                                removeTermImageModalIsDefSide
+                                                    ? "defImageUrl"
+                                                    : "termImageUrl"
+                                            ] = undefined;
+                                        }
+                                        showRemoveTermImageModal = false;
                                     }
-                                    showRemoveTermImageModal = false;
-                                } else {
-                                    const raw = await fetch(`/api/term-images/${removeTermImageModalTerm.id}/${removeTermImageModalIsDefSide ? "def" : "term"}`, {
-                                        method: "DELETE"
-                                    });
-                                    const resp = await raw.json();
-                                    if (resp?.error) {
-                                        console.error("Error in remove-term-image resp: ", resp);
-                                    } else {
-                                        removeTermImageModalTerm[removeTermImageModalIsDefSide ? "defImageUrl" : "termImageUrl"] = null;
-                                    }
-                                    showRemoveTermImageModal = false;
-                                }
-                            }}>
+                                }}
+                            >
                                 <IconTrash></IconTrash> Remove
                             </button>
-                            <button class="alt" onclick={() => {
-                                showRemoveTermImageModal = false;
-                            }}>
+                            <button
+                                class="alt"
+                                onclick={() => {
+                                    showRemoveTermImageModal = false;
+                                }}
+                            >
                                 Cancel
                             </button>
                         </div>
