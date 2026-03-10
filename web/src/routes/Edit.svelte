@@ -54,8 +54,8 @@
         id?: string | number;
         term: string;
         def: string;
-        termImageUrl?: string;
-        defImageUrl?: string;
+        termImageUrl?: string | null;
+        defImageUrl?: string | null;
         termTextarea?: HTMLTextAreaElement;
         defTextarea?: HTMLTextAreaElement;
     }
@@ -1606,7 +1606,7 @@
                                                     ? "defImageUrl"
                                                     : "termImageUrl"
                                             ] = undefined;
-                                            if (oldObjectUrl !== undefined) {
+                                            if (oldObjectUrl != null) {
                                                 URL.revokeObjectURL(
                                                     oldObjectUrl,
                                                 );
@@ -1635,7 +1635,7 @@
                                                 removeTermImageModalIsDefSide
                                                     ? "defImageUrl"
                                                     : "termImageUrl"
-                                            ] = undefined;
+                                            ] = null;
                                         }
                                         showRemoveTermImageModal = false;
                                     }
