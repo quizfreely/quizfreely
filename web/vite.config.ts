@@ -5,7 +5,7 @@ import { defineConfig } from 'vite';
 export default defineConfig({
 	plugins: [sveltekit(), devtoolsJson()],
 	server: {
-		port: process?.env?.PORT ?? 8080,
+		port: parseInt(process?.env?.PORT ?? "8080") || 8080,
 		proxy: {
 			"/api/": {
 				target: process?.env?.API_URL ?? "http://localhost:8008",
@@ -39,7 +39,7 @@ export default defineConfig({
 		}
 	},
 	preview: {
-		port: process?.env?.PORT ?? 8080,
+		port: parseInt(process?.env?.PORT ?? "8080") || 8080,
 		proxy: {
 			"/api/": {
 				target: process?.env?.API_URL ?? "http://localhost:8008",
