@@ -17,7 +17,7 @@
         id: string;
         name: string;
     }
-    let subjects = $state([]);
+    let subjects: Subject[] = $state([]);
     let showErrMsg = $state(false);
     let showActionErrMsg = $state(false);
     let searchQuery = $state("");
@@ -39,7 +39,7 @@
             });
             const resp = await raw.json();
             if (resp?.data) {
-                subjects:  = resp.data.allSubjects ?? [];
+                subjects = resp.data.allSubjects ?? [];
             } else {
                 console.error("No data property in json response: ", resp);
                 showErrMsg = true;
