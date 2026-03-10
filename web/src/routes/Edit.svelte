@@ -2,7 +2,7 @@
     import Noscript from "$lib/components/Noscript.svelte";
     import { onMount, mount, tick } from "svelte";
     import { env } from "$env/dynamic/public";
-    import { idbApiLayer, idbLayerImg } from "$lib/idb-api-layer";
+    import { idbApiLayer, idbLayerImg } from "../../idb-api-layer";
     import { goto, beforeNavigate } from "$app/navigation";
     import { cancelNprogressTimeout } from "$lib/stores/nprogressTimeout.js";
     let { data } = $props();
@@ -1363,53 +1363,25 @@
                         <div class="flex">
                             <button
                                 onclick={function () {
-                                    var termDefDelimiter: string;
-                                    var rowDelimiter: string;
-                                    if (
-                                        importTermsTermDefDelimiterRadioSelect ==
-                                        "tab"
-                                    ) {
-                                        termDefDelimiter = "\t";
-                                    } else if (
-                                        importTermsTermDefDelimiterRadioSelect ==
-                                        "comma"
-                                    ) {
-                                        termDefDelimiter = ",";
-                                    } else if (
-                                        importTermsTermDefDelimiterRadioSelect ==
-                                        "custom"
-                                    ) {
-                                        termDefDelimiter =
-                                            importTermsCustomTermDefDelimiterValue;
-                                        if (termDefDelimiter == "") {
-                                            alert(
-                                                "Custom delimiter can't be blank >:(",
-                                            );
-                                            return;
-                                        }
+                                    var termDefDelimiter: string = importTermsTermDefDelimiterRadioSelect == "tab" ?
+                                        "\t" : (importTermsTermDefDelimiterRadioSelect == "comma" ?
+                                            "," : importTermsCustomTermDefDelimiterValue
+                                        );
+                                    var rowDelimiter: string = importTermsRowDelimiterRadioSelect == "newline" ?
+                                        "\n" : (importTermsRowDelimiterRadioSelect == "semicolon" ?
+                                            ";" : importTermsCustomRowDelimiterValue
+                                        );
+                                    if (termDefDelimiter == "") {
+                                        alert(
+                                            "Custom delimiter can't be blank >:(",
+                                        );
+                                        return;
                                     }
-                                    if (
-                                        importTermsRowDelimiterRadioSelect ==
-                                        "newline"
-                                    ) {
-                                        rowDelimiter = "\n";
-                                    } else if (
-                                        importTermsRowDelimiterRadioSelect ==
-                                        "semicolon"
-                                    ) {
-                                        rowDelimiter = ";";
-                                    } else if (
-                                        importTermsRowDelimiterRadioSelect ==
-                                        "custom"
-                                    ) {
-                                        rowDelimiter =
-                                            importTermsCustomRowDelimiterValue;
-                                        if (rowDelimiter == "") {
-                                            alert(
-                                                "Custom delimiter can't be blank >:(",
-                                            );
-                                            return;
-                                        }
+                                    if (rowDelimiter == "") {
+                                        alert(
+                                            "Custom delimiter can't be blank >:(",
+                                        );
+                                        return;
                                     }
 
                                     /* we add a blank term when users create a studyset,
@@ -1471,7 +1443,7 @@
             {#if showSubjectPicker}
                 <SubjectPicker
                     closeCallback={() => (showSubjectPicker = false)}
-                    selectCallback={(subject) => {
+                    selectCallback={(subject: any) => {
                         selectedSubject = subject;
                         showSubjectPicker = false;
                         unsavedChanges = true;

@@ -1,9 +1,22 @@
 <script lang="ts">
     import { onMount } from "svelte";
+ 	import type { Snippet } from 'svelte';
     import { fade, slide } from "svelte/transition";
     import CloseXMarkIcon from "$lib/icons/CloseXMark.svelte";
     import SearchIcon from "$lib/icons/Search.svelte";
-    let { closeCallback, selectCallback, errMsg } = $props();
+    let {
+        closeCallback,
+        selectCallback,
+        errMsg
+    }: {
+        closeCallback?: () => void,
+        selectCallback: (subject: Subject | null, showError: (show: boolean) => void) => void,
+        errMsg?: Snippet
+    } = $props();
+    interface Subject {
+        id: string;
+        name: string;
+    }
     let subjects = $state([]);
     let showErrMsg = $state(false);
     let showActionErrMsg = $state(false);
@@ -26,7 +39,7 @@
             });
             const resp = await raw.json();
             if (resp?.data) {
-                subjects = resp.data.allSubjects ?? [];
+                subjects:  = resp.data.allSubjects ?? [];
             } else {
                 console.error("No data property in json response: ", resp);
                 showErrMsg = true;
@@ -45,8 +58,8 @@
                 <CloseXMarkIcon></CloseXMarkIcon>
             </button>
         </div>
-        {#if showActionErrMsg}
-            {@render errMsg?.()}
+        {#if showActionErrMsg && errMsg !== undefined}
+            {@render errMsg()}
         {:else if showErrMsg}
             <div class="box ohno" transition:slide={{duration: 400}}>
                 <p>Error while loading subjects :(</p>
