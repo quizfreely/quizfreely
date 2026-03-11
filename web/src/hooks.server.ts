@@ -1,5 +1,6 @@
 import themesList from "$lib/themes";
 import { env } from "$env/dynamic/public";
+import { getClientSdk } from "$lib/graphql/sdk";
 
 export function init() {
     if (env.PORT == null || env.API_URL == null) {
@@ -29,6 +30,14 @@ export function init() {
 }
 
 export function handle({ event, resolve }) {
+    const authCookie = event.cookies.get("auth");
+    event.locals.sdk = getClientSdk(env.API_URL, {
+        fetch: event.fetch,
+        headers: authCookie !== undefined ? {
+            "Authorization": `Bearer ${authCookie}`
+        } : undefined
+    });
+
     let theme = "auto";
     let themeCookie = event.cookies.get("theme");
     if (themeCookie !== undefined && themesList.includes(themeCookie)) {

@@ -1,12 +1,15 @@
 import { env } from "$env/dynamic/public";
 import { error } from '@sveltejs/kit';
 
-export async function load({ params, cookies }) {
+export async function load({ params, cookies, locals }) {
       const headers: Record<string, string> = {
         "Content-Type": "application/json",
         ...(cookies.get("auth") ? { "Authorization": `Bearer ${cookies.get("auth")}` } : {})
       };
       try {
+        let typedApiRes = await locals.sdk.PublicStudyset({
+          id: params.id
+        })
         let rawApiRes = await fetch(env.API_URL + "/graphql", {
           method: "POST",
           headers: headers,
@@ -42,7 +45,6 @@ export async function load({ params, cookies }) {
               }
             }`,
             variables: {
-              id: params.id
             }
           })
         })
