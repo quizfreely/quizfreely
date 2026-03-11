@@ -9,6 +9,7 @@ declare global {
 		// interface Error {}
 		interface Locals {
 			sdk: Sdk;
+			theme: string;
 		}
 		// interface PageData {}
 		// interface PageState {}
