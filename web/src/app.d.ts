@@ -1,9 +1,15 @@
 // See https://svelte.dev/docs/kit/types#app.d.ts
 // for information about these interfaces
+import type { getSdk } from "$lib/graphql/generated";
+
+type Sdk = ReturnType<typeof getSdk>;
+
 declare global {
 	namespace App {
 		// interface Error {}
-		// interface Locals {}
+		interface Locals {
+			sdk: Sdk;
+		}
 		// interface PageData {}
 		// interface PageState {}
 		// interface Platform {}
