@@ -3,7 +3,7 @@
     import Chart from 'chart.js/auto';
     import 'chartjs-adapter-luxon';
     import { fancyTimestamp } from "$lib/fancyTimestamp";
-    import { idbApiLayer, db } from "../lib/idb-api-layer";
+    import { idbApiLayer, db } from "$lib/idb-api-layer";
     import averageAccuracy from "$lib/average-accuracy.js";
     import BackIcon from "$lib/icons/BackArrow.svelte"
     import ForwardLongArrowIcon from "$lib/icons/ForwardRightArrowLong.svelte"

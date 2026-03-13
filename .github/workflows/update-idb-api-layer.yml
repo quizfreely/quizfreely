@@ -10,10 +10,10 @@ jobs:
         run: git clone https://github.com/quizfreely/quizfreely.git
       - name: Clone quizfreely/idb-api-layer (from GitHub)
         run: git clone https://github.com/quizfreely/idb-api-layer.git
-      - name: Copy to web/idb-api-layer in quizfreely/quizfreely
+      - name: Copy to $lib/idb-api-layer in quizfreely/quizfreely
         run: |
-          mkdir -p quizfreely/web/idb-api-layer
-          cp -r idb-api-layer/dist/* quizfreely/web/idb-api-layer/
+          mkdir -p quizfreely/web/src/lib/idb-api-layer
+          cp -r idb-api-layer/dist/* quizfreely/web/src/lib/idb-api-layer/
       - name: Commit & push to quizfreely/quizfreely (gh)
         run: |
           cd quizfreely
