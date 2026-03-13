@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { idbApiLayer, db }from "../../lib/idb-api-layer/index.js";
+    import { idbApiLayer, db }from "$lib/idb-api-layer/index.js";
     import { onMount } from "svelte";
     import StudysetLinkBox from "$lib/components/StudysetLinkBox.svelte";
     import CheckmarkIcon from "$lib/icons/Checkmark.svelte";
