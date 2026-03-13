@@ -10,6 +10,7 @@ declare global {
 		interface Locals {
 			sdk: Sdk;
 			theme: string;
+			hasAuthCookie: boolean;
 		}
 		// interface PageData {}
 		// interface PageState {}

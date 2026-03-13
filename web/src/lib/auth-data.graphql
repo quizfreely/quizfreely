@@ -1,0 +1,11 @@
+query AuthData {
+    authed
+    authedUser {
+        id
+        username
+        displayName
+        authType
+        oauthGoogleEmail
+        modPerms
+    }
+}
