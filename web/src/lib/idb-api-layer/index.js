@@ -6,8 +6,8 @@
  * https://github.com/quizfreely/idb-api-layer
  */
 import Dexie from 'dexie';
-import { db } from "./db.js";
-import { idbLayerImg } from "./images.js";
+import { db } from "./db";
+import { idbLayerImg } from "./images";
 function isTitleValid(newTitle) {
     return (newTitle.length > 0 &&
         newTitle.length < 9000 &&
@@ -18,8 +18,8 @@ function isTitleValid(newTitle) {
         */
         !(newTitle.replace(/[\s\p{C}]+/gu, "") == ""));
 }
-export * from "./db.js";
-export * from "./images.js";
+export * from "./db";
+export * from "./images";
 export const idbApiLayer = {
     getStudysetById: async function (id, resolveProps) {
         const studysets = await db.studysets.where("id").equals(id).toArray();
