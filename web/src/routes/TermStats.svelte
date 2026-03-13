@@ -1,6 +1,6 @@
 <script lang="ts">
     import { onMount } from "svelte";
-    import { idbApiLayer, db } from "../../idb-api-layer";
+    import { idbApiLayer, db } from "../lib/idb-api-layer";
     import averageAccuracy from "$lib/average-accuracy.js";
     import Chart from 'chart.js/auto';
     import 'chartjs-adapter-luxon';

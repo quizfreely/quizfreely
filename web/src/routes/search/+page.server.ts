@@ -1,6 +1,6 @@
 import { env } from '$env/dynamic/public';
 import { error, redirect } from '@sveltejs/kit';
-import fetchAuthData from '$lib/fetchAuthData.server';
+import fetchAuthData from '$lib/auth-data.server';
 
 export async function load({ cookies, url }) {
   let searchQuery = (url.searchParams.get("q") ?? "")

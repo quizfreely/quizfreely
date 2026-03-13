@@ -1,4 +1,4 @@
-import fetchAuthData from "$lib/fetchAuthData.server";
+import fetchAuthData from "$lib/auth-data.server";
 
 export async function load({ cookies, url }) {
     let localTermId = parseInt(url.searchParams.get("id"));

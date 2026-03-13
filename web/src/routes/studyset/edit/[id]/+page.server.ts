@@ -1,4 +1,4 @@
-import fetchAuthData from '$lib/fetchAuthData.server'
+import fetchAuthData from '$lib/auth-data.server'
 
 export async function load({ cookies, params }) {
     let userResult = await fetchAuthData({ cookies })

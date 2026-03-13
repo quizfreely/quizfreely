@@ -1,3 +1,3 @@
-import fetchAuthData from "$lib/fetchAuthData.server";
+import fetchAuthData from "$lib/auth-data.server";
 
 export { fetchAuthData as load };

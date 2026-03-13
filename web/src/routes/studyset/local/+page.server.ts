@@ -1,4 +1,4 @@
-import fetchAuthData from "$lib/fetchAuthData.server";
+import fetchAuthData from "$lib/auth-data.server";
 import { error } from "@sveltejs/kit";
 
 export async function load({ params, url, cookies }) {

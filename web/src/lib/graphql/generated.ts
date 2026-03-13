@@ -635,6 +635,11 @@ export type UserStudysetsArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
 };
 
+export type AuthDataQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type AuthDataQuery = { __typename?: 'Query', authed?: boolean | null, authedUser?: { __typename?: 'AuthedUser', id?: string | null, username?: string | null, displayName?: string | null, authType?: AuthType | null, oauthGoogleEmail?: string | null, modPerms?: boolean | null } | null };
+
 export type PublicStudysetQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
@@ -643,6 +648,19 @@ export type PublicStudysetQueryVariables = Exact<{
 export type PublicStudysetQuery = { __typename?: 'Query', authed?: boolean | null, authedUser?: { __typename?: 'AuthedUser', id?: string | null, username?: string | null, displayName?: string | null } | null, studyset?: { __typename?: 'Studyset', id?: string | null, title?: string | null, updatedAt?: string | null, private?: boolean | null, saved?: boolean | null, user?: { __typename?: 'User', id?: string | null, displayName?: string | null } | null, folder?: { __typename?: 'Folder', id?: string | null, name?: string | null } | null, terms?: Array<{ __typename?: 'Term', id?: string | null, term?: string | null, def?: string | null, termImageUrl?: string | null, defImageUrl?: string | null } | null> | null } | null };
 
 
+export const AuthDataDocument = gql`
+    query AuthData {
+  authed
+  authedUser {
+    id
+    username
+    displayName
+    authType
+    oauthGoogleEmail
+    modPerms
+  }
+}
+    `;
 export const PublicStudysetDocument = gql`
     query PublicStudyset($id: ID!) {
   authed
@@ -683,6 +701,9 @@ const defaultWrapper: SdkFunctionWrapper = (action, _operationName, _operationTy
 
 export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = defaultWrapper) {
   return {
+    AuthData(variables?: AuthDataQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<AuthDataQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<AuthDataQuery>({ document: AuthDataDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'AuthData', 'query', variables);
+    },
     PublicStudyset(variables: PublicStudysetQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<PublicStudysetQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<PublicStudysetQuery>({ document: PublicStudysetDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'PublicStudyset', 'query', variables);
     }

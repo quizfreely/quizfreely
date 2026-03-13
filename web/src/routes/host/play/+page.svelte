@@ -1,7 +1,7 @@
 <script lang="ts">
     import { env } from "$env/dynamic/public";
     import { onMount } from "svelte";
-    import { idbApiLayer } from "../../../../idb-api-layer/index.js";
+    import { idbApiLayer } from "$lib/idb-api-layer";
     import Lobby from "$lib/multiplayer/Lobby.svelte";
     import Leaderboard from "$lib/multiplayer/Leaderboard.svelte";
     let { data } = $props();
