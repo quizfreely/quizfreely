@@ -3,40 +3,148 @@ on:
   workflow_dispatch:
 jobs:
   deploy:
-    name: Build & deploy web-app to production
+    name: Build & Deploy Web App & API
     runs-on: ubuntu-latest
     environment: production
+    outputs:
+      deployed: ${{ steps.finalize_deploy.outputs.deployed }}
+      old_api_release: ${{ steps.read_current_release.outputs.old_api_release }}
+      old_web_release: ${{ steps.read_current_release.outputs.old_web_release }}
     steps:
-      - uses: actions/checkout@v3
-      - name: npm run build
+      - uses: actions/checkout@v6
+        with:
+          path: quizfreely
+      - uses: actions/checkout@v6
+        with:
+          repository: quizfreely/api
+          path: api
+      - uses: actions/setup-go@v6
+        with:
+          go-version: '1.26'
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+      - name: Get Version Numbers
         run: |
-          cd web
-          npm install
+          cd quizfreely
+          git fetch --tags
+          echo "NEW_WEB_RELEASE=$(git describe --tags --abbrev=0 2>/dev/null || echo '')" >> $GITHUB_ENV
+          cd ../api
+          git fetch --tags
+          echo "NEW_API_RELEASE=$(git describe --tags --abbrev=0 2>/dev/null || echo '')" >> $GITHUB_ENV
+      - name: Build Web App
+        run: |
+          cd quizfreely/web
+          npm ci
           npm run build
-      - name: Set up SSH
+      - name: Compile API
+        run: |
+          cd api
+          go build -o api-server
+      - name: Setup SSH
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.PROD_SERVER_NONROOT_SSH_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -H server.quizfreely.org >> ~/.ssh/known_hosts
-      - name: Rsync build, node_modules, package.json, & package-lock.json
+      - name: Get currently deployed version
+        id: read_current_release
         run: |
-          rsync -av --delete \
-            --include='node_modules/***' \
+          read OLD_API_RELEASE OLD_WEB_RELEASE <<< $(ssh -i ~/.ssh/id_ed25519 quizfreely@server.quizfreely.org '
+            CURRENT_API_RELEASE=""
+            CURRENT_WEB_RELEASE=""
+            if [ -L ~/api/current ]; then
+              API=$(basename "$(readlink ~/api/current)")
+            fi
+            if [ -L ~/web/current ]; then
+              WEB=$(basename "$(readlink ~/web/current)")
+            fi
+            echo "$API $WEB"
+          ')
+          echo "old_api_release=$OLD_API_RELEASE" >> $GITHUB_OUTPUT
+          echo "old_web_release=$OLD_WEB_RELEASE" >> $GITHUB_OUTPUT
+          TIMESTAMP="$(date +'%Y-%m-%d_%H.%M.%S')"
+          if [[ -z "$NEW_API_RELEASE" ]]; then
+            NEW_API_RELEASE="$TIMESTAMP"
+            echo "NEW_API_RELEASE=$NEW_API_RELEASE" >> $GITHUB_ENV
+          elif [[ "$OLD_API_RELEASE" == "$NEW_API_RELEASE" ]]; then
+            NEW_API_RELEASE+="+$TIMESTAMP"
+            echo "NEW_API_RELEASE=$NEW_API_RELEASE" >> $GITHUB_ENV
+          fi
+          if [[ -z "$NEW_WEB_RELEASE" ]]; then
+            NEW_WEB_RELEASE="$TIMESTAMP"
+            echo "NEW_WEB_RELEASE=$NEW_WEB_RELEASE" >> $GITHUB_ENV
+          elif [[ "$OLD_WEB_RELEASE" == "$NEW_WEB_RELEASE" ]]; then
+            NEW_WEB_RELEASE+="+$TIMESTAMP"
+            echo "NEW_WEB_RELEASE=$NEW_WEB_RELEASE" >> $GITHUB_ENV
+          fi
+      - name: Create Release Directories
+        run: |
+          ssh -i ~/.ssh/id_ed25519 quizfreely@server.quizfreely.org \
+            "mkdir -p /home/quizfreely/api/releases/$NEW_API_RELEASE; mkdir -p /home/quizfreely/web/releases/$NEW_WEB_RELEASE"
+      - name: Upload compiled API with scp
+        run: scp api/api-server quizfreely@server.quizfreely.org:/home/quizfreely/api/releases/$NEW_API_RELEASE/api-server
+      - name: Update API's db folder with rsync
+        run: rsync -r --delete api/db/ quizfreely@server.quizfreely.org:/home/quizfreely/api/db/
+      - name: Upload built web app with rsync
+        run: |
+          rsync -av \
             --include='build/***' \
             --include='package.json' \
             --include='package-lock.json' \
-            --include='.env.example' \
             --exclude="*" \
             -e "ssh -i ~/.ssh/id_ed25519" \
-            web/ quizfreely@server.quizfreely.org:/home/quizfreely/web/
-      - name: Rsync static files in /srv
-        run: |
-          rsync -av --delete --chown=caddy:caddy \
-            -e "ssh -i ~/.ssh/id_ed25519" \
-            web/build/client/ quizfreely@server.quizfreely.org:/srv/quizfreely-web/www/
-      - name: SSH into server & restart systemd service
+            quizfreely/web/ quizfreely@server.quizfreely.org:/home/quizfreely/web/releases/$NEW_WEB_RELEASE/
+      - name: Install Node.js Dependencies on Production Server
         run: |
           ssh -i ~/.ssh/id_ed25519 \
-            quizfreely@server.quizfreely.org \
-            "sudo systemctl restart quizfreely-web.service"
+            quizfreely@server.quizfreely.org "
+              cd ~/web/releases/$NEW_WEB_RELEASE
+              npm ci
+            "
+      - name: Run DB Migrations, Update Release Symlinks, & Restart Systemd Services
+        id: finalize_deploy
+        run: |
+          ssh -i ~/.ssh/id_ed25519 \
+            quizfreely@server.quizfreely.org "
+              cd ~/api
+              dbmate -e DB_MIGRATION_URL migrate
+              ln -sfn ~/api/releases/$NEW_API_RELEASE ~/api/current
+              ln -sfn ~/web/releases/$NEW_WEB_RELEASE ~/web/current
+              sudo systemctl restart quizfreely-api.service
+              sudo systemctl restart quizfreely-web.service
+            "
+          echo "deployed=true" >> "$GITHUB_OUTPUT"
+  e2e-tests:
+    needs: deploy
+    uses: ./.github/workflows/e2e-tests.yml
+    with:
+      base_url: https://quizfreely.org
+  rollback:
+    needs: [deploy, e2e-tests]
+    if: failure() && needs.deploy.outputs.deployed == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.PROD_SERVER_NONROOT_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H server.quizfreely.org >> ~/.ssh/known_hosts
+      - name: Rollback Release
+        run: |
+          OLD_API_RELEASE="${{ needs.deploy.outputs.old_api_release }}"
+          OLD_WEB_RELEASE="${{ needs.deploy.outputs.old_web_release }}"
+          ssh -i ~/.ssh/id_ed25519 quizfreely@server.quizfreely.org "
+            if [ -n \"$OLD_API_RELEASE\" ]; then
+              ln -sfn ~/api/releases/$OLD_API_RELEASE ~/api/current
+            fi
+            if [ -n \"$OLD_WEB_RELEASE\" ]; then
+              ln -sfn ~/web/releases/$OLD_WEB_RELEASE ~/web/current
+            fi
+            sudo systemctl restart quizfreely-api.service
+            sudo systemctl restart quizfreely-web.service
+          "
+          # WARNING: database migrations are NOT automatically rolled back
+          exit 1
+
