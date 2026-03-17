@@ -26,14 +26,14 @@ quizfreely.org {
                 path /_app/immutable/*
         }
         handle @immutable {
-                root * /srv/quizfreely-web/www
+                root * /home/quizfreely/web/current/build/client
                 file_server
                 header {
                         Cache-Control "public, max-age=31536000, immutable"
                 }
         }
         handle /_app/* {
-                root * /srv/quizfreely-web/www
+                root * /home/quizfreely/web/current/build/client
                 file_server
         }
 
