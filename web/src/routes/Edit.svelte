@@ -1,6 +1,6 @@
 <script lang="ts">
     import Noscript from "$lib/components/Noscript.svelte";
-    import { onMount, mount, tick } from "svelte";
+    import { onMount, tick } from "svelte";
     import { env } from "$env/dynamic/public";
     import { idbApiLayer, idbLayerImg } from "$lib/idb-api-layer";
     import { goto, beforeNavigate } from "$app/navigation";
@@ -9,7 +9,6 @@
     import Dropdown from "$lib/components/Dropdown.svelte";
     import SubjectPicker from "$lib/components/SubjectPicker.svelte";
 
-    import IconLocal from "$lib/icons/Local.svelte";
     import IconCheckmark from "$lib/icons/Checkmark.svelte";
     import IconTrash from "$lib/icons/Trash.svelte";
     import IconArrowLeft from "$lib/icons/ArrowLeft.svelte";
@@ -1713,16 +1712,12 @@
         width: 10rem;
     }
 
-    button.img-button-thin-fit,
-    .button.img-button-thin-fit {
+    button.img-button-thin-fit {
         padding: 0.4rem 0.6rem;
         font-size: 0.9rem;
     }
 
-    button.pretty-button-disableable:disabled,
-    .button.pretty-button-disableable:disabled,
-    button.pretty-button-disableable.disabled,
-    .button.pretty-button-disableable.disabled {
+    button.pretty-button-disableable:disabled {
         opacity: 0.6;
     }
 

@@ -370,8 +370,8 @@
     <StudysetList
         bind:this={studysetListComponent}
         data={studysetListData}
-        cloudLinkTemplateFunc={(id) => `/studysets/${id}`}
-        localLinkTemplateFunc={(id) => `/studyset/local?id=${id}`}
+        cloudLinkTemplateFunc={(id: string) => `/studysets/${id}`}
+        localLinkTemplateFunc={(id: number | string) => `/studyset/local?id=${id}`}
         cloudEmptyMsg={emptyMsg}
         localEmptyMsg={emptyMsg}
         collapseCloud={true}
@@ -384,11 +384,11 @@
         {savedDropdownContent}
         {topMenu}
         {folderMenu}
-        onFolderEnter={(folder) => {
-            pushState(`/dashboard?folder=${folder.id}`);
+        onFolderEnter={(folder: {id:string}) => {
+            pushState(`/dashboard?folder=${folder.id}`, {});
         }}
-        onFolderExit={(folder) => {
-            pushState("/dashboard");
+        onFolderExit={(_: any) => {
+            pushState("/dashboard", {});
         }}
     ></StudysetList>
 </div>

@@ -32,6 +32,9 @@ export const idbLayerImg = {
                 }
                 canvas.width = width;
                 canvas.height = height;
+                if (ctx == null) {
+                    return reject(new Error("canvas.getContext(\"2d\") returned null"));
+                }
                 ctx.drawImage(img, 0, 0, width, height);
                 canvas.toBlob((blob) => {
                     if (!blob)
@@ -94,10 +97,10 @@ export const idbLayerImg = {
             updatedAt: rnISOString
         };
         if (defSide) {
-            changes.defImageKey = null;
+            changes.defImageKey = undefined;
         }
         else {
-            changes.termImageKey = null;
+            changes.termImageKey = undefined;
         }
         await db.terms.update(termId, changes);
         return true;

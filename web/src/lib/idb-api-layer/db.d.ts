@@ -19,10 +19,14 @@ interface Term {
     id: number;
     term: string;
     def: string;
-    termImageUrl?: string;
-    defImageUrl?: string;
+    termImageUrl?: string | null;
+    defImageUrl?: string | null;
     termImageKey?: number;
     defImageKey?: number;
+    sortOrder: number;
+    studysetId: number;
+    createdAt: string;
+    updatedAt: string;
     progress?: TermProgress;
     progressHistory?: TermProgressHistory[];
     topConfusionPairs?: TermConfusionPair[];

@@ -37,10 +37,10 @@
         terms = data?.studyset?.terms;
         practiceTests = data?.studyset?.practiceTests;
     }
-    let alreadyOverLocalPTStudysetId = $state(-1);
+    let alreadyOverLocalPTStudysetId: string | number = $state(-1);
     let mounted = $state(false);
     onMount(() => {
-        let objectKeys = [];
+        let objectKeys: string[] = [];
         (async () => {
             mounted = true;
             if (data?.settingsDateTimeFmtHours == "24") {
@@ -92,14 +92,14 @@
                     practiceTests: true,
                 });
                 terms = studyset.terms;
-                terms.forEach(term => {
+                terms?.forEach(term => {
                     if (term.termImageUrl != null) {
                         objectKeys.push(term.termImageUrl);
                     }
                     if (term.defImageUrl != null) {
                         objectKeys.push(term.defImageUrl);
                     }
-                    term.topConfusionPairs.forEach(confusionPair => {
+                    term.topConfusionPairs?.forEach(confusionPair => {
                         if (confusionPair?.confusedTerm?.termImageUrl != null) {
                             objectKeys.push(confusionPair.confusedTerm.termImageUrl);
                         }
@@ -107,7 +107,7 @@
                             objectKeys.push(confusionPair.confusedTerm.defImageUrl);
                         }
                     });
-                    term.topReverseConfusionPairs.forEach(confusionPair => {
+                    term.topReverseConfusionPairs?.forEach(confusionPair => {
                         if (confusionPair?.confusedTerm?.termImageUrl != null) {
                             objectKeys.push(confusionPair.confusedTerm.termImageUrl);
                         }
@@ -134,15 +134,15 @@
                     so lexical/alphanumeric sorting is the same as chronological sorting
                     also you see we're comparing `b` to `a`, so its descending,
                     so most recent is first */
-                    (a, b) => b.timestamp.localeCompare(a.timestamp),
+                    (a: any, b: any) => b.timestamp.localeCompare(a.timestamp),
                 );
                 practiceTests = practiceTests;
 
-                for (const term of terms) {
-                    term.progress = await db.termProgress
+                for (const term of terms ?? []) {
+                    term.progress = (await db.termProgress
                         .where("termId")
                         .equals(term.id)
-                        .toArray()?.[0];
+                        .toArray())?.[0];
                     term.topConfusionPairs = await idbApiLayer.getTopConfusionPairs(
                         term.id,
                     );
@@ -198,7 +198,7 @@
     );
     let questionComponents = $state([]);
     function setupStart() {
-        if (terms == null || terms.length < 1) {
+        if (terms.length < 1) {
             alert("oops, not enough terms");
             console.log("Terms array: ", terms);
             return;

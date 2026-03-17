@@ -29,10 +29,10 @@ export enum AuthType {
 
 export type AuthedUser = {
   __typename?: 'AuthedUser';
-  authType?: Maybe<AuthType>;
-  displayName?: Maybe<Scalars['String']['output']>;
-  id?: Maybe<Scalars['ID']['output']>;
-  modPerms?: Maybe<Scalars['Boolean']['output']>;
+  authType: AuthType;
+  displayName: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  modPerms: Scalars['Boolean']['output'];
   oauthGoogleEmail?: Maybe<Scalars['String']['output']>;
   username?: Maybe<Scalars['String']['output']>;
 };
@@ -56,8 +56,8 @@ export type FrqInput = {
 
 export type Folder = {
   __typename?: 'Folder';
-  id?: Maybe<Scalars['ID']['output']>;
-  name?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  name: Scalars['String']['output'];
   studysetCount: Scalars['Int']['output'];
   studysetDrafts: StudysetConnection;
   studysets: StudysetConnection;
@@ -145,8 +145,8 @@ export type Mutation = {
   unsaveStudyset?: Maybe<Scalars['Boolean']['output']>;
   updatePracticeTest?: Maybe<PracticeTest>;
   updateStudyset?: Maybe<Studyset>;
-  updateTermProgress?: Maybe<Array<Maybe<TermProgress>>>;
-  updateTerms?: Maybe<Array<Maybe<Term>>>;
+  updateTermProgress?: Maybe<Array<TermProgress>>;
+  updateTerms?: Maybe<Array<Term>>;
   updateUser?: Maybe<AuthedUser>;
 };
 
@@ -265,17 +265,17 @@ export type PageInfo = {
 
 export type PracticeTest = {
   __typename?: 'PracticeTest';
-  id?: Maybe<Scalars['ID']['output']>;
-  questions?: Maybe<Array<Maybe<Question>>>;
+  id: Scalars['ID']['output'];
+  questions?: Maybe<Array<Question>>;
   questionsCorrect?: Maybe<Scalars['Int']['output']>;
   questionsTotal?: Maybe<Scalars['Int']['output']>;
-  studysetId?: Maybe<Scalars['ID']['output']>;
-  timestamp?: Maybe<Scalars['String']['output']>;
+  studysetId: Scalars['ID']['output'];
+  timestamp: Scalars['String']['output'];
 };
 
 export type PracticeTestInput = {
   id?: InputMaybe<Scalars['ID']['input']>;
-  questions?: InputMaybe<Array<InputMaybe<QuestionInput>>>;
+  questions?: InputMaybe<Array<QuestionInput>>;
   questionsCorrect?: InputMaybe<Scalars['Int']['input']>;
   questionsTotal?: InputMaybe<Scalars['Int']['input']>;
   studysetId?: InputMaybe<Scalars['ID']['input']>;
@@ -284,8 +284,8 @@ export type PracticeTestInput = {
 
 export type Query = {
   __typename?: 'Query';
-  allSubjects?: Maybe<Array<Maybe<Subject>>>;
-  authed?: Maybe<Scalars['Boolean']['output']>;
+  allSubjects?: Maybe<Array<Subject>>;
+  authed: Scalars['Boolean']['output'];
   authedUser?: Maybe<AuthedUser>;
   folder?: Maybe<Folder>;
   myFolders: FolderConnection;
@@ -303,8 +303,8 @@ export type Query = {
   studysetCount: Scalars['Int']['output'];
   studysetUpdateCount: Scalars['Int']['output'];
   subject?: Maybe<Subject>;
-  subjectsByCategory?: Maybe<Array<Maybe<Subject>>>;
-  subjectsByKeyword?: Maybe<Array<Maybe<Subject>>>;
+  subjectsByCategory?: Maybe<Array<Subject>>;
+  subjectsByKeyword?: Maybe<Array<Subject>>;
   term?: Maybe<Term>;
   user?: Maybe<User>;
 };
@@ -458,16 +458,16 @@ export enum QuestionType {
 export type Studyset = {
   __typename?: 'Studyset';
   createdAt?: Maybe<Scalars['String']['output']>;
-  draft?: Maybe<Scalars['Boolean']['output']>;
+  draft: Scalars['Boolean']['output'];
   folder?: Maybe<Folder>;
-  id?: Maybe<Scalars['ID']['output']>;
+  id: Scalars['ID']['output'];
   practiceTests?: Maybe<Array<Maybe<PracticeTest>>>;
-  private?: Maybe<Scalars['Boolean']['output']>;
+  private: Scalars['Boolean']['output'];
   saved?: Maybe<Scalars['Boolean']['output']>;
   subject?: Maybe<Subject>;
   terms?: Maybe<Array<Maybe<Term>>>;
   termsCount?: Maybe<Scalars['Int']['output']>;
-  title?: Maybe<Scalars['String']['output']>;
+  title: Scalars['String']['output'];
   updatedAt?: Maybe<Scalars['String']['output']>;
   user?: Maybe<User>;
 };
@@ -493,7 +493,7 @@ export type StudysetInput = {
 export type Subject = {
   __typename?: 'Subject';
   category?: Maybe<SubjectCategory>;
-  id?: Maybe<Scalars['String']['output']>;
+  id: Scalars['String']['output'];
   name?: Maybe<Scalars['String']['output']>;
   studysetCount: Scalars['Int']['output'];
   studysets: StudysetConnection;
@@ -520,10 +520,10 @@ export type Term = {
   createdAt?: Maybe<Scalars['String']['output']>;
   def?: Maybe<Scalars['String']['output']>;
   defImageUrl?: Maybe<Scalars['String']['output']>;
-  id?: Maybe<Scalars['ID']['output']>;
+  id: Scalars['ID']['output'];
   progress?: Maybe<TermProgress>;
   progressHistory?: Maybe<Array<Maybe<TermProgressHistory>>>;
-  sortOrder?: Maybe<Scalars['Int']['output']>;
+  sortOrder: Scalars['Int']['output'];
   term?: Maybe<Scalars['String']['output']>;
   termImageUrl?: Maybe<Scalars['String']['output']>;
   topConfusionPairs?: Maybe<Array<Maybe<TermConfusionPair>>>;
@@ -533,12 +533,12 @@ export type Term = {
 
 export type TermConfusionPair = {
   __typename?: 'TermConfusionPair';
-  answeredWith?: Maybe<AnswerWith>;
+  answeredWith: AnswerWith;
   confusedCount?: Maybe<Scalars['Int']['output']>;
-  confusedTerm?: Maybe<Term>;
-  id?: Maybe<Scalars['ID']['output']>;
-  lastConfusedAt?: Maybe<Scalars['String']['output']>;
-  term?: Maybe<Term>;
+  confusedTerm: Term;
+  id: Scalars['ID']['output'];
+  lastConfusedAt: Scalars['String']['output'];
+  term: Term;
 };
 
 export type TermConfusionPairInput = {
@@ -558,16 +558,16 @@ export type TermInput = {
 
 export type TermProgress = {
   __typename?: 'TermProgress';
-  defCorrectCount?: Maybe<Scalars['Int']['output']>;
+  defCorrectCount: Scalars['Int']['output'];
   defFirstReviewedAt?: Maybe<Scalars['String']['output']>;
-  defIncorrectCount?: Maybe<Scalars['Int']['output']>;
+  defIncorrectCount: Scalars['Int']['output'];
   defLastReviewedAt?: Maybe<Scalars['String']['output']>;
   defLeitnerSystemBox?: Maybe<Scalars['Int']['output']>;
   defReviewCount?: Maybe<Scalars['Int']['output']>;
-  id?: Maybe<Scalars['ID']['output']>;
-  termCorrectCount?: Maybe<Scalars['Int']['output']>;
+  id: Scalars['ID']['output'];
+  termCorrectCount: Scalars['Int']['output'];
   termFirstReviewedAt?: Maybe<Scalars['String']['output']>;
-  termIncorrectCount?: Maybe<Scalars['Int']['output']>;
+  termIncorrectCount: Scalars['Int']['output'];
   termLastReviewedAt?: Maybe<Scalars['String']['output']>;
   termLeitnerSystemBox?: Maybe<Scalars['Int']['output']>;
   termReviewCount?: Maybe<Scalars['Int']['output']>;
@@ -577,10 +577,10 @@ export type TermProgressHistory = {
   __typename?: 'TermProgressHistory';
   defCorrectCount?: Maybe<Scalars['Int']['output']>;
   defIncorrectCount?: Maybe<Scalars['Int']['output']>;
-  id?: Maybe<Scalars['ID']['output']>;
+  id: Scalars['ID']['output'];
   termCorrectCount?: Maybe<Scalars['Int']['output']>;
   termIncorrectCount?: Maybe<Scalars['Int']['output']>;
-  timestamp?: Maybe<Scalars['String']['output']>;
+  timestamp: Scalars['String']['output'];
 };
 
 export type TermProgressInput = {
@@ -614,8 +614,8 @@ export type TrueFalseQuestionInput = {
 
 export type User = {
   __typename?: 'User';
-  displayName?: Maybe<Scalars['String']['output']>;
-  id?: Maybe<Scalars['ID']['output']>;
+  displayName: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
   studysetCount: Scalars['Int']['output'];
   studysets: StudysetConnection;
   username?: Maybe<Scalars['String']['output']>;
@@ -638,14 +638,59 @@ export type UserStudysetsArgs = {
 export type AuthDataQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type AuthDataQuery = { __typename?: 'Query', authed?: boolean | null, authedUser?: { __typename?: 'AuthedUser', id?: string | null, username?: string | null, displayName?: string | null, authType?: AuthType | null, oauthGoogleEmail?: string | null, modPerms?: boolean | null } | null };
+export type AuthDataQuery = { __typename?: 'Query', authed: boolean, authedUser?: { __typename?: 'AuthedUser', id: string, username?: string | null, displayName: string, authType: AuthType, oauthGoogleEmail?: string | null, modPerms: boolean } | null };
+
+export type StudysetListLoadPageCloudQueryVariables = Exact<{
+  first?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type StudysetListLoadPageCloudQuery = { __typename?: 'Query', myStudysets: { __typename?: 'StudysetConnection', edges: Array<{ __typename?: 'StudysetEdge', node: { __typename?: 'Studyset', id: string, title: string, private: boolean, termsCount?: number | null, updatedAt?: string | null, folder?: { __typename?: 'Folder', id: string, name: string } | null } }>, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, endCursor?: string | null } } };
+
+export type StudysetListLoadPageFolderQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+  first?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type StudysetListLoadPageFolderQuery = { __typename?: 'Query', folder?: { __typename?: 'Folder', id: string, studysets: { __typename?: 'StudysetConnection', edges: Array<{ __typename?: 'StudysetEdge', node: { __typename?: 'Studyset', id: string, title: string, private: boolean, termsCount?: number | null, updatedAt?: string | null, folder?: { __typename?: 'Folder', id: string, name: string } | null } }>, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, endCursor?: string | null } } } | null };
+
+export type StudysetListLoadPageSavedQueryVariables = Exact<{
+  first?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type StudysetListLoadPageSavedQuery = { __typename?: 'Query', mySavedStudysets: { __typename?: 'StudysetConnection', edges: Array<{ __typename?: 'StudysetEdge', node: { __typename?: 'Studyset', id: string, title: string, private: boolean, termsCount?: number | null, updatedAt?: string | null, folder?: { __typename?: 'Folder', id: string, name: string } | null } }>, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, endCursor?: string | null } } };
+
+export type ViewPracticeTestQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type ViewPracticeTestQuery = { __typename?: 'Query', authed: boolean, authedUser?: { __typename?: 'AuthedUser', id: string, username?: string | null, displayName: string } | null, practiceTest?: { __typename?: 'PracticeTest', id: string, timestamp: string, studysetId: string, questionsCorrect?: number | null, questionsTotal?: number | null, questions?: Array<{ __typename?: 'Question', questionType?: QuestionType | null, mcq?: { __typename?: 'MCQ', answerWith?: AnswerWith | null, correct?: boolean | null, correctChoiceIndex?: number | null, term?: { __typename?: 'Term', id: string, term?: string | null, def?: string | null } | null, answeredTerm?: { __typename?: 'Term', id: string, term?: string | null, def?: string | null } | null, distractors?: Array<{ __typename?: 'Term', id: string, term?: string | null, def?: string | null } | null> | null } | null, trueFalseQuestion?: { __typename?: 'TrueFalseQuestion', answerWith?: AnswerWith | null, correct?: boolean | null, answeredBool?: boolean | null, term?: { __typename?: 'Term', id: string, term?: string | null, def?: string | null } | null, distractor?: { __typename?: 'Term', id: string, term?: string | null, def?: string | null } | null } | null }> | null } | null };
 
 export type PublicStudysetQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type PublicStudysetQuery = { __typename?: 'Query', authed?: boolean | null, authedUser?: { __typename?: 'AuthedUser', id?: string | null, username?: string | null, displayName?: string | null } | null, studyset?: { __typename?: 'Studyset', id?: string | null, title?: string | null, updatedAt?: string | null, private?: boolean | null, saved?: boolean | null, user?: { __typename?: 'User', id?: string | null, displayName?: string | null } | null, folder?: { __typename?: 'Folder', id?: string | null, name?: string | null } | null, terms?: Array<{ __typename?: 'Term', id?: string | null, term?: string | null, def?: string | null, termImageUrl?: string | null, defImageUrl?: string | null } | null> | null } | null };
+export type PublicStudysetQuery = { __typename?: 'Query', authed: boolean, authedUser?: { __typename?: 'AuthedUser', id: string, username?: string | null, displayName: string } | null, studyset?: { __typename?: 'Studyset', id: string, title: string, updatedAt?: string | null, private: boolean, saved?: boolean | null, user?: { __typename?: 'User', id: string, displayName: string } | null, folder?: { __typename?: 'Folder', id: string, name: string } | null, terms?: Array<{ __typename?: 'Term', id: string, term?: string | null, def?: string | null, termImageUrl?: string | null, defImageUrl?: string | null } | null> | null } | null };
+
+export type StartPracticeTestQueryVariables = Exact<{
+  studysetId: Scalars['ID']['input'];
+}>;
+
+
+export type StartPracticeTestQuery = { __typename?: 'Query', authed: boolean, authedUser?: { __typename?: 'AuthedUser', id: string, username?: string | null, displayName: string } | null, studyset?: { __typename?: 'Studyset', id: string, title: string, updatedAt?: string | null, private: boolean, user?: { __typename?: 'User', id: string, displayName: string } | null, terms?: Array<{ __typename?: 'Term', id: string, term?: string | null, def?: string | null, termImageUrl?: string | null, defImageUrl?: string | null, progress?: { __typename?: 'TermProgress', termFirstReviewedAt?: string | null, termLastReviewedAt?: string | null, termReviewCount?: number | null, defFirstReviewedAt?: string | null, defLastReviewedAt?: string | null, defReviewCount?: number | null, termCorrectCount: number, termIncorrectCount: number, defCorrectCount: number, defIncorrectCount: number } | null, topConfusionPairs?: Array<{ __typename?: 'TermConfusionPair', answeredWith: AnswerWith, confusedCount?: number | null, confusedTerm: { __typename?: 'Term', id: string, term?: string | null, def?: string | null, termImageUrl?: string | null, defImageUrl?: string | null } } | null> | null, topReverseConfusionPairs?: Array<{ __typename?: 'TermConfusionPair', answeredWith: AnswerWith, confusedCount?: number | null, term: { __typename?: 'Term', id: string, term?: string | null, def?: string | null, termImageUrl?: string | null, defImageUrl?: string | null } } | null> | null } | null> | null, practiceTests?: Array<{ __typename?: 'PracticeTest', id: string, timestamp: string, questionsCorrect?: number | null, questionsTotal?: number | null } | null> | null } | null };
 
 
 export const AuthDataDocument = gql`
@@ -658,6 +703,145 @@ export const AuthDataDocument = gql`
     authType
     oauthGoogleEmail
     modPerms
+  }
+}
+    `;
+export const StudysetListLoadPageCloudDocument = gql`
+    query StudysetListLoadPageCloud($first: Int, $after: String, $last: Int, $before: String) {
+  myStudysets(
+    first: $first
+    after: $after
+    last: $last
+    before: $before
+    hideFoldered: true
+  ) {
+    edges {
+      node {
+        id
+        title
+        private
+        termsCount
+        updatedAt
+        folder {
+          id
+          name
+        }
+      }
+    }
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+      startCursor
+      endCursor
+    }
+  }
+}
+    `;
+export const StudysetListLoadPageFolderDocument = gql`
+    query StudysetListLoadPageFolder($id: ID!, $first: Int, $after: String, $last: Int, $before: String) {
+  folder(id: $id) {
+    id
+    studysets(first: $first, after: $after, last: $last, before: $before) {
+      edges {
+        node {
+          id
+          title
+          private
+          termsCount
+          updatedAt
+          folder {
+            id
+            name
+          }
+        }
+      }
+      pageInfo {
+        hasNextPage
+        hasPreviousPage
+        startCursor
+        endCursor
+      }
+    }
+  }
+}
+    `;
+export const StudysetListLoadPageSavedDocument = gql`
+    query StudysetListLoadPageSaved($first: Int, $after: String, $last: Int, $before: String) {
+  mySavedStudysets(first: $first, after: $after, last: $last, before: $before) {
+    edges {
+      node {
+        id
+        title
+        private
+        termsCount
+        updatedAt
+        folder {
+          id
+          name
+        }
+      }
+    }
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+      startCursor
+      endCursor
+    }
+  }
+}
+    `;
+export const ViewPracticeTestDocument = gql`
+    query ViewPracticeTest($id: ID!) {
+  authed
+  authedUser {
+    id
+    username
+    displayName
+  }
+  practiceTest(id: $id) {
+    id
+    timestamp
+    studysetId
+    questionsCorrect
+    questionsTotal
+    questions {
+      questionType
+      mcq {
+        term {
+          id
+          term
+          def
+        }
+        answerWith
+        correct
+        answeredTerm {
+          id
+          term
+          def
+        }
+        distractors {
+          id
+          term
+          def
+        }
+        correctChoiceIndex
+      }
+      trueFalseQuestion {
+        term {
+          id
+          term
+          def
+        }
+        answerWith
+        correct
+        answeredBool
+        distractor {
+          id
+          term
+          def
+        }
+      }
+    }
   }
 }
     `;
@@ -693,6 +877,73 @@ export const PublicStudysetDocument = gql`
   }
 }
     `;
+export const StartPracticeTestDocument = gql`
+    query StartPracticeTest($studysetId: ID!) {
+  authed
+  authedUser {
+    id
+    username
+    displayName
+  }
+  studyset(id: $studysetId) {
+    id
+    title
+    updatedAt
+    user {
+      id
+      displayName
+    }
+    private
+    terms {
+      id
+      term
+      def
+      termImageUrl
+      defImageUrl
+      progress {
+        termFirstReviewedAt
+        termLastReviewedAt
+        termReviewCount
+        defFirstReviewedAt
+        defLastReviewedAt
+        defReviewCount
+        termCorrectCount
+        termIncorrectCount
+        defCorrectCount
+        defIncorrectCount
+      }
+      topConfusionPairs {
+        confusedTerm {
+          id
+          term
+          def
+          termImageUrl
+          defImageUrl
+        }
+        answeredWith
+        confusedCount
+      }
+      topReverseConfusionPairs {
+        term {
+          id
+          term
+          def
+          termImageUrl
+          defImageUrl
+        }
+        answeredWith
+        confusedCount
+      }
+    }
+    practiceTests {
+      id
+      timestamp
+      questionsCorrect
+      questionsTotal
+    }
+  }
+}
+    `;
 
 export type SdkFunctionWrapper = <T>(action: (requestHeaders?:Record<string, string>) => Promise<T>, operationName: string, operationType?: string, variables?: any) => Promise<T>;
 
@@ -704,8 +955,23 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     AuthData(variables?: AuthDataQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<AuthDataQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<AuthDataQuery>({ document: AuthDataDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'AuthData', 'query', variables);
     },
+    StudysetListLoadPageCloud(variables?: StudysetListLoadPageCloudQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<StudysetListLoadPageCloudQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<StudysetListLoadPageCloudQuery>({ document: StudysetListLoadPageCloudDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'StudysetListLoadPageCloud', 'query', variables);
+    },
+    StudysetListLoadPageFolder(variables: StudysetListLoadPageFolderQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<StudysetListLoadPageFolderQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<StudysetListLoadPageFolderQuery>({ document: StudysetListLoadPageFolderDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'StudysetListLoadPageFolder', 'query', variables);
+    },
+    StudysetListLoadPageSaved(variables?: StudysetListLoadPageSavedQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<StudysetListLoadPageSavedQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<StudysetListLoadPageSavedQuery>({ document: StudysetListLoadPageSavedDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'StudysetListLoadPageSaved', 'query', variables);
+    },
+    ViewPracticeTest(variables: ViewPracticeTestQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<ViewPracticeTestQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<ViewPracticeTestQuery>({ document: ViewPracticeTestDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'ViewPracticeTest', 'query', variables);
+    },
     PublicStudyset(variables: PublicStudysetQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<PublicStudysetQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<PublicStudysetQuery>({ document: PublicStudysetDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'PublicStudyset', 'query', variables);
+    },
+    StartPracticeTest(variables: StartPracticeTestQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<StartPracticeTestQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<StartPracticeTestQuery>({ document: StartPracticeTestDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'StartPracticeTest', 'query', variables);
     }
   };
 }

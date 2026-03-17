@@ -1,7 +1,7 @@
 export declare const idbLayerImg: {
-    processImage: (file: any, maxWidth: any, maxHeight: any, quality: any) => Promise<unknown>;
-    processAndUpdateTermImage: (termId: any, defSide: any, file: any) => Promise<any>;
-    removeTermImage: (termId: any, defSide: any) => Promise<boolean>;
-    getImageObjectUrl: (key: any) => Promise<string>;
-    deleteImages: (keys: any) => Promise<void>;
+    processImage: (file: Blob, maxWidth: number, maxHeight: number, quality?: number) => Promise<Blob>;
+    processAndUpdateTermImage: (termId: number, defSide: boolean, file: Blob) => Promise<Blob | null>;
+    removeTermImage: (termId: number, defSide: boolean) => Promise<boolean>;
+    getImageObjectUrl: (key: number) => Promise<string | null>;
+    deleteImages: (keys: number[]) => Promise<void>;
 };

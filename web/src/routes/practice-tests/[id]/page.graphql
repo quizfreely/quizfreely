@@ -1,0 +1,53 @@
+query ViewPracticeTest($id: ID!) {
+    authed
+    authedUser {
+        id
+        username
+        displayName
+    }
+    practiceTest(id: $id) {
+        id
+        timestamp
+        studysetId
+        questionsCorrect
+        questionsTotal
+        questions {
+            questionType
+            mcq {
+                term {
+                    id
+                    term
+                    def
+                }
+                answerWith
+                correct
+                answeredTerm {
+                    id
+                    term
+                    def
+                }
+                distractors {
+                    id
+                    term
+                    def
+                }
+                correctChoiceIndex
+            }
+            trueFalseQuestion {
+                term {
+                    id
+                    term
+                    def
+                }
+                answerWith
+                correct
+                answeredBool
+                distractor {
+                    id
+                    term
+                    def
+                }
+            }
+        }
+    }
+}
