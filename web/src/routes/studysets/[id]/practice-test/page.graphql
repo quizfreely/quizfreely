@@ -1,0 +1,65 @@
+query StartPracticeTest($studysetId: ID!) {
+    authed
+    authedUser {
+        id
+        username
+        displayName
+    }
+    studyset(id: $studysetId) {
+        id
+        title
+        updatedAt
+        user {
+            id
+            displayName
+        }
+        private
+        terms {
+            id
+            term
+            def
+            termImageUrl
+            defImageUrl
+            progress {
+                termFirstReviewedAt
+                termLastReviewedAt
+                termReviewCount
+                defFirstReviewedAt
+                defLastReviewedAt
+                defReviewCount
+                termCorrectCount
+                termIncorrectCount
+                defCorrectCount
+                defIncorrectCount
+            }
+            topConfusionPairs {
+                confusedTerm {
+                    id
+                    term
+                    def
+                    termImageUrl
+                    defImageUrl
+                }
+                answeredWith
+                confusedCount
+            }
+            topReverseConfusionPairs {
+                term {
+                    id
+                    term
+                    def
+                    termImageUrl
+                    defImageUrl
+                }
+                answeredWith
+                confusedCount
+            }
+        }
+        practiceTests {
+            id
+            timestamp
+            questionsCorrect
+            questionsTotal
+        }
+    }
+}

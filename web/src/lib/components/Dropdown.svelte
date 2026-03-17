@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { onMount, tick } from "svelte";
+    import { onMount, tick, type Snippet } from "svelte";
     import { slide } from "svelte/transition";
     import {
         computePosition,
@@ -7,18 +7,29 @@
         shift,
         offset,
         autoUpdate,
+        type OffsetOptions,
+        type Placement,
+        type Padding,
     } from "@floating-ui/dom";
+    import type { HTMLButtonAttributes, HTMLAttributes } from "svelte/elements";
     let {
         button,
         buttonContent,
-        div = {},
+        div,
         divContent,
-        container = {},
-        ...props /*
-            offset,
-            shiftPadding,
-            placement
-        */
+        container,
+        offset: offsetValue = 4,
+        shiftPadding = 10,
+        placement = "bottom-start",
+    }: {
+        button?: HTMLButtonAttributes;
+        buttonContent: Snippet;
+        div?: HTMLAttributes<HTMLDivElement>;
+        divContent: Snippet<[hide: () => void]>;
+        container?: HTMLAttributes<HTMLDivElement>;
+        offset?: OffsetOptions;
+        shiftPadding?: Padding;
+        placement?: Placement;
     } = $props();
     let buttonEl: HTMLButtonElement;
     let divEl: HTMLDivElement | undefined = $state();
@@ -45,12 +56,12 @@
     function update() {
         if (show && divEl !== undefined) {
             computePosition(buttonEl, divEl, {
-                placement: props?.placement ?? "bottom-start",
+                placement: placement,
                 middleware: [
-                    offset(props?.offset ?? 4),
+                    offset(offsetValue),
                     flip(),
                     shift({
-                        padding: props?.shiftPadding ?? 10,
+                        padding: shiftPadding,
                     }),
                 ],
             }).then(({ x, y }) => {
@@ -87,7 +98,7 @@
 
 <div {...container}>
     <button onclick={() => toggle()} bind:this={buttonEl} {...button}>
-        {@render buttonContent?.()}
+        {@render buttonContent()}
     </button>
     {#if show}
         <div
@@ -98,7 +109,7 @@
             onintrostart={update}
             onintroend={update}
         >
-            {@render divContent?.(hide)}
+            {@render divContent(hide)}
         </div>
     {/if}
 </div>

@@ -9,7 +9,11 @@
     import ForwardLongArrowIcon from "$lib/icons/ForwardRightArrowLong.svelte"
     import StatsIcon from "$lib/icons/ChartGraphLine.svelte"
     import { slide } from "svelte/transition";
-    let { data } = $props();
+    import type { PageData as PageData4View } from "./practice-tests/[id]/$types";
+    import type { PageData as PageData4Start } from "./studysets/[id]/practice-test/$types";
+    let { data }: {
+        data: PageData4View | PageData4Start
+    } = $props();
     let terms = $state(
         data?.local ?
             [] : data?.studyset?.terms

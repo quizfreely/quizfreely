@@ -27,7 +27,7 @@ export const idbApiLayer = {
             return null;
         }
         if (resolveProps?.terms) {
-            studysets[0].terms = await this.getTermsByStudysetId(id, resolveProps.terms);
+            studysets[0].terms = await this.getTermsByStudysetId(id, resolveProps.terms === true ? undefined : resolveProps.terms);
         }
         if (resolveProps?.practiceTests) {
             studysets[0].practiceTests = await db.practiceTests.where("studysetId").equals(id).toArray();
@@ -47,51 +47,33 @@ export const idbApiLayer = {
             resolveProps?.termImageUrl ||
             resolveProps?.defImageUrl) {
             await Promise.all(terms.map(async (term) => {
-                let indicies = {};
-                let promises = [];
+                const promises = {};
                 if (resolveProps?.progress) {
-                    indicies.progress = promises.length;
-                    promises.push(db.termProgress.where("termId").equals(term.id).toArray());
+                    promises.progress = db.termProgress.where("termId").equals(term.id).toArray();
                 }
                 if (resolveProps?.progressHistory) {
-                    indicies.progressHistory = promises.length;
-                    promises.push(db.termProgressHistory.where("termId").equals(term.id).toArray());
+                    promises.progressHistory = db.termProgressHistory.where("termId").equals(term.id).toArray();
                 }
                 if (resolveProps?.topConfusionPairs) {
-                    indicies.topConfusionPairs = promises.length;
-                    promises.push(this.getTopConfusionPairs(term.id));
+                    promises.topConfusionPairs = this.getTopConfusionPairs(term.id);
                 }
                 if (resolveProps?.topReverseConfusionPairs) {
-                    indicies.topReverseConfusionPairs = promises.length;
-                    promises.push(this.getTopReverseConfusionPairs(term.id));
+                    promises.topReverseConfusionPairs = this.getTopReverseConfusionPairs(term.id);
                 }
                 if (resolveProps?.termImageUrl && term.termImageKey != null) {
-                    indicies.termImageUrl = promises.length;
-                    promises.push(idbLayerImg.getImageObjectUrl(term.termImageKey));
+                    promises.termImageUrl = idbLayerImg.getImageObjectUrl(term.termImageKey);
                 }
                 if (resolveProps?.defImageUrl && term.defImageKey != null) {
-                    indicies.defImageUrl = promises.length;
-                    promises.push(idbLayerImg.getImageObjectUrl(term.defImageKey));
+                    promises.defImageUrl = idbLayerImg.getImageObjectUrl(term.defImageKey);
                 }
-                const results = await Promise.all(promises);
-                if (resolveProps?.progress) {
-                    term.progress = results[indicies.progress]?.[0] ?? null;
-                }
-                if (resolveProps?.progressHistory) {
-                    term.progressHistory = results[indicies.progressHistory];
-                }
-                if (resolveProps?.topConfusionPairs) {
-                    term.topConfusionPairs = results[indicies.topConfusionPairs];
-                }
-                if (resolveProps?.topReverseConfusionPairs) {
-                    term.topReverseConfusionPairs = results[indicies.topReverseConfusionPairs];
-                }
-                if (resolveProps?.termImageUrl) {
-                    term.termImageUrl = term.termImageKey == null ? null : results[indicies.termImageUrl];
-                }
-                if (resolveProps?.defImageUrl) {
-                    term.defImageUrl = term.defImageKey == null ? null : results[indicies.defImageUrl];
-                }
+                const results = await Promise.all(Object.entries(promises).map(async ([k, p]) => [k, await p]));
+                const resolved = Object.fromEntries(results);
+                term.progress = resolved.progress?.[0] ?? undefined;
+                term.progressHistory = resolved.progressHistory;
+                term.topConfusionPairs = resolved.topConfusionPairs;
+                term.topReverseConfusionPairs = resolved.topReverseConfusionPairs;
+                term.termImageUrl = term.termImageKey == null ? null : resolved.termImageUrl;
+                term.defImageUrl = term.defImageKey == null ? null : resolved.defImageUrl;
             }));
         }
         return terms;
@@ -179,10 +161,10 @@ export const idbApiLayer = {
         const terms = await db.terms.bulkGet(deleteTermIDs);
         let imageKeysToDelete = [];
         terms.forEach(t => {
-            if (t.termImageKey != null) {
+            if (t?.termImageKey != null) {
                 imageKeysToDelete.push(t.termImageKey);
             }
-            if (t.defImageKey != null) {
+            if (t?.defImageKey != null) {
                 imageKeysToDelete.push(t.defImageKey);
             }
         });
@@ -266,6 +248,10 @@ export const idbApiLayer = {
             .toArray();
         if (resolveProps?.confusedTerm) {
             await Promise.all(confusionPairs.map(async (confusionPair) => {
+                if (typeof confusionPair.confusedTermId === "string") {
+                    console.error("getTopConfusionPairs: confusedTermId is a string (mabye a UUID), can't resolve confusedTerm");
+                    return;
+                }
                 confusionPair.confusedTerm = await this.getTermById(confusionPair.confusedTermId, resolveProps?.confusedTerm);
             }));
         }
@@ -279,6 +265,10 @@ export const idbApiLayer = {
             .toArray();
         if (resolveProps?.term) {
             await Promise.all(confusionPairs.map(async (confusionPair) => {
+                if (typeof confusionPair.termId === "string") {
+                    console.error("getTopReverseConfusionPairs: termId is a string (mabye a UUID), can't resolve term");
+                    return;
+                }
                 confusionPair.term = await this.getTermById(confusionPair.termId, resolveProps?.term);
             }));
         }

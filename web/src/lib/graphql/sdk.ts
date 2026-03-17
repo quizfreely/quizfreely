@@ -11,7 +11,7 @@ export function getClientSdk({
     url?: string;
     fetch?: Fetch;
     headers?: Record<string, string>;
-}) {
+} = {}) {
     return getSdk(
         new GraphQLClient(url, {
             fetch,
