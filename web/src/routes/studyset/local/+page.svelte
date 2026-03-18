@@ -1,6 +1,6 @@
 <script lang="ts">
     import StudysetPage from "../../StudysetPage.svelte";
-    let { data } = $props();
+    let { data }: { data: any } = $props();
 </script>
 
 <StudysetPage data={{ ...data, local: true }}/>

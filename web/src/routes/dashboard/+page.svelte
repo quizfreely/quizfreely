@@ -2,6 +2,7 @@
     import { tick, onMount } from "svelte";
     import { slide, fade } from "svelte/transition";
     import { goto, pushState } from "$app/navigation";
+    import { getClientSdk } from "$lib/graphql/sdk";
     import { idbApiLayer } from "$lib/idb-api-layer/index.js";
     import Dropdown from "$lib/components/Dropdown.svelte";
     import Noscript from "$lib/components/Noscript.svelte";
@@ -15,11 +16,11 @@
     import TrashIcon from "$lib/icons/Trash.svelte";
     import MoreIcon from "$lib/icons/MoreDotsVertical.svelte";
 
-    let { data } = $props();
+    let { data }: { data: App.PageData & { folderId?: string, studysetListPageInfo: any, myFoldersPageInfo: any, mySavedStudysetsPageInfo: any, studysetList: any, myFolders: any, mySavedStudysets: any } } = $props();
     let showFolderPicker = $state(false);
-    let folderPickerStudysetId;
+    let folderPickerStudysetId: string | undefined = $state();
 
-    let lastKeydown = null;
+    let lastKeydown: string | null = $state(null);
     let ignoreEnterOnceNewFolder = false;
     let ignoreEnterOnceRenameFolder = false;
 
@@ -27,7 +28,7 @@
     let newFolderName = $state("");
     let showErrInNewFolderModal = $state(false);
     let errInNewFolderModalMsg = $state("");
-    let newFolderInput = $state(null);
+    let newFolderInput: HTMLInputElement | null = $state(null);
     function openNewFolderModal() {
         showNewFolderModal = true;
         showErrInNewFolderModal = false;
@@ -44,11 +45,11 @@
         newFolderName = "";
     }
 
-    let folderRenaming;
-    let folderRenamingName = $state(null);
-    let folderRenamingInput = $state(null);
+    let folderRenaming: any = $state();
+    let folderRenamingName = $state("");
+    let folderRenamingInput: HTMLInputElement | null = $state(null);
     let showFolderRenamingFlag = $state(false);
-    function showFolderRenaming(folder) {
+    function showFolderRenaming(folder: any) {
         folderRenaming = folder;
         folderRenamingName = folder?.name ?? "";
         showFolderRenamingFlag = true;
@@ -63,9 +64,9 @@
         showFolderRenamingErr = false;
     }
     let showFolderRenamingErr = $state(false);
-    let folderRenamingErrMsg = $state(false);
+    let folderRenamingErrMsg = $state("");
 
-    let studysetListComponent;
+    let studysetListComponent: any = $state();
     let studysetListData = $state({
         authed: data.authed,
         studysetList: data.studysetList,
@@ -77,11 +78,11 @@
     });
 
     let showDeleteFolderModal = $state(false);
-    let deleteFolderId = $state(null);
-    let deleteFolderName = $state(null);
+    let deleteFolderId: string | null = $state(null);
+    let deleteFolderName: string | null = $state(null);
     let showDeleteFolderErr = $state(false);
     let deleteFolderErrMsg = $state("");
-    function showDeleteFolderConfirmation(folder) {
+    function showDeleteFolderConfirmation(folder: any) {
         showDeleteFolderModal = true;
         deleteFolderId = folder?.id;
         deleteFolderName = folder?.name;
@@ -91,33 +92,12 @@
         showDeleteFolderErr = false;
     }
     
-    async function newStudysetButton(folderId) {
+    const sdk = getClientSdk();
+
+    async function newStudysetButton(folderId?: string) {
         if (data.authed) {
-            const raw = await fetch("/api/graphql", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    query: `mutation createStudysetDraft($folderId: ID) {
-    createStudyset(
-        studyset: {
-            title: "",
-            private: false
-        },
-        draft: true,
-        folderId: $folderId
-    ) {
-        id
-    }
-}`,
-                    variables: {
-                        folderId
-                    }
-                })
-            });
-            const res = await raw.json();
-            goto(`/studyset/edit/${res?.data?.createStudyset?.id}`)
+            const res = await sdk.CreateStudysetDraft({ folderId });
+            goto(`/studyset/edit/${res?.createStudyset?.id}`)
         } else {
             const id = await idbApiLayer.createStudyset({
                 title: "",
@@ -128,28 +108,12 @@
     }
     async function newFolderOnclick() {
         try {
-            const raw = await fetch("/api/graphql", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    query: `mutation ($name: String!) {
-    createFolder(name: $name) {
-        id
-    }
-}`,
-                    variables: {
-                        name: newFolderName,
-                    },
-                }),
-            });
-            const resp = await raw.json();
-            if (resp?.data?.createFolder) {
+            const resp = await sdk.CreateFolder({ name: newFolderName });
+            if (resp?.createFolder) {
                 studysetListData.myFolders = [
                     ...(studysetListData?.myFolders ?? []),
                     {
-                        id: resp.data.createFolder?.id,
+                        id: resp.createFolder?.id,
                         name: newFolderName,
                     },
                 ];
@@ -173,34 +137,21 @@
 
     async function renameFolderOnclick() {
         try {
-            const raw = await fetch("/api/graphql", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    query: `mutation ($id: ID!, $name: String!) {
-    renameFolder(id: $id, name: $name) {
-        id
-    }
-}`,
-                    variables: {
-                        id: folderRenaming.id,
-                        name: folderRenamingName,
-                    },
-                }),
+            const resp = await sdk.RenameFolder({
+                id: folderRenaming.id,
+                name: folderRenamingName,
             });
-            const resp = await raw.json();
-            if (resp?.data?.renameFolder) {
+            if (resp?.renameFolder) {
                 /* update og obj from studysetlist component folder view */
                 folderRenaming.name = folderRenamingName;
 
                 /* update array from studysetlist component main view */
                 const renamedIndex = studysetListData.myFolders.findIndex(
-                    (folder) => folderRenaming.id == folder?.id,
+                    (folder: any) => folderRenaming.id == folder?.id,
                 );
-                studysetListData.myFolders[renamedIndex].name =
-                    folderRenamingName;
+                if (renamedIndex >= 0) {
+                    studysetListData.myFolders[renamedIndex].name = folderRenamingName;
+                }
                 showFolderRenamingFlag = false;
                 showFolderRenamingErr = false;
             } else {
@@ -217,14 +168,14 @@
             showFolderRenamingErr = true;
         }
     }
-    function onKeyup(e) {
+    function onKeyup(e: KeyboardEvent) {
         if (e.key === "Escape") {
             hideNewFolderModal();
             hideFolderRenaming();
             hideDeleteFolderConfirmation();
         }
     }
-    function onKeydown(e) {
+    function onKeydown(e: KeyboardEvent) {
         lastKeydown = e.key;
     }
     function windowOnclick() {
@@ -272,7 +223,7 @@
             {/if}
         </div>
     {/snippet}
-    {#snippet folderMenu(folder)}
+    {#snippet folderMenu(folder: any)}
         <div class="flex" style="align-items: center;">
             <button onclick={() => newStudysetButton(folder?.id)}>
                 <IconPlus />
@@ -306,7 +257,7 @@
             <p class="fg0">Select "New Studyset" to enter or import terms</p>
         </div>
     {/snippet}
-    {#snippet cloudDropdownContent(studyset)}
+    {#snippet cloudDropdownContent(studyset: any)}
         <button
             onclick={() => {
                 folderPickerStudysetId = studyset?.id;
@@ -317,7 +268,7 @@
             {studyset?.folder != null ? "Change Folder" : "Add to Folder"}
         </button>
     {/snippet}
-    {#snippet savedDropdownContent(studyset)}
+    {#snippet savedDropdownContent(studyset: any)}
         <button
             onclick={() => {
                 folderPickerStudysetId = studyset?.id;
@@ -330,25 +281,11 @@
         <button
             onclick={async () => {
                 try {
-                    const raw = await fetch("/api/graphql", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify({
-                            query: `mutation ($id: ID!) {
-    unsaveStudyset(studysetId: $id)
-}`,
-                            variables: {
-                                id: studyset?.id,
-                            },
-                        }),
-                    });
-                    const json = await raw.json();
-                    if (json?.data?.unsaveStudyset) {
+                    const json = await sdk.UnsaveStudyset({ id: studyset?.id });
+                    if (json?.unsaveStudyset) {
                         const index =
                             studysetListData?.mySavedStudysets?.findIndex(
-                                (s) => s?.id == studyset?.id,
+                                (s: any) => s?.id == studyset?.id,
                             );
                         if (index >= 0) {
                             studysetListData?.mySavedStudysets?.splice(
@@ -380,6 +317,7 @@
         showCloudDropdown={true}
         {cloudDropdownContent}
         showLocalDropdown={false}
+        localDropdownContent={() => {}}
         showSavedDropdown={true}
         {savedDropdownContent}
         {topMenu}
@@ -387,7 +325,7 @@
         onFolderEnter={(folder: {id:string}) => {
             pushState(`/dashboard?folder=${folder.id}`, {});
         }}
-        onFolderExit={(_: any) => {
+        onFolderExit={() => {
             pushState("/dashboard", {});
         }}
     ></StudysetList>
@@ -482,22 +420,10 @@
                     class="ohno"
                     onclick={async () => {
                         try {
-                            const raw = await fetch("/api/graphql", {
-                                method: "POST",
-                                headers: {
-                                    "Content-Type": "application/json",
-                                },
-                                body: JSON.stringify({
-                                    query: `mutation ($id: ID!) {
-    deleteFolder(id: $id)
-}`,
-                                    variables: {
-                                        id: deleteFolderId,
-                                    },
-                                }),
+                            const resp = await sdk.DeleteFolder({
+                                id: deleteFolderId ?? "",
                             });
-                            const resp = await raw.json();
-                            if (resp?.data?.deleteFolder) {
+                            if (resp?.deleteFolder) {
                                 window.location.reload();
                             } else {
                                 console.log(
@@ -546,26 +472,14 @@
         selectCallback={async (selectedFolder, showErrorMsgCallback) => {
             showErrorMsgCallback(false);
             try {
-                const raw = await fetch(`/api/graphql`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                        query: `mutation ($studysetId: ID!, $folderId: ID!) {
-    setStudysetFolder(studysetId: $studysetId, folderId: $folderId)
-}`,
-                        variables: {
-                            studysetId: folderPickerStudysetId,
-                            folderId: selectedFolder.id,
-                        },
-                    }),
+                const resp = await sdk.SetStudysetFolder({
+                    studysetId: folderPickerStudysetId ?? "",
+                    folderId: selectedFolder.id,
                 });
-                const resp = await raw.json();
-                if (resp?.data?.setStudysetFolder) {
+                if (resp?.setStudysetFolder) {
                     const studysetListIndex =
                         studysetListData.studysetList?.findIndex(
-                            (studyset) =>
+                            (studyset: any) =>
                                 folderPickerStudysetId == studyset?.id,
                         );
                     if (studysetListIndex >= 0) {
@@ -577,7 +491,7 @@
                     const folderData = studysetListComponent.getFolderData();
                     if (folderData && folderData?.id != selectedFolder?.id) {
                         const index = folderData?.studysets?.findIndex(
-                            (studyset) =>
+                            (studyset: any) =>
                                 folderPickerStudysetId == studyset?.id,
                         );
                         if (index >= 0) {
@@ -586,7 +500,7 @@
                     }
                     showFolderPicker = false;
                 } else {
-                    console.error("Unsuccessful json response: ", resp);
+                    console.error("Unsuccessful response: ", resp);
                     showErrorMsgCallback(true);
                 }
             } catch (err) {
@@ -598,26 +512,14 @@
         noneCallback={async (showErrorMsgCallback) => {
             showErrorMsgCallback(false);
             try {
-                const raw = await fetch(`/api/graphql`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                        query: `mutation ($studysetId: ID!) {
-    removeStudysetFromFolder(studysetId: $studysetId)
-}`,
-                        variables: {
-                            studysetId: folderPickerStudysetId,
-                        },
-                    }),
+                const resp = await sdk.RemoveStudysetFromFolder({
+                    studysetId: folderPickerStudysetId ?? "",
                 });
-                const resp = await raw.json();
-                if (resp?.data?.removeStudysetFromFolder) {
+                if (resp?.removeStudysetFromFolder) {
                     const folderData = studysetListComponent.getFolderData();
                     if (folderData) {
                         const index = folderData?.studysets?.findIndex(
-                            (studyset) =>
+                            (studyset: any) =>
                                 folderPickerStudysetId == studyset?.id,
                         );
                         if (index >= 0) {
@@ -630,7 +532,7 @@
                     }
                     showFolderPicker = false;
                 } else {
-                    console.error("Unsuccessful json response: ", resp);
+                    console.error("Unsuccessful response: ", resp);
                     showErrorMsgCallback(true);
                 }
             } catch (err) {

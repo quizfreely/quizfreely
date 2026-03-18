@@ -1,0 +1,13 @@
+query HostStartReviewGame($id: ID!) {
+  authed
+  authedUser {
+    id
+    username
+    displayName
+  }
+  studyset(id: $id) {
+    id
+    title
+    termsCount
+  }
+}

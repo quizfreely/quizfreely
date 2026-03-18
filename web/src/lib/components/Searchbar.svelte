@@ -5,15 +5,16 @@
     import IconSearch from "$lib/icons/Search.svelte";
     
     let doIHaveContentToShow = $state(false);
-    let autocompleteItems = $state([]);
+    let autocompleteItems: { query: string }[] = $state([]);
 
-    let searchbarInput;
-    let wholeEntireContainer;
-    let searchbarAutocomplete = $state(null);
-    function onSearchbarInput(event) {
-        if (event.target.value.length > 0 && event.target.value.length < 50) {
+    let searchbarInput: HTMLInputElement | undefined = $state();
+    let wholeEntireContainer: HTMLFormElement | undefined = $state();
+    let searchbarAutocomplete: HTMLDivElement | null = $state(null);
+    function onSearchbarInput(event: Event) {
+        const target = event.target as HTMLInputElement;
+        if (target.value.length > 0 && target.value.length < 50) {
             fetch(
-                "/api/v0/search-queries?q=" + encodeURIComponent(event.target.value)
+                "/api/v0/search-queries?q=" + encodeURIComponent(target.value)
             ).then(function (response) {
                 response.json().then(function (responseJson) {
                     if (responseJson.data && responseJson.data.queries && responseJson.data.queries.length > 0) {
@@ -39,7 +40,7 @@
         }
     }
 
-    function setIfIHaveContentToShow(visibility) {
+    function setIfIHaveContentToShow(visibility: boolean) {
         doIHaveContentToShow = visibility;
         updateClickHandlerAfterVisibilityChange();
     }
@@ -55,8 +56,8 @@
     }
 
     let gotOutsideClicked = $state(false);
-    function outsideClick(e) {
-        if (!wholeEntireContainer.contains(e.target)) {
+    function outsideClick(e: MouseEvent) {
+        if (wholeEntireContainer && !wholeEntireContainer.contains(e.target as Node)) {
             gotOutsideClicked = true;
             window.removeEventListener("click", outsideClick);
         }

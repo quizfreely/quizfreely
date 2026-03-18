@@ -5,7 +5,7 @@
   import { slide } from "svelte/transition";
   import Noscript from "$lib/components/Noscript.svelte";
 
-  let { data } = $props();
+  let { data }: { data: any } = $props();
 
   let showErr = $state(false);
   let errMsg = $state("");
@@ -19,14 +19,16 @@
       }
 
       function signinSubmit() {
+        const usernameInput = document.getElementById("signinUsernameInput") as HTMLInputElement;
+        const passwordInput = document.getElementById("signinPasswordInput") as HTMLInputElement;
         fetch("/api/v0/auth/sign-in", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            username: document.getElementById("signinUsernameInput").value,
-            password: document.getElementById("signinPasswordInput").value,
+            username: usernameInput.value,
+            password: passwordInput.value,
           }),
         })
           .then(function (rawResponse) {
@@ -62,10 +64,10 @@
       }
       document
         .getElementById("signinButton")
-        .addEventListener("click", signinSubmit);
+        ?.addEventListener("click", signinSubmit);
       document
         .getElementById("signinPasswordInput")
-        .addEventListener("keyup", function (event) {
+        ?.addEventListener("keyup", function (event) {
           if (event.key == "Enter") {
             signinSubmit();
           }

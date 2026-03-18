@@ -23,7 +23,7 @@ beforeNavigate(function () {
     nprogressTimeout.set(
         setTimeout(function () {
             NProgress.start();
-        }, 200)
+        }, 200) as any
     );
 })
 afterNavigate(function () {

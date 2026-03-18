@@ -1,8 +1,8 @@
-<script>
-    import { onMount, onDestroy } from 'svelte';
-    import { createEditor, undo, redo } from '$lib/proseMirrorEditor.js';
+<script lang="ts">
+    import { onMount, onDestroy, tick } from 'svelte';
+    import { createEditor, undo, redo } from '$lib/proseMirrorEditor';
     import 'prosemirror-view/style/prosemirror.css';
-    import { schema } from '$lib/proseMirrorSchema.js';
+    import { schema } from '$lib/proseMirrorSchema';
     import { toggleMark, setBlockType } from 'prosemirror-commands';
     import { EditorState } from "prosemirror-state";
     import BoldIcon from "$lib/icons/Bold.svelte";
@@ -13,20 +13,28 @@
     import SubscriptIcon from "$lib/icons/Subscript.svelte";
     import UndoIcon from "$lib/icons/Undo.svelte";
     import RedoIcon from "$lib/icons/Redo.svelte";
-    let { placeholder, value = $bindable(), oninputcallback } = $props();
+    import type { EditorView } from 'prosemirror-view';
+    import type { NodeType } from 'prosemirror-model';
 
-    let editorDiv;
-    let view;
-    let activeMarks = $state({});
-    function updateActiveMarksFunc(marks) {
+    let { placeholder, value = $bindable(), oninputcallback }: {
+        placeholder: string,
+        value?: any,
+        oninputcallback?: () => void
+    } = $props();
+
+    let editorDiv: HTMLDivElement | undefined = $state();
+    let view: EditorView | undefined = $state();
+    let activeMarks: { [key: string]: boolean } = $state({});
+    function updateActiveMarksFunc(marks: { [key: string]: boolean }) {
         activeMarks = marks;
     }
 
     const getContent = function () {
-        return view.state.doc.toJSON();
+        return view?.state.doc.toJSON();
     };
 
-    export function updateValueFromJson(newValue) {
+    export function updateValueFromJson(newValue: any) {
+        if (!view) return;
         try {
             const newDoc = schema.nodeFromJSON(newValue);
             const newState = EditorState.create({
@@ -41,6 +49,7 @@
         }
     }
     export function clearValue() {
+        if (!view) return;
         try {
             view.updateState(EditorState.create({
                 schema,
@@ -53,11 +62,13 @@
     }
 
     onMount(() => {
+        if (!editorDiv) return;
         view = createEditor(
             editorDiv,
             placeholder,
             updateActiveMarksFunc,
             function (tr) {
+                if (!view) return;
                 const newState = view.state.apply(tr);
                 view.updateState(newState);
                 value = getContent();
@@ -69,16 +80,16 @@
         );
 
         return () => {
-            view.destroy();
+            view?.destroy();
         };
     });
 
     onDestroy(() => {
         view?.destroy();
     });
-    function toggleBlockType(nodeType, attrs = {}) {
-    return function (state, dispatch) {
-        const isActive = state.selection.$from.parent.hasMarkup(nodeType, attrs);
+    function toggleBlockType(nodeType: NodeType, attrs = {}) {
+    return function (state: EditorState, dispatch: any) {
+        const isActive = (state.selection as any).$from.parent.hasMarkup(nodeType, attrs);
         return isActive
             ? setBlockType(
                 state.schema.nodes.paragraph
@@ -88,7 +99,8 @@
             )(state, dispatch);
     };
 }
-    function toggle(mark) {
+    function toggle(mark: string) {
+      if (!view) return;
       let untoggle = false;
       if (activeMarks[mark]) {
         /* check state before calling toggleMark
@@ -112,7 +124,8 @@
       view.focus();
     }
 
-    function toggleHeading(level) {
+    function toggleHeading(level: number) {
+      if (!view) return;
       toggleBlockType(schema.nodes.heading, { level })(view.state, view.dispatch);
       view.focus();
     }
@@ -201,12 +214,12 @@
         <SubscriptIcon></SubscriptIcon>
     </button>
     <button class="faint editor-toolbar-button" onclick={
-        () => undo(view.state, view.dispatch)
+        () => view && undo(view.state, view.dispatch)
     } aria-label="Undo">
         <UndoIcon></UndoIcon>
     </button>
     <button class="faint editor-toolbar-button" onclick={
-        () => redo(view.state, view.dispatch)
+        () => view && redo(view.state, view.dispatch)
     } aria-label="Redo">
         <RedoIcon></RedoIcon>
     </button>

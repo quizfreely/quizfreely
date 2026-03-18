@@ -8,11 +8,7 @@
         showDropdown = false,
         dropdownContent,
     }: {
-        studyset: {
-            id: string | number;
-            title: string;
-            termsCount?: number | null;
-        };
+        studyset: any;
         linkTemplateFunc: (id: string | number) => string;
         showDropdown?: boolean;
         dropdownContent?: Snippet<[studyset: any, hide: () => void]>;

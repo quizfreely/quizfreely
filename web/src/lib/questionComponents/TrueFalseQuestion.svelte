@@ -1,7 +1,16 @@
 <script lang="ts">
     import CheckmarkIcon from "$lib/icons/Checkmark.svelte";
     import XMarkIcon from "$lib/icons/CloseXMark.svelte";
-    let { term, answerWith, distractor, viewOnly, showAccuracy, answerUpdateCallback, answeredBool, wasCorrect } = $props();
+    let { term, answerWith, distractor, viewOnly, showAccuracy, answerUpdateCallback, answeredBool = $bindable(), wasCorrect }: {
+        term: any,
+        answerWith: "TERM" | "DEF",
+        distractor: any,
+        viewOnly: boolean,
+        showAccuracy: boolean,
+        answerUpdateCallback: () => void,
+        answeredBool?: boolean | null,
+        wasCorrect?: boolean | null
+    } = $props();
     /* answeredBool and wasCorrect are only defined when reviewing questions from a completed practice test */
     let correctAnswerBool = answeredBool != null ?
         (wasCorrect ?

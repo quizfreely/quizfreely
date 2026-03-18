@@ -1,0 +1,8 @@
+mutation RecordPracticeTest($input: PracticeTestInput, $termProgress: [TermProgressInput!]!) {
+  recordPracticeTest(input: $input) {
+    id
+  }
+  updateTermProgress(termProgress: $termProgress) {
+    id
+  }
+}

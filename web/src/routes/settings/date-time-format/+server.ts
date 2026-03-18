@@ -22,7 +22,7 @@ export function GET({ url, cookies }) {
     ) {
         cookies.set(
           "settingsdatetimeformathours",
-          url.searchParams.get("h"),
+          url.searchParams.get("h") ?? "24",
           {
             /* 30 days * 24h * 60m * 60s = 2592000 sec for 30 days */
             maxAge: 2592000,

@@ -9,16 +9,14 @@
     import ForwardLongArrowIcon from "$lib/icons/ForwardRightArrowLong.svelte"
     import StatsIcon from "$lib/icons/ChartGraphLine.svelte"
     import { slide } from "svelte/transition";
-    import type { PageData as PageData4View } from "./practice-tests/[id]/$types";
-    import type { PageData as PageData4Start } from "./studysets/[id]/practice-test/$types";
     let { data }: {
-        data: PageData4View | PageData4Start
+        data: any
     } = $props();
-    let terms = $state(
+    let terms = $state<any[]>(
         data?.local ?
             [] : data?.studyset?.terms
     );
-    let practiceTests = $state(
+    let practiceTests = $state<any[]>(
         data?.local ?
             [] : data?.studyset?.practiceTests
     );
@@ -65,13 +63,13 @@
         }
     })
 
-    let chartCanvasTerms;
-    let chartCanvas;
+    let chartCanvasTerms: HTMLCanvasElement;
+    let chartCanvas: HTMLCanvasElement;
 
     let mounted = $state(false);
     onMount(() => {
-        let chart;
-        let objectUrls = [];
+        let chart: Chart;
+        let objectUrls: string[] = [];
         (async () => {
             mounted = true;
             if (data?.settingsDateTimeFmtHours == "24") {
@@ -88,17 +86,17 @@
                         progress: true,
                         topConfusionPairs: {
                             confusedTerm: true
-                        },
+                        } as any,
                         topReverseConfusionPairs: {
                             term: true
-                        },
+                        } as any,
                         termImageUrl: true,
                         defImageUrl: true
                     },
                     practiceTests: true
                 })
-                terms = studyset.terms;
-                terms.forEach(term => {
+                terms = (studyset?.terms as any[]) ?? [];
+                terms.forEach((term: any) => {
                     if (term.termImageUrl != null) {
                         objectUrls.push(term.termImageUrl);
                     }
@@ -106,7 +104,7 @@
                         objectUrls.push(term.defImageUrl);
                     }
                 })
-                practiceTests = studyset?.practiceTests;
+                practiceTests = (studyset?.practiceTests as any[]) ?? [];
             }
 
             if (!data.authed && !data.local) {
@@ -159,7 +157,7 @@
                                 pointStyle: "circle",
                                 pointRadius: 6,
                                 pointHoverRadius: 8,
-                                data: practiceTests.map(pt => ({
+                                data: practiceTests.map((pt: any) => ({
                                     x: Date.parse(pt.timestamp),
                                     y: pt.questionsCorrect / pt.questionsTotal
                                 }))
@@ -215,7 +213,7 @@
                                 titleFont: { weight: "normal" },
                                 displayColors: false,
                                 callbacks: {
-                                    label: ctx => Math.floor(ctx.raw.y * 100) + "%"
+                                    label: (ctx: any) => Math.floor(ctx.raw.y * 100) + "%"
                                 }
                             },
                             legend: {

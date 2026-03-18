@@ -1,8 +1,8 @@
 import fetchAuthData from "$lib/auth-data.server";
 
-export async function load({ cookies }) {
+export async function load({ locals }) {
     return {
-        ...await fetchAuthData({ cookies }),
+        ...await fetchAuthData({ locals }),
         dashboardPage: "activities",
       header: { activePage: "home" },
     }

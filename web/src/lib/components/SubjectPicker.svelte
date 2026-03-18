@@ -1,6 +1,7 @@
 <script lang="ts">
     import { onMount } from "svelte";
  	import type { Snippet } from 'svelte';
+    import { getClientSdk } from "$lib/graphql/sdk";
     import { fade, slide } from "svelte/transition";
     import CloseXMarkIcon from "$lib/icons/CloseXMark.svelte";
     import SearchIcon from "$lib/icons/Search.svelte";
@@ -21,31 +22,18 @@
     let showErrMsg = $state(false);
     let showActionErrMsg = $state(false);
     let searchQuery = $state("");
+    const sdk = getClientSdk();
     onMount(async () => {
         try {
-            const raw = await fetch(`/api/graphql`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    query: `{
-    allSubjects {
-        id
-        name
-    }
-}`
-                })
-            });
-            const resp = await raw.json();
-            if (resp?.data) {
-                subjects = resp.data.allSubjects ?? [];
+            const resp = await sdk.GetAllSubjects();
+            if (resp?.allSubjects) {
+                subjects = resp.allSubjects as Subject[] ?? [];
             } else {
-                console.error("No data property in json response: ", resp);
+                console.error("No data property in response: ", resp);
                 showErrMsg = true;
             }
         } catch (err) {
-            console.error("Error loading folders: ", err);
+            console.error("Error loading subjects: ", err);
             showErrMsg = true;
         }
     })

@@ -15,6 +15,7 @@ declare global {
                 activePage?: string;
                 searchQuery?: string;
                 hideHeader?: boolean;
+                showSignUpLink?: boolean;
             };
             footer?: {
                 hideFooter?: boolean;

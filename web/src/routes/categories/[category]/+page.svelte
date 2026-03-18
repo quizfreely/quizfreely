@@ -1,13 +1,13 @@
 <script lang="ts">
     import BackIcon from "$lib/icons/BackArrow.svelte";
-    let { data } = $props();
-    const categoryName = {
+    let { data }: { data: any } = $props();
+    const categoryName = ({
         LANG: "World Languages",
         SOCIAL_STUDIES: "Social Studies",
         STEM: "STEM",
         MATH: "Math",
         LA: "Language Arts"
-    }?.[data?.categoryEnum];
+    } as any)?.[data?.categoryEnum];
 </script>
 <div class="grid page">
     <div class="content">

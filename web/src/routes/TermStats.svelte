@@ -9,18 +9,18 @@
     import ForwardLongArrowIcon from "$lib/icons/ForwardRightArrowLong.svelte"
     import StatsIcon from "$lib/icons/ChartGraphLine.svelte"
     import { slide } from "svelte/transition";
-    let { data } = $props();
-    let term = $state();
-    let objectUrls = [];
+    let { data }: { data: any } = $props();
+    let term = $state<any>();
+    let objectUrls: string[] = [];
 
-    let topConfusionPairsUniqueArray = $state([]);
-    let topReverseConfusionPairsUniqueArray = $state([]);
+    let topConfusionPairsUniqueArray = $state<any[]>([]);
+    let topReverseConfusionPairsUniqueArray = $state<any[]>([]);
     function combineConfusionPairs() {
         let topConfusionPairsUnique = new Map();
         let topReverseConfusionPairsUnique = new Map();
 
-        term?.topConfusionPairs?.forEach(pair => {
-            let obj = {
+        term?.topConfusionPairs?.forEach((pair: any) => {
+            let obj: any = {
                 confusedTerm: pair.confusedTerm
             };
             if (pair?.answeredWith == "DEF") {
@@ -46,8 +46,8 @@
         })
         topConfusionPairsUniqueArray = [...topConfusionPairsUnique.values()];
 
-        term?.topReverseConfusionPairs?.forEach(pair => {
-            let obj = {
+        term?.topReverseConfusionPairs?.forEach((pair: any) => {
+            let obj: any = {
                 term: pair.term
             };
             if (pair?.answeredWith == "DEF") {
@@ -79,11 +79,11 @@
         combineConfusionPairs();
     }
 
-    let chartCanvas;
+    let chartCanvas = $state<HTMLCanvasElement | null>(null);
 
     let mounted = $state(false);
     onMount(() => {
-        let chart;
+        let chart: Chart | null = null;
         (async () => {
             mounted = true;
             if (data?.settingsDateTimeFmtHours == "24") {
@@ -101,13 +101,13 @@
                             termImageUrl: true,
                             defImageUrl: true
                         }
-                    },
+                    } as any,
                     topReverseConfusionPairs: {
                         term: {
                             termImageUrl: true,
                             defImageUrl: true
                         }
-                    },
+                    } as any,
                     termImageUrl: true,
                     defImageUrl: true
                 })
@@ -144,7 +144,7 @@
             Chart.defaults.backgroundColor = mainColor;
             Chart.defaults.borderColor = borderColor;
             Chart.defaults.color = fg1Color;
-            chart = new Chart(
+            if (chartCanvas) chart = new Chart(
                 chartCanvas,
                 {
                     type: "line",
@@ -159,10 +159,10 @@
                             pointRadius: 6,
                             pointHoverRadius: 8,
                             data: (() => {
-                                let data = [];
-                                term?.progressHistory?.forEach(ph => {
+                                let res: any[] = [];
+                                term?.progressHistory?.forEach((ph: any) => {
                                     if (ph.termCorrectCount + ph.termIncorrectCount > 0) {
-                                        data.push({
+                                        res.push({
                                             x: Date.parse(ph.timestamp),
                                             y: ph.termCorrectCount / (
                                                 ph.termCorrectCount +
@@ -171,7 +171,7 @@
                                         })
                                     }
                                 });
-                                return data;
+                                return res;
                             })()
                         }, {
                             label: "Definition Accuracy",
@@ -183,10 +183,10 @@
                             pointRadius: 6,
                             pointHoverRadius: 8,
                             data: (() => {
-                                let data = [];
-                                term?.progressHistory?.forEach(ph => {
+                                let res: any[] = [];
+                                term?.progressHistory?.forEach((ph: any) => {
                                     if (ph.defCorrectCount + ph.defIncorrectCount > 0) {
-                                        data.push({
+                                        res.push({
                                             x: Date.parse(ph.timestamp),
                                             y: ph.defCorrectCount / (
                                                 ph.defCorrectCount +
@@ -195,7 +195,7 @@
                                         })
                                     }
                                 });
-                                return data;
+                                return res;
                             })()
                         }]
                     },
@@ -243,7 +243,7 @@
                                 titleFont: { weight: "normal" },
                                 displayColors: false,
                                 callbacks: {
-                                    label: ctx => Math.floor(ctx.raw.y * 100) + "%"
+                                    label: (ctx: any) => Math.floor(ctx.raw.y * 100) + "%"
                                 }
                             },
                             legend: {
@@ -418,10 +418,10 @@
                     {#if term?.progress?.termLastReviewedAt || term?.progress?.defLastReviewedAt}
                         <p class="shy-h4" style="margin-top: 0px;">{mounted ? (
                             fancyTimestamp.format(
-                                Math.max(
+                                new Date(Math.max(
                                     Date.parse(term?.progress?.termLastReviewedAt) || 0,
                                     Date.parse(term?.progress?.defLastReviewedAt) || 0
-                                )
+                                ))
                             )
                         ) : ""}</p>
                     {/if}

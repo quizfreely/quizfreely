@@ -2,7 +2,7 @@
     import Noscript from "$lib/components/Noscript.svelte";
     import GroupIcon from "$lib/icons/GroupUsers.svelte";
     import EnterIcon from "$lib/icons/Enter.svelte";
-    let { data } = $props();
+    let { data }: { data: any } = $props();
 </script>
 <style>
     .top-menu-link {

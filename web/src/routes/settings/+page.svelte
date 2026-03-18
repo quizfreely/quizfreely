@@ -1,6 +1,6 @@
 <script lang="ts">
     // import { onMount } from "svelte";
-    let { data } = $props();
+    let { data }: { data: any } = $props();
 
     import IconCheckmark from "$lib/icons/Checkmark.svelte";
 
