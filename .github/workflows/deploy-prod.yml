@@ -13,10 +13,12 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
+          ref: prod
           path: quizfreely
       - uses: actions/checkout@v6
         with:
           repository: quizfreely/api
+          ref: prod
           path: api
       - uses: actions/setup-go@v6
         with:
