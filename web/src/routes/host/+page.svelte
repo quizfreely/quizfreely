@@ -4,16 +4,19 @@
     import StudysetLinkBox from "$lib/components/StudysetLinkBox.svelte";
     import CheckmarkIcon from "$lib/icons/Checkmark.svelte";
 
-    let { data } = $props();
-    let localStudyset = $state(null);
+    let { data }: { data: any } = $props();
+    let localStudyset = $state<any>(null);
     let mins = $state("");
     const DEFAULT_MINS = 20;
     onMount(async () => {
         if (data.localId != null) {
-            localStudyset = (
+            const res = (
                 await db.studysets.where("id").equals(data.localId).toArray()
-            )?.[0];
-            localStudyset.termsCount = (await idbApiLayer.getTermsByStudysetId(data.localId))?.length ?? 0;
+            );
+            if (res.length > 0) {
+                localStudyset = res[0];
+                localStudyset.termsCount = (await idbApiLayer.getTermsByStudysetId(data.localId))?.length ?? 0;
+            }
         }
     })
 </script>
@@ -24,7 +27,7 @@
             <p>Selected studyset:</p>
             <StudysetLinkBox
                 studyset={data.studyset ?? localStudyset}
-                linkTemplateFunc={(id) => (
+                linkTemplateFunc={(id: string | number) => (
                     data.studyset != null ?
                         `/studysets/${id}` :
                         `/studyset/local?id=${id}`
@@ -37,12 +40,12 @@
         {/if}
         <p style="margin-top: 2rem;">Set time limit:</p>
         <div class="flex compact-gap" style="margin-top: 0.6rem; align-items: center;">
-            <input type="text" placeholder="{DEFAULT_MINS}" bind:value={mins} style="max-width: 6rem;">
+            <input type="text" placeholder="{DEFAULT_MINS.toString()}" bind:value={mins} style="max-width: 6rem;">
             <span>minutes</span>
         </div>
         <a href="/host/play?{data.studysetId != null ?
             `studysetId=${data.studysetId}` :
-            `localId=${data.studysetId}`
+            `localId=${data.localId}`
         }&t={parseInt(mins) || DEFAULT_MINS}" class="button"><CheckmarkIcon></CheckmarkIcon> Start</a>
     </div>
 </div>

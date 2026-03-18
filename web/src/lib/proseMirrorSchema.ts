@@ -1,7 +1,6 @@
-import { Schema } from "prosemirror-model";
-import { DOMParser as PMDOMParser } from "prosemirror-model";
+import {Schema} from 'prosemirror-model';
 
-const schema = new Schema({
+export const schema = new Schema({
   nodes: {
     doc: {content: "block+"},
     paragraph: {
@@ -52,14 +51,3 @@ const schema = new Schema({
     }
   }
 });
-
-export default function (plaintext) {
-    const div = document.createElement("div");
-    div.innerHTML = plaintext.split(/\n+/).map(
-        line => `<p>${line}</p>`
-    ).join("");
-
-    const doc = PMDOMParser.fromSchema(schema).parse(div);
-    return doc.toJSON();
-}
-

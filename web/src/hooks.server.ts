@@ -31,7 +31,9 @@ export function init() {
 
 export function handle({ event, resolve }) {
     const authCookie = event.cookies.get("auth");
-    event.locals.sdk = getClientSdk(env.API_URL, {
+    event.locals.hasAuthCookie = authCookie !== undefined;
+    event.locals.sdk = getClientSdk({
+        url: env.API_URL + "/graphql",
         fetch: event.fetch,
         headers: authCookie !== undefined ? {
             "Authorization": `Bearer ${authCookie}`

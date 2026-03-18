@@ -2,7 +2,7 @@ import fetchAuthData from "$lib/auth-data.server"
 
 export async function load({ locals, cookies }) {
     return {
-        ...await fetchAuthData({ cookies }),
+        ...await fetchAuthData({ locals }),
         theme: locals.theme,
         header: { activePage: "settings" },
         settingsSection: "general",

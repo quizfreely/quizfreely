@@ -3,31 +3,30 @@ import { error } from '@sveltejs/kit';
 
 export async function load({ params, locals }) {
     try {
-        let data = await locals.sdk.PublicStudyset({
+        const data = await locals.sdk.PublicStudyset({
           id: params.id
         });
         let authed = false;
-          let authedUser;
-          if (apiRes?.data?.authed) {
-            authed = apiRes.data.authed;
-            authedUser = apiRes.data?.authedUser;
+        let authedUser;
+        if (data.authed) {
+          authed = data.authed;
+          authedUser = data.authedUser;
+        }
+        if (data.studyset) {
+          return {
+            studyset: data.studyset,
+            authed: authed,
+            authedUser: authedUser
           }
-          if (apiRes?.data?.studyset) {
-            asdfjklasdjfklas joiasdf jk
-            return {
-              studyset: apiRes.data.studyset,
-              authed: authed,
-              authedUser: authedUser
-            }
-          } else {
-            console.error(
-                "API Error in studyset page load func: ",
-                apiRes
-            );
-            error(404, {
-              message: "Not Found"
-            })
-          }
+        } else {
+          console.error(
+              "API Error in studyset page load func: ",
+              data
+          );
+          error(404, {
+            message: "Not Found"
+          })
+        }
       } catch (err) {
         console.error(
             "Error in studyset page load func: ",

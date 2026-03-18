@@ -1,45 +1,18 @@
-import { env } from '$env/dynamic/public';
-
-export async function load({ cookies }) {
+export async function load({ locals }) {
     try {
-        let rawApiRes = await fetch(env.API_URL + "/graphql", {
-          method: "POST",
-          headers: {
-            "Authorization": "Bearer " + cookies.get("auth"),
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            query: `query {
-              authed
-              authedUser {
-                id
-                username
-                displayName
-                authType
-                oauthGoogleEmail
-                modPerms
-              }
-              allSubjects {
-                id
-                name
-                category
-              }
-            }`
-          })
-        });
-        let apiRes = await rawApiRes.json();
+        const data = await locals.sdk.ExplorePage();
         let authed = false;
         let authedUser;
-        if (apiRes?.data?.authed) {
-          authed = apiRes.data.authed;
-          authedUser = apiRes.data?.authedUser;
+        if (data.authed) {
+          authed = data.authed;
+          authedUser = data.authedUser;
         }
         
         return {
             explorePage: "subjects",
             authed: authed,
             authedUser: authedUser,
-            allSubjects: apiRes?.data?.allSubjects,
+            allSubjects: data.allSubjects,
             header: {
                 activePage: "explore"
             },

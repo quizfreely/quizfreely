@@ -1,0 +1,16 @@
+query GetMyFolders {
+  myFolders {
+    edges {
+      node {
+        id
+        name
+      }
+    }
+  }
+}
+
+mutation CreateFolder($name: String!) {
+  createFolder(name: $name) {
+    id
+  }
+}

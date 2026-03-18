@@ -4,7 +4,7 @@
     import ArrowRightIcon from "$lib/icons/ArrowRight.svelte";
     import UserIcon from "$lib/icons/User.svelte";
 
-    let { data } = $props();
+    let { data }: { data: any } = $props();
     console.log(data);
 </script>
 

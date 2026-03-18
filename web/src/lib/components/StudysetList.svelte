@@ -1,6 +1,7 @@
 <script lang="ts">
     import { fancyTimestamp } from "$lib/fancyTimestamp";
     import { idbApiLayer, db } from "$lib/idb-api-layer";
+    import { getClientSdk } from "$lib/graphql/sdk";
     import { onMount } from "svelte";
     import { slide, fade, scale } from "svelte/transition";
     import { sineIn, sineOut } from "svelte/easing";
@@ -14,7 +15,7 @@
     import ArrowRightIcon from "$lib/icons/ArrowRight.svelte";
 
     let {
-        data,
+        data = $bindable(),
         cloudLinkTemplateFunc,
         localLinkTemplateFunc,
         cloudEmptyMsg,
@@ -35,22 +36,23 @@
         onFolderExit,
     } = $props();
 
-    let localStudysetList = $state([]);
+    let localStudysetList = $state<any[]>([]);
 
     let cloudCurrentlyCollapsed = $state(true);
     let localCurrentlyCollapsed = $state(true);
     let savedCurrentlyCollapsed = $state(true);
 
     onMount(async function () {
-        localStudysetList = await db.studysets
+        const list = await db.studysets
             .orderBy("updatedAt")
             .filter((studyset) => studyset.draft == false)
             .toArray();
-        for (const studyset of localStudysetList) {
-            studyset.termsCount =
+        for (const studyset of list) {
+            (studyset as any).termsCount =
                 (await idbApiLayer.getTermsByStudysetId(studyset.id))?.length ??
                 0;
         }
+        localStudysetList = list;
     });
 
     const COLLAPSE_LENGTH = 6;
@@ -61,53 +63,34 @@
     let savedPage = $state(0);
 
     let inFolder = $state(false);
-    let currentFolder = $state(null);
+    let currentFolder = $state<any>(null);
     let folderPage = $state(0);
-    let folderPageInfo = $state(null);
+    let folderPageInfo = $state<any>(null);
     let showErrorBox = $state(false);
     let errorBoxText = $state("");
 
-    async function loadPage(type, direction) {
+    const sdk = getClientSdk();
+
+    async function loadPage(type: "cloud" | "folder" | "saved", direction: "next" | "prev") {
         let cursor = null;
-        let query = "";
-        let variables = {};
+        let variables: any = {};
 
         if (type === "cloud") {
             cursor =
                 direction === "next"
                     ? data.studysetListPageInfo?.endCursor
                     : data.studysetListPageInfo?.startCursor;
-            query = `query ($first: Int, $after: String, $last: Int, $before: String) {
-                myStudysets(first: $first, after: $after, last: $last, before: $before, hideFoldered: true) {
-                    edges { node { id title private termsCount updatedAt folder { id name } } }
-                    pageInfo { hasNextPage hasPreviousPage startCursor endCursor }
-                }
-            }`;
         } else if (type === "folder") {
             cursor =
                 direction === "next"
                     ? folderPageInfo?.endCursor
                     : folderPageInfo?.startCursor;
-            query = `query ($id: ID!, $first: Int, $after: String, $last: Int, $before: String) {
-                folder(id: $id) {
-                    studysets(first: $first, after: $after, last: $last, before: $before) {
-                        edges { node { id title private termsCount updatedAt folder { id name } } }
-                        pageInfo { hasNextPage hasPreviousPage startCursor endCursor }
-                    }
-                }
-            }`;
             variables.id = currentFolder?.id;
         } else if (type === "saved") {
             cursor =
                 direction === "next"
                     ? data.mySavedStudysetsPageInfo?.endCursor
                     : data.mySavedStudysetsPageInfo?.startCursor;
-            query = `query ($first: Int, $after: String, $last: Int, $before: String) {
-                mySavedStudysets(first: $first, after: $after, last: $last, before: $before) {
-                    edges { node { id title private termsCount updatedAt folder { id name } } }
-                    pageInfo { hasNextPage hasPreviousPage startCursor endCursor }
-                }
-            }`;
         }
 
         if (direction === "next") {
@@ -119,37 +102,33 @@
         }
 
         try {
-            const respRaw = await fetch("/api/graphql", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ query, variables }),
-            });
-            const resp = await respRaw.json();
-            const connection =
-                resp?.data?.myStudysets ?? resp?.data?.mySavedStudysets;
-
-            if (connection) {
-                if (type === "cloud") {
-                    data.studysetList = connection.edges.map((e) => e.node);
-                    data.studysetListPageInfo = connection.pageInfo;
-                    cloudPage += direction === "next" ? 1 : -1;
-                } else if (type === "saved") {
-                    data.mySavedStudysets = connection.edges.map((e) => e.node);
-                    data.mySavedStudysetsPageInfo = connection.pageInfo;
-                    savedPage += direction === "next" ? 1 : -1;
+            if (type === "cloud") {
+                const resp = await sdk.StudysetListLoadPageCloud(variables);
+                const connection = resp.myStudysets;
+                data.studysetList = connection.edges.map((e) => e.node);
+                data.studysetListPageInfo = connection.pageInfo;
+                cloudPage += direction === "next" ? 1 : -1;
+            } else if (type === "folder") {
+                const resp = await sdk.StudysetListLoadPageFolder(variables);
+                const connection = resp.folder?.studysets;
+                if (connection) {
+                    currentFolder.studysets = connection.edges.map((e) => e.node);
+                    folderPageInfo = connection.pageInfo;
+                    folderPage += direction === "next" ? 1 : -1;
                 }
-            } else if (type === "folder" && resp?.data?.folder?.studysets) {
-                const connection = resp.data.folder.studysets;
-                currentFolder.studysets = connection.edges.map((e) => e.node);
-                folderPageInfo = connection.pageInfo;
-                folderPage += direction === "next" ? 1 : -1;
+            } else if (type === "saved") {
+                const resp = await sdk.StudysetListLoadPageSaved(variables);
+                const connection = resp.mySavedStudysets;
+                data.mySavedStudysets = connection.edges.map((e) => e.node);
+                data.mySavedStudysetsPageInfo = connection.pageInfo;
+                savedPage += direction === "next" ? 1 : -1;
             }
         } catch (err) {
             console.error("Error loading page:", err);
         }
     }
 
-    const getPaginatedList = (list, isCollapsed, page) => {
+    const getPaginatedList = (list: any[], isCollapsed: boolean, page: number) => {
         if (isCollapsed) {
             return list.slice(0, COLLAPSE_LENGTH);
         }
@@ -159,7 +138,7 @@
         );
     };
 
-    const hasNextPageFunc = (type) => {
+    const hasNextPageFunc = (type: "cloud" | "folder" | "saved" | "local") => {
         if (type === "cloud") {
             if (cloudCurrentlyCollapsed)
                 return data.studysetList?.length > COLLAPSE_LENGTH;
@@ -183,7 +162,7 @@
         return false;
     };
 
-    const hasPrevPageFunc = (type) => {
+    const hasPrevPageFunc = (type: "cloud" | "folder" | "saved" | "local") => {
         if (type === "cloud") {
             if (cloudCurrentlyCollapsed) return false;
             return data.studysetListPageInfo?.hasPreviousPage;
@@ -201,52 +180,16 @@
         }
         return false;
     };
-    export async function viewFolder(id) {
+    export async function viewFolder(id: string) {
         try {
-            const respRaw = await fetch("/api/graphql", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    query: `query ($id: ID!){
-    folder(id: $id) {
-        id
-        name
-        studysets(first: 24) {
-            edges {
-                node {
-                    id
-                    title
-                    termsCount
-                    folder {
-                        id
-                        name
-                    }
-                }
-            }
-            pageInfo {
-                hasNextPage
-                hasPreviousPage
-                startCursor
-                endCursor
-            }
-        }
-    }
-}`,
-                    variables: {
-                        id,
-                    },
-                }),
-            });
-            const resp = await respRaw.json();
-            if (resp?.data?.folder) {
-                currentFolder = resp.data.folder;
+            const resp = await sdk.StudysetListLoadFolderData({ id });
+            if (resp?.folder) {
+                currentFolder = resp.folder;
                 // Initialize studysets list from edges
                 if (currentFolder.studysets && currentFolder.studysets.edges) {
                     folderPageInfo = currentFolder.studysets.pageInfo;
                     currentFolder.studysets = currentFolder.studysets.edges.map(
-                        (e) => e.node,
+                        (e: any) => e.node,
                     );
                 }
                 showErrorBox = false;

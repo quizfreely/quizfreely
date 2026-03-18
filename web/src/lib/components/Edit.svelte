@@ -2,10 +2,11 @@
     import Noscript from "$lib/components/Noscript.svelte";
     import { onMount, tick } from "svelte";
     import { env } from "$env/dynamic/public";
+    import { getClientSdk } from "$lib/graphql/sdk";
     import { idbApiLayer, idbLayerImg } from "$lib/idb-api-layer";
     import { goto, beforeNavigate } from "$app/navigation";
     import { cancelNprogressTimeout } from "$lib/stores/nprogressTimeout.js";
-    let { data } = $props();
+    let { data }: { data: any } = $props();
     import Dropdown from "$lib/components/Dropdown.svelte";
     import SubjectPicker from "$lib/components/SubjectPicker.svelte";
 
@@ -41,8 +42,8 @@
     let termImageModalFileInputBox: FileInputBox | undefined = $state();
     let isDraft = $state(false);
     let showRemoveTermImageModal = $state(false);
-    let removeTermImageModalTerm: Term;
-    let removeTermImageModalIsDefSide: boolean;
+    let removeTermImageModalTerm: Term | undefined = $state();
+    let removeTermImageModalIsDefSide: boolean = $state(false);
     let editTitleInputValue: string = $state("");
     let importTermsCustomRowDelimiterValue: string = $state("");
     let importTermsCustomTermDefDelimiterValue: string = $state("");
@@ -50,21 +51,24 @@
 
     interface Term {
         key: number;
-        id?: string | number;
+        id?: any;
         term: string;
         def: string;
         termImageUrl?: string | null;
         defImageUrl?: string | null;
         termTextarea?: HTMLTextAreaElement;
         defTextarea?: HTMLTextAreaElement;
+        studysetId?: number;
+        createdAt?: any;
+        updatedAt?: any;
     }
     var terms: Term[] = $state([]);
-    var existingTermIdsToDelete: (string | number)[] = [];
+    var existingTermIdsToDelete: any[] = [];
     var key = 0;
     function addTerm(
         term?: string,
         def?: string,
-        id?: string | number,
+        id?: any,
         termImageUrl?: string,
         defImageUrl?: string,
     ) {
@@ -82,7 +86,7 @@
         index: number,
         term?: string,
         def?: string,
-        id?: string | number,
+        id?: any,
         termImageUrl?: string,
         defImageUrl?: string,
     ) {
@@ -108,7 +112,7 @@
             terms.splice(newIndex, 0, term);
         }
     }
-    let deletedTermRegister: Term;
+    let deletedTermRegister: Term | undefined = $state();
     function deleteTerm(index: number, copyToRegister?: boolean) {
         if (terms[index].id != null) {
             existingTermIdsToDelete.push(terms[index].id);
@@ -118,24 +122,12 @@
             deletedTermRegister = deletedTerm;
         }
     }
-    function unmarkForDeletion(id: string | number) {
+    function unmarkForDeletion(id: any) {
         const index = existingTermIdsToDelete.indexOf(id);
         if (index >= 0) {
             existingTermIdsToDelete.splice(index, 1);
         }
     }
-
-    // NOTE: this old function only handles term/def text, no id, sort order, or term/def image
-    // if we ever want to use it for exporting terms to raw text/CSV we'll need this but mabye updated
-    // like how addTermsFrom2DArray is used for importing terms from CSV/text
-    //
-    // function termsTo2DArray() {
-    //     var arr = [];
-    //     for (var index = 0; index < terms.length; index++) {
-    //         arr.push([terms[index].term, terms[index].def]);
-    //     }
-    //     return arr;
-    // }
 
     function addTermsFrom2DArray(arr: string[][]) {
         for (var row = 0; row < arr.length; row++) {
@@ -143,51 +135,30 @@
         }
     }
 
+    const sdk = getClientSdk();
+
     async function initTerm(termsCount?: number, term?: string, def?: string) {
         let sortOrder = termsCount;
-        if (termsCount == null) {
+        if (sortOrder == null) {
             sortOrder = terms.length;
         }
         if (data.local) {
-            return await idbApiLayer.createTerms(data.localId, [
+            const returnedKeys: any = await idbApiLayer.createTerms(data.localId as number, [
                 {
                     term: term ?? "",
                     def: def ?? "",
                     sortOrder: sortOrder,
-                },
+                } as any,
             ]); /* returns last key */
+            return (returnedKeys as any)[0];
         } else {
-            const raw = await fetch("/api/graphql", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    query: `mutation initTerm($studysetId: ID!, $term: String, $def: String, $sortOrder: Int!) {
-    createTerms(
-        studysetId: $studysetId,
-        terms: [{
-            term: $term,
-            def: $def,
-            sortOrder: $sortOrder
-        }]
-    ) {
-        id
-    }
-}`,
-                    variables: {
-                        studysetId: data.studysetId,
-                        term: term ?? "",
-                        def: def ?? "",
-                        sortOrder: sortOrder,
-                    },
-                }),
+            const resp = await sdk.InitTerm({
+                studysetId: data.studysetId,
+                term: term ?? "",
+                def: def ?? "",
+                sortOrder: sortOrder,
             });
-            const resp = await raw.json();
-            if (resp.errors != null || resp?.data == null) {
-                console.error("Err(s) in initTerm query/resp: ", resp);
-            }
-            return resp.data.createTerms[0].id;
+            return resp.createTerms?.[0]?.id;
         }
     }
 
@@ -242,51 +213,14 @@
             }
             if (data.studysetId) {
                 if (data.authed) {
-                    fetch("/api/graphql", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                            Accept: "application/json",
-                        },
-                        credentials: "same-origin",
-                        body: JSON.stringify({
-                            query: `
-                                query GetStudyset($id: ID!) {
-                                    studyset(id: $id) {
-                                        title
-                                        private
-                                        draft
-                                        subject {
-                                            name
-                                            id
-                                        }
-                                        terms {
-                                            id
-                                            term
-                                            def
-                                            termImageUrl
-                                            defImageUrl
-                                        }
-                                    }
-                                }
-                            `,
-                            variables: {
-                                id: data.studysetId,
-                            },
-                        }),
-                    })
-                        .then((response) => response.json())
+                    sdk.GetStudyset({ id: data.studysetId as string })
                         .then((result) => {
-                            if (result.errors) {
-                                alert("Error loading studyset");
-                                console.error(result.errors);
-                            } else {
-                                const studyset = result.data.studyset;
+                            if (result.studyset) {
+                                const studyset = result.studyset;
                                 editTitleInputValue = studyset.title;
                                 if (studyset.private) {
-                                    document
-                                        .getElementById("edit-private-false")
-                                        ?.classList.remove("selected");
+                                    const privateFalse = document.getElementById("edit-private-false");
+                                    privateFalse?.classList.remove("selected");
                                     document
                                         .getElementById("edit-private-true")
                                         ?.classList.add("selected");
@@ -309,13 +243,16 @@
                                         );
                                     });
                                 }
-                                selectedSubject = studyset.subject;
+                                selectedSubject = (studyset.subject as any) ?? null;
                                 isDraft = studyset.draft;
 
                                 if (studyset.draft && terms.length == 0) {
                                     addTerm();
                                 }
                             }
+                        }).catch(err => {
+                            alert("Error loading studyset");
+                            console.error(err);
                         });
                 } else {
                     console.error(
@@ -324,7 +261,7 @@
                 }
             } else {
                 const studysetRecord = await idbApiLayer.getStudysetById(
-                    data.localId,
+                    data.localId as number,
                     {
                         terms: {
                             termImageUrl: true,
@@ -450,6 +387,7 @@
                 unsavedChanges = true;
 
                 tick().then(() => {
+                    focusedRow = focusedRow;
                     terms?.[focusedRow]?.termTextarea?.focus();
                 });
                 return;
@@ -743,12 +681,12 @@
             updateLocalStudysetCooldown = false;
         }, 2000);
 
-        let existingTerms = [];
-        let newTerms = [];
+        let existingTerms: any[] = [];
+        let newTerms: any[] = [];
         for (let index = 0; index < terms.length; index++) {
             if (terms[index].id != null) {
                 existingTerms.push({
-                    id: terms[index].id,
+                    id: terms[index].id as string,
                     term: terms[index].term,
                     def: terms[index].def,
                     sortOrder: index,
@@ -764,18 +702,18 @@
 
         (async () => {
             await idbApiLayer.updateStudyset({
-                id: data.localId,
+                id: data.localId as number,
                 title: editTitleInputValue,
                 draft: false,
             });
             if (existingTerms.length > 0) {
-                await idbApiLayer.updateTerms(existingTerms);
+                await idbApiLayer.updateTerms(existingTerms as any[]);
             }
             if (newTerms.length > 0) {
-                await idbApiLayer.createTerms(data.localId, newTerms);
+                await idbApiLayer.createTerms(data.localId as number, newTerms as any[]);
             }
             if (existingTermIdsToDelete.length > 0) {
-                await idbApiLayer.deleteTerms(existingTermIdsToDelete);
+                await idbApiLayer.deleteTerms(existingTermIdsToDelete as number[]);
             }
             goto("/studyset/local?id=" + data.localId);
         })();
@@ -792,12 +730,12 @@
             updateCloudStudysetCooldown = false;
         }, 2000);
 
-        let existingTerms = [];
-        let newTerms = [];
+        let existingTerms: any[] = [];
+        let newTerms: any[] = [];
         for (let index = 0; index < terms.length; index++) {
             if (terms[index].id != null) {
                 existingTerms.push({
-                    id: terms[index].id,
+                    id: terms[index].id as string,
                     term: terms[index].term,
                     def: terms[index].def,
                     sortOrder: index,
@@ -811,43 +749,24 @@
             }
         }
 
-        fetch("/api/graphql", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                Accept: "application/json",
+        sdk.UpdateStudysetAndTerms({
+            id: data.studysetId,
+            studyset: {
+                title: editTitleInputValue,
+                private: document
+                    .getElementById("edit-private-true")
+                    ?.classList.contains("selected") ?? false,
+                subjectId: selectedSubject?.id ?? null,
             },
-            credentials: "same-origin",
-            body: JSON.stringify({
-                query: `mutation UpdateStudysetAndTerms($id: ID!, $studyset: StudysetInput, $terms: [TermInput!]!, $newTerms: [NewTermInput!]!, $deleteTerms: [ID!]!) {
-                    updateStudyset(id: $id, studyset: $studyset, draft: false) { id }
-                    updateTerms(studysetId: $id, terms: $terms) { id }
-                    createTerms(studysetId: $id, terms: $newTerms) { id }
-                    deleteTerms(studysetId: $id, ids: $deleteTerms)
-                }`,
-                variables: {
-                    id: data.studysetId,
-                    studyset: {
-                        title: editTitleInputValue,
-                        private: document
-                            .getElementById("edit-private-true")
-                            ?.classList.contains("selected"),
-                        subjectId: selectedSubject?.id ?? null,
-                    },
-                    terms: existingTerms,
-                    newTerms: newTerms,
-                    deleteTerms: existingTermIdsToDelete,
-                },
-            }),
+            terms: existingTerms,
+            newTerms: newTerms,
+            deleteTerms: existingTermIdsToDelete as string[],
         })
-            .then((response) => response.json())
             .then((result) => {
-                if (result.errors) {
-                    console.log(result);
-                    alert("Error updating studyset");
-                } else {
-                    goto("/studysets/" + data.studysetId);
-                }
+                goto("/studysets/" + data.studysetId);
+            }).catch(err => {
+                console.log(err);
+                alert("Error updating studyset");
             });
     }
     function saveButton() {
@@ -923,7 +842,7 @@
         >
             <div>
                 <img
-                    src={term?.[isDefSide ? "defImageUrl" : "termImageUrl"]}
+                    src={term?.[isDefSide ? "defImageUrl" : "termImageUrl"] ?? ""}
                     alt="{isDefSide ? 'definition' : 'term'} image"
                     class="term-image"
                 />
@@ -1042,7 +961,7 @@
                                         showFocusBorder = false;
                                         resetKeySeq();
                                     },
-                                    style: `transition-duration: 0.2s; ${
+                                    style: `transition-duration: 0.2s; ` + (
                                         showFocusBorder &&
                                         useOhnoColorFocusBorder &&
                                         !defFocused &&
@@ -1053,7 +972,7 @@
                                                 focusedRow == index
                                               ? "border-color: var(--main)"
                                               : ""
-                                    }`,
+                                    ),
                                 }}
                                 bind:value={term.term}
                                 bind:textareaElement={term.termTextarea}
@@ -1081,7 +1000,7 @@
                                         showFocusBorder = false;
                                         resetKeySeq();
                                     },
-                                    style: `transition-duration: 0.2s; ${
+                                    style: `transition-duration: 0.2s; ` + (
                                         showFocusBorder &&
                                         useOhnoColorFocusBorder &&
                                         defFocused &&
@@ -1092,7 +1011,7 @@
                                                 focusedRow == index
                                               ? "border-color: var(--main)"
                                               : ""
-                                    }`,
+                                    ),
                                 }}
                                 bind:value={term.def}
                                 bind:textareaElement={term.defTextarea}
@@ -1113,7 +1032,7 @@
                                 {/snippet}
                                 {#snippet divContent(hide: any)}
                                     <button
-                                        onclick={function (event) {
+                                        onclick={function (event: any) {
                                             moveTerm(index, index - 1);
                                             unsavedChanges = true;
                                             hide?.();
@@ -1122,7 +1041,7 @@
                                         <IconArrowUp /> Move up
                                     </button>
                                     <button
-                                        onclick={function (event) {
+                                        onclick={function (event: any) {
                                             moveTerm(index, index + 1);
                                             unsavedChanges = true;
                                             hide?.();
@@ -1131,7 +1050,7 @@
                                         <IconArrowDown /> Move down
                                     </button>
                                     <button
-                                        onclick={function (event) {
+                                        onclick={function (event: any) {
                                             insertTerm(index + 1);
                                             unsavedChanges = true;
                                             hide?.();
@@ -1441,12 +1360,12 @@
             {/snippet}
             {#if showSubjectPicker}
                 <SubjectPicker
-                    closeCallback={() => (showSubjectPicker = false)}
                     selectCallback={(subject: any) => {
                         selectedSubject = subject;
                         showSubjectPicker = false;
                         unsavedChanges = true;
                     }}
+                    closeCallback={() => (showSubjectPicker = false)}
                 ></SubjectPicker>
             {/if}
             {#if showExitConfirmationModal}
@@ -1525,7 +1444,7 @@
                                                 URL.createObjectURL(
                                                     returnedBlob,
                                                 );
-                                            termImageModalTerm[
+                                            (termImageModalTerm as any)[
                                                 termImageModalIsDefSide
                                                     ? "defImageUrl"
                                                     : "termImageUrl"
@@ -1536,7 +1455,7 @@
                                         termImageModalFileInputBox?.clear();
                                     } else {
                                         const raw = await fetch(
-                                            `/api/term-images/${termImageModalTerm.id}/${termImageModalIsDefSide ? "def" : "term"}`,
+                                            "/api/term-images/" + termImageModalTerm.id + "/" + (termImageModalIsDefSide ? "def" : "term"),
                                             {
                                                 method: "PUT",
                                                 body: termImageModalFiles[0],
@@ -1549,7 +1468,7 @@
                                                 resp,
                                             );
                                         } else {
-                                            termImageModalTerm[
+                                            (termImageModalTerm as any)[
                                                 termImageModalIsDefSide
                                                     ? "defImageUrl"
                                                     : "termImageUrl"
@@ -1586,9 +1505,10 @@
                             <button
                                 class="ohno"
                                 onclick={async () => {
+                                    if (!removeTermImageModalTerm) return;
                                     if (data.local) {
                                         const oldObjectUrl =
-                                            removeTermImageModalTerm[
+                                            (removeTermImageModalTerm as any)[
                                                 removeTermImageModalIsDefSide
                                                     ? "defImageUrl"
                                                     : "termImageUrl"
@@ -1600,7 +1520,7 @@
                                                 removeTermImageModalIsDefSide,
                                             );
                                         if (success) {
-                                            removeTermImageModalTerm[
+                                            (removeTermImageModalTerm as any)[
                                                 removeTermImageModalIsDefSide
                                                     ? "defImageUrl"
                                                     : "termImageUrl"
@@ -1618,7 +1538,7 @@
                                         showRemoveTermImageModal = false;
                                     } else {
                                         const raw = await fetch(
-                                            `/api/term-images/${removeTermImageModalTerm.id}/${removeTermImageModalIsDefSide ? "def" : "term"}`,
+                                            "/api/term-images/" + removeTermImageModalTerm.id + "/" + (removeTermImageModalIsDefSide ? "def" : "term"),
                                             {
                                                 method: "DELETE",
                                             },
@@ -1630,7 +1550,7 @@
                                                 resp,
                                             );
                                         } else {
-                                            removeTermImageModalTerm[
+                                            (removeTermImageModalTerm as any)[
                                                 removeTermImageModalIsDefSide
                                                     ? "defImageUrl"
                                                     : "termImageUrl"

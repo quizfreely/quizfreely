@@ -1,6 +1,6 @@
 export const fancyTimestamp = {
     hours: 0, /* 24 or 12, any other value will use locale's default */
-    format: function (dateStringOrObj) {
+    format: function (dateStringOrObj: string | Date) {
         var dateObj = new Date(dateStringOrObj)
         var now = new Date();
         var yesterday = new Date();
@@ -20,7 +20,7 @@ export const fancyTimestamp = {
                 day: "numeric"
             });
         }
-        var intlTimeOptions = {
+        var intlTimeOptions: any = {
             hour: 'numeric',
             minute: '2-digit'
         };

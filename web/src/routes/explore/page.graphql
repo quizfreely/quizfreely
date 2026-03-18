@@ -1,0 +1,16 @@
+query ExplorePage {
+  authed
+  authedUser {
+    id
+    username
+    displayName
+    authType
+    oauthGoogleEmail
+    modPerms
+  }
+  allSubjects {
+    id
+    name
+    category
+  }
+}

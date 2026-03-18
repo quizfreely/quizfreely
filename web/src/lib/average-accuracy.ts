@@ -21,21 +21,19 @@ if (term.progress && (
     ) + "%");
 }
 */
-export default function averageAccuracy(tc, ti, dc, di) {
+export default function averageAccuracy(tc: number, ti: number, dc: number, di: number) {
     /* tc = termCorrect, ti = termIncorrect,
     dc = defCorrect, di = defIncorrect */
-    let avg;
+    let avg = 0;
+    let counts = 0;
     if (tc + ti > 0) {
-        avg = tc / (tc+ti);
+        avg += tc / (tc+ti);
+        counts++;
     }
     if (dc + di > 0) {
-        if (avg == null) {
-            avg = dc / (dc+di);
-        } else {
-            avg = (avg + (
-                dc / (dc+di)
-            )) / 2
-        }
+        avg += dc / (dc+di);
+        counts++;
     }
-    return Math.floor(avg * 100);
+    if (counts === 0) return 0;
+    return Math.floor((avg / counts) * 100);
 }

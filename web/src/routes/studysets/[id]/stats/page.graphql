@@ -1,0 +1,55 @@
+query StudysetStats($studysetId: ID!) {
+  authed
+  authedUser {
+    id
+    username
+    displayName
+  }
+  studyset(id: $studysetId) {
+    id
+    title
+    terms {
+      id
+      term
+      def
+      termImageUrl
+      defImageUrl
+      progress {
+        termFirstReviewedAt
+        termLastReviewedAt
+        termReviewCount
+        defFirstReviewedAt
+        defLastReviewedAt
+        defReviewCount
+        termCorrectCount
+        termIncorrectCount
+        defCorrectCount
+        defIncorrectCount
+      }
+      topConfusionPairs {
+        confusedTerm {
+          id
+          term
+          def
+        }
+        answeredWith
+        confusedCount
+      }
+      topReverseConfusionPairs {
+        term {
+          id
+          term
+          def
+        }
+        answeredWith
+        confusedCount
+      }
+    }
+    practiceTests {
+      id
+      timestamp
+      questionsCorrect
+      questionsTotal
+    }
+  }
+}

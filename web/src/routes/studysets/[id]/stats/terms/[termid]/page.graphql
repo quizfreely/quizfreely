@@ -1,0 +1,56 @@
+query TermStats($termId: ID!) {
+  authed
+  authedUser {
+    id
+    username
+    displayName
+  }
+  term(id: $termId) {
+    id
+    term
+    def
+    termImageUrl
+    defImageUrl
+    progress {
+      termFirstReviewedAt
+      termLastReviewedAt
+      termReviewCount
+      defFirstReviewedAt
+      defLastReviewedAt
+      defReviewCount
+      termCorrectCount
+      termIncorrectCount
+      defCorrectCount
+      defIncorrectCount
+    }
+    progressHistory {
+      timestamp
+      termCorrectCount
+      termIncorrectCount
+      defCorrectCount
+      defIncorrectCount
+    }
+    topConfusionPairs {
+      confusedTerm {
+        id
+        term
+        def
+        termImageUrl
+        defImageUrl
+      }
+      answeredWith
+      confusedCount
+    }
+    topReverseConfusionPairs {
+      term {
+        id
+        term
+        def
+        termImageUrl
+        defImageUrl
+      }
+      answeredWith
+      confusedCount
+    }
+  }
+}

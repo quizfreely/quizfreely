@@ -1,0 +1,41 @@
+query SubjectPage($id: String!, $first: Int, $after: String, $last: Int, $before: String) {
+  authed
+  authedUser {
+    id
+    username
+    displayName
+  }
+  subject(id: $id) {
+    id
+    name
+    category
+    studysets(first: $first, after: $after, last: $last, before: $before) {
+      edges {
+        node {
+          id
+          title
+          termsCount
+          saved
+          folder {
+            id
+            name
+          }
+        }
+      }
+      pageInfo {
+        hasNextPage
+        hasPreviousPage
+        startCursor
+        endCursor
+      }
+    }
+  }
+}
+
+mutation SaveStudyset($id: ID!) {
+  saveStudyset(studysetId: $id)
+}
+
+mutation UnsaveStudyset($id: ID!) {
+  unsaveStudyset(studysetId: $id)
+}

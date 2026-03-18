@@ -1,14 +1,17 @@
-import {EditorState, Plugin} from 'prosemirror-state';
+import {EditorState, Plugin, Transaction} from 'prosemirror-state';
 import {EditorView, Decoration, DecorationSet} from 'prosemirror-view';
 import {keymap} from 'prosemirror-keymap';
 import {baseKeymap, toggleMark} from 'prosemirror-commands';
 import {history, undo, redo} from 'prosemirror-history';
-import { schema } from "$lib/proseMirrorSchema.js";
+import { schema } from "$lib/proseMirrorSchema";
+import { Schema, MarkType } from "prosemirror-model";
 
 export { undo, redo };
 
-function buildKeymap(schema) {
-  const keys = {};
+type Command = (state: EditorState, dispatch?: (tr: Transaction) => void) => boolean;
+
+function buildKeymap(schema: Schema) {
+  const keys: { [key: string]: Command } = {};
 
   keys["Mod-b"] = toggleMark(schema.marks.bold);
   keys["Mod-i"] = toggleMark(schema.marks.italic);
@@ -21,7 +24,7 @@ function buildKeymap(schema) {
   return keymap(keys);
 }
 
-function placeholderPlugin(text) {
+function placeholderPlugin(text: string) {
   return new Plugin({
     props: {
       decorations(state) {
@@ -44,7 +47,7 @@ function placeholderPlugin(text) {
   });
 }
 
-function markTrackingPlugin(updateMarks) {
+function markTrackingPlugin(updateMarks: (marks: { [key: string]: boolean }) => void) {
   return new Plugin({
     view(view) {
       updateMarks(getActiveMarks(view.state));
@@ -57,15 +60,17 @@ function markTrackingPlugin(updateMarks) {
   });
 }
 
-function getActiveMarks(state) {
+function getActiveMarks(state: EditorState) {
   const { from, $from, to, empty } = state.selection;
-  let active = {};
+  let active: { [key: string]: boolean } = {};
 
   if (empty) {
-    state.schema.marks && Object.keys(state.schema.marks).forEach(markName => {
-      active[markName] = !!state.storedMarks?.some(m => m.type.name === markName) ||
-                         !!$from.marks().some(m => m.type.name === markName);
-    });
+    if (state.schema.marks) {
+        Object.keys(state.schema.marks).forEach(markName => {
+            active[markName] = !!state.storedMarks?.some(m => m.type.name === markName) ||
+                               !!$from.marks().some(m => m.type.name === markName);
+        });
+    }
   } else {
     state.doc.nodesBetween(from, to, node => {
       if (!node.isText) return;
@@ -79,10 +84,10 @@ function getActiveMarks(state) {
 }
 
 export function createEditor(
-    dom,
-    placeholder,
-    updateActiveMarksFunc,
-    dispatchTransactionFunc,
+    dom: HTMLElement,
+    placeholder: string,
+    updateActiveMarksFunc: (marks: { [key: string]: boolean }) => void,
+    dispatchTransactionFunc: (tr: Transaction) => void,
 ) {
   const state = EditorState.create({
     schema,
@@ -100,4 +105,3 @@ export function createEditor(
         dispatchTransaction: dispatchTransactionFunc
     });
 }
-
