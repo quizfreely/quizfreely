@@ -1,8 +1,8 @@
 node_modules
 
 .output
-web/.svelte-kit
-web/build
+.svelte-kit
+build
 
 .DS_Store
 Thumbs.db
