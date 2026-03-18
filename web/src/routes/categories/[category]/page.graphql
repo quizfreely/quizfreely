@@ -1,0 +1,12 @@
+query SubjectCategory($category: SubjectCategory!) {
+  authed
+  authedUser {
+    id
+    username
+    displayName
+  }
+  subjectsByCategory(category: $category) {
+    id
+    name
+  }
+}

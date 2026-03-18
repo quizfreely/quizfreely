@@ -6,7 +6,7 @@
     <div class="content" style="padding-top: 2rem;">
         <p class="fg0" style="font-size: 1.6rem;">{page.status}</p>
         <h1 class="h2" style="margin-top:0px;">
-            {page.error.message}
+            {page.error?.message}
         </h1>
         {#if page.status == 404}
             <p>Sorry, that page doesn't exist.</p>

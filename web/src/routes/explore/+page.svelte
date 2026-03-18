@@ -1,6 +1,6 @@
 <script lang="ts">
     import { onMount } from "svelte";
-    let { data } = $props();
+    let { data }: { data: any } = $props();
     let modPowersActive = $state(false);
     onMount(() => {
         if (data.authedUser?.modPerms) {

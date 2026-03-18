@@ -1,0 +1,33 @@
+query UserPage($id: ID!, $first: Int, $after: String, $before: String) {
+  authed
+  authedUser {
+    id
+    username
+    displayName
+  }
+  user(id: $id) {
+    id
+    username
+    displayName
+    studysets(first: $first, after: $after, before: $before) {
+      edges {
+        node {
+          id
+          title
+          termsCount
+          updatedAt
+          user {
+            displayName
+          }
+        }
+      }
+      pageInfo {
+        hasNextPage
+        hasPreviousPage
+        startCursor
+        endCursor
+      }
+    }
+    studysetCount
+  }
+}

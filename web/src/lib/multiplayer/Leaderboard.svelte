@@ -2,17 +2,25 @@
     import { onMount } from "svelte";
     import { flip } from "svelte/animate";
     import { scale } from "svelte/transition";
-    let { ws, gameCode, ...props } = $props();
-    let playersData = $state(props?.players?.map(
-        player => ({
+    let { ws, gameCode, ...props }: {
+        ws: WebSocket,
+        gameCode: string,
+        players?: any[],
+        endCallback?: (d: any) => void
+    } = $props();
+    let playersData = $state<any[]>(props?.players?.map(
+        (player: any) => ({
             uniqueName: player,
             correctCount: 0,
             incorrectCount: 0,
             streak: 0
         })
     ) ?? []);
+    let showErrorMsg = $state(false);
+    let errorMsg = $state("");
+
     onMount(() => {
-        ws.onmessage = (event) => {
+        ws.onmessage = (event: MessageEvent) => {
             console.log("Received: " + event.data);
             const json = JSON.parse(event.data);
             if (json?.error && json?.msg) {
@@ -27,17 +35,17 @@
                     streak: 0
                 });
             } else if (json?.type == "player_left") {
-                const index = playersData.find(
-                    player => player.uniqueName == json.player
+                const index = playersData.findIndex(
+                    (player: any) => player.uniqueName == json.player
                 );
-                if (index > 0) {
+                if (index >= 0) {
                     playersData.splice(
                         index,
                         1
                     );
                 }
             } else if (json?.type == "end") {
-                endCallback({playersData});
+                props.endCallback?.({playersData});
             }
         };
 
@@ -45,7 +53,7 @@
           console.log("Connection closed");
         };
 
-        ws.onerror = (err) => {
+        ws.onerror = (err: any) => {
           console.log("Error: " + err.message);
         };
     })

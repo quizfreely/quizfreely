@@ -1,30 +1,50 @@
 query PublicStudyset($id: ID!) {
-    authed
-    authedUser {
-        id
-        username
-        displayName
+  authed
+  authedUser {
+    id
+    username
+    displayName
+  }
+  studyset(id: $id) {
+    id
+    title
+    updatedAt
+    user {
+      id
+      displayName
     }
-    studyset(id: $id) {
-        id
-        title
-        updatedAt
-        user {
-            id
-            displayName
-        }
-        private
-        saved
-        folder {
-            id
-            name
-        }
-        terms {
-            id
-            term
-            def
-            termImageUrl
-            defImageUrl
-        }
+    private
+    saved
+    folder {
+      id
+      name
     }
+    terms {
+      id
+      term
+      def
+      termImageUrl
+      defImageUrl
+    }
+  }
+}
+
+mutation DeleteStudyset($id: ID!) {
+  deleteStudyset(id: $id)
+}
+
+mutation SaveStudyset($id: ID!) {
+  saveStudyset(studysetId: $id)
+}
+
+mutation UnsaveStudyset($id: ID!) {
+  unsaveStudyset(studysetId: $id)
+}
+
+mutation SetStudysetFolder($studysetId: ID!, $folderId: ID!) {
+  setStudysetFolder(studysetId: $studysetId, folderId: $folderId)
+}
+
+mutation RemoveStudysetFromFolder($studysetId: ID!) {
+  removeStudysetFromFolder(studysetId: $studysetId)
 }

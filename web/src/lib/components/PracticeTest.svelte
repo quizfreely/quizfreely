@@ -1,6 +1,7 @@
 <script lang="ts">
     import { onMount } from "svelte";
     import { idbApiLayer, db } from "$lib/idb-api-layer";
+    import { getClientSdk } from "$lib/graphql/sdk";
     import BackIcon from "$lib/icons/BackArrow.svelte";
     import ForwardLongArrowIcon from "$lib/icons/ForwardRightArrowLong.svelte";
     import ExitIcon from "$lib/icons/Exit.svelte";
@@ -13,22 +14,22 @@
     import { cancelNprogressTimeout } from "$lib/stores/nprogressTimeout.js";
     import { fancyTimestamp } from "$lib/fancyTimestamp";
     import { Confetti } from "svelte-confetti";
-    let { data } = $props();
-    let terms = $state();
-    let practiceTests = $state([]);
+    let { data }: { data: any } = $props();
+    let terms = $state<any[]>([]);
+    let practiceTests = $state<any[]>([]);
 
     // maps questions from practice test data to objs with props for question components
-    function mapPracticeTestQuestionToQuestionComponentFormat(q) {
+    function mapPracticeTestQuestionToQuestionComponentFormat(q: any) {
         return {
             type: q.questionType,
-            term: q?.mcq?.term ?? q?.trueFalseQuestion?.term,
-            answerWith: q?.mcq?.answerWith ?? q?.trueFalseQuestion?.answerWith,
+            term: q?.mcq?.term ?? q?.trueFalseQuestion?.term ?? q?.frq?.term,
+            answerWith: q?.mcq?.answerWith ?? q?.trueFalseQuestion?.answerWith ?? q?.frq?.answerWith,
             answeredTerm: q.mcq?.answeredTerm,
             answeredBool: q.trueFalseQuestion?.answeredBool,
             distractors: q.mcq?.distractors,
             distractor: q.trueFalseQuestion?.distractor,
             correctChoiceIndex: q.mcq?.correctChoiceIndex,
-            wasCorrect: q?.mcq?.correct ?? q?.trueFalseQuestion?.correct,
+            wasCorrect: q?.mcq?.correct ?? q?.trueFalseQuestion?.correct ?? q?.frq?.correct,
         };
     }
 
@@ -79,19 +80,19 @@
                                 termImageUrl: true,
                                 defImageUrl: true
                             },
-                        },
+                        } as any,
                         topReverseConfusionPairs: {
                             term: {
                                 termImageUrl: true,
                                 defImageUrl: true
                             },
-                        },
+                        } as any,
                         termImageUrl: true,
                         defImageUrl: true
                     },
                     practiceTests: true,
                 });
-                terms = studyset.terms;
+                terms = (studyset as any).terms;
                 terms?.forEach(term => {
                     if (term.termImageUrl != null) {
                         objectKeys.push(term.termImageUrl);
@@ -99,7 +100,7 @@
                     if (term.defImageUrl != null) {
                         objectKeys.push(term.defImageUrl);
                     }
-                    term.topConfusionPairs?.forEach(confusionPair => {
+                    term.topConfusionPairs?.forEach((confusionPair: any) => {
                         if (confusionPair?.confusedTerm?.termImageUrl != null) {
                             objectKeys.push(confusionPair.confusedTerm.termImageUrl);
                         }
@@ -107,7 +108,7 @@
                             objectKeys.push(confusionPair.confusedTerm.defImageUrl);
                         }
                     });
-                    term.topReverseConfusionPairs?.forEach(confusionPair => {
+                    term.topReverseConfusionPairs?.forEach((confusionPair: any) => {
                         if (confusionPair?.confusedTerm?.termImageUrl != null) {
                             objectKeys.push(confusionPair.confusedTerm.termImageUrl);
                         }
@@ -116,7 +117,7 @@
                         }
                     });
                 });
-                practiceTests = studyset?.practiceTests;
+                practiceTests = (studyset as any)?.practiceTests;
             }
 
             if (!data.authed && !data.local && !data.alreadyOver) {
@@ -167,7 +168,7 @@
         frq: false,
     });
 
-    let questionsCountEntered = $state();
+    let questionsCountEntered: any = $state();
 
     let defaultQuestionsCount = $derived.by(() => {
         if (terms?.length > 20) {
@@ -181,7 +182,7 @@
         }
     });
 
-    function shuffleArray(ogArray) {
+    function shuffleArray(ogArray: any[]) {
         let arr = [...ogArray];
         for (let index = arr.length - 1; index > 0; index--) {
             const randomIndex = Math.floor(Math.random() * (index + 1));
@@ -191,12 +192,12 @@
     }
 
     let showSetup = $state(!data?.alreadyOver);
-    let questions = $state(
+    let questions = $state<any[]>(
         data?.practiceTest?.questions?.map(
             mapPracticeTestQuestionToQuestionComponentFormat,
         ) ?? [],
     );
-    let questionComponents = $state([]);
+    let questionComponents = $state<any[]>([]);
     function setupStart() {
         if (terms.length < 1) {
             alert("oops, not enough terms");
@@ -206,10 +207,10 @@
 
         let questionsCount = defaultQuestionsCount;
         if (!isNaN(parseInt(questionsCountEntered))) {
-            questionsCount = questionsCountEntered;
+            questionsCount = parseInt(questionsCountEntered);
         }
 
-        let questionTypesEnabledArray = [];
+        let questionTypesEnabledArray: string[] = [];
         Object.entries(questionTypesEnabled).forEach(
             ([questionType, enabled]) => {
                 if (enabled) {
@@ -260,21 +261,21 @@
             unassignedQuestionTypesCount--;
         }
         console.log(
-            `Total: ${questionsCount},
-MCQs: ${numMCQsToAssign},
-True/False: ${numTrueFalseQsToAssign},
-Matching: ${numMatchQsToAssign},
-FRQs: ${numFRQsToAssign}`,
+            `Total: \${questionsCount},
+MCQs: \${numMCQsToAssign},
+True/False: \${numTrueFalseQsToAssign},
+Matching: \${numMatchQsToAssign},
+FRQs: \${numFRQsToAssign}`,
         );
 
-        let remainingCounts = {
+        let remainingCounts: any = {
             mcq: numMCQsToAssign,
             trueFalse: numTrueFalseQsToAssign,
             match: numMatchQsToAssign,
             frq: numFRQsToAssign,
         };
 
-        function pickNewRandomTerm(ogTermsArray) {
+        function pickNewRandomTerm(ogTermsArray: any[]) {
             let termsArray = [...ogTermsArray];
             if (termsArray.length == 0) {
                 pickRepeatedRandomTerm();
@@ -316,9 +317,9 @@ FRQs: ${numFRQsToAssign}`,
             pickRepeatedRandomTerm();
         }
 
-        function pickQuestionType(term, remainingCounts) {
+        function pickQuestionType(term: any, remainingCounts: any) {
             const availableTypes = Object.entries(remainingCounts)
-                .filter(([type, count]) => count > 0)
+                .filter(([type, count]: [string, any]) => count > 0)
                 .map(([type]) => type);
 
             if (availableTypes.length === 0) return;
@@ -341,7 +342,7 @@ FRQs: ${numFRQsToAssign}`,
                     addTrueFalseQuestion(term);
                     break;
                 case "match":
-                    addMatchQuestion(term);
+                    // addMatchQuestion(term);
                     break;
                 case "frq":
                     addFRQ(term);
@@ -353,9 +354,9 @@ FRQs: ${numFRQsToAssign}`,
 
         // returns a number; higher = more priority
         function confusionPairPriority(
-            count,
-            lastConfusedAtDate,
-            lastReviewedAt,
+            count: number,
+            lastConfusedAtDate: Date,
+            lastReviewedAt: Date,
         ) {
             const decayDays = 7;
             const msPerDay = 1000 * 60 * 60 * 24;
@@ -366,14 +367,14 @@ FRQs: ${numFRQsToAssign}`,
             return Math.log1p(count) * Math.exp(-daysSince / decayDays);
         }
 
-        function addMCQ(term) {
+        function addMCQ(term: any) {
             const pickedAnswerWith =
                 answerWith == "BOTH"
                     ? Math.random() < 0.5
                         ? "TERM"
                         : "DEF"
                     : answerWith;
-            let question = {
+            let question: any = {
                 type: "MCQ",
                 term: {
                     id: term.id,
@@ -385,9 +386,9 @@ FRQs: ${numFRQsToAssign}`,
                 answerWith: pickedAnswerWith,
             };
             question.distractors = [];
-            let confusionPairDistractors = [];
+            let confusionPairDistractors: any[] = [];
             if (term?.topConfusionPairs != null) {
-                term.topConfusionPairs.forEach((confusionPair) => {
+                term.topConfusionPairs.forEach((confusionPair: any) => {
                     if (
                         confusionPair.answeredWith == pickedAnswerWith &&
                         confusionPair.confusedCount >= 2 &&
@@ -416,7 +417,7 @@ FRQs: ${numFRQsToAssign}`,
                 });
             }
             if (term?.topReverseConfusionPairs != null) {
-                term.topReverseConfusionPairs.forEach((confusionPair) => {
+                term.topReverseConfusionPairs.forEach((confusionPair: any) => {
                     if (
                         confusionPair.answeredWith != pickedAnswerWith &&
                         confusionPair.confusedCount >= 2 &&
@@ -489,7 +490,7 @@ FRQs: ${numFRQsToAssign}`,
                 }
 
                 let sum = 0;
-                question.distractors.forEach((d) => {
+                question.distractors.forEach((d: any) => {
                     sum += d?.[pickedAnswerWith.toLowerCase()]?.length ?? 0;
                 });
                 return sum / question?.distractors?.length;
@@ -512,7 +513,7 @@ FRQs: ${numFRQsToAssign}`,
                         term.id /* if random term is correct answer */ ||
                     question.distractors.some(
                         /* or if it's already an answer choice */
-                        (d) => randomTerm.id == d.id,
+                        (d: any) => randomTerm.id == d.id,
                     )
                 ) {
                     /* loop again without adding this random term
@@ -545,8 +546,8 @@ FRQs: ${numFRQsToAssign}`,
             questions.push(question);
         }
 
-        function addTrueFalseQuestion(term) {
-            let question = {
+        function addTrueFalseQuestion(term: any) {
+            let question: any = {
                 type: "TRUE_FALSE",
                 term: {
                     id: term.id,
@@ -563,9 +564,9 @@ FRQs: ${numFRQsToAssign}`,
                         : answerWith,
             };
 
-            let confusionPairTerms = [];
+            let confusionPairTerms: any[] = [];
             if (term.topConfusionPairs != null) {
-                term.topConfusionPairs.forEach((p) => {
+                term.topConfusionPairs.forEach((p: any) => {
                     if (p?.confusedCount >= 2) {
                         confusionPairTerms.push({
                             id: p.confusedTerm.id,
@@ -578,7 +579,7 @@ FRQs: ${numFRQsToAssign}`,
                 });
             }
             if (term.topReverseConfusionPairs != null) {
-                term.topReverseConfusionPairs.forEach((p) => {
+                term.topReverseConfusionPairs.forEach((p: any) => {
                     if (p?.confusedCount >= 2) {
                         confusionPairTerms.push({
                             id: p.term.id,
@@ -630,7 +631,7 @@ FRQs: ${numFRQsToAssign}`,
             questions.push(question);
         }
 
-        function addFRQ(term) {
+        function addFRQ(term: any) {
             questions.push({
                 type: "FRQ",
                 term: term,
@@ -660,7 +661,7 @@ FRQs: ${numFRQsToAssign}`,
     var showTest = $state(data.alreadyOver);
     var takingActualPracticeTest = $state(false);
     var bypassExitConfirmation = false;
-    let navigatingToURL = $state("");
+    let navigatingToURL: URL | undefined = $state();
     beforeNavigate(function (navigation) {
         if (
             takingActualPracticeTest &&
@@ -685,7 +686,7 @@ FRQs: ${numFRQsToAssign}`,
             /* if navigation.type is "leave",
             then its controlled by the browser &
             the browser shows it's own native modal
-            when we use `.cancel()` */
+            when we use \`.cancel()\` */
             navigation.cancel();
         }
     });
@@ -705,7 +706,7 @@ FRQs: ${numFRQsToAssign}`,
     let showScore = $state(data?.alreadyOver);
     let questionsCorrect = $state(data?.practiceTest?.questionsCorrect ?? 0);
 
-    let recordedPracticeTestId;
+    let recordedPracticeTestId: string | number | undefined = $state();
     if (data?.practiceTestId != null) {
         recordedPracticeTestId = data.practiceTestId;
     }
@@ -719,18 +720,14 @@ FRQs: ${numFRQsToAssign}`,
             <a
                 class="button faint"
                 href={data.alreadyOver
-                    ? data.local /* when alreadyOver is true, data.local means practice test is local,
-                but the studyset might be a cloud studyset */
-                        ? ("" + alreadyOverLocalPTStudysetId).includes("-")
-                            ? /* uuids have dashes/hyphens */
-                              `/studysets/${alreadyOverLocalPTStudysetId}`
-                            : `/studyset/local?id=${alreadyOverLocalPTStudysetId}`
-                        : `/studysets/${data.studysetId}`
-                    : /* if the practice test is a cloud pt, then the studyset is always a cloud studyset,
-                    but a local practice test can be for a local OR cloud studyset */
-                      data.local
-                      ? `/studyset/local?id=${data.localId}`
-                      : `/studysets/${data.studysetId}`}
+                    ? (data.local
+                        ? (("" + alreadyOverLocalPTStudysetId).indexOf("-") !== -1
+                            ? "/studysets/" + alreadyOverLocalPTStudysetId
+                            : "/studyset/local?id=" + alreadyOverLocalPTStudysetId)
+                        : "/studysets/" + data.studysetId)
+                    : (data.local
+                      ? "/studyset/local?id=" + data.localId
+                      : "/studysets/" + data.studysetId)}
                 ><BackIcon></BackIcon> Back</a
             >
         </div>
@@ -762,7 +759,7 @@ FRQs: ${numFRQsToAssign}`,
                             ? 'yay'
                             : 'ohno'}"
                         >{Math.round(
-                            (questionsCorrect / questions.length) * 100,
+                            (questionsCorrect / (questions.length || 1)) * 100,
                         )}%</span
                     >
                     <span>{questionsCorrect}/{questions.length} Correct</span>
@@ -781,7 +778,7 @@ FRQs: ${numFRQsToAssign}`,
                 <div style="margin-top: 0.4rem;">
                     <input
                         type="text"
-                        placeholder={defaultQuestionsCount}
+                        placeholder={"" + defaultQuestionsCount}
                         style="max-width: 4rem;"
                         bind:value={questionsCountEntered}
                     />
@@ -885,14 +882,14 @@ FRQs: ${numFRQsToAssign}`,
                             <span
                                 class="b fourpartthing-one {Math.floor(
                                     (practiceTest.questionsCorrect /
-                                        practiceTest.questionsTotal) *
+                                        (practiceTest.questionsTotal || 1)) *
                                         100,
                                 ) >= 90
                                     ? 'yay'
                                     : 'ohno'}"
                                 >{Math.floor(
                                     (practiceTest.questionsCorrect /
-                                        practiceTest.questionsTotal) *
+                                        (practiceTest.questionsTotal || 1)) *
                                         100,
                                 )}%</span
                             >
@@ -908,8 +905,8 @@ FRQs: ${numFRQsToAssign}`,
                             >
                             <a
                                 href={data.authed && !data.local
-                                    ? `/practice-tests/${practiceTest.id}`
-                                    : `/practice-test/local?id=${practiceTest.id}`}
+                                    ? ("/practice-tests/" + practiceTest.id)
+                                    : ("/practice-test/local?id=" + practiceTest.id)}
                                 class="fourpartthing-four"
                                 style="display: flex; align-items: center; gap: 0.4rem;"
                             >
@@ -934,6 +931,7 @@ FRQs: ${numFRQsToAssign}`,
                             distractors={question.distractors}
                             viewOnly={questionsViewOnly}
                             showAccuracy={questionsShowAccuracy}
+                            showCorrectAnswer={true}
                             {answerUpdateCallback}
                             bind:this={questionComponents[index]}
                             answeredTerm={question.answeredTerm}
@@ -961,7 +959,7 @@ FRQs: ${numFRQsToAssign}`,
                             answerWith={question.answerWith}
                             viewOnly={questionsViewOnly}
                             showAccuracy={questionsShowAccuracy}
-                            {index}
+                            index={index}
                             {answerUpdateCallback}
                             bind:this={questionComponents[index]}
                         ></FRQ>
@@ -989,7 +987,7 @@ FRQs: ${numFRQsToAssign}`,
                             questionsShowAccuracy = true;
                             takingActualPracticeTest = false;
                             showScore = true;
-                            let questionDataArray = [];
+                            let questionDataArray: any[] = [];
                             questionsCorrect = 0;
                             let termProgressToUpdate = new Map();
                             questionComponents.forEach((questionComponent) => {
@@ -999,7 +997,8 @@ FRQs: ${numFRQsToAssign}`,
 
                                 const thisTermId =
                                     questionData.mcq?.term?.id ??
-                                    questionData.trueFalseQuestion?.term?.id;
+                                    questionData.trueFalseQuestion?.term?.id ??
+                                    questionData.frq?.term?.id;
                                 if (thisTermId == null) {
                                     console.error(
                                         "term id from question is null(ish)! this might happen if new question types aren't fully implemented",
@@ -1007,14 +1006,16 @@ FRQs: ${numFRQsToAssign}`,
                                 }
                                 const thisAnswerWith =
                                     questionData.mcq?.answerWith ??
-                                    questionData.trueFalseQuestion?.answerWith;
+                                    questionData.trueFalseQuestion?.answerWith ??
+                                    questionData.frq?.answerWith;
                                 let termCorrectIncrease = 0;
                                 let termIncorrectIncrease = 0;
                                 let defCorrectIncrease = 0;
                                 let defIncorrectIncrease = 0;
                                 if (
                                     questionData?.mcq?.correct ||
-                                    questionData?.trueFalseQuestion?.correct
+                                    questionData?.trueFalseQuestion?.correct ||
+                                    questionData?.frq?.correct
                                 ) {
                                     questionsCorrect++;
 
@@ -1070,17 +1071,17 @@ FRQs: ${numFRQsToAssign}`,
                                                           new Date().toISOString(),
                                                   }),
                                             termCorrectIncrease:
-                                                existingToUpdate.termCorrectIncrease ??
-                                                0 + termCorrectIncrease,
+                                                (existingToUpdate.termCorrectIncrease ??
+                                                0) + termCorrectIncrease,
                                             termIncorrectIncrease:
-                                                existingToUpdate.termIncorrectIncrease ??
-                                                0 + termIncorrectIncrease,
+                                                (existingToUpdate.termIncorrectIncrease ??
+                                                0) + termIncorrectIncrease,
                                             defCorrectIncrease:
-                                                existingToUpdate.defCorrectIncrease ??
-                                                0 + defCorrectIncrease,
+                                                (existingToUpdate.defCorrectIncrease ??
+                                                0) + defCorrectIncrease,
                                             defIncorrectIncrease:
-                                                existingToUpdate.defIncorrectIncrease ??
-                                                0 + defIncorrectIncrease,
+                                                (existingToUpdate.defIncorrectIncrease ??
+                                                0) + defIncorrectIncrease,
                                             ...(termIncorrectIncrease > 0
                                                 ? { termLeitnerSystemBox: 1 }
                                                 : {}),
@@ -1094,45 +1095,24 @@ FRQs: ${numFRQsToAssign}`,
                             console.log(questionDataArray);
                             if (data.authed && !data.local) {
                                 try {
-                                    let raw = await fetch("/api/graphql", {
-                                        method: "POST",
-                                        headers: {
-                                            "Content-Type": "application/json",
+                                    const sdk = getClientSdk();
+                                    const resp = await sdk.RecordPracticeTest({
+                                        input: {
+                                            studysetId: data.studysetId,
+                                            questionsCorrect:
+                                                questionsCorrect,
+                                            questionsTotal:
+                                                questions.length,
+                                            questions:
+                                                questionDataArray,
                                         },
-                                        body: JSON.stringify({
-                                            query: `mutation recordPracticeTest(
-    $input: PracticeTestInput,
-    $termProgress: [TermProgressInput!]!
-) {
-    recordPracticeTest(input: $input) {
-        id
-    }
-    updateTermProgress(termProgress: $termProgress) {
-        id
-    }
-}`,
-                                            variables: {
-                                                input: {
-                                                    studysetId: data.studysetId,
-                                                    questionsCorrect:
-                                                        questionsCorrect,
-                                                    questionsTotal:
-                                                        questions.length,
-                                                    questions:
-                                                        questionDataArray,
-                                                },
-                                                /* .values() returns a map iterator, which JSON.stringify does NOT automatically turn into an array,
-                                        so we use the spread operator to make it into an array that JSON.stringify() can use */
-                                                termProgress: [
-                                                    ...termProgressToUpdate.values(),
-                                                ],
-                                            },
-                                        }),
+                                        termProgress: [
+                                            ...termProgressToUpdate.values(),
+                                        ],
                                     });
-                                    let resp = await raw.json();
-                                    if (resp?.data?.recordPracticeTest?.id) {
+                                    if (resp?.recordPracticeTest?.id) {
                                         recordedPracticeTestId =
-                                            resp.data.recordPracticeTest.id;
+                                            resp.recordPracticeTest.id;
                                         submitted = true;
                                     } else {
                                         console.log(
@@ -1201,7 +1181,7 @@ FRQs: ${numFRQsToAssign}`,
                             data-sveltekit-preload-data="false"
                             onclick={function () {
                                 bypassExitConfirmation = true;
-                                goto(navigatingToURL);
+                                goto(navigatingToURL as any);
                             }}
                         >
                             <ExitIcon />
@@ -1213,7 +1193,7 @@ FRQs: ${numFRQsToAssign}`,
         {/if}
     </div>
 </div>
-{#if !data?.alreadyOver && showScore && questionsCorrect / questions.length == 1}
+{#if !data?.alreadyOver && showScore && (questions.length > 0) && (questionsCorrect / questions.length == 1)}
     <!-- fullscreen confetti if 100% -->
     <div
         style="position: fixed; top: -50px; left 0px; margin: 0px; padding: 0px; height: 100vh; width: 100vw; display: flex; justify-content: center; overflow: hidden; pointer-events: none;"
@@ -1223,7 +1203,7 @@ FRQs: ${numFRQsToAssign}`,
             y={[0, 0.1]}
             delay={[0, 6000]}
             duration={4000}
-            amount="1000"
+            amount={1000}
             fallDistance="200vh"
         />
     </div>

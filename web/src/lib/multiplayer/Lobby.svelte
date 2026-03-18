@@ -4,17 +4,26 @@
     import GroupIcon from "$lib/icons/GroupUsers.svelte";
     import XMarkIcon from "$lib/icons/CloseXMark.svelte";
     import CheckmarkIcon from "$lib/icons/Checkmark.svelte";
-    let { ws, gameCode, hostPOV, startCallback, ...props } = $props();
+    let { ws, gameCode, hostPOV, startCallback, ...props }: {
+        ws: WebSocket,
+        gameCode: string,
+        hostPOV: boolean,
+        startCallback: (d: any) => void,
+        players?: any[]
+    } = $props();
     let players = $state(props?.players ?? []);
     let showKicking = $state(false);
     let kickingUniqueName = $state("");
+
+    let showErrorMsg = $state(false);
+    let errorMsg = $state("");
 
     onMount(() => {
         if (hostPOV) {
             document.documentElement.style.fontSize = "20px";
         }
 
-        ws.onmessage = (event) => {
+        ws.onmessage = (event: MessageEvent) => {
             console.log("Received: " + event.data);
             const json = JSON.parse(event.data);
             if (json?.error && json?.msg) {
@@ -39,7 +48,7 @@
           console.log("Connection closed");
         };
 
-        ws.onerror = (err) => {
+        ws.onerror = (err: any) => {
           console.log("Error: " + err.message);
         };
     })

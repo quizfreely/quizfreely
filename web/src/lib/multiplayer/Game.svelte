@@ -1,11 +1,21 @@
 <script lang="ts">
     import { onMount } from "svelte";
-    let { ws, gameCode, studyset, answerWith, ...props } = $props();
+    let { ws, gameCode, studyset, answerWith, ...props }: {
+        ws: WebSocket,
+        gameCode: string,
+        studyset: any,
+        answerWith: string,
+        players?: any[],
+        endCallback?: (d: any) => void
+    } = $props();
     let players = $state(props?.players ?? []);
-    let term = $state(null);
-    let distractors = $state([]);
+    let term = $state<any>(null);
+    let distractors = $state<any[]>([]);
+    let showErrorMsg = $state(false);
+    let errorMsg = $state("");
+
     onMount(() => {
-        ws.onmessage = (event) => {
+        ws.onmessage = (event: MessageEvent) => {
             console.log("Received: " + event.data);
             const json = JSON.parse(event.data);
             if (json?.error && json?.msg) {
@@ -22,7 +32,7 @@
                     );
                 }
             } else if (json?.type == "end") {
-                endCallback({players});
+                props.endCallback?.({players});
             }
         };
 
@@ -30,7 +40,7 @@
           console.log("Connection closed");
         };
 
-        ws.onerror = (err) => {
+        ws.onerror = (err: any) => {
           console.log("Error: " + err.message);
         };
     });

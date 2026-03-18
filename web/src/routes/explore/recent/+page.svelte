@@ -4,7 +4,7 @@
     import CheckmarkIcon from "$lib/icons/Checkmark.svelte";
     import ArrowLeftIcon from "$lib/icons/ArrowLeft.svelte";
     import ArrowRightIcon from "$lib/icons/ArrowRight.svelte";
-    let { data } = $props();
+    let { data }: { data: any } = $props();
 
     const theList = $derived(
         data.recentlyUpdated
