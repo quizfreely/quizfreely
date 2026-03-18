@@ -34,7 +34,7 @@ jobs:
           echo "NEW_API_RELEASE=$(git describe --tags --abbrev=0 2>/dev/null || echo '')" >> $GITHUB_ENV
       - name: Build Web App
         run: |
-          cd quizfreely/web
+          cd quizfreely
           npm ci
           npm run build
       - name: Compile API
@@ -94,7 +94,7 @@ jobs:
             --include='package-lock.json' \
             --exclude="*" \
             -e "ssh -i ~/.ssh/id_ed25519" \
-            quizfreely/web/ quizfreely@server.quizfreely.org:/home/quizfreely/web/releases/$NEW_WEB_RELEASE/
+            quizfreely/ quizfreely@server.quizfreely.org:/home/quizfreely/web/releases/$NEW_WEB_RELEASE/
       - name: Install Node.js Dependencies on Production Server
         run: |
           ssh -i ~/.ssh/id_ed25519 \
