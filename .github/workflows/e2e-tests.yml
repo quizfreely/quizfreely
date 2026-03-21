@@ -1,36 +1,163 @@
 name: End-to-End Tests
 on:
-  # push:
-  #   branches: [ main, master ]
   pull_request:
-    branches: [ main ]
+    types: [opened, synchronize]
   workflow_dispatch:
 jobs:
   tests:
     name: Run Tests
     timeout-minutes: 10
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: quizfreely_db_admin
+          POSTGRES_PASSWORD: e2eTestsAdminPassword
+          POSTGRES_DB: quizfreely_test_db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+      garage:
+        image: dxflrs/garage:v2.2.0
+        env:
+          GARAGE_ADMIN_TOKEN: e2eTestsAdminToken
+        options: >-
+          --health-cmd="curl http://localhost:3903/health"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+        ports:
+          - 3900:3900 # S3 API
+          - 3902:3902 # S3 web
+          - 3903:3903 # admin API
     steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-node@v4
-      with:
-        node-version: lts/*
-    - name: Install Dependencies
-      run: npm ci
-    - name: Install Playwright Browsers
-      #run: npx playwright install --with-deps
-      run: npx playwright install chromium
-    - name: Run Playwright tests
-      run: npx playwright test
-    - name: Upload HTML Report
-      if: always()
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.STORAGE_DEV_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.STORAGE_DEV_SECRET_ACCESS_KEY }}
-        AWS_DEFAULT_REGION: 'garage'
-        AWS_ENDPOINT_URL: 'http://server.quizfreely.org:3900'
-      run: |
-        REPORT_DIR='tests/run-${{ github.run_id }}-${{ github.run_attempt }}'
-        aws s3 cp playwright-report s3://dev/$REPORT_DIR/ --recursive
-        echo "### Test Report" >> $GITHUB_STEP_SUMMARY
-        echo "View Test Report: https://dev.static.quizfreely.org/$REPORT_DIR/" >> $GITHUB_STEP_SUMMARY
+      - uses: actions/checkout@v6
+        with:
+          path: quizfreely
+      - name: Clone quizfreely/api
+        run: |
+          set -euo pipefail
+          cd quizfreely
+          api_branch=$(yq '.branch' quizfreely-api.toml)
+          if [[ -z "$api_branch" ]]; then
+            api_branch="main"
+          fi
+          cd ../
+          git clone \
+            --depth 1 \
+            --branch "$api_branch" \
+            --single-branch \
+            https://github.com/quizfreely/api.git api
+      - uses: actions/setup-go@v6
+        with:
+          go-version: '1.26'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+      - name: Set up DB
+        env:
+          PGPASSWORD: e2eTestsAdminPassword
+          DB_MIGRATION_URL: 'postgres://quizfreely_db_admin:e2eTestsAdminPassword@localhost:5432/quizfreely_test_db?sslmode=disable'
+        run: |
+          psql -h localhost -U quizfreely_db_admin -d quizfreely_test_db -c "CREATE ROLE quizfreely_api LOGIN PASSWORD 'e2eTestsAPIPassword';"
+          cd api
+          dbmate -e DB_MIGRATION_URL migrate
+      - name: Set up Object Storage
+        run: |
+          set -euo pipefail
+          create_bucket_resp=$(curl -X POST http://localhost:3903/v2/CreateBucket \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer e2eTestsAdminToken" \
+            -d '{ "globalAlias": "usercontent" }')
+          bucket_id=$(echo "$create_bucket_resp" | jq '.id')
+          curl -X POST "http://localhost:3903/v2/UpdateBucket?id=$bucket_id" \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer e2eTestsAdminToken" \
+            -d '{
+              "websiteAccess": {
+                enabled: true
+              }
+            }'
+          create_key_resp=$(curl -X POST "http://localhost:3903/v2/CreateKey" \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer e2eTestsAdminToken" \
+            -d '{ "name": "quizfreely-api" }')
+          access_key_id=$(echo "$create_key_resp" | jq '.accessKeyId')
+          secret_access_key=$(echo "$create_key_resp" | jq '.secretAccessKey')
+          echo "STORAGE_ACCESS_KEY_ID=$access_key_id" >> $GITHUB_ENV
+          echo "STORAGE_SECRET_ACCESS_KEY=$secret_access_key" >> $GITHUB_ENV
+          curl -X POST "http://localhost:3903/v2/AllowBucketKey" \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer e2eTestsAdminToken" \
+            -d "{
+              \"accessKeyId\": \"$access_key_id\",
+              \"bucketId\": \"$bucket_id\",
+              \"permissions\": {
+                \"read\": true,
+                \"write\": true
+              }
+            }"
+      - name: Create config.toml for API
+        run: |
+          set -euo pipefail
+          cd api
+          cat <<EOF > config.toml
+          port = 8008
+          db_url = 'postgres://quizfreely_api:e2eTestsAPIPassword@localhost:5432/quizfreely_test_db'
+          pretty_log = true
+          base_path = '/'
+          enable_oauth_google = false
+          storage_endpoint_url = 'http://localhost:3900'
+          storage_region = "garage"
+          storage_key_id = '$STORAGE_ACCESS_KEY_ID'
+          storage_secret_key = '$STORAGE_SECRET_ACCESS_KEY'
+          usercontent_bucket = "usercontent"
+          usercontent_base_url = "http://localhost:8080/usercontent/"
+          session_cleanup_cron_spec = "0 0 * * *"
+          term_image_cleanup_cron_spec = "10 0 * * *"
+          EOF
+      - name: Start API
+        run: |
+          cd api
+          go run main.go &
+      - name: Wait for API to start
+        run: |
+          timeout 30s bash -c '
+            until curl -fs http://localhost:8008/health; do
+              sleep 1
+            done
+          '
+      - name: Install Dependencies
+        run: |
+          cd quizfreely
+          npm ci
+      - name: Install Playwright Browsers
+        #run: npx playwright install --with-deps
+        run: npx playwright install chromium
+      - name: Run Playwright tests
+        env:
+          ENABLE_HTML_REPORTER: "${{ github.event_name != 'pull_request' }}"
+          ENABLE_GH_REPORTER: true
+          DEPLOYED: false
+          ENABLE_OAUTH_GOOGLE: false
+          ENABLE_TERM_IMAGES: true
+          API_URL: http://localhost:8008
+          USERCONTENT_URL: http://usercontent.web.garage.localhost:3902
+        run: npx playwright test
+      - name: Upload HTML Report
+        if: always() && github.event_name != 'pull_request'
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.STORAGE_DEV_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.STORAGE_DEV_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: 'garage'
+          AWS_ENDPOINT_URL: 'http://server.quizfreely.org:3900'
+        run: |
+          REPORT_DIR='e2e-tests/run-${{ github.run_id }}-${{ github.run_attempt }}'
+          aws s3 cp playwright-report s3://dev/$REPORT_DIR/ --recursive
+          echo "### Test Report" >> $GITHUB_STEP_SUMMARY
+          echo "View Test Report: https://dev.static.quizfreely.org/$REPORT_DIR/" >> $GITHUB_STEP_SUMMARY
