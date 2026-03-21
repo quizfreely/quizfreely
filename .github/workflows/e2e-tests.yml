@@ -93,20 +93,16 @@ jobs:
           EOF
           sudo mv garage.toml /etc/
           garage server &
-          node_id=$(timeout 60s bash -c '
-            until garage node id 2>/dev/null | cut -d'@' -f1; do
-              sleep 1
-            done
-          ')
-          garage layout assign -z dc1 -c 1G "$node_id"
-          garage layout apply --version 1
-          garage bucket create usercontent
-          garage bucket website --allow usercontent
           timeout 60s bash -c '
             until curl -fsSL --retry-connrefused --max-time 10 http://localhost:3903/health; do
               sleep 1
             done
           '
+          node_id=$(garage node id | cut -d'@' -f1)
+          garage layout assign -z dc1 -c 1G "$node_id"
+          garage layout apply --version 1
+          garage bucket create usercontent
+          garage bucket website --allow usercontent
           create_key_resp=$(curl -fsSL -X POST "http://localhost:3903/v2/CreateKey" \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer e2eTestsAdminToken" \
