@@ -22,42 +22,6 @@ jobs:
           --health-retries 5
         ports:
           - 5432:5432
-      garage:
-        image: dxflrs/garage:v2.2.0
-        options: >-
-          --health-cmd="curl -f http://localhost:3903/health || exit 1"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=5
-        ports:
-          - 3900:3900 # S3 API
-          - 3902:3902 # S3 web
-          - 3903:3903 # admin API
-        command: >
-          sh -c "
-          cat <<EOF > /tmp/garage.toml
-          metadata_dir = '/tmp/meta'
-          data_dir = '/tmp/data'
-
-          [s3_api]
-          s3_region = 'garage'
-          api_bind_addr = '0.0.0.0:3900'
-          root_domain = '.s3.garage.localhost'
-
-          [s3_web]
-          bind_addr = '0.0.0.0:3902'
-          root_domain = '.web.garage.localhost'
-          index = 'index.html'
-
-          [admin]
-          api_bind_addr = '0.0.0.0:3903'
-          admin_token = 'e2eTestsAdminToken'
-          EOF
-
-          mkdir -p /tmp/meta /tmp/data
-
-          garage server -c /tmp/garage.toml
-          "
     steps:
       - uses: actions/checkout@v6
         with:
@@ -82,7 +46,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: lts/*
-      - name: Set up DB
+      - name: Set Up Database
         env:
           PGPASSWORD: e2eTestsAdminPassword
           DB_MIGRATION_URL: 'postgres://quizfreely_db_admin:e2eTestsAdminPassword@localhost:5432/quizfreely_test_db?sslmode=disable'
@@ -90,22 +54,47 @@ jobs:
           psql -h localhost -U quizfreely_db_admin -d quizfreely_test_db -c "CREATE ROLE quizfreely_api LOGIN PASSWORD 'e2eTestsAPIPassword';"
           cd api
           dbmate -e DB_MIGRATION_URL migrate
-      - name: Set up Object Storage
+      - name: Set Up Garage Object Storage
         run: |
           set -euo pipefail
-          create_bucket_resp=$(curl -X POST http://localhost:3903/v2/CreateBucket \
-            -H "Content-Type: application/json" \
-            -H "Authorization: Bearer e2eTestsAdminToken" \
-            -d '{ "globalAlias": "usercontent" }')
-          bucket_id=$(echo "$create_bucket_resp" | jq '.id')
-          curl -X POST "http://localhost:3903/v2/UpdateBucket?id=$bucket_id" \
-            -H "Content-Type: application/json" \
-            -H "Authorization: Bearer e2eTestsAdminToken" \
-            -d '{
-              "websiteAccess": {
-                enabled: true
-              }
-            }'
+          curl -L -o garage https://garagehq.deuxfleurs.fr/_releases/v2.2.0/x86_64-unknown-linux-musl/garage
+          chmod +x garage
+          cat <<EOF > garage.toml
+          metadata_dir = "/tmp/meta"
+          data_dir = "/tmp/data"
+          db_engine = "sqlite"
+
+          replication_factor = 1
+
+          rpc_bind_addr = "0.0.0.0:3901"
+          rpc_public_addr = "127.0.0.1:3901"
+          rpc_secret = "e2eTestsRPCSecret"
+
+          [s3_api]
+          s3_region = "garage"
+          api_bind_addr = "0.0.0.0:3900"
+          root_domain = ".s3.garage.localhost"
+
+          [s3_web]
+          bind_addr = "0.0.0.0:3902"
+          root_domain = ".web.garage.localhost"
+          index = "index.html"
+
+          [admin]
+          api_bind_addr = "0.0.0.0:3903"
+          admin_token = "e2eTestsAdminToken"
+          metrics_token = "e2eTestsMetricsToken"
+          EOF
+          ./garage -c garage.toml server &
+          timeout 60s bash -c '
+            until node_id=$(garage node id 2>/dev/null | cut -d'@' -f1); do
+              sleep 1
+            done
+          '
+          ./garage layout assign -z dc1 -c 1G "$node_id"
+          ./garage layout apply --version 1
+          ./garage bucket create usercontent
+          ./garage bucket website --allow usercontent
           create_key_resp=$(curl -X POST "http://localhost:3903/v2/CreateKey" \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer e2eTestsAdminToken" \
@@ -114,17 +103,7 @@ jobs:
           secret_access_key=$(echo "$create_key_resp" | jq '.secretAccessKey')
           echo "STORAGE_ACCESS_KEY_ID=$access_key_id" >> $GITHUB_ENV
           echo "STORAGE_SECRET_ACCESS_KEY=$secret_access_key" >> $GITHUB_ENV
-          curl -X POST "http://localhost:3903/v2/AllowBucketKey" \
-            -H "Content-Type: application/json" \
-            -H "Authorization: Bearer e2eTestsAdminToken" \
-            -d "{
-              \"accessKeyId\": \"$access_key_id\",
-              \"bucketId\": \"$bucket_id\",
-              \"permissions\": {
-                \"read\": true,
-                \"write\": true
-              }
-            }"
+          ./garage bucket allow --read --write usercontent --key quizfreely-api
       - name: Create config.toml for API
         run: |
           set -euo pipefail
@@ -148,8 +127,6 @@ jobs:
         run: |
           cd api
           go run main.go &
-      - name: Wait for API to start
-        run: |
           timeout 30s bash -c '
             until curl -fs http://localhost:8008/health; do
               sleep 1
@@ -162,7 +139,7 @@ jobs:
       - name: Install Playwright Browsers
         #run: npx playwright install --with-deps
         run: npx playwright install chromium
-      - name: Run Playwright tests
+      - name: Run Tests
         env:
           ENABLE_HTML_REPORTER: "${{ github.event_name != 'pull_request' }}"
           ENABLE_GH_REPORTER: true
