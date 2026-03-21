@@ -1,6 +1,15 @@
 quizfreely.org {
         encode zstd gzip
 
+        log {
+                output file /var/log/caddy/quizfreely.org.log {
+                        roll_size 10MiB
+                        roll_keep 5
+                        roll_keep_for 720h
+                }
+                format json
+        }
+
         handle_path /api/* {
             reverse_proxy localhost:8008
         }
@@ -41,6 +50,7 @@ quizfreely.org {
             reverse_proxy localhost:8080
         }
 
+        redir /donate https://hcb.hackclub.com/donations/start/quizfreely
         redir /discord https://discord.gg/6qQrybf6kG
 }
 www.quizfreely.org, quizfreely.com, www.quizfreely.com {
