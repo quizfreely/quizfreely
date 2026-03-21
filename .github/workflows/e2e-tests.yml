@@ -93,7 +93,7 @@ jobs:
           EOF
           sudo mv garage.toml /etc/
           garage server &
-          timeout 60s bash -c '
+          timeout 90s bash -c '
             until curl -fsSL --retry-connrefused --max-time 10 http://localhost:3903/health; do
               sleep 1
             done
