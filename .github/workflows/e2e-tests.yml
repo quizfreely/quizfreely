@@ -43,7 +43,7 @@ jobs:
         run: |
           set -euo pipefail
           cd quizfreely
-          api_branch=$(yq '.branch' quizfreely-api.toml)
+          api_branch=$(yq '.api_branch' quizfreely.toml)
           if [[ -z "$api_branch" ]]; then
             api_branch="main"
           fi
