@@ -24,10 +24,8 @@ jobs:
           - 5432:5432
       garage:
         image: dxflrs/garage:v2.2.0
-        env:
-          GARAGE_ADMIN_TOKEN: e2eTestsAdminToken
         options: >-
-          --health-cmd="curl http://localhost:3903/health"
+          --health-cmd="curl -f http://localhost:3903/health || exit 1"
           --health-interval=10s
           --health-timeout=5s
           --health-retries=5
@@ -35,6 +33,31 @@ jobs:
           - 3900:3900 # S3 API
           - 3902:3902 # S3 web
           - 3903:3903 # admin API
+        command: >
+          sh -c "
+          cat <<EOF > /tmp/garage.toml
+          metadata_dir = '/tmp/meta'
+          data_dir = '/tmp/data'
+
+          [s3_api]
+          s3_region = 'garage'
+          api_bind_addr = '0.0.0.0:3900'
+          root_domain = '.s3.garage.localhost'
+
+          [s3_web]
+          bind_addr = '0.0.0.0:3902'
+          root_domain = '.web.garage.localhost'
+          index = 'index.html'
+
+          [admin]
+          api_bind_addr = '0.0.0.0:3903'
+          admin_token = 'e2eTestsAdminToken'
+          EOF
+
+          mkdir -p /tmp/meta /tmp/data
+
+          garage server -c /tmp/garage.toml
+          "
     steps:
       - uses: actions/checkout@v6
         with:
