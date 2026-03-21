@@ -1,8 +1,6 @@
-# Local and Cloud Data in Quizfreely
+# Local & Cloud Data in Quizfreely's Web App
 
-This project supports two types of studyset storage: **Cloud** (stored on the server and accessed via GraphQL) and **Local** (stored in the browser's IndexedDB). This document explains the differences in their implementation, loading, and saving processes.
-
-## 1. Architectural Overview
+## Architectural Overview
 
 | Feature | Cloud Studysets | Local Studysets |
 | :--- | :--- | :--- |
@@ -12,7 +10,7 @@ This project supports two types of studyset storage: **Cloud** (stored on the se
 | **IDs** | Strings (UUIDs/HashIDs) | Integers (Auto-incrementing) |
 | **Server-Side Rendering** | Supported | **Not Supported** (Browser-only API) |
 
-## 2. Loading Implementation
+## Loading Implementation
 
 ### Cloud Studysets (Initial Render)
 Cloud data is typically fetched on the server in `+page.server.ts` load functions. This allows the page to be pre-rendered (SSR), making the data available immediately upon the first render.
@@ -55,12 +53,12 @@ onMount(function () {
 });
 ```
 
-## 3. Image Handling & Memory Management
+## Image Handling & Memory Management
 
 Images are handled fundamentally differently between the two storage types.
 
 ### Cloud Images
-Cloud images are served via standard URLs from the backend (e.g., `/api/term-images/[id]/[side]`). The browser handles caching and memory management for these URLs normally.
+Cloud images are served via standard URLs from the backend (e.g., `https://usercontent.static.quizfreely.org/api/term-images/[id]/[side]`). The browser handles caching and memory management for these URLs normally.
 
 ### Local Images (Object URLs)
 Local images are stored as `Blob` objects in IndexedDB. To display them in an `<img>` tag, we must generate an **Object URL**.
@@ -89,7 +87,7 @@ onMount(() => {
 });
 ```
 
-## 4. Saving & Updating
+## Saving & Updating
 
 The project uses a "dual-path" approach in shared components like `Edit.svelte`.
 
@@ -106,14 +104,3 @@ function saveButton() {
     }
 }
 ```
-
-## 5. Key File References
-
--   **`src/lib/idb-api-layer/`**: The client-side API for IndexedDB storage.
-    -   `db.js`: Database schema and migrations.
-    -   `index.js`: Main API methods (`getStudysetById`, `createTerms`, etc.).
-    -   `images.js`: Image processing and Object URL management.
--   **`src/lib/graphql/sdk.ts`**: The generated TypeScript SDK for cloud interactions.
--   **`src/routes/StudysetPage.svelte`**: A core component that abstracts the differences between local and cloud studysets for display.
--   **`src/lib/components/Edit.svelte`**: Handles the complex logic of editing and saving both local and cloud data.
--   **`src/routes/dashboard/+page.svelte`**: Manages the listing of both cloud (via GraphQL) and local (via IndexedDB) studysets.
