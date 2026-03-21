@@ -89,11 +89,11 @@ jobs:
           metrics_token = "e2eTestsMetricsToken"
           EOF
           ./garage -c garage.toml server &
-          timeout 60s bash -c '
-            until node_id=$(garage node id 2>/dev/null | cut -d'@' -f1); do
+          node_id=$(timeout 60s bash -c '
+            until garage node id 2>/dev/null | cut -d'@' -f1; do
               sleep 1
             done
-          '
+          ')
           ./garage layout assign -z dc1 -c 1G "$node_id"
           ./garage layout apply --version 1
           ./garage bucket create usercontent
