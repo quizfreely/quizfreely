@@ -51,13 +51,16 @@ jobs:
           PGPASSWORD: e2eTestsAdminPassword
           DB_MIGRATION_URL: 'postgres://quizfreely_db_admin:e2eTestsAdminPassword@localhost:5432/quizfreely_test_db?sslmode=disable'
         run: |
+          set -euo pipefail
           psql -h localhost -U quizfreely_db_admin -d quizfreely_test_db -c "CREATE ROLE quizfreely_api LOGIN PASSWORD 'e2eTestsAPIPassword';"
+          curl -fsSL -o dbmate https://github.com/amacneil/dbmate/releases/latest/download/dbmate-linux-amd64
+          chmod +x dbmate
           cd api
-          dbmate -e DB_MIGRATION_URL migrate
+          ../dbmate -e DB_MIGRATION_URL migrate
       - name: Set Up Garage Object Storage
         run: |
           set -euo pipefail
-          curl -L -o garage https://garagehq.deuxfleurs.fr/_releases/v2.2.0/x86_64-unknown-linux-musl/garage
+          curl -fsSL -o garage https://garagehq.deuxfleurs.fr/_releases/v2.2.0/x86_64-unknown-linux-musl/garage
           chmod +x garage
           cat <<EOF > garage.toml
           metadata_dir = "/tmp/meta"
@@ -95,7 +98,12 @@ jobs:
           ./garage layout apply --version 1
           ./garage bucket create usercontent
           ./garage bucket website --allow usercontent
-          create_key_resp=$(curl -X POST "http://localhost:3903/v2/CreateKey" \
+          timeout 60s bash -c '
+            until curl -fsSL --retry-connrefused --max-time 10 http://localhost:3903/health; do
+              sleep 1
+            done
+          '
+          create_key_resp=$(curl -fsSL -X POST "http://localhost:3903/v2/CreateKey" \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer e2eTestsAdminToken" \
             -d '{ "name": "quizfreely-api" }')
@@ -125,10 +133,11 @@ jobs:
           EOF
       - name: Start API
         run: |
+          set -euo pipefail
           cd api
           go run main.go &
           timeout 30s bash -c '
-            until curl -fs http://localhost:8008/health; do
+            until curl -fsSL --retry-connrefused --max-time 10 http://localhost:8008/health; do
               sleep 1
             done
           '
