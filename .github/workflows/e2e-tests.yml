@@ -93,8 +93,8 @@ jobs:
           EOF
           sudo mv garage.toml /etc/
           garage server &
-          timeout 90s bash -c '
-            until curl -fsSL --retry-connrefused --max-time 10 http://localhost:3903/health; do
+          timeout 60s bash -c '
+            until garage node id 2>/dev/null; do
               sleep 1
             done
           '
@@ -103,6 +103,11 @@ jobs:
           garage layout apply --version 1
           garage bucket create usercontent
           garage bucket website --allow usercontent
+          timeout 60s bash -c '
+            until curl -fsL --retry-connrefused --max-time 10 http://localhost:3903/health >/dev/null 2>&1; do
+              sleep 1
+            done
+          '
           create_key_resp=$(curl -fsSL -X POST "http://localhost:3903/v2/CreateKey" \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer e2eTestsAdminToken" \
@@ -137,7 +142,7 @@ jobs:
           cd api
           go run main.go &
           timeout 30s bash -c '
-            until curl -fsSL --retry-connrefused --max-time 10 http://localhost:8008/health; do
+            until curl -fsL --retry-connrefused --max-time 10 http://localhost:8008/health >/dev/null 2>&1; do
               sleep 1
             done
           '
