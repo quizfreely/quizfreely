@@ -71,7 +71,7 @@ jobs:
 
           rpc_bind_addr = "0.0.0.0:3901"
           rpc_public_addr = "127.0.0.1:3901"
-          rpc_secret = "e2eTestsRPCSecret"
+          rpc_secret = "$(openssl rand -hex 32)"
 
           [s3_api]
           s3_region = "garage"
