@@ -55,13 +55,16 @@ jobs:
           psql -h localhost -U quizfreely_db_admin -d quizfreely_test_db -c "CREATE ROLE quizfreely_api LOGIN PASSWORD 'e2eTestsAPIPassword';"
           curl -fsSL -o dbmate https://github.com/amacneil/dbmate/releases/latest/download/dbmate-linux-amd64
           chmod +x dbmate
+          sudo mv dbmate /usr/local/bin/
           cd api
-          ../dbmate -e DB_MIGRATION_URL migrate
+          dbmate -e DB_MIGRATION_URL migrate
       - name: Set Up Garage Object Storage
         run: |
           set -euo pipefail
           curl -fsSL -o garage https://garagehq.deuxfleurs.fr/_releases/v2.2.0/x86_64-unknown-linux-musl/garage
           chmod +x garage
+          sudo mv garage /usr/local/bin/
+          mkdir -p /tmp/meta /tmp/data
           cat <<EOF > garage.toml
           metadata_dir = "/tmp/meta"
           data_dir = "/tmp/data"
@@ -88,16 +91,17 @@ jobs:
           admin_token = "e2eTestsAdminToken"
           metrics_token = "e2eTestsMetricsToken"
           EOF
-          ./garage -c garage.toml server &
+          sudo mv garage.toml /etc/
+          garage server &
           node_id=$(timeout 60s bash -c '
             until garage node id 2>/dev/null | cut -d'@' -f1; do
               sleep 1
             done
           ')
-          ./garage layout assign -z dc1 -c 1G "$node_id"
-          ./garage layout apply --version 1
-          ./garage bucket create usercontent
-          ./garage bucket website --allow usercontent
+          garage layout assign -z dc1 -c 1G "$node_id"
+          garage layout apply --version 1
+          garage bucket create usercontent
+          garage bucket website --allow usercontent
           timeout 60s bash -c '
             until curl -fsSL --retry-connrefused --max-time 10 http://localhost:3903/health; do
               sleep 1
@@ -111,7 +115,7 @@ jobs:
           secret_access_key=$(echo "$create_key_resp" | jq '.secretAccessKey')
           echo "STORAGE_ACCESS_KEY_ID=$access_key_id" >> $GITHUB_ENV
           echo "STORAGE_SECRET_ACCESS_KEY=$secret_access_key" >> $GITHUB_ENV
-          ./garage bucket allow --read --write usercontent --key quizfreely-api
+          garage bucket allow --read --write usercontent --key quizfreely-api
       - name: Create config.toml for API
         run: |
           set -euo pipefail
