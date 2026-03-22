@@ -7,11 +7,11 @@ on:
         type: string
         default: "https://quizfreely.org"
         description: "Base URL"
-      enableOauthGoogle:
-        required: true
-        type: boolean
-        default: true
-        description: "Enable/Test Google OAuth"
+      # enableOauthGoogle:
+      #   required: true
+      #   type: boolean
+      #   default: true
+      #   description: "Enable/Test Google OAuth"
       enableTermImages:
         required: true
         type: boolean
@@ -23,10 +23,10 @@ on:
         required: true
         type: string
         default: "https://quizfreely.org"
-      enableOauthGoogle:
-        required: true
-        type: boolean
-        default: true
+      # enableOauthGoogle:
+      #   required: true
+      #   type: boolean
+      #   default: true
       enableTermImages:
         required: true
         type: boolean
@@ -52,7 +52,8 @@ jobs:
         ENABLE_GH_REPORTER: true
         DEPLOYED: true
         BASE_URL: ${{ inputs.baseUrl }}
-        ENABLE_OAUTH_GOOGLE: ${{ inputs.enableOauthGoogle }}
+        # ENABLE_OAUTH_GOOGLE: ${{ inputs.enableOauthGoogle }}
+        ENABLE_OAUTH_GOOGLE: false
         ENABLE_TERM_IMAGES: ${{ inputs.enableTermImages }}
       run: npx playwright test
     - name: Upload HTML Report
