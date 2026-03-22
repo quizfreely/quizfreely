@@ -142,6 +142,7 @@ export type Mutation = {
   renameFolder?: Maybe<Folder>;
   saveStudyset?: Maybe<Scalars['Boolean']['output']>;
   setStudysetFolder?: Maybe<Scalars['Boolean']['output']>;
+  setStudysetSeoIndexing: Scalars['Boolean']['output'];
   unsaveStudyset?: Maybe<Scalars['Boolean']['output']>;
   updatePracticeTest?: Maybe<PracticeTest>;
   updateStudyset?: Maybe<Studyset>;
@@ -213,6 +214,12 @@ export type MutationSaveStudysetArgs = {
 
 export type MutationSetStudysetFolderArgs = {
   folderId: Scalars['ID']['input'];
+  studysetId: Scalars['ID']['input'];
+};
+
+
+export type MutationSetStudysetSeoIndexingArgs = {
+  approved: Scalars['Boolean']['input'];
   studysetId: Scalars['ID']['input'];
 };
 
@@ -464,6 +471,7 @@ export type Studyset = {
   practiceTests?: Maybe<Array<Maybe<PracticeTest>>>;
   private: Scalars['Boolean']['output'];
   saved?: Maybe<Scalars['Boolean']['output']>;
+  seoIndexingApproved: Scalars['Boolean']['output'];
   subject?: Maybe<Subject>;
   terms?: Maybe<Array<Maybe<Term>>>;
   termsCount?: Maybe<Scalars['Int']['output']>;

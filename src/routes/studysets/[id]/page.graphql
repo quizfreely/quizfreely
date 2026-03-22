@@ -14,6 +14,7 @@ query PublicStudyset($id: ID!) {
       displayName
     }
     private
+    seoIndexingApproved
     saved
     folder {
       id
