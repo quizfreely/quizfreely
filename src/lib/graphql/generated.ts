@@ -861,7 +861,7 @@ export type PublicStudysetQueryVariables = Exact<{
 }>;
 
 
-export type PublicStudysetQuery = { __typename?: 'Query', authed: boolean, authedUser?: { __typename?: 'AuthedUser', id: string, username?: string | null, displayName: string } | null, studyset?: { __typename?: 'Studyset', id: string, title: string, updatedAt?: string | null, private: boolean, saved?: boolean | null, user?: { __typename?: 'User', id: string, displayName: string } | null, folder?: { __typename?: 'Folder', id: string, name: string } | null, terms?: Array<{ __typename?: 'Term', id: string, term?: string | null, def?: string | null, termImageUrl?: string | null, defImageUrl?: string | null } | null> | null } | null };
+export type PublicStudysetQuery = { __typename?: 'Query', authed: boolean, authedUser?: { __typename?: 'AuthedUser', id: string, username?: string | null, displayName: string } | null, studyset?: { __typename?: 'Studyset', id: string, title: string, updatedAt?: string | null, private: boolean, seoIndexingApproved: boolean, saved?: boolean | null, user?: { __typename?: 'User', id: string, displayName: string } | null, folder?: { __typename?: 'Folder', id: string, name: string } | null, terms?: Array<{ __typename?: 'Term', id: string, term?: string | null, def?: string | null, termImageUrl?: string | null, defImageUrl?: string | null } | null> | null } | null };
 
 export type DeleteStudysetMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -1521,6 +1521,7 @@ export const PublicStudysetDocument = gql`
       displayName
     }
     private
+    seoIndexingApproved
     saved
     folder {
       id
