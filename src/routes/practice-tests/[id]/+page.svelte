@@ -1,5 +1,5 @@
 <script lang="ts">
-    import PracticeTest from "$lib/components/PracticeTest.svelte"
+    import PracticeTest from "../../PracticeTest.svelte"
     let { data }: { data: any } = $props();
 </script>
 

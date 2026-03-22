@@ -309,6 +309,9 @@
         border-radius: 0.8rem;
     }
 </style>
+<svelte:head>
+    <meta name="robots" content="noindex, follow" />
+</svelte:head>
 <div class="grid page">
     <div class="content">
         <div class="flex">

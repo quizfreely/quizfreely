@@ -1,5 +1,5 @@
 <script lang="ts">
-    import Edit from "$lib/components/Edit.svelte";
+    import Edit from "../../../Edit.svelte";
     let { data }: { data: any } = $props();
 </script>
 

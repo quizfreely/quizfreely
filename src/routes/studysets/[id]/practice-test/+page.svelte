@@ -1,5 +1,5 @@
 <script lang="ts">
-    import ReviewMode from "$lib/components/PracticeTest.svelte"
+    import ReviewMode from "../../../PracticeTest.svelte"
     let { data }: { data: any } = $props();
 </script>
 

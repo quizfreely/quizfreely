@@ -713,7 +713,9 @@ FRQs: \${numFRQsToAssign}`,
     let submitted = $state(data?.alreadyOver);
     let submitting = false;
 </script>
-
+<svelte:head>
+    <meta name="robots" content="noindex, follow" />
+</svelte:head>
 <div class="grid page">
     <div class="content">
         <div class="flex">
