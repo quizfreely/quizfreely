@@ -2,6 +2,9 @@
     import { idbApiLayer } from "$lib/idb-api-layer";
     let { data } = $props();
 </script>
+<svelte:head>
+    <meta name="robots" content="noindex, follow" />
+</svelte:head>
 <div class="grid page">
     <div class="content">
         <button class="button-box">

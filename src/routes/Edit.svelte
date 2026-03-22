@@ -815,6 +815,7 @@
 
 <svelte:head>
     <title>Quizfreely</title>
+    <meta name="robots" content="noindex, follow" />
 </svelte:head>
 
 {#snippet termImage(term: Term, isDefSide: boolean)}
