@@ -202,7 +202,11 @@
     {:else}
         <title>Quizfreely</title>
     {/if}
-    <meta name="robots" content="noindex, follow" />
+    {#if !data.local && data?.studyset?.seoIndexingApproved}
+        <meta name="robots" content="index, follow" />
+    {:else}
+        <meta name="robots" content="noindex, follow" />
+    {/if}
 </svelte:head>
 
 {#snippet folderPickerErrMsg()}
@@ -404,10 +408,13 @@
                     </div>
                 {/if}
                 <div>
+                    <!-- There is a seperate flip button further below that's keyboard accessible and does the same thing as clicking the flashcard to flip -->
+                    <!-- svelte-ignore a11y_click_events_have_key_events -->
                     <div
                         class="card double"
                         id="flashcard"
                         onclick={flashcardsFlip}
+                        role="presentation"
                     >
                         <div class="content">
                             <div
