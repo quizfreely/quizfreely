@@ -53,7 +53,7 @@ quizfreely.org {
         redir /donate https://hcb.hackclub.com/donations/start/quizfreely
         redir /discord https://discord.gg/6qQrybf6kG
 }
-www.quizfreely.org, quizfreely.com, www.quizfreely.com {
+www.quizfreely.org, quizfreely.com, www.quizfreely.com, quizfreely.ehan.dev, quizlate.ehan.dev {
         redir https://quizfreely.org{uri} permanent
 }
 *.static.quizfreely.org {
