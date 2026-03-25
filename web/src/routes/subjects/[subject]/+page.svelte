@@ -3,6 +3,8 @@
     import BackIcon from "$lib/icons/BackArrow.svelte";
     import BookmarkIcon from "$lib/icons/Bookmark.svelte";
     import AngleRightIcon from "$lib/icons/AngleRight.svelte";
+    import ArrowLeftIcon from "$lib/icons/ArrowLeft.svelte"
+    import ArrowRightIcon from "$lib/icons/ArrowRight.svelte"
     let { data } = $props();
     const categoryName = {
         LANG: "World Languages",
