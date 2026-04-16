@@ -1,6 +1,6 @@
 export async function load({cookies, params, locals}) {
     try {
-        const data = await locals.sdk.ViewPracticeTest({
+        const { data } = await locals.sdk.ViewPracticeTest({
             id: params.id
         });
         return {

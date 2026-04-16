@@ -152,7 +152,7 @@
             ]); /* returns last key */
             return (returnedKeys as any)[0];
         } else {
-            const resp = await sdk.InitTerm({
+            const { data: resp } = await sdk.InitTerm({
                 studysetId: data.studysetId,
                 term: term ?? "",
                 def: def ?? "",

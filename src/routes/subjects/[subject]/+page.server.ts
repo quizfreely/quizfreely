@@ -6,7 +6,7 @@ export async function load({ params, locals, url }) {
     const after = url.searchParams.get("after");
     const before = url.searchParams.get("before");
 
-    const data = await locals.sdk.SubjectPage({
+    const { data } = await locals.sdk.SubjectPage({
       id: params.subject,
       first: before ? null : PER_PAGE,
       last: before ? PER_PAGE : null,
@@ -21,6 +21,11 @@ export async function load({ params, locals, url }) {
       authedUser = data.authedUser;
     }
 
+    if (!data?.subject) {
+      error(404, {
+        message: "Not Found"
+      });
+    }
     const rawSubject = data.subject;
     const subject = rawSubject
       ? {
