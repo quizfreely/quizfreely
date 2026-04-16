@@ -6,7 +6,7 @@ on:
 jobs:
   tests:
     name: Run Tests
-    timeout-minutes: 10
+    timeout-minutes: 15
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -24,22 +24,18 @@ jobs:
           - 5432:5432
     steps:
       - uses: actions/checkout@v4
-        with:
-          path: quizfreely
       - name: Clone quizfreely/api
         run: |
           set -euo pipefail
-          cd quizfreely
-          api_branch=$(yq '.api_branch' quizfreely.toml)
-          if [[ -z "$api_branch" ]]; then
+          api_branch=$(grep 'api_branch' quizfreely.toml | sed 's/.*=.*"\(.*\)".*/\1/' || echo "main")
+          if [[ -z "$api_branch" || "$api_branch" == "null" ]]; then
             api_branch="main"
           fi
-          cd ../
           git clone \
             --depth 1 \
             --branch "$api_branch" \
             --single-branch \
-            https://github.com/quizfreely/api.git api
+            https://github.com/quizfreely/api.git ../api
       - uses: actions/setup-go@v5
         with:
           go-version: '1.24'
@@ -56,7 +52,7 @@ jobs:
           curl -fsSL -o dbmate https://github.com/amacneil/dbmate/releases/latest/download/dbmate-linux-amd64
           chmod +x dbmate
           sudo mv dbmate /usr/local/bin/
-          cd api
+          cd ../api
           dbmate -e DB_MIGRATION_URL migrate
       - name: Set Up Garage Object Storage
         run: |
@@ -66,31 +62,26 @@ jobs:
           sudo mv garage /usr/local/bin/
           mkdir -p /tmp/meta /tmp/data
           cat <<EOF > garage.toml
-          metadata_dir = "/tmp/meta"
-          data_dir = "/tmp/data"
-          db_engine = "sqlite"
-
-          replication_factor = 1
-
-          rpc_bind_addr = "0.0.0.0:3901"
-          rpc_public_addr = "127.0.0.1:3901"
-          rpc_secret = "$(openssl rand -hex 32)"
-
-          [s3_api]
-          s3_region = "garage"
-          api_bind_addr = "0.0.0.0:3900"
-          root_domain = ".s3.garage.localhost"
-
-          [s3_web]
-          bind_addr = "0.0.0.0:3902"
-          root_domain = ".web.garage.localhost"
-          index = "index.html"
-
-          [admin]
-          api_bind_addr = "0.0.0.0:3903"
-          admin_token = "e2eTestsAdminToken"
-          metrics_token = "e2eTestsMetricsToken"
-          EOF
+metadata_dir = "/tmp/meta"
+data_dir = "/tmp/data"
+db_engine = "sqlite"
+replication_factor = 1
+rpc_bind_addr = "0.0.0.0:3901"
+rpc_public_addr = "127.0.0.1:3901"
+rpc_secret = "$(openssl rand -hex 32)"
+[s3_api]
+s3_region = "garage"
+api_bind_addr = "0.0.0.0:3900"
+root_domain = ".s3.garage.localhost"
+[s3_web]
+bind_addr = "0.0.0.0:3902"
+root_domain = ".web.garage.localhost"
+index = "index.html"
+[admin]
+api_bind_addr = "0.0.0.0:3903"
+admin_token = "e2eTestsAdminToken"
+metrics_token = "e2eTestsMetricsToken"
+EOF
           sudo mv garage.toml /etc/
           garage server &
           timeout 120s bash -c '
@@ -110,36 +101,36 @@ jobs:
           '
           create_key_resp=$(curl -fsSL -X POST "http://localhost:3903/v2/CreateKey" \
             -H "Content-Type: application/json" \
-            -H "Authorization: e2eTestsAdminToken" \
+            -H "Authorization: Bearer e2eTestsAdminToken" \
             -d '{ "name": "quizfreely-api" }')
-          access_key_id=$(echo "$create_key_resp" | jq '.accessKeyId')
-          secret_access_key=$(echo "$create_key_resp" | jq '.secretAccessKey')
+          access_key_id=$(echo "$create_key_resp" | jq -r '.accessKeyId')
+          secret_access_key=$(echo "$create_key_resp" | jq -r '.secretAccessKey')
           echo "STORAGE_ACCESS_KEY_ID=$access_key_id" >> $GITHUB_ENV
           echo "STORAGE_SECRET_ACCESS_KEY=$secret_access_key" >> $GITHUB_ENV
           garage bucket allow --read --write usercontent --key quizfreely-api
       - name: Create config.toml for API
         run: |
           set -euo pipefail
-          cd api
+          cd ../api
           cat <<EOF > config.toml
-          port = 8008
-          db_url = 'postgres://quizfreely_api:e2eTestsAPIPassword@localhost:5432/quizfreely_test_db'
-          pretty_log = true
-          base_path = '/'
-          enable_oauth_google = false
-          storage_endpoint_url = 'http://localhost:3900'
-          storage_region = "garage"
-          storage_key_id = '$STORAGE_ACCESS_KEY_ID'
-          storage_secret_key = '$STORAGE_SECRET_ACCESS_KEY'
-          usercontent_bucket = "usercontent"
-          usercontent_base_url = "http://localhost:8080/usercontent/"
-          session_cleanup_cron_spec = "0 0 * * *"
-          term_image_cleanup_cron_spec = "10 0 * * *"
-          EOF
+port = 8008
+db_url = 'postgres://quizfreely_api:e2eTestsAPIPassword@localhost:5432/quizfreely_test_db'
+pretty_log = true
+base_path = '/'
+enable_oauth_google = false
+storage_endpoint_url = 'http://localhost:3900'
+storage_region = "garage"
+storage_key_id = '$STORAGE_ACCESS_KEY_ID'
+storage_secret_key = '$STORAGE_SECRET_ACCESS_KEY'
+usercontent_bucket = "usercontent"
+usercontent_base_url = "http://localhost:8080/usercontent/"
+session_cleanup_cron_spec = "0 0 * * *"
+term_image_cleanup_cron_spec = "10 0 * * *"
+EOF
       - name: Start API
         run: |
           set -euo pipefail
-          cd api
+          cd ../api
           go mod download
           go run main.go &
           timeout 120s bash -c '
@@ -148,12 +139,9 @@ jobs:
             done
           '
       - name: Install Dependencies
-        run: |
-          cd quizfreely
-          npm ci
+        run: npm ci
       - name: Install Playwright Browsers
-        #run: npx playwright install --with-deps
-        run: npx playwright install chromium
+        run: npx playwright install --with-deps chromium
       - name: Run Tests
         env:
           ENABLE_HTML_REPORTER: "${{ github.event_name != 'pull_request' }}"
@@ -163,7 +151,7 @@ jobs:
           ENABLE_TERM_IMAGES: true
           API_URL: http://localhost:8008
           USERCONTENT_URL: http://usercontent.web.garage.localhost:3902
-        run: cd quizfreely && npx playwright test
+        run: npx playwright test
       - name: Upload HTML Report
         if: always() && github.event_name != 'pull_request'
         env:
