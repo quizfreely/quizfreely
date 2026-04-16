@@ -140,8 +140,9 @@ jobs:
         run: |
           set -euo pipefail
           cd api
+          go mod download
           go run main.go &
-          timeout 30s bash -c '
+          timeout 60s bash -c '
             until curl -fsL --retry-connrefused --max-time 10 http://localhost:8008/health >/dev/null 2>&1; do
               sleep 1
             done
