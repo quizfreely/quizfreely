@@ -1,6 +1,6 @@
 export async function load({ locals }) {
   try {
-    const data = await locals.sdk.AuthData();
+    const { data } = await locals.sdk.AuthData();
     return {
       authed: data.authed,
       authedUser: data.authedUser,

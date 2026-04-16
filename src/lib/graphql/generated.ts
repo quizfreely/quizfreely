@@ -1,3 +1,4 @@
+import type { GraphQLResponse } from 'graphql-request';
 import type { GraphQLClient, RequestOptions } from 'graphql-request';
 import gql from 'graphql-tag';
 export type Maybe<T> = T | null;
@@ -1807,113 +1808,113 @@ const defaultWrapper: SdkFunctionWrapper = (action, _operationName, _operationTy
 
 export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = defaultWrapper) {
   return {
-    AuthData(variables?: AuthDataQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<AuthDataQuery> {
-      return withWrapper((wrappedRequestHeaders) => client.request<AuthDataQuery>({ document: AuthDataDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'AuthData', 'query', variables);
+    AuthData(variables?: AuthDataQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<any> {
+      return withWrapper((wrappedRequestHeaders) => client.rawRequest<AuthDataQuery>({ query: AuthDataDocument as any, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'AuthData', 'query', variables);
     },
-    GetMyFolders(variables?: GetMyFoldersQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<GetMyFoldersQuery> {
-      return withWrapper((wrappedRequestHeaders) => client.request<GetMyFoldersQuery>({ document: GetMyFoldersDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetMyFolders', 'query', variables);
+    GetMyFolders(variables?: GetMyFoldersQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<any> {
+      return withWrapper((wrappedRequestHeaders) => client.rawRequest<GetMyFoldersQuery>({ query: GetMyFoldersDocument as any, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetMyFolders', 'query', variables);
     },
-    CreateFolder(variables: CreateFolderMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<CreateFolderMutation> {
-      return withWrapper((wrappedRequestHeaders) => client.request<CreateFolderMutation>({ document: CreateFolderDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'CreateFolder', 'mutation', variables);
+    CreateFolder(variables: CreateFolderMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<any> {
+      return withWrapper((wrappedRequestHeaders) => client.rawRequest<CreateFolderMutation>({ query: CreateFolderDocument as any, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'CreateFolder', 'mutation', variables);
     },
-    StudysetListLoadPageCloud(variables?: StudysetListLoadPageCloudQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<StudysetListLoadPageCloudQuery> {
-      return withWrapper((wrappedRequestHeaders) => client.request<StudysetListLoadPageCloudQuery>({ document: StudysetListLoadPageCloudDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'StudysetListLoadPageCloud', 'query', variables);
+    StudysetListLoadPageCloud(variables?: StudysetListLoadPageCloudQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<any> {
+      return withWrapper((wrappedRequestHeaders) => client.rawRequest<StudysetListLoadPageCloudQuery>({ query: StudysetListLoadPageCloudDocument as any, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'StudysetListLoadPageCloud', 'query', variables);
     },
-    StudysetListLoadPageFolder(variables: StudysetListLoadPageFolderQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<StudysetListLoadPageFolderQuery> {
-      return withWrapper((wrappedRequestHeaders) => client.request<StudysetListLoadPageFolderQuery>({ document: StudysetListLoadPageFolderDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'StudysetListLoadPageFolder', 'query', variables);
+    StudysetListLoadPageFolder(variables: StudysetListLoadPageFolderQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<any> {
+      return withWrapper((wrappedRequestHeaders) => client.rawRequest<StudysetListLoadPageFolderQuery>({ query: StudysetListLoadPageFolderDocument as any, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'StudysetListLoadPageFolder', 'query', variables);
     },
-    StudysetListLoadPageSaved(variables?: StudysetListLoadPageSavedQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<StudysetListLoadPageSavedQuery> {
-      return withWrapper((wrappedRequestHeaders) => client.request<StudysetListLoadPageSavedQuery>({ document: StudysetListLoadPageSavedDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'StudysetListLoadPageSaved', 'query', variables);
+    StudysetListLoadPageSaved(variables?: StudysetListLoadPageSavedQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<any> {
+      return withWrapper((wrappedRequestHeaders) => client.rawRequest<StudysetListLoadPageSavedQuery>({ query: StudysetListLoadPageSavedDocument as any, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'StudysetListLoadPageSaved', 'query', variables);
     },
-    StudysetListLoadFolderData(variables: StudysetListLoadFolderDataQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<StudysetListLoadFolderDataQuery> {
-      return withWrapper((wrappedRequestHeaders) => client.request<StudysetListLoadFolderDataQuery>({ document: StudysetListLoadFolderDataDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'StudysetListLoadFolderData', 'query', variables);
+    StudysetListLoadFolderData(variables: StudysetListLoadFolderDataQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<any> {
+      return withWrapper((wrappedRequestHeaders) => client.rawRequest<StudysetListLoadFolderDataQuery>({ query: StudysetListLoadFolderDataDocument as any, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'StudysetListLoadFolderData', 'query', variables);
     },
-    GetAllSubjects(variables?: GetAllSubjectsQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<GetAllSubjectsQuery> {
-      return withWrapper((wrappedRequestHeaders) => client.request<GetAllSubjectsQuery>({ document: GetAllSubjectsDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetAllSubjects', 'query', variables);
+    GetAllSubjects(variables?: GetAllSubjectsQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<any> {
+      return withWrapper((wrappedRequestHeaders) => client.rawRequest<GetAllSubjectsQuery>({ query: GetAllSubjectsDocument as any, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetAllSubjects', 'query', variables);
     },
-    InitTerm(variables: InitTermMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<InitTermMutation> {
-      return withWrapper((wrappedRequestHeaders) => client.request<InitTermMutation>({ document: InitTermDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'InitTerm', 'mutation', variables);
+    InitTerm(variables: InitTermMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<any> {
+      return withWrapper((wrappedRequestHeaders) => client.rawRequest<InitTermMutation>({ query: InitTermDocument as any, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'InitTerm', 'mutation', variables);
     },
-    GetStudyset(variables: GetStudysetQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<GetStudysetQuery> {
-      return withWrapper((wrappedRequestHeaders) => client.request<GetStudysetQuery>({ document: GetStudysetDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetStudyset', 'query', variables);
+    GetStudyset(variables: GetStudysetQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<any> {
+      return withWrapper((wrappedRequestHeaders) => client.rawRequest<GetStudysetQuery>({ query: GetStudysetDocument as any, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetStudyset', 'query', variables);
     },
-    UpdateStudysetAndTerms(variables: UpdateStudysetAndTermsMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<UpdateStudysetAndTermsMutation> {
-      return withWrapper((wrappedRequestHeaders) => client.request<UpdateStudysetAndTermsMutation>({ document: UpdateStudysetAndTermsDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'UpdateStudysetAndTerms', 'mutation', variables);
+    UpdateStudysetAndTerms(variables: UpdateStudysetAndTermsMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<any> {
+      return withWrapper((wrappedRequestHeaders) => client.rawRequest<UpdateStudysetAndTermsMutation>({ query: UpdateStudysetAndTermsDocument as any, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'UpdateStudysetAndTerms', 'mutation', variables);
     },
-    RecordPracticeTest(variables: RecordPracticeTestMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<RecordPracticeTestMutation> {
-      return withWrapper((wrappedRequestHeaders) => client.request<RecordPracticeTestMutation>({ document: RecordPracticeTestDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'RecordPracticeTest', 'mutation', variables);
+    RecordPracticeTest(variables: RecordPracticeTestMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<any> {
+      return withWrapper((wrappedRequestHeaders) => client.rawRequest<RecordPracticeTestMutation>({ query: RecordPracticeTestDocument as any, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'RecordPracticeTest', 'mutation', variables);
     },
-    SubjectCategory(variables: SubjectCategoryQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<SubjectCategoryQuery> {
-      return withWrapper((wrappedRequestHeaders) => client.request<SubjectCategoryQuery>({ document: SubjectCategoryDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'SubjectCategory', 'query', variables);
+    SubjectCategory(variables: SubjectCategoryQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<any> {
+      return withWrapper((wrappedRequestHeaders) => client.rawRequest<SubjectCategoryQuery>({ query: SubjectCategoryDocument as any, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'SubjectCategory', 'query', variables);
     },
-    DashboardPage(variables?: DashboardPageQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<DashboardPageQuery> {
-      return withWrapper((wrappedRequestHeaders) => client.request<DashboardPageQuery>({ document: DashboardPageDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'DashboardPage', 'query', variables);
+    DashboardPage(variables?: DashboardPageQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<any> {
+      return withWrapper((wrappedRequestHeaders) => client.rawRequest<DashboardPageQuery>({ query: DashboardPageDocument as any, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'DashboardPage', 'query', variables);
     },
-    CreateStudysetDraft(variables?: CreateStudysetDraftMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<CreateStudysetDraftMutation> {
-      return withWrapper((wrappedRequestHeaders) => client.request<CreateStudysetDraftMutation>({ document: CreateStudysetDraftDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'CreateStudysetDraft', 'mutation', variables);
+    CreateStudysetDraft(variables?: CreateStudysetDraftMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<any> {
+      return withWrapper((wrappedRequestHeaders) => client.rawRequest<CreateStudysetDraftMutation>({ query: CreateStudysetDraftDocument as any, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'CreateStudysetDraft', 'mutation', variables);
     },
-    RenameFolder(variables: RenameFolderMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<RenameFolderMutation> {
-      return withWrapper((wrappedRequestHeaders) => client.request<RenameFolderMutation>({ document: RenameFolderDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'RenameFolder', 'mutation', variables);
+    RenameFolder(variables: RenameFolderMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<any> {
+      return withWrapper((wrappedRequestHeaders) => client.rawRequest<RenameFolderMutation>({ query: RenameFolderDocument as any, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'RenameFolder', 'mutation', variables);
     },
-    DeleteFolder(variables: DeleteFolderMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<DeleteFolderMutation> {
-      return withWrapper((wrappedRequestHeaders) => client.request<DeleteFolderMutation>({ document: DeleteFolderDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'DeleteFolder', 'mutation', variables);
+    DeleteFolder(variables: DeleteFolderMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<any> {
+      return withWrapper((wrappedRequestHeaders) => client.rawRequest<DeleteFolderMutation>({ query: DeleteFolderDocument as any, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'DeleteFolder', 'mutation', variables);
     },
-    UnsaveStudyset(variables: UnsaveStudysetMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<UnsaveStudysetMutation> {
-      return withWrapper((wrappedRequestHeaders) => client.request<UnsaveStudysetMutation>({ document: UnsaveStudysetDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'UnsaveStudyset', 'mutation', variables);
+    UnsaveStudyset(variables: UnsaveStudysetMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<any> {
+      return withWrapper((wrappedRequestHeaders) => client.rawRequest<UnsaveStudysetMutation>({ query: UnsaveStudysetDocument as any, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'UnsaveStudyset', 'mutation', variables);
     },
-    SetStudysetFolder(variables: SetStudysetFolderMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<SetStudysetFolderMutation> {
-      return withWrapper((wrappedRequestHeaders) => client.request<SetStudysetFolderMutation>({ document: SetStudysetFolderDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'SetStudysetFolder', 'mutation', variables);
+    SetStudysetFolder(variables: SetStudysetFolderMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<any> {
+      return withWrapper((wrappedRequestHeaders) => client.rawRequest<SetStudysetFolderMutation>({ query: SetStudysetFolderDocument as any, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'SetStudysetFolder', 'mutation', variables);
     },
-    RemoveStudysetFromFolder(variables: RemoveStudysetFromFolderMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<RemoveStudysetFromFolderMutation> {
-      return withWrapper((wrappedRequestHeaders) => client.request<RemoveStudysetFromFolderMutation>({ document: RemoveStudysetFromFolderDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'RemoveStudysetFromFolder', 'mutation', variables);
+    RemoveStudysetFromFolder(variables: RemoveStudysetFromFolderMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<any> {
+      return withWrapper((wrappedRequestHeaders) => client.rawRequest<RemoveStudysetFromFolderMutation>({ query: RemoveStudysetFromFolderDocument as any, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'RemoveStudysetFromFolder', 'mutation', variables);
     },
-    ExplorePage(variables?: ExplorePageQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<ExplorePageQuery> {
-      return withWrapper((wrappedRequestHeaders) => client.request<ExplorePageQuery>({ document: ExplorePageDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'ExplorePage', 'query', variables);
+    ExplorePage(variables?: ExplorePageQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<any> {
+      return withWrapper((wrappedRequestHeaders) => client.rawRequest<ExplorePageQuery>({ query: ExplorePageDocument as any, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'ExplorePage', 'query', variables);
     },
-    RecentStudysets(variables?: RecentStudysetsQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<RecentStudysetsQuery> {
-      return withWrapper((wrappedRequestHeaders) => client.request<RecentStudysetsQuery>({ document: RecentStudysetsDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'RecentStudysets', 'query', variables);
+    RecentStudysets(variables?: RecentStudysetsQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<any> {
+      return withWrapper((wrappedRequestHeaders) => client.rawRequest<RecentStudysetsQuery>({ query: RecentStudysetsDocument as any, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'RecentStudysets', 'query', variables);
     },
-    HostStartReviewGame(variables: HostStartReviewGameQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<HostStartReviewGameQuery> {
-      return withWrapper((wrappedRequestHeaders) => client.request<HostStartReviewGameQuery>({ document: HostStartReviewGameDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'HostStartReviewGame', 'query', variables);
+    HostStartReviewGame(variables: HostStartReviewGameQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<any> {
+      return withWrapper((wrappedRequestHeaders) => client.rawRequest<HostStartReviewGameQuery>({ query: HostStartReviewGameDocument as any, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'HostStartReviewGame', 'query', variables);
     },
-    HostPickPage(variables?: HostPickPageQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<HostPickPageQuery> {
-      return withWrapper((wrappedRequestHeaders) => client.request<HostPickPageQuery>({ document: HostPickPageDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'HostPickPage', 'query', variables);
+    HostPickPage(variables?: HostPickPageQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<any> {
+      return withWrapper((wrappedRequestHeaders) => client.rawRequest<HostPickPageQuery>({ query: HostPickPageDocument as any, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'HostPickPage', 'query', variables);
     },
-    HostPlayReviewGame(variables: HostPlayReviewGameQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<HostPlayReviewGameQuery> {
-      return withWrapper((wrappedRequestHeaders) => client.request<HostPlayReviewGameQuery>({ document: HostPlayReviewGameDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'HostPlayReviewGame', 'query', variables);
+    HostPlayReviewGame(variables: HostPlayReviewGameQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<any> {
+      return withWrapper((wrappedRequestHeaders) => client.rawRequest<HostPlayReviewGameQuery>({ query: HostPlayReviewGameDocument as any, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'HostPlayReviewGame', 'query', variables);
     },
-    ViewPracticeTest(variables: ViewPracticeTestQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<ViewPracticeTestQuery> {
-      return withWrapper((wrappedRequestHeaders) => client.request<ViewPracticeTestQuery>({ document: ViewPracticeTestDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'ViewPracticeTest', 'query', variables);
+    ViewPracticeTest(variables: ViewPracticeTestQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<any> {
+      return withWrapper((wrappedRequestHeaders) => client.rawRequest<ViewPracticeTestQuery>({ query: ViewPracticeTestDocument as any, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'ViewPracticeTest', 'query', variables);
     },
-    SearchResults(variables: SearchResultsQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<SearchResultsQuery> {
-      return withWrapper((wrappedRequestHeaders) => client.request<SearchResultsQuery>({ document: SearchResultsDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'SearchResults', 'query', variables);
+    SearchResults(variables: SearchResultsQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<any> {
+      return withWrapper((wrappedRequestHeaders) => client.rawRequest<SearchResultsQuery>({ query: SearchResultsDocument as any, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'SearchResults', 'query', variables);
     },
-    UpdateDisplayName(variables?: UpdateDisplayNameMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<UpdateDisplayNameMutation> {
-      return withWrapper((wrappedRequestHeaders) => client.request<UpdateDisplayNameMutation>({ document: UpdateDisplayNameDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'UpdateDisplayName', 'mutation', variables);
+    UpdateDisplayName(variables?: UpdateDisplayNameMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<any> {
+      return withWrapper((wrappedRequestHeaders) => client.rawRequest<UpdateDisplayNameMutation>({ query: UpdateDisplayNameDocument as any, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'UpdateDisplayName', 'mutation', variables);
     },
-    PublicStudyset(variables: PublicStudysetQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<PublicStudysetQuery> {
-      return withWrapper((wrappedRequestHeaders) => client.request<PublicStudysetQuery>({ document: PublicStudysetDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'PublicStudyset', 'query', variables);
+    PublicStudyset(variables: PublicStudysetQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<any> {
+      return withWrapper((wrappedRequestHeaders) => client.rawRequest<PublicStudysetQuery>({ query: PublicStudysetDocument as any, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'PublicStudyset', 'query', variables);
     },
-    DeleteStudyset(variables: DeleteStudysetMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<DeleteStudysetMutation> {
-      return withWrapper((wrappedRequestHeaders) => client.request<DeleteStudysetMutation>({ document: DeleteStudysetDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'DeleteStudyset', 'mutation', variables);
+    DeleteStudyset(variables: DeleteStudysetMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<any> {
+      return withWrapper((wrappedRequestHeaders) => client.rawRequest<DeleteStudysetMutation>({ query: DeleteStudysetDocument as any, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'DeleteStudyset', 'mutation', variables);
     },
-    SaveStudyset(variables: SaveStudysetMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<SaveStudysetMutation> {
-      return withWrapper((wrappedRequestHeaders) => client.request<SaveStudysetMutation>({ document: SaveStudysetDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'SaveStudyset', 'mutation', variables);
+    SaveStudyset(variables: SaveStudysetMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<any> {
+      return withWrapper((wrappedRequestHeaders) => client.rawRequest<SaveStudysetMutation>({ query: SaveStudysetDocument as any, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'SaveStudyset', 'mutation', variables);
     },
-    StartPracticeTest(variables: StartPracticeTestQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<StartPracticeTestQuery> {
-      return withWrapper((wrappedRequestHeaders) => client.request<StartPracticeTestQuery>({ document: StartPracticeTestDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'StartPracticeTest', 'query', variables);
+    StartPracticeTest(variables: StartPracticeTestQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<any> {
+      return withWrapper((wrappedRequestHeaders) => client.rawRequest<StartPracticeTestQuery>({ query: StartPracticeTestDocument as any, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'StartPracticeTest', 'query', variables);
     },
-    StudysetStats(variables: StudysetStatsQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<StudysetStatsQuery> {
-      return withWrapper((wrappedRequestHeaders) => client.request<StudysetStatsQuery>({ document: StudysetStatsDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'StudysetStats', 'query', variables);
+    StudysetStats(variables: StudysetStatsQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<any> {
+      return withWrapper((wrappedRequestHeaders) => client.rawRequest<StudysetStatsQuery>({ query: StudysetStatsDocument as any, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'StudysetStats', 'query', variables);
     },
-    TermStats(variables: TermStatsQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<TermStatsQuery> {
-      return withWrapper((wrappedRequestHeaders) => client.request<TermStatsQuery>({ document: TermStatsDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'TermStats', 'query', variables);
+    TermStats(variables: TermStatsQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<any> {
+      return withWrapper((wrappedRequestHeaders) => client.rawRequest<TermStatsQuery>({ query: TermStatsDocument as any, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'TermStats', 'query', variables);
     },
-    SubjectPage(variables: SubjectPageQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<SubjectPageQuery> {
-      return withWrapper((wrappedRequestHeaders) => client.request<SubjectPageQuery>({ document: SubjectPageDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'SubjectPage', 'query', variables);
+    SubjectPage(variables: SubjectPageQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<any> {
+      return withWrapper((wrappedRequestHeaders) => client.rawRequest<SubjectPageQuery>({ query: SubjectPageDocument as any, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'SubjectPage', 'query', variables);
     },
-    UserPage(variables: UserPageQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<UserPageQuery> {
-      return withWrapper((wrappedRequestHeaders) => client.request<UserPageQuery>({ document: UserPageDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'UserPage', 'query', variables);
+    UserPage(variables: UserPageQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<any> {
+      return withWrapper((wrappedRequestHeaders) => client.rawRequest<UserPageQuery>({ query: UserPageDocument as any, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'UserPage', 'query', variables);
     }
   };
 }

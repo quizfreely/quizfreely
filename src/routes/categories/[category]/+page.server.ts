@@ -17,9 +17,15 @@ export async function load({ params, locals }) {
     }
 
     try {
-        const data = await locals.sdk.SubjectCategory({
+        const { data } = await locals.sdk.SubjectCategory({
           category: categoryEnum
         });
+
+        if (!data?.subjectsByCategory) {
+          error(404, {
+            message: "Not Found"
+          });
+        }
 
         let authed = false;
         let authedUser;
