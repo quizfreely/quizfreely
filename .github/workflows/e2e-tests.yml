@@ -152,8 +152,8 @@ jobs:
           cd quizfreely
           npm ci
       - name: Install Playwright Browsers
-        #run: npx playwright install --with-deps
-        run: npx playwright install chromium
+        #run: cd quizfreely && npx playwright install --with-deps
+        run: cd quizfreely && npx playwright install chromium
       - name: Run Tests
         env:
           ENABLE_HTML_REPORTER: "${{ github.event_name != 'pull_request' }}"
@@ -163,7 +163,7 @@ jobs:
           ENABLE_TERM_IMAGES: true
           API_URL: http://localhost:8008
           USERCONTENT_URL: http://usercontent.web.garage.localhost:3902
-        run: npx playwright test
+        run: cd quizfreely && npx playwright test
       - name: Upload HTML Report
         if: always() && github.event_name != 'pull_request'
         env:
