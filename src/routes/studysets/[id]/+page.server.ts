@@ -3,7 +3,7 @@ import { error } from '@sveltejs/kit';
 
 export async function load({ params, locals }) {
     try {
-        const data = await locals.sdk.PublicStudyset({
+        const { data } = await locals.sdk.PublicStudyset({
           id: params.id
         });
         let authed = false;

@@ -1,6 +1,6 @@
 export async function load({ cookies, params, locals}) {
     try {
-        const data = await locals.sdk.TermStats({
+        const { data } = await locals.sdk.TermStats({
             termId: params.termid
         });
         return {

@@ -10,7 +10,7 @@ export async function load({ locals, url }) {
     const weekStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay()).toISOString();
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
 
-    const data = await locals.sdk.RecentStudysets({
+    const { data } = await locals.sdk.RecentStudysets({
       after,
       before,
       day: dayStart,

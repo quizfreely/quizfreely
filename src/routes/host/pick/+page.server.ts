@@ -1,7 +1,7 @@
 export async function load({ cookies, locals }) {
   if (cookies.get("auth")) {
     try {
-      const data = await locals.sdk.HostPickPage();
+      const { data } = await locals.sdk.HostPickPage();
       if (data.authed) {
         const studysetList = data.myStudysets?.edges?.map((e: any) => e.node) ?? [];
         const myFolders = data.myFolders?.edges?.map((e: any) => e.node) ?? [];

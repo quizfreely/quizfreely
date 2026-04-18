@@ -11,7 +11,7 @@ export async function load({ locals, url }) {
       const PER_PAGE = 24;
       const after = url.searchParams.get("after");
       const before = url.searchParams.get("before");
-      const data = await locals.sdk.SearchResults({
+      const { data } = await locals.sdk.SearchResults({
         q: url.searchParams.get("q") ?? "",
         first: before ? null : PER_PAGE,
         last: before ? PER_PAGE : null,

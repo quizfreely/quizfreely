@@ -39,7 +39,7 @@
                 <button
                     onclick={async () => {
                         try {
-                            const json = await sdk.UnsaveStudyset({
+                            const { data: json } = await sdk.UnsaveStudyset({
                                 id: studyset?.id,
                             });
                             if (json?.unsaveStudyset) {
@@ -62,7 +62,7 @@
                 <button
                     onclick={async () => {
                         try {
-                            const json = await sdk.SaveStudyset({
+                            const { data: json } = await sdk.SaveStudyset({
                                 id: studyset?.id,
                             });
                             if (json?.saveStudyset) {
