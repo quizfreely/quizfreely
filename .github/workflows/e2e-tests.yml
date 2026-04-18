@@ -172,6 +172,7 @@ jobs:
           AWS_DEFAULT_REGION: 'garage'
           AWS_ENDPOINT_URL: 'http://server.quizfreely.org:3900'
         run: |
+          cd quizfreely
           REPORT_DIR='e2e-tests/run-${{ github.run_id }}-${{ github.run_attempt }}'
           aws s3 cp playwright-report s3://dev/$REPORT_DIR/ --recursive
           echo "### Test Report" >> $GITHUB_STEP_SUMMARY
