@@ -1,6 +1,6 @@
 export async function load({ cookies, params, locals}) {
     try {
-        const data = await locals.sdk.StudysetStats({
+        const { data } = await locals.sdk.StudysetStats({
             studysetId: params.id
         });
         return {

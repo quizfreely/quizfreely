@@ -42,7 +42,7 @@ export async function load({ cookies, locals, url }) {
   const folderId = url?.searchParams?.get("folder");
   if (cookies.get("auth")) {
     try {
-      const data = await locals.sdk.DashboardPage();
+      const { data } = await locals.sdk.DashboardPage();
       if (data.authed) {
         const myStudysets = data.myStudysets?.edges?.map((e: any) => e.node) ?? [];
         const mySavedStudysets = data.mySavedStudysets?.edges?.map((e: any) => e.node) ?? [];

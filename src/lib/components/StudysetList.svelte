@@ -103,23 +103,23 @@
 
         try {
             if (type === "cloud") {
-                const resp = await sdk.StudysetListLoadPageCloud(variables);
-                const connection = resp.myStudysets;
-                data.studysetList = connection.edges.map((e) => e.node);
+                const { data: resp } = await sdk.StudysetListLoadPageCloud(variables);
+                const connection = resp?.myStudysets;
+                data.studysetList = connection.edges.map((e: any) => e.node);
                 data.studysetListPageInfo = connection.pageInfo;
                 cloudPage += direction === "next" ? 1 : -1;
             } else if (type === "folder") {
-                const resp = await sdk.StudysetListLoadPageFolder(variables);
+                const { data: resp } = await sdk.StudysetListLoadPageFolder(variables);
                 const connection = resp.folder?.studysets;
                 if (connection) {
-                    currentFolder.studysets = connection.edges.map((e) => e.node);
+                    currentFolder.studysets = connection.edges.map((e: any) => e.node);
                     folderPageInfo = connection.pageInfo;
                     folderPage += direction === "next" ? 1 : -1;
                 }
             } else if (type === "saved") {
-                const resp = await sdk.StudysetListLoadPageSaved(variables);
-                const connection = resp.mySavedStudysets;
-                data.mySavedStudysets = connection.edges.map((e) => e.node);
+                const { data: resp } = await sdk.StudysetListLoadPageSaved(variables);
+                const connection = resp?.mySavedStudysets;
+                data.mySavedStudysets = connection.edges.map((e: any) => e.node);
                 data.mySavedStudysetsPageInfo = connection.pageInfo;
                 savedPage += direction === "next" ? 1 : -1;
             }
@@ -182,7 +182,7 @@
     };
     export async function viewFolder(id: string) {
         try {
-            const resp = await sdk.StudysetListLoadFolderData({ id });
+            const { data: resp } = await sdk.StudysetListLoadFolderData({ id });
             if (resp?.folder) {
                 currentFolder = resp.folder;
                 // Initialize studysets list from edges

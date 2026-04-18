@@ -1,9 +1,9 @@
 export async function load({ locals, cookies, params}) {
     let data;
     try {
-        data = await locals.sdk.StartPracticeTest({
+        ({ data } = await locals.sdk.StartPracticeTest({
             studysetId: params.id
-        });
+        }));
     } catch (err) {
         console.error("Error in cloud studyset practice test load func: ", err);
     }

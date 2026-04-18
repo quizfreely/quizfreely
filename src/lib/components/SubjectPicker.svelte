@@ -25,7 +25,7 @@
     const sdk = getClientSdk();
     onMount(async () => {
         try {
-            const resp = await sdk.GetAllSubjects();
+            const { data: resp } = await sdk.GetAllSubjects();
             if (resp?.allSubjects) {
                 subjects = resp.allSubjects as Subject[] ?? [];
             } else {

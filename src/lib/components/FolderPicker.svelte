@@ -25,7 +25,7 @@
     const sdk = getClientSdk();
     onMount(async () => {
         try {
-            const resp = await sdk.GetMyFolders();
+            const { data: resp } = await sdk.GetMyFolders();
             if (resp?.myFolders) {
                 folders = (resp.myFolders.edges?.map((e: any) => e.node) ?? []) as { id: string, name: string }[];
             } else {
@@ -43,7 +43,7 @@
         newFolderName = "";
         showCreateErrMsg = false;
         try {
-            const resp = await sdk.CreateFolder({ name: folderName });
+            const { data: resp } = await sdk.CreateFolder({ name: folderName });
             if (resp?.createFolder?.id) {
                 folders.push({
                     id: resp.createFolder.id,

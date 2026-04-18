@@ -7,7 +7,7 @@ export async function load({ url, locals }) {
     let respData = {};
     if (studysetId) {
         try {
-            const data = await locals.sdk.HostStartReviewGame({
+            const { data } = await locals.sdk.HostStartReviewGame({
                 id: studysetId
             });
             respData = data;
@@ -16,7 +16,7 @@ export async function load({ url, locals }) {
         }
     } else {
         try {
-            const data = await locals.sdk.AuthData();
+            const { data } = await locals.sdk.AuthData();
             respData = data;
         } catch (err) {
             console.error("Error in /host load func: ", err);

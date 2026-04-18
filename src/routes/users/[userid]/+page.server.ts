@@ -7,7 +7,7 @@ export async function load({ locals, params, url }) {
     const before = url.searchParams.get("before");
 
     try {
-        const data = await locals.sdk.UserPage({
+        const { data } = await locals.sdk.UserPage({
             id: userId,
             first: PER_PAGE,
             after,

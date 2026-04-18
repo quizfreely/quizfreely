@@ -1,6 +1,6 @@
 export async function load({ locals }) {
     try {
-        const data = await locals.sdk.ExplorePage();
+        const { data } = await locals.sdk.ExplorePage();
         let authed = false;
         let authedUser;
         if (data.authed) {

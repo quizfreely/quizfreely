@@ -96,7 +96,7 @@
 
     async function newStudysetButton(folderId?: string) {
         if (data.authed) {
-            const res = await sdk.CreateStudysetDraft({ folderId });
+            const { data: res } = await sdk.CreateStudysetDraft({ folderId });
             goto(`/studyset/edit/${res?.createStudyset?.id}`)
         } else {
             const id = await idbApiLayer.createStudyset({
@@ -108,7 +108,7 @@
     }
     async function newFolderOnclick() {
         try {
-            const resp = await sdk.CreateFolder({ name: newFolderName });
+            const { data: resp } = await sdk.CreateFolder({ name: newFolderName });
             if (resp?.createFolder) {
                 studysetListData.myFolders = [
                     ...(studysetListData?.myFolders ?? []),
@@ -137,7 +137,7 @@
 
     async function renameFolderOnclick() {
         try {
-            const resp = await sdk.RenameFolder({
+            const { data: resp } = await sdk.RenameFolder({
                 id: folderRenaming.id,
                 name: folderRenamingName,
             });
@@ -281,7 +281,7 @@
         <button
             onclick={async () => {
                 try {
-                    const json = await sdk.UnsaveStudyset({ id: studyset?.id });
+                    const { data: json } = await sdk.UnsaveStudyset({ id: studyset?.id });
                     if (json?.unsaveStudyset) {
                         const index =
                             studysetListData?.mySavedStudysets?.findIndex(
@@ -420,7 +420,7 @@
                     class="ohno"
                     onclick={async () => {
                         try {
-                            const resp = await sdk.DeleteFolder({
+                            const { data: resp } = await sdk.DeleteFolder({
                                 id: deleteFolderId ?? "",
                             });
                             if (resp?.deleteFolder) {
@@ -472,7 +472,7 @@
         selectCallback={async (selectedFolder, showErrorMsgCallback) => {
             showErrorMsgCallback(false);
             try {
-                const resp = await sdk.SetStudysetFolder({
+                const { data: resp } = await sdk.SetStudysetFolder({
                     studysetId: folderPickerStudysetId ?? "",
                     folderId: selectedFolder.id,
                 });
@@ -512,7 +512,7 @@
         noneCallback={async (showErrorMsgCallback) => {
             showErrorMsgCallback(false);
             try {
-                const resp = await sdk.RemoveStudysetFromFolder({
+                const { data: resp } = await sdk.RemoveStudysetFromFolder({
                     studysetId: folderPickerStudysetId ?? "",
                 });
                 if (resp?.removeStudysetFromFolder) {

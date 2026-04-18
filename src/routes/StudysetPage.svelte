@@ -340,7 +340,7 @@
                                     class="alt"
                                     onclick={async () => {
                                         try {
-                                            const resp = await sdk.UnsaveStudyset({
+                                            const { data: resp } = await sdk.UnsaveStudyset({
                                                 id: data?.studyset?.id,
                                             });
                                             if (resp?.unsaveStudyset) {
@@ -367,7 +367,7 @@
                                     class="alt"
                                     onclick={async () => {
                                         try {
-                                            const resp = await sdk.SaveStudyset({
+                                            const { data: resp } = await sdk.SaveStudyset({
                                                 id: data?.studyset?.id,
                                             });
                                             if (resp?.saveStudyset) {
@@ -606,7 +606,7 @@
                         ) => {
                             showErrorMsgCallback(false);
                             try {
-                                const resp = await sdk.SetStudysetFolder({
+                                const { data: resp } = await sdk.SetStudysetFolder({
                                     studysetId: data.studyset.id,
                                     folderId: selectedFolder.id,
                                 });
@@ -630,7 +630,7 @@
                         noneCallback={async (showErrorMsgCallback: (show: boolean) => void) => {
                             showErrorMsgCallback(false);
                             try {
-                                const resp = await sdk.RemoveStudysetFromFolder({
+                                const { data: resp } = await sdk.RemoveStudysetFromFolder({
                                     studysetId: data.studyset.id,
                                 });
                                 if (resp?.removeStudysetFromFolder) {

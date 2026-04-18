@@ -1098,7 +1098,7 @@ FRQs: \${numFRQsToAssign}`,
                             if (data.authed && !data.local) {
                                 try {
                                     const sdk = getClientSdk();
-                                    const resp = await sdk.RecordPracticeTest({
+                                    const { data: resp } = await sdk.RecordPracticeTest({
                                         input: {
                                             studysetId: data.studysetId,
                                             questionsCorrect:
