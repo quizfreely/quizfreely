@@ -1,6 +1,6 @@
-<script lang="ts">
+<script>
     import Edit from "../../Edit.svelte";
-    let { data }: { data: any } = $props();
+    let { data } = $props();
 </script>
 
 <Edit data={{ ...data, new: true }}/>

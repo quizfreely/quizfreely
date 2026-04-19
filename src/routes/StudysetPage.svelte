@@ -1,11 +1,10 @@
-<script lang="ts">
+<script>
     import Noscript from "$lib/components/Noscript.svelte";
     import { onMount } from "svelte";
-    import { idbApiLayer } from "$lib/idb-api-layer";
-    import { getClientSdk } from "$lib/graphql/sdk";
+    import idbApiLayer from "$lib/idb-api-layer/idb-api-layer.js";
     import { goto, beforeNavigate } from "$app/navigation";
-    import { fade, slide } from "svelte/transition";
-    let { data }: { data: any } = $props();
+    import { fade } from "svelte/transition";
+    let { data } = $props();
 
     import Dropdown from "$lib/components/Dropdown.svelte";
     import FolderPicker from "$lib/components/FolderPicker.svelte";
@@ -43,7 +42,7 @@
     let showConfetti = $state(false);
 
     function flashcardsFlip() {
-        document.getElementById("flashcard")?.classList.toggle("flip");
+        document.getElementById("flashcard").classList.toggle("flip");
         if (flashcardsMaximized) {
             flashcardsSeenWhileMax.add(flashcardsIndex);
         }
@@ -71,7 +70,7 @@
     let mounted = $state(false);
     onMount(function () {
         mounted = true;
-        let objectUrls: string[] = [];
+        let objectUrls = [];
         if (data.local) {
             (async () => {
                 const localStudyset = await idbApiLayer.getStudysetById(
@@ -85,8 +84,8 @@
                     },
                 );
                 title = localStudyset?.title;
-                terms = localStudyset?.terms ?? [];
-                terms.forEach((term: any) => {
+                terms = localStudyset?.terms;
+                terms.forEach(term => {
                     if (term.termImageUrl != null) {
                         objectUrls.push(term.termImageUrl);
                     }
@@ -97,13 +96,13 @@
             })();
         }
 
-        function flashcardsOnKeyDown(e: KeyboardEvent) {
+        function flashcardsOnKeyDown(e) {
             const active = document.activeElement;
             if (
                 active &&
                 (active.tagName === "INPUT" ||
                     active.tagName === "TEXTAREA" ||
-                    (active as HTMLElement).isContentEditable)
+                    active.isContentEditable)
             ) {
                 return;
             }
@@ -129,13 +128,13 @@
                 flip is in keyup to prevent spam reflipping */
             }
         }
-        function flashcardsOnKeyUp(e: KeyboardEvent) {
+        function flashcardsOnKeyUp(e) {
             const active = document.activeElement;
             if (
                 active &&
                 (active.tagName === "INPUT" ||
                     active.tagName === "TEXTAREA" ||
-                    (active as HTMLElement).isContentEditable)
+                    active.isContentEditable)
             ) {
                 return;
             }
@@ -157,15 +156,32 @@
             objectUrls.forEach(objectUrl => URL.revokeObjectURL(objectUrl));
         };
     });
-    const sdk = getClientSdk();
     async function deleteConfirmButtonClicked() {
         if (data.local) {
             await idbApiLayer.deleteStudyset(data.localId);
             goto("/dashboard");
         } else {
-            sdk.DeleteStudyset({ id: data.studyset.id })
+            fetch("/api/graphql", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                credentials: "same-origin",
+                body: JSON.stringify({
+                    query: `mutation DeleteStudyset($id: ID!) {
+    deleteStudyset(id: $id)
+}`,
+                    variables: {
+                        id: data.studyset.id,
+                    },
+                }),
+            })
+                .then((response) => response.json())
                 .then((response) => {
-                    if (response.deleteStudyset) {
+                    if (response.errors) {
+                        console.error(response.errors);
+                        alert("GraphQL error: " + response.errors[0].message);
+                    } else {
                         goto("/dashboard");
                     }
                 })
@@ -202,11 +218,7 @@
     {:else}
         <title>Quizfreely</title>
     {/if}
-    {#if !data.local && data?.studyset?.seoIndexingApproved}
-        <meta name="robots" content="index, follow" />
-    {:else}
-        <meta name="robots" content="noindex, follow" />
-    {/if}
+    <meta name="robots" content="noindex, follow" />
 </svelte:head>
 
 {#snippet folderPickerErrMsg()}
@@ -268,7 +280,7 @@
                             >
                         </p>
                     {/if}
-                    {#if data.studyset && data.authed && data.authedUser!.id == data.studyset.user?.id}
+                    {#if data.studyset && data.authed && data.authedUser.id == data.studyset.user?.id}
                         <div
                             id="edit-menu"
                             class="flex"
@@ -340,10 +352,27 @@
                                     class="alt"
                                     onclick={async () => {
                                         try {
-                                            const { data: resp } = await sdk.UnsaveStudyset({
-                                                id: data?.studyset?.id,
-                                            });
-                                            if (resp?.unsaveStudyset) {
+                                            const respRaw = await fetch(
+                                                "/api/graphql",
+                                                {
+                                                    method: "POST",
+                                                    headers: {
+                                                        "Content-Type":
+                                                            "application/json",
+                                                    },
+                                                    body: JSON.stringify({
+                                                        query: `mutation unsaveStudyset($id: ID!) {
+    unsaveStudyset(studysetId: $id)
+}`,
+                                                        variables: {
+                                                            id: data?.studyset
+                                                                ?.id,
+                                                        },
+                                                    }),
+                                                },
+                                            );
+                                            const resp = await respRaw.json();
+                                            if (resp?.data?.unsaveStudyset) {
                                                 saved = false;
                                             } else {
                                                 console.error(
@@ -367,10 +396,27 @@
                                     class="alt"
                                     onclick={async () => {
                                         try {
-                                            const { data: resp } = await sdk.SaveStudyset({
-                                                id: data?.studyset?.id,
-                                            });
-                                            if (resp?.saveStudyset) {
+                                            const respRaw = await fetch(
+                                                "/api/graphql",
+                                                {
+                                                    method: "POST",
+                                                    headers: {
+                                                        "Content-Type":
+                                                            "application/json",
+                                                    },
+                                                    body: JSON.stringify({
+                                                        query: `mutation saveStudyset($id: ID!) {
+    saveStudyset(studysetId: $id)
+}`,
+                                                        variables: {
+                                                            id: data?.studyset
+                                                                ?.id,
+                                                        },
+                                                    }),
+                                                },
+                                            );
+                                            const resp = await respRaw.json();
+                                            if (resp?.data?.saveStudyset) {
                                                 saved = true;
                                             } else {
                                                 console.error(
@@ -408,13 +454,10 @@
                     </div>
                 {/if}
                 <div>
-                    <!-- There is a seperate flip button further below that's keyboard accessible and does the same thing as clicking the flashcard to flip -->
-                    <!-- svelte-ignore a11y_click_events_have_key_events -->
                     <div
                         class="card double"
                         id="flashcard"
                         onclick={flashcardsFlip}
-                        role="presentation"
                     >
                         <div class="content">
                             <div
@@ -601,22 +644,34 @@
                         closeCallback={() => (showFolderChooser = false)}
                         errMsg={folderPickerErrMsg}
                         selectCallback={async (
-                            selectedFolder: any,
-                            showErrorMsgCallback: (show: boolean) => void,
+                            selectedFolder,
+                            showErrorMsgCallback,
                         ) => {
                             showErrorMsgCallback(false);
                             try {
-                                const { data: resp } = await sdk.SetStudysetFolder({
-                                    studysetId: data.studyset.id,
-                                    folderId: selectedFolder.id,
+                                const raw = await fetch(`/api/graphql`, {
+                                    method: "POST",
+                                    headers: {
+                                        "Content-Type": "application/json",
+                                    },
+                                    body: JSON.stringify({
+                                        query: `mutation ($studysetId: ID!, $folderId: ID!) {
+    setStudysetFolder(studysetId: $studysetId, folderId: $folderId)
+}`,
+                                        variables: {
+                                            studysetId: data.studyset.id,
+                                            folderId: selectedFolder.id,
+                                        },
+                                    }),
                                 });
-                                if (resp?.setStudysetFolder) {
+                                const resp = await raw.json();
+                                if (resp?.data?.setStudysetFolder) {
                                     folderId = selectedFolder.id;
                                     folderName = selectedFolder.name;
                                     showFolderChooser = false;
                                 } else {
                                     console.error(
-                                        "Unsuccessful response: ",
+                                        "Unsuccessful json response: ",
                                         resp,
                                     );
                                     showErrorMsgCallback(true);
@@ -627,19 +682,31 @@
                             }
                         }}
                         showNoneOption={true}
-                        noneCallback={async (showErrorMsgCallback: (show: boolean) => void) => {
+                        noneCallback={async (showErrorMsgCallback) => {
                             showErrorMsgCallback(false);
                             try {
-                                const { data: resp } = await sdk.RemoveStudysetFromFolder({
-                                    studysetId: data.studyset.id,
+                                const raw = await fetch(`/api/graphql`, {
+                                    method: "POST",
+                                    headers: {
+                                        "Content-Type": "application/json",
+                                    },
+                                    body: JSON.stringify({
+                                        query: `mutation ($studysetId: ID!) {
+    removeStudysetFromFolder(studysetId: $studysetId)
+}`,
+                                        variables: {
+                                            studysetId: data.studyset.id,
+                                        },
+                                    }),
                                 });
-                                if (resp?.removeStudysetFromFolder) {
+                                const resp = await raw.json();
+                                if (resp?.data?.removeStudysetFromFolder) {
                                     folderId = null;
                                     folderName = null;
                                     showFolderChooser = false;
                                 } else {
                                     console.error(
-                                        "Unsuccessful response: ",
+                                        "Unsuccessful json response: ",
                                         resp,
                                     );
                                     showErrorMsgCallback(true);
@@ -668,7 +735,7 @@
             y={[0, 0.1]}
             delay={[0, 6000]}
             duration={4000}
-            amount={1000}
+            amount="1000"
             fallDistance="200vh"
         />
     </div>

@@ -1,39 +1,38 @@
-<script lang="ts">
+<script>
     import { onMount } from "svelte";
- 	import type { Snippet } from 'svelte';
-    import { getClientSdk } from "$lib/graphql/sdk";
     import { fade, slide } from "svelte/transition";
     import CloseXMarkIcon from "$lib/icons/CloseXMark.svelte";
     import SearchIcon from "$lib/icons/Search.svelte";
-    let {
-        closeCallback,
-        selectCallback,
-        errMsg
-    }: {
-        closeCallback?: () => void,
-        selectCallback: (subject: Subject | null, showError: (show: boolean) => void) => void,
-        errMsg?: Snippet
-    } = $props();
-    interface Subject {
-        id: string;
-        name: string;
-    }
-    let subjects: Subject[] = $state([]);
+    let { closeCallback, selectCallback, errMsg } = $props();
+    let subjects = $state([]);
     let showErrMsg = $state(false);
     let showActionErrMsg = $state(false);
     let searchQuery = $state("");
-    const sdk = getClientSdk();
     onMount(async () => {
         try {
-            const { data: resp } = await sdk.GetAllSubjects();
-            if (resp?.allSubjects) {
-                subjects = resp.allSubjects as Subject[] ?? [];
+            const raw = await fetch(`/api/graphql`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    query: `{
+    allSubjects {
+        id
+        name
+    }
+}`
+                })
+            });
+            const resp = await raw.json();
+            if (resp?.data) {
+                subjects = resp.data.allSubjects ?? [];
             } else {
-                console.error("No data property in response: ", resp);
+                console.error("No data property in json response: ", resp);
                 showErrMsg = true;
             }
         } catch (err) {
-            console.error("Error loading subjects: ", err);
+            console.error("Error loading folders: ", err);
             showErrMsg = true;
         }
     })
@@ -46,8 +45,8 @@
                 <CloseXMarkIcon></CloseXMarkIcon>
             </button>
         </div>
-        {#if showActionErrMsg && errMsg !== undefined}
-            {@render errMsg()}
+        {#if showActionErrMsg}
+            {@render errMsg?.()}
         {:else if showErrMsg}
             <div class="box ohno" transition:slide={{duration: 400}}>
                 <p>Error while loading subjects :(</p>

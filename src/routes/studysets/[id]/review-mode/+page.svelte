@@ -1,6 +1,6 @@
-<script lang="ts">
+<script>
     import ReviewMode from "../../../ReviewMode.svelte"
-    let { data }: { data: any } = $props();
+    let { data } = $props();
 </script>
 
 <ReviewMode data={{ ...data, local: false }} />

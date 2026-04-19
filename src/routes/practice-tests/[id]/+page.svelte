@@ -1,6 +1,6 @@
-<script lang="ts">
+<script>
     import PracticeTest from "../../PracticeTest.svelte"
-    let { data }: { data: any } = $props();
+    let { data } = $props();
 </script>
 
 <PracticeTest data={{ ...data, local: false, alreadyOver: true }} />

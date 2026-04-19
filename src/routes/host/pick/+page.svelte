@@ -1,15 +1,9 @@
-<script lang="ts">
+<script>
     import StudysetList from "$lib/components/StudysetList.svelte";
     import BackIcon from "$lib/icons/BackArrow.svelte";
 
-    let { data }: { data: any } = $props();
+    let { data } = $props();
 </script>
-
-{#snippet placeholderSnippet()}
-{/snippet}
-{#snippet placeholderFunc(_: any)}
-{/snippet}
-
 <div class="grid page">
     <div class="content">
         <!-- <div class="flex"> -->
@@ -27,21 +21,14 @@
         <StudysetList
             {data}
             cloudLinkTemplateFunc={
-                (id: string) => `/host?studysetId=${id}`
+                id => `/host?studysetId=${id}`
             }
             localLinkTemplateFunc={
-                (id: string | number) => `/host?localId=${id}`
+                id => `/host?localId=${id}`
             }
             cloudEmptyMsg={emptyMsg}
             localEmptyMsg={emptyMsg}
             hideTypeWhenCloudEmptyAndLocalExists={true}
-            cloudDropdownContent={placeholderSnippet}
-            localDropdownContent={placeholderSnippet}
-            savedDropdownContent={placeholderSnippet}
-            topMenu={placeholderSnippet}
-            folderMenu={placeholderSnippet}
-            onFolderEnter={placeholderFunc}
-            onFolderExit={placeholderFunc}
         >
         </StudysetList>
     </div>

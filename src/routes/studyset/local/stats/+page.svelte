@@ -1,6 +1,6 @@
-<script lang="ts">
+<script>
     import StudysetStats from "../../../StudysetStats.svelte"
-    let { data }: { data: any } = $props();
+    let { data } = $props();
 </script>
 
-<StudysetStats data={{ ...data, local: true } as any} />
+<StudysetStats data={{ ...data, local: true }} />

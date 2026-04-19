@@ -1,5 +1,0 @@
-mutation UpdateDisplayName($displayName: String) {
-  updateUser(displayName: $displayName) {
-    displayName
-  }
-}

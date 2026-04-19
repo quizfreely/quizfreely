@@ -1,6 +1,0 @@
-query GetAllSubjects {
-  allSubjects {
-    id
-    name
-  }
-}

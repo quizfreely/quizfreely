@@ -1,15 +1,7 @@
-<script lang="ts">
+<script>
     import CheckmarkIcon from "$lib/icons/Checkmark.svelte";
     import XMarkIcon from "$lib/icons/CloseXMark.svelte";
-    let { term, answerWith, viewOnly, showAccuracy, answerUpdateCallback, userMarkedCorrectCallback, index }: {
-        term: any,
-        answerWith: "TERM" | "DEF",
-        viewOnly: boolean,
-        showAccuracy: boolean,
-        answerUpdateCallback: () => void,
-        userMarkedCorrectCallback?: () => void,
-        index?: number
-    } = $props();
+    let { term, answerWith, viewOnly, showAccuracy, answerUpdateCallback, userMarkedCorrectCallback } = $props();
     let manuallyMarkedCorrect = $state(false);
     export function getQuestion() {
         if (answer == "") {
@@ -59,7 +51,7 @@
             <div>
             <button class="faint" onclick={() => {
                 manuallyMarkedCorrect = true;
-                userMarkedCorrectCallback?.();
+                userMarkedCorrectCallback()
             }}>Manually mark as correct?</button>
             </div>
         {/if}

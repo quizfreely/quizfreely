@@ -1,15 +1,16 @@
-<script lang="ts">
+<script>
     import Noscript from "$lib/components/Noscript.svelte";
-    import { onMount, tick } from "svelte";
-    import { env } from "$env/dynamic/public";
-    import { getClientSdk } from "$lib/graphql/sdk";
-    import { idbApiLayer, idbLayerImg } from "$lib/idb-api-layer";
+    import { onMount, mount, tick } from "svelte";
+    import { env } from '$env/dynamic/public';
+    import idbApiLayer from "$lib/idb-api-layer/idb-api-layer.js";
+    import idbLayerImg from "$lib/idb-api-layer/images.js";
     import { goto, beforeNavigate } from "$app/navigation";
     import { cancelNprogressTimeout } from "$lib/stores/nprogressTimeout.js";
-    let { data }: { data: any } = $props();
+    let { data } = $props();
     import Dropdown from "$lib/components/Dropdown.svelte";
     import SubjectPicker from "$lib/components/SubjectPicker.svelte";
 
+    import IconLocal from "$lib/icons/Local.svelte";
     import IconCheckmark from "$lib/icons/Checkmark.svelte";
     import IconTrash from "$lib/icons/Trash.svelte";
     import IconArrowLeft from "$lib/icons/ArrowLeft.svelte";
@@ -31,47 +32,24 @@
     var showImportTermsModal = $state(false);
     var showExitConfirmationModal = $state(false);
     var showSubjectPicker = $state(false);
-    let selectedSubject: { id: string; name: string } | null = $state(null);
+    let selectedSubject = $state(null);
     var unsavedChanges = false;
     var bypassUnsavedChangesConfirmation = false;
-    let objectUrls: string[] = [];
+    let objectUrls = [];
     let showTermImageModal = $state(false);
-    let termImageModalTerm: Term | undefined = $state();
+    let termImageModalTerm = $state();
     let termImageModalIsDefSide = $state(false);
-    let termImageModalFiles: FileList | undefined = $state();
-    let termImageModalFileInputBox: FileInputBox | undefined = $state();
+    let termImageModalFiles = $state();
+    let termImageModalFileInputBox = $state();
     let isDraft = $state(false);
     let showRemoveTermImageModal = $state(false);
-    let removeTermImageModalTerm: Term | undefined = $state();
-    let removeTermImageModalIsDefSide: boolean = $state(false);
-    let editTitleInputValue: string = $state("");
-    let importTermsCustomRowDelimiterValue: string = $state("");
-    let importTermsCustomTermDefDelimiterValue: string = $state("");
-    let importTermsPasteValue: string = $state("");
+    let removeTermImageModalTerm;
+    let removeTermImageModalIsDefSide;
 
-    interface Term {
-        key: number;
-        id?: any;
-        term: string;
-        def: string;
-        termImageUrl?: string | null;
-        defImageUrl?: string | null;
-        termTextarea?: HTMLTextAreaElement;
-        defTextarea?: HTMLTextAreaElement;
-        studysetId?: number;
-        createdAt?: any;
-        updatedAt?: any;
-    }
-    var terms: Term[] = $state([]);
-    var existingTermIdsToDelete: any[] = [];
+    var terms = $state([]);
+    var existingTermIdsToDelete = [];
     var key = 0;
-    function addTerm(
-        term?: string,
-        def?: string,
-        id?: any,
-        termImageUrl?: string,
-        defImageUrl?: string,
-    ) {
+    function addTerm(term, def, id, termImageUrl, defImageUrl) {
         terms.push({
             id: id,
             term: term ?? "",
@@ -82,14 +60,7 @@
         });
         key++;
     }
-    function insertTerm(
-        index: number,
-        term?: string,
-        def?: string,
-        id?: any,
-        termImageUrl?: string,
-        defImageUrl?: string,
-    ) {
+    function insertTerm(index, term, def, id, termImageUrl, defImageUrl) {
         terms.splice(index, 0, {
             id: id,
             term: term ?? "",
@@ -100,7 +71,7 @@
         });
         key++;
     }
-    function moveTerm(oldIndex: number, newIndex: number) {
+    function moveTerm(oldIndex, newIndex) {
         if (
             oldIndex >= 0 &&
             oldIndex < terms.length &&
@@ -112,8 +83,8 @@
             terms.splice(newIndex, 0, term);
         }
     }
-    let deletedTermRegister: Term | undefined = $state();
-    function deleteTerm(index: number, copyToRegister?: boolean) {
+    let deletedTermRegister;
+    function deleteTerm(index, copyToRegister) {
         if (terms[index].id != null) {
             existingTermIdsToDelete.push(terms[index].id);
         }
@@ -122,43 +93,74 @@
             deletedTermRegister = deletedTerm;
         }
     }
-    function unmarkForDeletion(id: any) {
+    function unmarkForDeletion(id) {
         const index = existingTermIdsToDelete.indexOf(id);
         if (index >= 0) {
             existingTermIdsToDelete.splice(index, 1);
         }
     }
 
-    function addTermsFrom2DArray(arr: string[][]) {
+    // NOTE: this old function only handles term/def text, no id, sort order, or term/def image
+    // if we ever want to use it for exporting terms to raw text/CSV we'll need this but mabye updated
+    // like how addTermsFrom2DArray is used for importing terms from CSV/text
+    //
+    // function termsTo2DArray() {
+    //     var arr = [];
+    //     for (var index = 0; index < terms.length; index++) {
+    //         arr.push([terms[index].term, terms[index].def]);
+    //     }
+    //     return arr;
+    // }
+
+    function addTermsFrom2DArray(arr) {
         for (var row = 0; row < arr.length; row++) {
             addTerm(arr[row][0], arr[row][1]);
         }
     }
 
-    const sdk = getClientSdk();
-
-    async function initTerm(termsCount?: number, term?: string, def?: string) {
+    async function initTerm(termsCount, term, def) {
         let sortOrder = termsCount;
-        if (sortOrder == null) {
+        if (termsCount == null) {
             sortOrder = terms.length;
         }
         if (data.local) {
-            const returnedKeys: any = await idbApiLayer.createTerms(data.localId as number, [
-                {
-                    term: term ?? "",
-                    def: def ?? "",
-                    sortOrder: sortOrder,
-                } as any,
-            ]); /* returns last key */
-            return (returnedKeys as any)[0];
-        } else {
-            const { data: resp } = await sdk.InitTerm({
-                studysetId: data.studysetId,
+            return await idbApiLayer.createTerms(data.localId, [{
                 term: term ?? "",
                 def: def ?? "",
-                sortOrder: sortOrder,
+                sortOrder: sortOrder
+            }]); /* returns last key */
+        } else {
+            const raw = await fetch("/api/graphql", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    query: `mutation initTerm($studysetId: ID!, $term: String, $def: String, $sortOrder: Int!) {
+    createTerms(
+        studysetId: $studysetId,
+        terms: [{
+            term: $term,
+            def: $def,
+            sortOrder: $sortOrder
+        }]
+    ) {
+        id
+    }
+}`,
+                    variables: {
+                        studysetId: data.studysetId,
+                        term: term ?? "",
+                        def: def ?? "",
+                        sortOrder: sortOrder
+                    }
+                })
             });
-            return resp.createTerms?.[0]?.id;
+            const resp = await raw.json();
+            if (resp.errors != null || resp?.data == null) {
+                console.error("Err(s) in initTerm query/resp: ", resp);
+            }
+            return resp.data.createTerms[0].id;
         }
     }
 
@@ -166,8 +168,8 @@
     let focusedRow = $state(0);
     let showFocusBorder = $state(false);
     let useOhnoColorFocusBorder = $state(false);
-    let keySeq: string[] = [];
-    function addToKeySeq(key: string) {
+    let keySeq = [];
+    function addToKeySeq(key) {
         if ("hjkl".includes(key)) {
             resetKeySeq();
             /* dont return cause we want to remove ohnocolorfocusborder below */
@@ -192,94 +194,116 @@
             if (data.authed && !data.local) {
                 document
                     .getElementById("edit-private-false")
-                    ?.addEventListener("click", function () {
+                    .addEventListener("click", function () {
                         document
                             .getElementById("edit-private-false")
-                            ?.classList.add("selected");
+                            .classList.add("selected");
                         document
                             .getElementById("edit-private-true")
-                            ?.classList.remove("selected");
+                            .classList.remove("selected");
                     });
                 document
                     .getElementById("edit-private-true")
-                    ?.addEventListener("click", function () {
+                    .addEventListener("click", function () {
                         document
                             .getElementById("edit-private-false")
-                            ?.classList.remove("selected");
+                            .classList.remove("selected");
                         document
                             .getElementById("edit-private-true")
-                            ?.classList.add("selected");
+                            .classList.add("selected");
                     });
             }
             if (data.studysetId) {
                 if (data.authed) {
-                    sdk.GetStudyset({ id: data.studysetId as string })
+                    fetch("/api/graphql", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            Accept: "application/json",
+                        },
+                        credentials: "same-origin",
+                        body: JSON.stringify({
+                            query: `
+                                query GetStudyset($id: ID!) {
+                                    studyset(id: $id) {
+                                        title
+                                        private
+                                        draft
+                                        subject {
+                                            name
+                                            id
+                                        }
+                                        terms {
+                                            id
+                                            term
+                                            def
+                                            termImageUrl
+                                            defImageUrl
+                                        }
+                                    }
+                                }
+                            `,
+                            variables: {
+                                id: data.studysetId,
+                            },
+                        }),
+                    })
+                        .then((response) => response.json())
                         .then((result) => {
-                            if (result.studyset) {
-                                const studyset = result.studyset;
-                                editTitleInputValue = studyset.title;
+                            if (result.errors) {
+                                alert("Error loading studyset");
+                                console.error(result.errors);
+                            } else {
+                                const studyset = result.data.studyset;
+                                document.getElementById("edit-title").value =
+                                    studyset.title;
                                 if (studyset.private) {
-                                    const privateFalse = document.getElementById("edit-private-false");
-                                    privateFalse?.classList.remove("selected");
+                                    document
+                                        .getElementById("edit-private-false")
+                                        .classList.remove("selected");
                                     document
                                         .getElementById("edit-private-true")
-                                        ?.classList.add("selected");
+                                        .classList.add("selected");
                                 } else {
                                     document
                                         .getElementById("edit-private-false")
-                                        ?.classList.add("selected");
+                                        .classList.add("selected");
                                     document
                                         .getElementById("edit-private-true")
-                                        ?.classList.remove("selected");
+                                        .classList.remove("selected");
                                 }
                                 if (studyset.terms != null) {
-                                    studyset.terms.forEach((t: any) => {
-                                        addTerm(
-                                            t.term,
-                                            t.def,
-                                            t.id,
-                                            t.termImageUrl,
-                                            t.defImageUrl,
-                                        );
+                                    studyset.terms.forEach((t) => {
+                                        addTerm(t.term, t.def, t.id, t.termImageUrl, t.defImageUrl);
                                     });
                                 }
-                                selectedSubject = (studyset.subject as any) ?? null;
+                                selectedSubject = studyset.subject;
                                 isDraft = studyset.draft;
 
                                 if (studyset.draft && terms.length == 0) {
                                     addTerm();
                                 }
                             }
-                        }).catch(err => {
-                            alert("Error loading studyset");
-                            console.error(err);
                         });
                 } else {
-                    console.error(
-                        "Unexpected situation: studyset is not local but user is not logged in",
-                    );
+                    console.error("Unexpected situation: studyset is not local but user is not logged in")
                 }
             } else {
                 const studysetRecord = await idbApiLayer.getStudysetById(
-                    data.localId as number,
+                    data.localId,
                     {
                         terms: {
                             termImageUrl: true,
-                            defImageUrl: true,
-                        },
+                            defImageUrl: true
+                        }
                     },
                 );
                 if (studysetRecord) {
-                    editTitleInputValue = studysetRecord.title;
+                    document.getElementById("edit-title").value =
+                        studysetRecord.title;
                     if (studysetRecord.terms != null) {
-                        studysetRecord.terms.forEach((t: any) => {
-                            addTerm(
-                                t.term,
-                                t.def,
-                                t.id,
-                                t.termImageUrl,
-                                t.defImageUrl,
-                            );
+                        studysetRecord.terms.forEach((t) => {
+                            addTerm(t.term, t.def, t.id, t.termImageUrl, t.defImageUrl);
                             if (t?.termImageUrl != null) {
                                 objectUrls.push(t.termImageUrl);
                             }
@@ -297,7 +321,7 @@
             }
         })();
 
-        function moveUpButForKeydown(refocus?: boolean) {
+        function moveUpButForKeydown(refocus) {
             const index = focusedRow;
             const newIndex = focusedRow - 1;
             const wasDefFocused = defFocused;
@@ -318,7 +342,7 @@
                 });
             }
         }
-        function moveDownButForKeydown(refocus?: boolean) {
+        function moveDownButForKeydown(refocus) {
             const index = focusedRow;
             const newIndex = focusedRow + 1;
             const wasDefFocused = defFocused;
@@ -339,7 +363,7 @@
                 });
             }
         }
-        function onKeydown(event: KeyboardEvent) {
+        function onKeydown(event) {
             if (event.key === "Enter" && event.ctrlKey && !event.altKey) {
                 event.preventDefault();
                 addTerm();
@@ -355,8 +379,7 @@
                     !(
                         document.activeElement?.tagName === "INPUT" ||
                         document.activeElement?.tagName === "TEXTAREA" ||
-                        (document.activeElement instanceof HTMLElement &&
-                            document.activeElement?.isContentEditable)
+                        document.activeElement?.isContentEditable
                     ))
             ) {
                 event.preventDefault();
@@ -378,8 +401,7 @@
                 !(
                     document.activeElement?.tagName === "INPUT" ||
                     document.activeElement?.tagName === "TEXTAREA" ||
-                    (document.activeElement instanceof HTMLElement &&
-                        document.activeElement?.isContentEditable)
+                    document.activeElement?.isContentEditable
                 )
             ) {
                 event.preventDefault();
@@ -387,7 +409,6 @@
                 unsavedChanges = true;
 
                 tick().then(() => {
-                    focusedRow = focusedRow;
                     terms?.[focusedRow]?.termTextarea?.focus();
                 });
                 return;
@@ -431,8 +452,7 @@
                 !(
                     document.activeElement?.tagName === "INPUT" ||
                     document.activeElement?.tagName === "TEXTAREA" ||
-                    (document.activeElement instanceof HTMLElement &&
-                        document.activeElement?.isContentEditable)
+                    document.activeElement?.isContentEditable
                 )
             ) {
                 event.preventDefault();
@@ -450,8 +470,7 @@
                 !(
                     document.activeElement?.tagName === "INPUT" ||
                     document.activeElement?.tagName === "TEXTAREA" ||
-                    (document.activeElement instanceof HTMLElement &&
-                        document.activeElement?.isContentEditable)
+                    document.activeElement?.isContentEditable
                 )
             ) {
                 event.preventDefault();
@@ -466,8 +485,7 @@
                 !(
                     document.activeElement?.tagName === "INPUT" ||
                     document.activeElement?.tagName === "TEXTAREA" ||
-                    (document.activeElement instanceof HTMLElement &&
-                        document.activeElement?.isContentEditable)
+                    document.activeElement?.isContentEditable
                 )
             ) {
                 event.preventDefault();
@@ -480,8 +498,7 @@
                 !(
                     document.activeElement?.tagName === "INPUT" ||
                     document.activeElement?.tagName === "TEXTAREA" ||
-                    (document.activeElement instanceof HTMLElement &&
-                        document.activeElement?.isContentEditable)
+                    document.activeElement?.isContentEditable
                 )
             ) {
                 event.preventDefault();
@@ -495,8 +512,7 @@
                 !(
                     document.activeElement?.tagName === "INPUT" ||
                     document.activeElement?.tagName === "TEXTAREA" ||
-                    (document.activeElement instanceof HTMLElement &&
-                        document.activeElement?.isContentEditable)
+                    document.activeElement?.isContentEditable
                 )
             ) {
                 event.preventDefault();
@@ -509,8 +525,7 @@
                 !(
                     document.activeElement?.tagName === "INPUT" ||
                     document.activeElement?.tagName === "TEXTAREA" ||
-                    (document.activeElement instanceof HTMLElement &&
-                        document.activeElement?.isContentEditable)
+                    document.activeElement?.isContentEditable
                 )
             ) {
                 event.preventDefault();
@@ -522,8 +537,7 @@
                 !(
                     document.activeElement?.tagName === "INPUT" ||
                     document.activeElement?.tagName === "TEXTAREA" ||
-                    (document.activeElement instanceof HTMLElement &&
-                        document.activeElement?.isContentEditable)
+                    document.activeElement?.isContentEditable
                 ) &&
                 (event.key === "i" || event.key === "Enter")
             ) {
@@ -536,11 +550,8 @@
                 return;
             }
         }
-        function onKeyup(event: KeyboardEvent) {
-            if (
-                event.key === "Escape" &&
-                document?.activeElement instanceof HTMLElement
-            ) {
+        function onKeyup(event) {
+            if (event.key === "Escape") {
                 document?.activeElement?.blur();
                 resetKeySeq();
                 if (showFocusBorder) {
@@ -575,8 +586,7 @@
                 !(
                     document.activeElement?.tagName === "INPUT" ||
                     document.activeElement?.tagName === "TEXTAREA" ||
-                    (document.activeElement instanceof HTMLElement &&
-                        document.activeElement?.isContentEditable)
+                    document.activeElement?.isContentEditable
                 )
             ) {
                 if (deletedTermRegister) {
@@ -611,8 +621,7 @@
                 !(
                     document.activeElement?.tagName === "INPUT" ||
                     document.activeElement?.tagName === "TEXTAREA" ||
-                    (document.activeElement instanceof HTMLElement &&
-                        document.activeElement?.isContentEditable)
+                    document.activeElement?.isContentEditable
                 )
             ) {
                 if (deletedTermRegister) {
@@ -638,8 +647,7 @@
                 !(
                     document.activeElement?.tagName === "INPUT" ||
                     document.activeElement?.tagName === "TEXTAREA" ||
-                    (document.activeElement instanceof HTMLElement &&
-                        document.activeElement?.isContentEditable)
+                    document.activeElement?.isContentEditable
                 )
             ) {
                 const newKeySeq = addToKeySeq(event.key);
@@ -664,9 +672,9 @@
         return () => {
             window.removeEventListener("keydown", onKeydown);
             window.removeEventListener("keyup", onKeyup);
-            objectUrls.forEach((objectUrl) => {
+            objectUrls.forEach(objectUrl => {
                 URL.revokeObjectURL(objectUrl);
-            });
+            })
         };
     });
 
@@ -681,12 +689,12 @@
             updateLocalStudysetCooldown = false;
         }, 2000);
 
-        let existingTerms: any[] = [];
-        let newTerms: any[] = [];
+        let existingTerms = [];
+        let newTerms = [];
         for (let index = 0; index < terms.length; index++) {
             if (terms[index].id != null) {
                 existingTerms.push({
-                    id: terms[index].id as string,
+                    id: terms[index].id,
                     term: terms[index].term,
                     def: terms[index].def,
                     sortOrder: index,
@@ -702,18 +710,18 @@
 
         (async () => {
             await idbApiLayer.updateStudyset({
-                id: data.localId as number,
-                title: editTitleInputValue,
-                draft: false,
+                id: data.localId,
+                title: document.getElementById("edit-title").value,
+                draft: false
             });
             if (existingTerms.length > 0) {
-                await idbApiLayer.updateTerms(existingTerms as any[]);
+                await idbApiLayer.updateTerms(existingTerms);
             }
             if (newTerms.length > 0) {
-                await idbApiLayer.createTerms(data.localId as number, newTerms as any[]);
+                await idbApiLayer.createTerms(data.localId, newTerms);
             }
             if (existingTermIdsToDelete.length > 0) {
-                await idbApiLayer.deleteTerms(existingTermIdsToDelete as number[]);
+                await idbApiLayer.deleteTerms(existingTermIdsToDelete);
             }
             goto("/studyset/local?id=" + data.localId);
         })();
@@ -730,12 +738,12 @@
             updateCloudStudysetCooldown = false;
         }, 2000);
 
-        let existingTerms: any[] = [];
-        let newTerms: any[] = [];
+        let existingTerms = [];
+        let newTerms = [];
         for (let index = 0; index < terms.length; index++) {
             if (terms[index].id != null) {
                 existingTerms.push({
-                    id: terms[index].id as string,
+                    id: terms[index].id,
                     term: terms[index].term,
                     def: terms[index].def,
                     sortOrder: index,
@@ -749,24 +757,43 @@
             }
         }
 
-        sdk.UpdateStudysetAndTerms({
-            id: data.studysetId,
-            studyset: {
-                title: editTitleInputValue,
-                private: document
-                    .getElementById("edit-private-true")
-                    ?.classList.contains("selected") ?? false,
-                subjectId: selectedSubject?.id ?? null,
+        fetch("/api/graphql", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Accept: "application/json",
             },
-            terms: existingTerms,
-            newTerms: newTerms,
-            deleteTerms: existingTermIdsToDelete as string[],
+            credentials: "same-origin",
+            body: JSON.stringify({
+                query: `mutation UpdateStudysetAndTerms($id: ID!, $studyset: StudysetInput, $terms: [TermInput!]!, $newTerms: [NewTermInput!]!, $deleteTerms: [ID!]!) {
+                    updateStudyset(id: $id, studyset: $studyset, draft: false) { id }
+                    updateTerms(studysetId: $id, terms: $terms) { id }
+                    createTerms(studysetId: $id, terms: $newTerms) { id }
+                    deleteTerms(studysetId: $id, ids: $deleteTerms)
+                }`,
+                variables: {
+                    id: data.studysetId,
+                    studyset: {
+                        title: document.getElementById("edit-title").value,
+                        private: document
+                            .getElementById("edit-private-true")
+                            .classList.contains("selected"),
+                        subjectId: selectedSubject?.id ?? null,
+                    },
+                    terms: existingTerms,
+                    newTerms: newTerms,
+                    deleteTerms: existingTermIdsToDelete,
+                },
+            }),
         })
+            .then((response) => response.json())
             .then((result) => {
-                goto("/studysets/" + data.studysetId);
-            }).catch(err => {
-                console.log(err);
-                alert("Error updating studyset");
+                if (result.errors) {
+                    console.log(result);
+                    alert("Error updating studyset");
+                } else {
+                    goto("/studysets/" + data.studysetId);
+                }
             });
     }
     function saveButton() {
@@ -786,7 +813,7 @@
     let importTermsTermDefDelimiterRadioSelect = $state("tab");
     let importTermsRowDelimiterRadioSelect = $state("newline");
 
-    let navigatingToURL: URL | undefined = $state();
+    let navigatingToURL = $state("");
     beforeNavigate(function (navigation) {
         if (unsavedChanges && !bypassUnsavedChangesConfirmation) {
             navigatingToURL = navigation?.to?.url;
@@ -815,61 +842,39 @@
 
 <svelte:head>
     <title>Quizfreely</title>
-    <meta name="robots" content="noindex, follow" />
 </svelte:head>
 
-{#snippet termImage(term: Term, isDefSide: boolean)}
+{#snippet termImage(term, isDefSide)}
     {#if term?.[isDefSide ? "defImageUrl" : "termImageUrl"] == null}
         <div class="flex" style="margin-top: 0.2rem;">
-            <button
-                class="faint img-button-thin-fit text fg0"
-                onclick={async () => {
-                    if (term.id == null) {
-                        term.id = await initTerm(); /* returns ID */
-                    }
+            <button class="faint img-button-thin-fit text fg0" onclick={async () => {
+                if (term.id == null) {
+                    term.id = await initTerm(); /* returns ID */
+                }
 
-                    showTermImageModal = true;
-                    termImageModalTerm = term;
-                    termImageModalIsDefSide = isDefSide;
-                }}
-            >
+                showTermImageModal = true;
+                termImageModalTerm = term;
+                termImageModalIsDefSide = isDefSide;
+            }}>
                 <ImageIcon></ImageIcon> Add Image
             </button>
         </div>
     {:else}
-        <div
-            class="flex"
-            style="flex-direction: column; flex-wrap: nowrap; gap: 0.2rem; margin-top: 0.6rem;"
-        >
-            <div>
-                <img
-                    src={term?.[isDefSide ? "defImageUrl" : "termImageUrl"] ?? ""}
-                    alt="{isDefSide ? 'definition' : 'term'} image"
-                    class="term-image"
-                />
-            </div>
-            <div
-                class="flex"
-                style="margin-top: 0px; row-gap: 0.2rem; column-gap: 0.4rem;"
-            >
-                <button
-                    class="faint img-button-thin-fit text fg0"
-                    onclick={async () => {
-                        showTermImageModal = true;
-                        termImageModalTerm = term;
-                        termImageModalIsDefSide = isDefSide;
-                    }}
-                >
+        <div class="flex" style="flex-direction: column; flex-wrap: nowrap; gap: 0.2rem; margin-top: 0.6rem;">
+            <div><img src={term?.[isDefSide ? "defImageUrl" : "termImageUrl"]} class="term-image"></div>
+            <div class="flex" style="margin-top: 0px; row-gap: 0.2rem; column-gap: 0.4rem;">
+                <button class="faint img-button-thin-fit text fg0" onclick={async () => {
+                    showTermImageModal = true;
+                    termImageModalTerm = term;
+                    termImageModalIsDefSide = isDefSide;
+                }}>
                     <PencilIcon></PencilIcon> Edit Image
                 </button>
-                <button
-                    class="faint img-button-thin-fit text fg0"
-                    onclick={async () => {
-                        showRemoveTermImageModal = true;
-                        removeTermImageModalTerm = term;
-                        removeTermImageModalIsDefSide = isDefSide;
-                    }}
-                >
+                <button class="faint img-button-thin-fit text fg0" onclick={async () => {
+                    showRemoveTermImageModal = true;
+                    removeTermImageModalTerm = term;
+                    removeTermImageModalIsDefSide = isDefSide;
+                }}>
                     <XMarkIcon></XMarkIcon> Remove Image
                 </button>
             </div>
@@ -885,21 +890,19 @@
                 <a
                     class="button faint"
                     data-sveltekit-preload-data="false"
-                    href={isDraft
-                        ? "/dashboard"
-                        : data.local
-                          ? "/studyset/local?id=" + data.localId
-                          : "/studysets/" + data.studysetId}
+                    href={isDraft ?
+                        "/dashboard" :
+                        (data.local ?
+                            "/studyset/local?id=" + data.localId :
+                            "/studysets/" + data.studysetId
+                        )
+                    }
                 >
                     <IconArrowLeft />
                     Back
                 </a>
             </div>
-            <input
-                type="text"
-                placeholder="Title"
-                bind:value={editTitleInputValue}
-            />
+            <input id="edit-title" type="text" placeholder="Title" />
             {#if data.authed && !data.local}
                 <div id="edit-private-div">
                     <div class="flex">
@@ -962,7 +965,7 @@
                                         showFocusBorder = false;
                                         resetKeySeq();
                                     },
-                                    style: `transition-duration: 0.2s; ` + (
+                                    style: `transition-duration: 0.2s; ${
                                         showFocusBorder &&
                                         useOhnoColorFocusBorder &&
                                         !defFocused &&
@@ -973,13 +976,13 @@
                                                 focusedRow == index
                                               ? "border-color: var(--main)"
                                               : ""
-                                    ),
+                                    }`,
                                 }}
                                 bind:value={term.term}
                                 bind:textareaElement={term.termTextarea}
                             />
                             {#if env.ENABLE_TERM_IMAGES != "false"}
-                                {@render termImage(term, false)}
+                            {@render termImage(term, false)}
                             {/if}
                         </div>
                         <div>
@@ -1001,7 +1004,7 @@
                                         showFocusBorder = false;
                                         resetKeySeq();
                                     },
-                                    style: `transition-duration: 0.2s; ` + (
+                                    style: `transition-duration: 0.2s; ${
                                         showFocusBorder &&
                                         useOhnoColorFocusBorder &&
                                         defFocused &&
@@ -1012,13 +1015,13 @@
                                                 focusedRow == index
                                               ? "border-color: var(--main)"
                                               : ""
-                                    ),
+                                    }`,
                                 }}
                                 bind:value={term.def}
                                 bind:textareaElement={term.defTextarea}
                             />
                             {#if env.ENABLE_TERM_IMAGES != "false"}
-                                {@render termImage(term, true)}
+                            {@render termImage(term, true)}
                             {/if}
                         </div>
                         <div class="flex center term-row-box-actions">
@@ -1031,30 +1034,30 @@
                                 {#snippet buttonContent()}
                                     <IconMoreDotsV />
                                 {/snippet}
-                                {#snippet divContent(hide: any)}
+                                {#snippet divContent(hide)}
                                     <button
-                                        onclick={function (event: any) {
+                                        onclick={function (event) {
                                             moveTerm(index, index - 1);
                                             unsavedChanges = true;
-                                            hide?.();
+                                            hide();
                                         }}
                                     >
                                         <IconArrowUp /> Move up
                                     </button>
                                     <button
-                                        onclick={function (event: any) {
+                                        onclick={function (event) {
                                             moveTerm(index, index + 1);
                                             unsavedChanges = true;
-                                            hide?.();
+                                            hide();
                                         }}
                                     >
                                         <IconArrowDown /> Move down
                                     </button>
                                     <button
-                                        onclick={function (event: any) {
+                                        onclick={function (event) {
                                             insertTerm(index + 1);
                                             unsavedChanges = true;
-                                            hide?.();
+                                            hide();
                                         }}
                                     >
                                         <IconPlus /> Add Below
@@ -1126,11 +1129,13 @@
                 <a
                     class="button alt"
                     data-sveltekit-preload-data="false"
-                    href={isDraft
-                        ? "/dashboard"
-                        : data.local
-                          ? "/studyset/local?id=" + data.localId
-                          : "/studysets/" + data.studysetId}
+                    href={isDraft ?
+                        "/dashboard" :
+                        (data.local ?
+                            "/studyset/local?id=" + data.localId :
+                            "/studysets/" + data.studysetId
+                        )
+                    }
                 >
                     Cancel
                 </a>
@@ -1197,9 +1202,7 @@
                                     <input
                                         type="text"
                                         placeholder="Term Delimiter"
-                                        bind:value={
-                                            importTermsCustomTermDefDelimiterValue
-                                        }
+                                        id="import-terms-custom-termdef-delimiter-input"
                                         class="slightly-smaller-textbox"
                                         transition:scale={{ duration: 400 }}
                                     />
@@ -1263,9 +1266,7 @@
                                     <input
                                         type="text"
                                         placeholder="Row Delimiter"
-                                        bind:value={
-                                            importTermsCustomRowDelimiterValue
-                                        }
+                                        id="import-terms-custom-row-delimiter-input"
                                         class="slightly-smaller-textbox"
                                         transition:scale={{ duration: 400 }}
                                     />
@@ -1274,7 +1275,6 @@
                         </div>
                         <textarea
                             id="import-terms-paste-textarea"
-                            bind:value={importTermsPasteValue}
                             class="vertical"
                             rows="3"
                             placeholder="Paste data here, then press the import button"
@@ -1282,25 +1282,56 @@
                         <div class="flex">
                             <button
                                 onclick={function () {
-                                    var termDefDelimiter: string = importTermsTermDefDelimiterRadioSelect == "tab" ?
-                                        "\t" : (importTermsTermDefDelimiterRadioSelect == "comma" ?
-                                            "," : importTermsCustomTermDefDelimiterValue
-                                        );
-                                    var rowDelimiter: string = importTermsRowDelimiterRadioSelect == "newline" ?
-                                        "\n" : (importTermsRowDelimiterRadioSelect == "semicolon" ?
-                                            ";" : importTermsCustomRowDelimiterValue
-                                        );
-                                    if (termDefDelimiter == "") {
-                                        alert(
-                                            "Custom delimiter can't be blank >:(",
-                                        );
-                                        return;
+                                    var termDefDelimiter;
+                                    var rowDelimiter;
+                                    if (
+                                        importTermsTermDefDelimiterRadioSelect ==
+                                        "tab"
+                                    ) {
+                                        termDefDelimiter = "\t";
+                                    } else if (
+                                        importTermsTermDefDelimiterRadioSelect ==
+                                        "comma"
+                                    ) {
+                                        termDefDelimiter = ",";
+                                    } else if (
+                                        importTermsTermDefDelimiterRadioSelect ==
+                                        "custom"
+                                    ) {
+                                        termDefDelimiter =
+                                            document.getElementById(
+                                                "import-terms-custom-termdef-delimiter-input",
+                                            ).value;
+                                        if (termDefDelimiter == "") {
+                                            alert(
+                                                "Custom delimiter can't be blank >:(",
+                                            );
+                                            return;
+                                        }
                                     }
-                                    if (rowDelimiter == "") {
-                                        alert(
-                                            "Custom delimiter can't be blank >:(",
-                                        );
-                                        return;
+                                    if (
+                                        importTermsRowDelimiterRadioSelect ==
+                                        "newline"
+                                    ) {
+                                        rowDelimiter = "\n";
+                                    } else if (
+                                        importTermsRowDelimiterRadioSelect ==
+                                        "semicolon"
+                                    ) {
+                                        rowDelimiter = ";";
+                                    } else if (
+                                        importTermsRowDelimiterRadioSelect ==
+                                        "custom"
+                                    ) {
+                                        rowDelimiter = document.getElementById(
+                                            "import-terms-custom-row-delimiter-input",
+                                        ).value;
+                                        if (rowDelimiter == "") {
+                                            alert(
+                                                "Custom delimiter can't be blank >:(",
+                                            );
+                                            return;
+                                        }
                                     }
 
                                     /* we add a blank term when users create a studyset,
@@ -1316,7 +1347,9 @@
                                         terms.splice(0, 1);
                                     }
 
-                                    var pastedData = importTermsPasteValue;
+                                    var pastedData = document.getElementById(
+                                        "import-terms-paste-textarea",
+                                    ).value;
                                     addTermsFrom2DArray(
                                         pastedData
                                             .split(rowDelimiter)
@@ -1361,12 +1394,12 @@
             {/snippet}
             {#if showSubjectPicker}
                 <SubjectPicker
-                    selectCallback={(subject: any) => {
+                    closeCallback={() => (showSubjectPicker = false)}
+                    selectCallback={(subject) => {
                         selectedSubject = subject;
                         showSubjectPicker = false;
                         unsavedChanges = true;
                     }}
-                    closeCallback={() => (showSubjectPicker = false)}
                 ></SubjectPicker>
             {/if}
             {#if showExitConfirmationModal}
@@ -1393,9 +1426,7 @@
                                 data-sveltekit-preload-data="false"
                                 onclick={function () {
                                     bypassUnsavedChangesConfirmation = true;
-                                    if (navigatingToURL !== undefined) {
-                                        goto(navigatingToURL);
-                                    }
+                                    goto(navigatingToURL);
                                 }}
                             >
                                 <IconTrash />
@@ -1408,87 +1439,40 @@
             {#if showTermImageModal}
                 <div class="modal" transition:fade={{ duration: 200 }}>
                     <div class="content">
-                        <h4>
-                            {termImageModalTerm?.[
-                                termImageModalIsDefSide
-                                    ? "defImageUrl"
-                                    : "termImageUrl"
-                            ] == null
-                                ? "Add Image"
-                                : "Update Image"}
-                        </h4>
-                        <FileInputBox
-                            accept="image/jpeg, image/png, image/webp, .jpeg, .jpg, .png, .webp"
-                            bind:this={termImageModalFileInputBox}
-                            onChangeCallback={(files: FileList) =>
-                                (termImageModalFiles = files)}
-                        ></FileInputBox>
+                        <h4>{(termImageModalTerm?.[termImageModalIsDefSide ? "defImageUrl" : "termImageUrl"] == null) ? "Add Image" : "Update Image"}</h4>
+                        <FileInputBox accept="image/jpeg, image/png, image/webp, .jpeg, .jpg, .png, .webp" bind:this={termImageModalFileInputBox} onChangeCallback={(files) => termImageModalFiles = files}></FileInputBox>
                         <div class="flex">
-                            <button
-                                class="pretty-button-disableable"
-                                disabled={termImageModalFiles == null ||
-                                    termImageModalFiles.length == 0}
-                                onclick={async () => {
-                                    if (termImageModalTerm === undefined || termImageModalFiles === undefined) {
-                                        console.error("term image save button: termImageModalTerm or termImageModalFiles is undefined");
-                                        return;
+                            <button class="pretty-button-disableable" disabled={termImageModalFiles == null || termImageModalFiles.length == 0} onclick={async () => {
+                                if (data.local) {
+                                    const returnedBlob = await idbLayerImg.processAndUpdateTermImage(termImageModalTerm.id, termImageModalIsDefSide, termImageModalFiles[0]);
+                                    if (returnedBlob != null) {
+                                        const newObjectUrl = URL.createObjectURL(returnedBlob);
+                                        termImageModalTerm[termImageModalIsDefSide ? "defImageUrl" : "termImageUrl"] = newObjectUrl;
+                                        objectUrls.push(newObjectUrl);
                                     }
-                                    if (data.local) {
-                                        const returnedBlob =
-                                            await idbLayerImg.processAndUpdateTermImage(
-                                                termImageModalTerm.id,
-                                                termImageModalIsDefSide,
-                                                termImageModalFiles[0],
-                                            );
-                                        if (returnedBlob != null) {
-                                            const newObjectUrl =
-                                                URL.createObjectURL(
-                                                    returnedBlob,
-                                                );
-                                            (termImageModalTerm as any)[
-                                                termImageModalIsDefSide
-                                                    ? "defImageUrl"
-                                                    : "termImageUrl"
-                                            ] = newObjectUrl;
-                                            objectUrls.push(newObjectUrl);
-                                        }
-                                        showTermImageModal = false;
-                                        termImageModalFileInputBox?.clear();
+                                    showTermImageModal = false;
+                                    termImageModalFileInputBox.clear();
+                                } else {
+                                    const raw = await fetch(`/api/term-images/${termImageModalTerm.id}/${termImageModalIsDefSide ? "def" : "term"}`, {
+                                        method: "PUT",
+                                        body: termImageModalFiles[0]
+                                    });
+                                    const resp = await raw.json();
+                                    if (resp?.data?.imageUrl == null) {
+                                        console.error("Error in term-image-upload resp: ", resp);
                                     } else {
-                                        const raw = await fetch(
-                                            "/api/term-images/" + termImageModalTerm.id + "/" + (termImageModalIsDefSide ? "def" : "term"),
-                                            {
-                                                method: "PUT",
-                                                body: termImageModalFiles[0],
-                                            },
-                                        );
-                                        const resp = await raw.json();
-                                        if (resp?.data?.imageUrl == null) {
-                                            console.error(
-                                                "Error in term-image-upload resp: ",
-                                                resp,
-                                            );
-                                        } else {
-                                            (termImageModalTerm as any)[
-                                                termImageModalIsDefSide
-                                                    ? "defImageUrl"
-                                                    : "termImageUrl"
-                                            ] = resp.data.imageUrl;
-                                        }
-                                        showTermImageModal = false;
-                                        termImageModalFileInputBox?.clear();
+                                        termImageModalTerm[termImageModalIsDefSide ? "defImageUrl" : "termImageUrl"] = resp.data.imageUrl;
                                     }
-                                }}
-                            >
+                                    showTermImageModal = false;
+                                    termImageModalFileInputBox.clear();
+                                }
+                            }}>
                                 <IconCheckmark></IconCheckmark> Save
                             </button>
-                            <button
-                                class="alt"
-                                onclick={() => {
-                                    showTermImageModal = false;
-                                    termImageModalFileInputBox?.clear();
-                                }}
-                            >
+                            <button class="alt" onclick={() => {
+                                showTermImageModal = false;
+                                termImageModalFileInputBox.clear();
+                            }}>
                                 Cancel
                             </button>
                         </div>
@@ -1499,76 +1483,40 @@
                 <div class="modal" transition:fade={{ duration: 200 }}>
                     <div class="content">
                         <h4>Remove Image?</h4>
-                        <p>
-                            Are you sure you want to remove this term's image?
-                        </p>
+                        <p>Are you sure you want to remove this term's image?</p>
                         <div class="flex">
-                            <button
-                                class="ohno"
-                                onclick={async () => {
-                                    if (!removeTermImageModalTerm) return;
-                                    if (data.local) {
-                                        const oldObjectUrl =
-                                            (removeTermImageModalTerm as any)[
-                                                removeTermImageModalIsDefSide
-                                                    ? "defImageUrl"
-                                                    : "termImageUrl"
-                                            ];
+                            <button class="ohno" onclick={async () => {
+                                if (data.local) {
+                                    const oldObjectUrl = removeTermImageModalTerm[
+                                        removeTermImageModalIsDefSide ? "defImageUrl" : "termImageUrl"
+                                    ];
 
-                                        const success =
-                                            await idbLayerImg.removeTermImage(
-                                                removeTermImageModalTerm.id,
-                                                removeTermImageModalIsDefSide,
-                                            );
-                                        if (success) {
-                                            (removeTermImageModalTerm as any)[
-                                                removeTermImageModalIsDefSide
-                                                    ? "defImageUrl"
-                                                    : "termImageUrl"
-                                            ] = undefined;
-                                            if (oldObjectUrl != null) {
-                                                URL.revokeObjectURL(
-                                                    oldObjectUrl,
-                                                );
-                                            }
-                                        } else {
-                                            alert(
-                                                "Error removing term image :(",
-                                            );
-                                        }
-                                        showRemoveTermImageModal = false;
+                                    const success = await idbLayerImg.removeTermImage(removeTermImageModalTerm.id, removeTermImageModalIsDefSide);
+                                    if (success) {
+                                        removeTermImageModalTerm[removeTermImageModalIsDefSide ? "defImageUrl" : "termImageUrl"] = null;
+                                        URL.revokeObjectURL(oldObjectUrl);
                                     } else {
-                                        const raw = await fetch(
-                                            "/api/term-images/" + removeTermImageModalTerm.id + "/" + (removeTermImageModalIsDefSide ? "def" : "term"),
-                                            {
-                                                method: "DELETE",
-                                            },
-                                        );
-                                        const resp = await raw.json();
-                                        if (resp?.error) {
-                                            console.error(
-                                                "Error in remove-term-image resp: ",
-                                                resp,
-                                            );
-                                        } else {
-                                            (removeTermImageModalTerm as any)[
-                                                removeTermImageModalIsDefSide
-                                                    ? "defImageUrl"
-                                                    : "termImageUrl"
-                                            ] = null;
-                                        }
-                                        showRemoveTermImageModal = false;
+                                        alert("Error removing term image :(")
                                     }
-                                }}
-                            >
+                                    showRemoveTermImageModal = false;
+                                } else {
+                                    const raw = await fetch(`/api/term-images/${removeTermImageModalTerm.id}/${removeTermImageModalIsDefSide ? "def" : "term"}`, {
+                                        method: "DELETE"
+                                    });
+                                    const resp = await raw.json();
+                                    if (resp?.error) {
+                                        console.error("Error in remove-term-image resp: ", resp);
+                                    } else {
+                                        removeTermImageModalTerm[removeTermImageModalIsDefSide ? "defImageUrl" : "termImageUrl"] = null;
+                                    }
+                                    showRemoveTermImageModal = false;
+                                }
+                            }}>
                                 <IconTrash></IconTrash> Remove
                             </button>
-                            <button
-                                class="alt"
-                                onclick={() => {
-                                    showRemoveTermImageModal = false;
-                                }}
-                            >
+                            <button class="alt" onclick={() => {
+                                showRemoveTermImageModal = false;
+                            }}>
                                 Cancel
                             </button>
                         </div>
@@ -1633,12 +1581,16 @@
         width: 10rem;
     }
 
-    button.img-button-thin-fit {
+    button.img-button-thin-fit,
+    .button.img-button-thin-fit {
         padding: 0.4rem 0.6rem;
         font-size: 0.9rem;
     }
 
-    button.pretty-button-disableable:disabled {
+    button.pretty-button-disableable:disabled,
+    .button.pretty-button-disableable:disabled,
+    button.pretty-button-disableable.disabled,
+    .button.pretty-button-disableable.disabled {
         opacity: 0.6;
     }
 

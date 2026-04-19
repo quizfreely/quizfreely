@@ -1,7 +1,7 @@
-<script lang="ts">
+<script>
     import Dashboard from "./dashboard/+page.svelte";
     import LandingPage from "./landing-page/+page.svelte";
-    let { data }: { data: any } = $props();
+    let { data } = $props();
 </script>
 
 {#if data?.dashboard == true}

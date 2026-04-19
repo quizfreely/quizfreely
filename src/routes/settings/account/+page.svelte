@@ -1,8 +1,6 @@
-<script lang="ts">
+<script>
     import { onMount } from "svelte";
-    import { getClientSdk } from "$lib/graphql/sdk";
-
-    let { data }: { data: App.PageData } = $props();
+    let { data } = $props();
     let modPowersActive = $state(false);
 
     import IconPencil from "$lib/icons/Pencil.svelte";
@@ -10,42 +8,50 @@
     import IconTrash from "$lib/icons/Trash.svelte";
 
     onMount(function () {
-        if (data.authed && data.authedUser) {
-            const authedUser = data.authedUser;
-            const sdk = getClientSdk();
-            document.getElementById("display-name-edit-button")?.addEventListener("click", function () {
-                const displayNameEdit = document.getElementById("display-name-edit") as HTMLInputElement | null;
-                const accountDisplayName = document.getElementById("account-display-name");
-                if (displayNameEdit && accountDisplayName) {
-                    displayNameEdit.value = accountDisplayName.innerText;
-                    document.getElementById("display-name-edit-div")?.classList.remove("hide");
-                    document.getElementById("display-name-view-div")?.classList.add("hide");
-                    displayNameEdit.focus();
-                }
+        if (data.authed) {
+            document.getElementById("display-name-edit-button").addEventListener("click", function () {
+                document.getElementById("display-name-edit").value = document.getElementById("account-display-name").innerText;
+                document.getElementById("display-name-edit-div").classList.remove("hide");
+                document.getElementById("display-name-view-div").classList.add("hide");
+                document.getElementById("display-name-edit").focus();
             })
-            document.getElementById("display-name-edit-save-button")?.addEventListener("click", function () {
-                const displayNameEdit = document.getElementById("display-name-edit") as HTMLInputElement | null;
-                const displayName = displayNameEdit?.value;
-
-                sdk.UpdateDisplayName({ displayName })
-                .then(result => {
-                    if (result.updateUser) {
-                        const accountDisplayName = document.getElementById("account-display-name");
-                        if (accountDisplayName) {
-                            accountDisplayName.innerText = result.updateUser.displayName;
-                        }
+            document.getElementById("display-name-edit-save-button").addEventListener("click", function () {
+    const displayName = document.getElementById("display-name-edit").value;
+    
+    fetch("/api/graphql", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            query: `
+                mutation UpdateDisplayName($displayName: String) {
+                    updateUser(displayName: $displayName) {
+                        displayName
                     }
-                    document.getElementById("display-name-view-div")?.classList.remove("hide");
-                    document.getElementById("display-name-edit-div")?.classList.add("hide");
-                }).catch(err => {
-                    console.error("Error updating display name: ", err);
-                });
+                }
+            `,
+            variables: {
+                displayName: displayName
+            }
+        })
+    }).then(response => response.json())
+    .then(result => {
+        if (result.errors) {
+            console.error(result.errors);
+        } else if (result.data?.updateUser) {
+            document.getElementById("account-display-name").innerText = result.data.updateUser.displayName;
+        }
+        document.getElementById("display-name-view-div").classList.remove("hide");
+        document.getElementById("display-name-edit-div").classList.add("hide");
+    });
             })
-            document.getElementById("display-name-edit-cancel-button")?.addEventListener("click", function () {
-                document.getElementById("display-name-view-div")?.classList.remove("hide");
-                document.getElementById("display-name-edit-div")?.classList.add("hide");
+            document.getElementById("display-name-edit-cancel-button").addEventListener("click", function () {
+                document.getElementById("display-name-view-div").classList.remove("hide");
+                document.getElementById("display-name-edit-div").classList.add("hide");
             })
-            document.getElementById("account-sign-out-button")?.addEventListener("click", async function () {
+            document.getElementById("account-sign-out-button").addEventListener("click", async function () {
                 try {
                     const rawResp = await fetch("/api/v0/auth/sign-out", {
                         method: "POST",
@@ -61,30 +67,28 @@
                     console.error("Error signing out: ", err);
                 }
             })
-            document.getElementById("show-delete-account-modal")?.addEventListener("click", function () {
-                document.getElementById("delete-account-modal")?.classList.remove("hide");
+            document.getElementById("show-delete-account-modal").addEventListener("click", function () {
+                document.getElementById("delete-account-modal").classList.remove("hide");
             })
-            document.getElementById("hide-delete-account-modal")?.addEventListener("click", function () {
-                document.getElementById("delete-account-modal")?.classList.add("hide");
-                const confirmPasswordInput = document.getElementById("delete-account-confirm-password-input") as HTMLInputElement | null;
-                if (confirmPasswordInput) confirmPasswordInput.value = "";
+            document.getElementById("hide-delete-account-modal").addEventListener("click", function () {
+                document.getElementById("delete-account-modal").classList.add("hide");
+                document.getElementById("delete-account-confirm-password-input").value = "";
             })
-            document.getElementById("delete-account-delete-all-my-studysets-false")?.addEventListener("click", function () {
-                document.getElementById("delete-account-delete-all-my-studysets-true")?.classList.remove("selected");
-                document.getElementById("delete-account-delete-all-my-studysets-false")?.classList.add("selected");
+            document.getElementById("delete-account-delete-all-my-studysets-false").addEventListener("click", function () {
+                document.getElementById("delete-account-delete-all-my-studysets-true").classList.remove("selected");
+                document.getElementById("delete-account-delete-all-my-studysets-false").classList.add("selected");
             })
-            document.getElementById("delete-account-delete-all-my-studysets-true")?.addEventListener("click", function () {
-                document.getElementById("delete-account-delete-all-my-studysets-true")?.classList.add("selected");
-                document.getElementById("delete-account-delete-all-my-studysets-false")?.classList.remove("selected");
+            document.getElementById("delete-account-delete-all-my-studysets-true").addEventListener("click", function () {
+                document.getElementById("delete-account-delete-all-my-studysets-true").classList.add("selected");
+                document.getElementById("delete-account-delete-all-my-studysets-false").classList.remove("selected");
             })
-            document.getElementById("delete-account-confirm-button")?.addEventListener("click", function () {
-                const confirmPasswordInput = document.getElementById("delete-account-confirm-password-input") as HTMLInputElement | null;
-                if (authedUser.authType == "OAUTH_GOOGLE" || (confirmPasswordInput?.value?.length ?? 0) > 0) {
-                    var reqBody: any = {
-                        deleteAllMyStudysets: document.getElementById("delete-account-delete-all-my-studysets-true")?.classList.contains("selected") ?? false,
+            document.getElementById("delete-account-confirm-button").addEventListener("click", function () {
+                if (data.authedUser.authType == "OAUTH_GOOGLE" || document.getElementById("delete-account-confirm-password-input").value.length > 0) {
+                    var reqBody = {
+                        deleteAllMyStudysets: document.getElementById("delete-account-delete-all-my-studysets-true").classList.contains("selected"),
                     };
-                    if (authedUser.authType != "OAUTH_GOOGLE") {
-                        reqBody.confirmPassword = confirmPasswordInput?.value
+                    if (data.authedUser.authType != "OAUTH_GOOGLE") {
+                        reqBody.confirmPassword = document.getElementById("delete-account-confirm-password-input").value
                     };
                     fetch("/api/v0/auth/delete-account", {
                         method: "POST",
@@ -96,7 +100,7 @@
                         response.json().then(function (responseJSON) {
                             if (responseJSON.error) {
                                 console.error(responseJSON.error);
-                                if (authedUser.authType == "OAUTH_GOOGLE") {
+                                if (data.authedUser.authType == "OAUTH_GOOGLE") {
                                     alert("API Error, idk why skull emoji")
                                 } else {
                                     alert("API Errored (but nicely), check your password mabye?");
@@ -117,19 +121,19 @@
     })
 </script>
 
-{#if data.authed && data.authedUser}
+{#if data.authed}
 <div id="account-signedin-div" class="box">
   <div class="flex compact-gap align-end" id="display-name-view-div">
     <p>
       <span class="h6">Display name:</span>
-      <span class="line" id="account-display-name">{ data.authedUser!.displayName }</span>
+      <span class="line" id="account-display-name">{ data.authedUser.displayName }</span>
     </p>
     <button class="icon-only-button" id="display-name-edit-button" aria-label="Edit"><IconPencil /></button>
   </div>
   <div id="display-name-edit-div" class="hide" style="margin-top:0px">
     <p class="h6" style="margin-bottom:0.6rem">Display Name:</p>
     <div class="flex" style="margin-top:0px">
-      <input type="text" id="display-name-edit" placeholder="Display Name" value={ data.authedUser!.displayName } />
+      <input type="text" id="display-name-edit" placeholder="Display Name" value={ data.authedUser.displayName } />
     </div>
     <div class="flex">
       <button id="display-name-edit-save-button">Save</button>
@@ -148,7 +152,7 @@
   <div id="account-username-password-div">
     <p>
       <span class="h6">Username:</span>
-      <span class="line" id="account-username">{ data.authedUser!.username }</span>
+      <span class="line" id="account-username">{ data.authedUser.username }</span>
     </p>
   </div>
   {/if}
@@ -182,7 +186,7 @@
   </p>
 </div>
 {/if}
-{#if data.authed && data.authedUser}
+{#if data.authed}
 <div class="modal hide" id="delete-account-modal">
   <div class="content">
       <p class="h4">Are you sure you want to delete your account?</p>

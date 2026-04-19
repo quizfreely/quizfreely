@@ -1,4 +1,4 @@
-<script lang="ts">
+<script>
     let {value = $bindable(), div, textarea, textareaElement = $bindable()} = $props();
     /*
         `textarea` and `div` are spread below

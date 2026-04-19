@@ -1,5 +1,5 @@
-<script lang="ts">
-    let { data }: { data: any } = $props();
+<script>
+    let { data } = $props();
     import HeartIcon from "$lib/icons/Heart.svelte";
     import IconCodeberg from "$lib/icons/Codeberg.svelte";
     import IconGitHub from "$lib/icons/GitHub.svelte";
@@ -22,7 +22,8 @@
            id="svg1"
            xml:space="preserve"
            xmlns:xlink="http://www.w3.org/1999/xlink"
-           xmlns="http://www.w3.org/2000/svg"><defs
+           xmlns="http://www.w3.org/2000/svg"
+           xmlns:svg="http://www.w3.org/2000/svg"><defs
              id="defs1"><linearGradient
                id="linearGradient1"><stop
                  style="stop-color: var(--main-gradient-light-stop-color, #7ca4fe); stop-opacity:1;"
