@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test('test', async ({ page }) => {
-  await page.goto('http://localhost:8080/');
+  await page.goto('/');
   await expect(page.locator('h1')).toContainText('A studying tool that\'s actually free');
   await expect(page.getByRole('banner')).toContainText('Sign in');
   await page.getByRole('link', { name: 'Get Started' }).click();
