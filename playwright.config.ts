@@ -88,6 +88,6 @@ export default defineConfig({
   webServer: process.env.DEPLOYED == "true" ? undefined : {
     command: 'npm run dev',
     url: `http://localhost:${process.env.PORT ?? "8080"}`,
-    reuseExistingServer: false,
+    reuseExistingServer: true,
   },
 });
