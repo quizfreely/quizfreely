@@ -1,27 +1,25 @@
-<script lang="ts">
+<script>
     import StudysetLinkBox from "$lib/components/StudysetLinkBox.svelte";
     import BackIcon from "$lib/icons/BackArrow.svelte";
     import BookmarkIcon from "$lib/icons/Bookmark.svelte";
     import AngleRightIcon from "$lib/icons/AngleRight.svelte";
-    import ArrowLeftIcon from "$lib/icons/ArrowLeft.svelte";
-    import ArrowRightIcon from "$lib/icons/ArrowRight.svelte";
-    import { getClientSdk } from "$lib/graphql/sdk";
-    let { data }: { data: any } = $props();
-    const sdk = getClientSdk();
-    const categoryName = ({
+    import ArrowLeftIcon from "$lib/icons/ArrowLeft.svelte"
+    import ArrowRightIcon from "$lib/icons/ArrowRight.svelte"
+    let { data } = $props();
+    const categoryName = {
         LANG: "World Languages",
         SOCIAL_STUDIES: "Social Studies",
         STEM: "STEM",
         MATH: "Math",
         LA: "Language Arts",
-    } as any)?.[data?.subject?.category];
-    const categoryPath = ({
+    }?.[data?.subject?.category];
+    const categoryPath = {
         LANG: "languages",
         SOCIAL_STUDIES: "social-studies",
         STEM: "stem",
         MATH: "math",
         LA: "language-arts",
-    } as any)?.[data?.subject?.category];
+    }?.[data?.subject?.category];
 </script>
 
 <div class="grid page">
@@ -34,15 +32,27 @@
             </a>
         </div>
         <h3>{data?.subject?.name}</h3>
-        {#snippet dropdownContent(studyset: any, hide: () => void)}
+        {#snippet dropdownContent(studyset, hide)}
             {#if studyset?.saved}
                 <button
                     onclick={async () => {
                         try {
-                            const { data: json } = await sdk.UnsaveStudyset({
-                                id: studyset?.id,
+                            const raw = await fetch("/api/graphql", {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json",
+                                },
+                                body: JSON.stringify({
+                                    query: `mutation ($id: ID!) {
+    unsaveStudyset(studysetId: $id)
+}`,
+                                    variables: {
+                                        id: studyset?.id,
+                                    },
+                                }),
                             });
-                            if (json?.unsaveStudyset) {
+                            const json = await raw.json();
+                            if (json?.data?.unsaveStudyset) {
                                 studyset.saved = false;
                                 hide();
                             } else {
@@ -62,10 +72,22 @@
                 <button
                     onclick={async () => {
                         try {
-                            const { data: json } = await sdk.SaveStudyset({
-                                id: studyset?.id,
+                            const raw = await fetch("/api/graphql", {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json",
+                                },
+                                body: JSON.stringify({
+                                    query: `mutation ($id: ID!) {
+    saveStudyset(studysetId: $id)
+}`,
+                                    variables: {
+                                        id: studyset?.id,
+                                    },
+                                }),
                             });
-                            if (json?.saveStudyset) {
+                            const json = await raw.json();
+                            if (json?.data?.saveStudyset) {
                                 studyset.saved = true;
                                 hide();
                             } else {

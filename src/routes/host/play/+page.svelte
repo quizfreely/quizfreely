@@ -1,19 +1,16 @@
-<script lang="ts">
+<script>
     import { env } from "$env/dynamic/public";
     import { onMount } from "svelte";
-    import { idbApiLayer } from "$lib/idb-api-layer";
+    import idbApiLayer from "$lib/idb-api-layer/idb-api-layer.js";
     import Lobby from "$lib/multiplayer/Lobby.svelte";
     import Leaderboard from "$lib/multiplayer/Leaderboard.svelte";
-    let { data }: { data: any } = $props();
-    let ws = $state<WebSocket | null>(null);
-    let gameCode = $state<string | null>(null);
-    let studyset = $state(data.studyset);
+    let { data } = $props();
+    let ws = $state(null);
+    let gameCode = $state(null);
+    let studyset = data.studyset;
     let inGame = $state(false);
     let showResults = $state(false);
-    let players = $state<any[]>([]);
-    let showErrorMsg = $state(false);
-    let errorMsg = $state("");
-
+    let players = $state([]);
     onMount(async () => {
         if (data.localId != null) {
             studyset = await idbApiLayer.getStudysetById(
@@ -22,17 +19,16 @@
                 }
             );
         }
-        const socket = new WebSocket(env.REALTIME_SERVER_WS_URL+"/ws");
-        ws = socket;
-        socket.onopen = () => {
+        ws = new WebSocket(env.REALTIME_SERVER_WS_URL+"/ws");
+        ws.onopen = () => {
             console.log("Connected to server");
-            socket.send(JSON.stringify({
+            ws.send(JSON.stringify({
                 action: "host",
                 studyset
             }));
         };
 
-        socket.onmessage = (event) => {
+        ws.onmessage = (event) => {
             console.log("Received: " + event.data);
             const json = JSON.parse(event.data);
             if (json?.error && json?.msg) {
@@ -44,17 +40,17 @@
             }
         };
 
-        socket.onclose = () => {
+        ws.onclose = () => {
           console.log("Connection closed");
         };
 
-        socket.onerror = (err: any) => {
+        ws.onerror = (err) => {
           console.log("Error: " + err.message);
         };
     })
 </script>
 {#if ws && gameCode && !inGame}
-    <Lobby {ws} {gameCode} hostPOV={true} startCallback={(d: any) => {
+    <Lobby {ws} {gameCode} hostPOV startCallback={(d) => {
         players = d.players;
         inGame = true;
     }}></Lobby>

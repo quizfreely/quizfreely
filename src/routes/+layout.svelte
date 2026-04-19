@@ -1,4 +1,4 @@
-<script lang="ts">
+<script>
 import Header from "$lib/components/Header.svelte";
 import Footer from "$lib/components/Footer.svelte";
 import { fade } from "svelte/transition";
@@ -23,7 +23,7 @@ beforeNavigate(function () {
     nprogressTimeout.set(
         setTimeout(function () {
             NProgress.start();
-        }, 200) as any
+        }, 200)
     );
 })
 afterNavigate(function () {

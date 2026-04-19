@@ -1,11 +1,11 @@
-<script lang="ts">
+<script>
     import StudysetLinkBox from "$lib/components/StudysetLinkBox.svelte";
     import Noscript from "$lib/components/Noscript.svelte";
     import Searchbar from "$lib/components/Searchbar.svelte";
     import ArrowLeftIcon from "$lib/icons/ArrowLeft.svelte";
     import ArrowRightIcon from "$lib/icons/ArrowRight.svelte";
 
-    let { data }: { data: any } = $props();
+    let { data } = $props();
 </script>
 
 <svelte:head>

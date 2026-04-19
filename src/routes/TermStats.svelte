@@ -1,6 +1,7 @@
-<script lang="ts">
+<script>
     import { onMount } from "svelte";
-    import { idbApiLayer, db } from "$lib/idb-api-layer";
+    import db from "$lib/idb-api-layer/db.js";
+    import idbApiLayer from "$lib/idb-api-layer/idb-api-layer.js";
     import averageAccuracy from "$lib/average-accuracy.js";
     import Chart from 'chart.js/auto';
     import 'chartjs-adapter-luxon';
@@ -9,18 +10,18 @@
     import ForwardLongArrowIcon from "$lib/icons/ForwardRightArrowLong.svelte"
     import StatsIcon from "$lib/icons/ChartGraphLine.svelte"
     import { slide } from "svelte/transition";
-    let { data }: { data: any } = $props();
-    let term = $state<any>();
-    let objectUrls: string[] = [];
+    let { data } = $props();
+    let term = $state();
+    let objectUrls = [];
 
-    let topConfusionPairsUniqueArray = $state<any[]>([]);
-    let topReverseConfusionPairsUniqueArray = $state<any[]>([]);
+    let topConfusionPairsUniqueArray = $state([]);
+    let topReverseConfusionPairsUniqueArray = $state([]);
     function combineConfusionPairs() {
         let topConfusionPairsUnique = new Map();
         let topReverseConfusionPairsUnique = new Map();
 
-        term?.topConfusionPairs?.forEach((pair: any) => {
-            let obj: any = {
+        term?.topConfusionPairs?.forEach(pair => {
+            let obj = {
                 confusedTerm: pair.confusedTerm
             };
             if (pair?.answeredWith == "DEF") {
@@ -46,8 +47,8 @@
         })
         topConfusionPairsUniqueArray = [...topConfusionPairsUnique.values()];
 
-        term?.topReverseConfusionPairs?.forEach((pair: any) => {
-            let obj: any = {
+        term?.topReverseConfusionPairs?.forEach(pair => {
+            let obj = {
                 term: pair.term
             };
             if (pair?.answeredWith == "DEF") {
@@ -79,11 +80,11 @@
         combineConfusionPairs();
     }
 
-    let chartCanvas = $state<HTMLCanvasElement | null>(null);
+    let chartCanvas;
 
     let mounted = $state(false);
     onMount(() => {
-        let chart: Chart | null = null;
+        let chart;
         (async () => {
             mounted = true;
             if (data?.settingsDateTimeFmtHours == "24") {
@@ -101,13 +102,13 @@
                             termImageUrl: true,
                             defImageUrl: true
                         }
-                    } as any,
+                    },
                     topReverseConfusionPairs: {
                         term: {
                             termImageUrl: true,
                             defImageUrl: true
                         }
-                    } as any,
+                    },
                     termImageUrl: true,
                     defImageUrl: true
                 })
@@ -144,7 +145,7 @@
             Chart.defaults.backgroundColor = mainColor;
             Chart.defaults.borderColor = borderColor;
             Chart.defaults.color = fg1Color;
-            if (chartCanvas) chart = new Chart(
+            chart = new Chart(
                 chartCanvas,
                 {
                     type: "line",
@@ -159,10 +160,10 @@
                             pointRadius: 6,
                             pointHoverRadius: 8,
                             data: (() => {
-                                let res: any[] = [];
-                                term?.progressHistory?.forEach((ph: any) => {
+                                let data = [];
+                                term?.progressHistory?.forEach(ph => {
                                     if (ph.termCorrectCount + ph.termIncorrectCount > 0) {
-                                        res.push({
+                                        data.push({
                                             x: Date.parse(ph.timestamp),
                                             y: ph.termCorrectCount / (
                                                 ph.termCorrectCount +
@@ -171,7 +172,7 @@
                                         })
                                     }
                                 });
-                                return res;
+                                return data;
                             })()
                         }, {
                             label: "Definition Accuracy",
@@ -183,10 +184,10 @@
                             pointRadius: 6,
                             pointHoverRadius: 8,
                             data: (() => {
-                                let res: any[] = [];
-                                term?.progressHistory?.forEach((ph: any) => {
+                                let data = [];
+                                term?.progressHistory?.forEach(ph => {
                                     if (ph.defCorrectCount + ph.defIncorrectCount > 0) {
-                                        res.push({
+                                        data.push({
                                             x: Date.parse(ph.timestamp),
                                             y: ph.defCorrectCount / (
                                                 ph.defCorrectCount +
@@ -195,7 +196,7 @@
                                         })
                                     }
                                 });
-                                return res;
+                                return data;
                             })()
                         }]
                     },
@@ -243,7 +244,7 @@
                                 titleFont: { weight: "normal" },
                                 displayColors: false,
                                 callbacks: {
-                                    label: (ctx: any) => Math.floor(ctx.raw.y * 100) + "%"
+                                    label: ctx => Math.floor(ctx.raw.y * 100) + "%"
                                 }
                             },
                             legend: {
@@ -309,9 +310,6 @@
         border-radius: 0.8rem;
     }
 </style>
-<svelte:head>
-    <meta name="robots" content="noindex, follow" />
-</svelte:head>
 <div class="grid page">
     <div class="content">
         <div class="flex">
@@ -421,10 +419,10 @@
                     {#if term?.progress?.termLastReviewedAt || term?.progress?.defLastReviewedAt}
                         <p class="shy-h4" style="margin-top: 0px;">{mounted ? (
                             fancyTimestamp.format(
-                                new Date(Math.max(
+                                Math.max(
                                     Date.parse(term?.progress?.termLastReviewedAt) || 0,
                                     Date.parse(term?.progress?.defLastReviewedAt) || 0
-                                ))
+                                )
                             )
                         ) : ""}</p>
                     {/if}

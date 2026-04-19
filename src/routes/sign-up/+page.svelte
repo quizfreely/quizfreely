@@ -1,11 +1,11 @@
-<script lang="ts">
+<script>
   import { env } from "$env/dynamic/public";
   import { onMount } from "svelte";
   import { goto } from "$app/navigation";
   import { slide } from "svelte/transition";
   import Noscript from "$lib/components/Noscript.svelte";
 
-  let { data }: { data: any } = $props();
+  let { data } = $props();
 
   let showErr = $state(false);
   let errMsg = $state("");
@@ -19,15 +19,12 @@
       }
 
       function signupSubmit() {
-        const usernameInput = document.getElementById("signupUsernameInput") as HTMLInputElement;
-        const passwordInput = document.getElementById("signupPasswordInput") as HTMLInputElement;
-        const passwordConfirmInput = document.getElementById("signupPasswordConfirmInput") as HTMLInputElement;
         if (
-          passwordInput.value ===
-          passwordConfirmInput.value
+          document.getElementById("signupPasswordInput").value ===
+          document.getElementById("signupPasswordConfirmInput").value
         ) {
           showErr = false;
-          var username = usernameInput.value;
+          var username = document.getElementById("signupUsernameInput").value;
           fetch("/api/v0/auth/sign-up", {
             method: "POST",
             headers: {
@@ -35,7 +32,7 @@
             },
             body: JSON.stringify({
               username: username,
-              password: passwordInput.value,
+              password: document.getElementById("signupPasswordInput").value,
             }),
           })
             .then(function (rawRes) {
@@ -82,10 +79,10 @@
       }
       document
         .getElementById("signupButton")
-        ?.addEventListener("click", signupSubmit);
+        .addEventListener("click", signupSubmit);
       document
         .getElementById("signupPasswordConfirmInput")
-        ?.addEventListener("keyup", function (event) {
+        .addEventListener("keyup", function (event) {
           if (event.key == "Enter") {
             signupSubmit();
           }

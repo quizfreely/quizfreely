@@ -1,4 +1,4 @@
-<script lang="ts">
+<script>
   import Searchbar from "$lib/components/Searchbar.svelte";
   import { page } from "$app/state";
   import { beforeNavigate } from "$app/navigation";
@@ -8,10 +8,7 @@
   import IconCloseXMark from "$lib/icons/CloseXMark.svelte";
 
   beforeNavigate(function (navigation) {
-    const el = document.getElementById("nav-menu-toggle");
-    if (el) {
-        (el as HTMLInputElement).checked = false;
-    }
+    document.getElementById("nav-menu-toggle").checked = false;
   });
 </script>
 
@@ -48,10 +45,10 @@
   <div class="status">
     {#if page.data?.authed}
       <!--<div class="dropdown" tabindex="0" style="margin-top:0px;margin-bottom:0px;margin-left:1rem;margin-right:1rem">
-                {#if page.data.authedUser!.display_name.length < 10 }
+                {#if page.data.authedUser.display_name.length < 10 }
                     <button class="faint">
                       <IconUser />
-                      { page.data.authedUser!.display_name }
+                      { page.data.authedUser.display_name }
                     </button>
                 {:else}
                     <button class="faint">
@@ -60,18 +57,18 @@
                     </button>
                 {/if}
                 <div class="content" style="right:0">
-                  <a href="/users/{ page.data.authedUser!.id }" class="button">Profile</a>
+                  <a href="/users/{ page.data.authedUser.id }" class="button">Profile</a>
                   <a href="/settings" class="button">Settings</a>
                 </div>
             </div>-->
       <div
         style="margin-top:0px;margin-bottom:0px;margin-left:0px;margin-right:1rem"
       >
-        <a href="/users/{page.data.authedUser!?.id}" class="button faint">
+        <a href="/users/{page.data.authedUser?.id}" class="button faint">
           <IconUser />
           <span class="hide-on-mobile-for-compactness"
-            >{page.data.authedUser!.displayName.length < 10
-              ? page.data.authedUser!.displayName
+            >{page.data.authedUser.displayName.length < 10
+              ? page.data.authedUser.displayName
               : "Signed in"}</span
           >
         </a>

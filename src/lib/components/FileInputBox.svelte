@@ -1,9 +1,9 @@
-<script lang="ts">
-    let { accept, multiple = false, onChangeCallback }: { accept?: string, multiple?: boolean, onChangeCallback?: (files: FileList) => void } = $props();
-    let files: FileList;
-    let filesArray = $state<File[]>([]);
-    let dropArea: HTMLDivElement;
-    let fileInput: HTMLInputElement;
+<script>
+    let { accept, multiple = false, onChangeCallback } = $props();
+    let files;
+    let filesArray = $state([]);
+    let dropArea;
+    let fileInput;
     let highlightDropArea = $state(false);
 
     export function clear() {
@@ -65,25 +65,20 @@
         e.preventDefault();
         e.stopPropagation();
         highlightDropArea = false;
-        if (e.dataTransfer) {
-            files = e.dataTransfer.files;
-            filesArray = Array.from(files);
-            if (onChangeCallback) {
-                onChangeCallback(files);
-            }
+        files = e.dataTransfer.files;
+        filesArray = Array.from(files);
+        if (onChangeCallback) {
+            onChangeCallback(files);
         }
     }}>
     <span>Drag & Drop Here or Select {multiple ? "Files" : "File"}</span>
     <label class="button">
         Select {multiple ? "File" : "File"}
         <input type="file" {accept} {multiple} class="invisible" bind:this={fileInput} onchange={e => {
-            const target = e.target as HTMLInputElement;
-            if (target.files) {
-                files = target.files;
-                filesArray = Array.from(files);
-                if (onChangeCallback) {
-                    onChangeCallback(files);
-                }
+            files = e.target.files;
+            filesArray = Array.from(files);
+            if (onChangeCallback) {
+                onChangeCallback(files);
             }
         }}>
     </label>

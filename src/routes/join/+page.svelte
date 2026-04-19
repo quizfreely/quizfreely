@@ -1,20 +1,20 @@
-<script lang="ts">
+<script>
     import { env } from "$env/dynamic/public";
     import { scale } from "svelte/transition";
     import Lobby from "$lib/multiplayer/Lobby.svelte";
     import Game from "$lib/multiplayer/Game.svelte";
     import { footerState } from "$lib/components/footer.svelte.js";
-    let { data }: { data: any } = $props()
+    let { data } = $props()
     let gameCode = $state("");
-    let uniqueName = $state("");
+    let uniqueName;
     let codeEntered = $state(false);
     let inLobby = $state(false);
     let inGame = $state(false);
     let showErrorMsg = $state(false)
     let errorMsg = $state("");
-    let ws = $state<WebSocket | null>(null);
-    let players = $state<any[]>([]);
-    let studyset = $state<any>();
+    let ws = $state(null);
+    let players = [];
+    let studyset;
 
     if (data?.prefilledCode?.length > 0) {
         gameCode = data.prefilledCode.substring(0,4)+" "+data.prefilledCode.substring(4);
@@ -50,14 +50,13 @@
                 return;
             }
         } else if (uniqueName?.length > 0) {
-            const socket = new WebSocket(env.REALTIME_SERVER_WS_URL+"/ws");
-            ws = socket;
-            socket.onopen = () => {
+            ws = new WebSocket(env.REALTIME_SERVER_WS_URL+"/ws");
+            ws.onopen = () => {
               console.log("Connected to server");
-              socket.send(JSON.stringify({ action: "join", code: gameCode.replaceAll(" ", ""), uniqueName }));
+              ws.send(JSON.stringify({ action: "join", code: gameCode.replaceAll(" ", ""), uniqueName }));
             };
 
-            socket.onmessage = (event) => {
+            ws.onmessage = (event) => {
                 console.log("Received: " + event.data);
                 const json = JSON.parse(event.data);
                 if (json?.error && json?.msg) {
@@ -87,11 +86,11 @@
                 }
             };
 
-            socket.onclose = () => {
+            ws.onclose = () => {
               console.log("Connection closed");
             };
 
-            socket.onerror = (err: any) => {
+            ws.onerror = (err) => {
               console.log("Error: " + err.message);
             };
         } else {
@@ -116,7 +115,7 @@
         <h1 class="h3 center" style="margin-bottom: 0px;">Join Game</h1>
         {#if !codeEntered}
         <div>
-        <input class="large-textbox-thing" style="max-width: 16rem;" type="text" id="gameCode" placeholder="A100 B200" autocomplete="off" bind:value={gameCode} oninput={(e: any) => {
+        <input class="large-textbox-thing" style="max-width: 16rem;" type="text" id="gameCode" placeholder="A100 B200" autocomplete="off" bind:value={gameCode} oninput={(e) => {
             let pos = e.target.selectionStart ?? 0;
             gameCode = gameCode.toUpperCase().replaceAll(" ", "");
             if (gameCode.length > 4) {
@@ -151,7 +150,7 @@
 </div>
 {:else if inLobby}
     {#if ws && gameCode}
-        <Lobby {ws} {players} {gameCode} hostPOV={false} startCallback={(d: any) => {
+        <Lobby {ws} {players} {gameCode} startCallback={(d) => {
             players = d.players;
             inLobby = false;
             inGame = true;
@@ -159,6 +158,6 @@
     {/if}
 {:else if inGame}
     {#if ws && gameCode}
-        <Game {ws} {players} {studyset} {gameCode} answerWith="TERM"></Game>
+        <Game {ws} {players} {studyset} {gameCode}></Game>
     {/if}
 {/if}

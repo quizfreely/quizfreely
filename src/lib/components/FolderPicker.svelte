@@ -1,6 +1,5 @@
-<script lang="ts">
+<script>
     import { onMount } from "svelte";
-    import { getClientSdk } from "$lib/graphql/sdk";
     import { fade, slide } from "svelte/transition";
     import CloseXMarkIcon from "$lib/icons/CloseXMark.svelte";
     import FolderIcon from "$lib/icons/Folder.svelte";
@@ -10,26 +9,37 @@
         errMsg,
         showNoneOption,
         noneCallback,
-    }: {
-        closeCallback: () => void,
-        selectCallback: (folder: any, showErr: (show: boolean) => void) => void,
-        errMsg?: any,
-        showNoneOption?: boolean,
-        noneCallback?: (showErr: (show: boolean) => void) => void,
     } = $props();
-    let folders: { id: string, name: string }[] = $state([]);
+    let folders = $state([]);
     let showErrMsg = $state(false);
     let showActionErrMsg = $state(false);
     let showCreateErrMsg = $state(false);
     let newFolderName = $state("");
-    const sdk = getClientSdk();
     onMount(async () => {
         try {
-            const { data: resp } = await sdk.GetMyFolders();
-            if (resp?.myFolders) {
-                folders = (resp.myFolders.edges?.map((e: any) => e.node) ?? []) as { id: string, name: string }[];
+            const raw = await fetch(`/api/graphql`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    query: `{
+    myFolders {
+        edges {
+            node {
+                id
+                name
+            }
+        }
+    }
+}`,
+                }),
+            });
+            const resp = await raw.json();
+            if (resp?.data) {
+                folders = resp.data.myFolders?.edges?.map((e) => e.node) ?? [];
             } else {
-                console.error("No data in response: ", resp);
+                console.error("No data property in json response: ", resp);
                 showErrMsg = true;
             }
         } catch (err) {
@@ -43,14 +53,30 @@
         newFolderName = "";
         showCreateErrMsg = false;
         try {
-            const { data: resp } = await sdk.CreateFolder({ name: folderName });
-            if (resp?.createFolder?.id) {
+            const raw = await fetch(`/api/graphql`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    query: `mutation ($name: String!) {
+    createFolder(name: $name) {
+        id
+    }
+}`,
+                    variables: {
+                        name: folderName,
+                    },
+                }),
+            });
+            const resp = await raw.json();
+            if (resp?.data?.createFolder?.id) {
                 folders.push({
-                    id: resp.createFolder.id,
+                    id: resp?.data?.createFolder?.id,
                     name: folderName,
                 });
             } else {
-                console.error("Unsuccessful response: ", resp);
+                console.error("Unsuccessful json response: ", resp);
                 showCreateErrMsg = true;
             }
         } catch (err) {
@@ -86,7 +112,7 @@
                 <button
                     class="button-box"
                     onclick={() =>
-                        noneCallback?.((show) => (showActionErrMsg = show))}
+                        noneCallback((show) => (showActionErrMsg = show))}
                 >
                     None
                 </button>

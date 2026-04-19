@@ -1,8 +1,8 @@
-<script lang="ts">
+<script>
     import Noscript from "$lib/components/Noscript.svelte";
     import GroupIcon from "$lib/icons/GroupUsers.svelte";
     import EnterIcon from "$lib/icons/Enter.svelte";
-    let { data }: { data: any } = $props();
+    let { data } = $props();
 </script>
 <style>
     .top-menu-link {

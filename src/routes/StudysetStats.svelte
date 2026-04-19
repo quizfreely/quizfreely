@@ -1,22 +1,21 @@
-<script lang="ts">
+<script>
     import { onMount } from "svelte";
     import Chart from 'chart.js/auto';
     import 'chartjs-adapter-luxon';
     import { fancyTimestamp } from "$lib/fancyTimestamp";
-    import { idbApiLayer, db } from "$lib/idb-api-layer";
+    import db from "$lib/idb-api-layer/db.js";
+    import idbApiLayer from "$lib/idb-api-layer/idb-api-layer.js";
     import averageAccuracy from "$lib/average-accuracy.js";
     import BackIcon from "$lib/icons/BackArrow.svelte"
     import ForwardLongArrowIcon from "$lib/icons/ForwardRightArrowLong.svelte"
     import StatsIcon from "$lib/icons/ChartGraphLine.svelte"
     import { slide } from "svelte/transition";
-    let { data }: {
-        data: any
-    } = $props();
-    let terms = $state<any[]>(
+    let { data } = $props();
+    let terms = $state(
         data?.local ?
             [] : data?.studyset?.terms
     );
-    let practiceTests = $state<any[]>(
+    let practiceTests = $state(
         data?.local ?
             [] : data?.studyset?.practiceTests
     );
@@ -63,13 +62,13 @@
         }
     })
 
-    let chartCanvasTerms: HTMLCanvasElement;
-    let chartCanvas: HTMLCanvasElement;
+    let chartCanvasTerms;
+    let chartCanvas;
 
     let mounted = $state(false);
     onMount(() => {
-        let chart: Chart;
-        let objectUrls: string[] = [];
+        let chart;
+        let objectUrls = [];
         (async () => {
             mounted = true;
             if (data?.settingsDateTimeFmtHours == "24") {
@@ -86,17 +85,17 @@
                         progress: true,
                         topConfusionPairs: {
                             confusedTerm: true
-                        } as any,
+                        },
                         topReverseConfusionPairs: {
                             term: true
-                        } as any,
+                        },
                         termImageUrl: true,
                         defImageUrl: true
                     },
                     practiceTests: true
                 })
-                terms = (studyset?.terms as any[]) ?? [];
-                terms.forEach((term: any) => {
+                terms = studyset.terms;
+                terms.forEach(term => {
                     if (term.termImageUrl != null) {
                         objectUrls.push(term.termImageUrl);
                     }
@@ -104,7 +103,7 @@
                         objectUrls.push(term.defImageUrl);
                     }
                 })
-                practiceTests = (studyset?.practiceTests as any[]) ?? [];
+                practiceTests = studyset?.practiceTests;
             }
 
             if (!data.authed && !data.local) {
@@ -157,7 +156,7 @@
                                 pointStyle: "circle",
                                 pointRadius: 6,
                                 pointHoverRadius: 8,
-                                data: practiceTests.map((pt: any) => ({
+                                data: practiceTests.map(pt => ({
                                     x: Date.parse(pt.timestamp),
                                     y: pt.questionsCorrect / pt.questionsTotal
                                 }))
@@ -213,7 +212,7 @@
                                 titleFont: { weight: "normal" },
                                 displayColors: false,
                                 callbacks: {
-                                    label: (ctx: any) => Math.floor(ctx.raw.y * 100) + "%"
+                                    label: ctx => Math.floor(ctx.raw.y * 100) + "%"
                                 }
                             },
                             legend: {
@@ -338,9 +337,6 @@
         border-radius: 0.8rem;
     }
 </style>
-<svelte:head>
-    <meta name="robots" content="noindex, follow" />
-</svelte:head>
 <div class="grid page">
     <div class="content">
         <div class="flex">

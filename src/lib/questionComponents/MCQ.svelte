@@ -1,19 +1,9 @@
-<script lang="ts">
+<script>
     import CheckmarkIcon from "$lib/icons/Checkmark.svelte";
     import XMarkIcon from "$lib/icons/CloseXMark.svelte";
-    let { term, answerWith, distractors, viewOnly, showAccuracy, answerUpdateCallback, answeredTerm, correctChoiceIndex, showCorrectAnswer = $bindable() }: {
-        term: any,
-        answerWith: "TERM" | "DEF",
-        distractors: any[],
-        viewOnly: boolean,
-        showAccuracy: boolean,
-        answerUpdateCallback: () => void,
-        answeredTerm?: any,
-        correctChoiceIndex?: number | null,
-        showCorrectAnswer: boolean
-    } = $props();
+    let { term, answerWith, distractors, viewOnly, showAccuracy, answerUpdateCallback, answeredTerm, correctChoiceIndex, showCorrectAnswer } = $props();
     /* answeredTerm and correctChoiceIndex are only defined when reviewing questions from a completed practice test */
-    function shuffleInPlace(arr: any[]) {
+    function shuffleInPlace(arr) {
         for (let index = arr.length - 1; index > 0; index--) {
             const randomIndex = Math.floor(Math.random() * (index + 1));
             [arr[index], arr[randomIndex]] = [arr[randomIndex], arr[index]];
