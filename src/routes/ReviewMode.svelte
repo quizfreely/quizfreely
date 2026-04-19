@@ -1,5 +1,5 @@
 <script>
-    import idbApiLayer from "$lib/idb-api-layer/idb-api-layer.js";
+    import { idbApiLayer } from "$lib/idb-api-layer";
     let { data } = $props();
 </script>
 <div class="grid page">
