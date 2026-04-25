@@ -172,7 +172,7 @@
     let defaultQuestionsCount = $derived.by(() => {
         if (terms?.length < 30) {
             return terms?.length;
-        } else 
+        } else {
             return 20;
         }
     });
