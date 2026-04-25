@@ -170,14 +170,10 @@
     let questionsCountEntered = $state();
 
     let defaultQuestionsCount = $derived.by(() => {
-        if (terms?.length > 20) {
-            return 25;
-        } else if (terms?.length > 15) {
+        if (terms?.length < 30) {
+            return terms?.length;
+        } else 
             return 20;
-        } else if (terms?.length > 10) {
-            return 15;
-        } else {
-            return 10;
         }
     });
 
