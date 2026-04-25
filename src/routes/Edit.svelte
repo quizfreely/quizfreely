@@ -1139,6 +1139,19 @@
                     Cancel
                 </a>
             </div>
+
+            {#if isDraft && !data.authed}
+                <p class="text fg0" style="margin-top: 2rem;">
+                    This studyset will be local & private.
+                    <span class="optional-line"><a href="/sign-in">Sign in</a> or <a href="/sign-up">create an account</a> to post public studysets.</span>
+                </p>
+            {:else if !data.authed}
+                <p class="text fg0" style="margin-top: 2rem;">
+                    This studyset is local & private.
+                    <span class="optional-line"><a href="/sign-in">Sign in</a> or <a href="/sign-up">create an account</a> to post public studysets.</span>
+                </p>
+            {/if}
+
             {#if showImportTermsModal}
                 <div class="modal" transition:fade={{ duration: 200 }}>
                     <div class="content">
