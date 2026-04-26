@@ -901,7 +901,7 @@
                     Back
                 </a>
             </div>
-            <input id="edit-title" type="text" placeholder="Title" />
+            <input id="edit-title" type="text" placeholder="Title" class="title-textbox" />
             {#if data.authed && !data.local}
                 <div id="edit-private-div">
                     <div class="flex">
@@ -1612,5 +1612,16 @@
         margin: 0px;
         padding: 0px;
         border-radius: 0.8rem;
+    }
+
+    .title-textbox,
+    input.title-textbox {
+        width: 100%;
+    }
+    .title-textbox,
+    input.title-textbox,
+    .title-textbox::placeholder,
+    input.title-textbox::placeholder {
+        font-size: 1.6rem;
     }
 </style>
