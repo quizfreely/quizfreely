@@ -6,6 +6,7 @@
     import { fade } from "svelte/transition";
     let { data } = $props();
 
+    import Flashcards from "./Flashcards.svelte";
     import Dropdown from "$lib/components/Dropdown.svelte";
     import FolderPicker from "$lib/components/FolderPicker.svelte";
 
@@ -13,9 +14,6 @@
     import IconPencil from "$lib/icons/Pencil.svelte";
     import IconEyeSlash from "$lib/icons/EyeSlash.svelte";
     import IconTrash from "$lib/icons/Trash.svelte";
-    import IconBackArrow from "$lib/icons/BackArrow.svelte";
-    import IconArrowLeft from "$lib/icons/ArrowLeft.svelte";
-    import IconArrowRight from "$lib/icons/ArrowRight.svelte";
     import IconMoreDotsV from "$lib/icons/MoreDotsVertical.svelte";
     import IconReviewModeBook from "$lib/icons/ReviewModeBook.svelte";
     import IconPracticeTestChecklist from "$lib/icons/PracticeTestChecklist.svelte";
@@ -27,45 +25,11 @@
     import FolderIcon from "$lib/icons/Folder.svelte";
     import AngleRIcon from "$lib/icons/AngleRight.svelte";
 
-    import { Confetti } from "svelte-confetti";
     import { footerState } from "$lib/components/footer.svelte.js";
 
     var showDeleteConfirmationModal = $state(false);
     let title = $state(data?.studyset?.title);
     let terms = $state(data?.studyset?.terms);
-    let flashcardsIndex = $state(0);
-
-    /* use a set to track seen flashcards
-    so flipping same card does not add a new element
-    so we can use the length/size to check how many cards have been seen (both sides) this session */
-    let flashcardsSeenWhileMax = $state(new Set());
-    let showConfetti = $state(false);
-
-    function flashcardsFlip() {
-        document.getElementById("flashcard").classList.toggle("flip");
-        if (flashcardsMaximized) {
-            flashcardsSeenWhileMax.add(flashcardsIndex);
-        }
-    }
-    function flashcardsPrev() {
-        if (flashcardsIndex > 0) {
-            flashcardsIndex -= 1;
-        }
-    }
-    function flashcardsNext() {
-        if (flashcardsIndex < terms?.length - 1) {
-            flashcardsIndex += 1;
-        }
-
-        if (
-            flashcardsMaximized == true &&
-            terms?.length > 4 &&
-            flashcardsIndex == terms?.length - 1 &&
-            flashcardsSeenWhileMax.size == terms?.length - 1
-        ) {
-            showConfetti = true;
-        }
-    }
 
     let mounted = $state(false);
     onMount(function () {
@@ -96,63 +60,8 @@
             })();
         }
 
-        function flashcardsOnKeyDown(e) {
-            const active = document.activeElement;
-            if (
-                active &&
-                (active.tagName === "INPUT" ||
-                    active.tagName === "TEXTAREA" ||
-                    active.isContentEditable)
-            ) {
-                return;
-            }
-
-            switch (e.key) {
-                case "ArrowLeft":
-                case "h":
-                case "j":
-                    flashcardsPrev();
-                    break;
-                case "ArrowRight":
-                case "l":
-                case "k":
-                    flashcardsNext();
-                    break;
-                case " " /* space */:
-                    /* prevent scrolling,
-                    but don't flip here in keydown,
-                    to avoid spam-flipping */
-                    e.preventDefault();
-
-                /* next/prev is in keydown to allow spamming to move quickly,
-                flip is in keyup to prevent spam reflipping */
-            }
-        }
-        function flashcardsOnKeyUp(e) {
-            const active = document.activeElement;
-            if (
-                active &&
-                (active.tagName === "INPUT" ||
-                    active.tagName === "TEXTAREA" ||
-                    active.isContentEditable)
-            ) {
-                return;
-            }
-
-            if (e.key == " ") {
-                /* flip in keyup to only flip once */
-                e.preventDefault();
-                flashcardsFlip();
-            }
-        }
-
-        window.addEventListener("keydown", flashcardsOnKeyDown);
-        window.addEventListener("keyup", flashcardsOnKeyUp);
-
-        /* return cleanup function to remove eventlisteners & cleanup object urls */
+        /* return cleanup function to cleanup object urls */
         return () => {
-            window.removeEventListener("keydown", flashcardsOnKeyDown);
-            window.removeEventListener("keyup", flashcardsOnKeyUp);
             objectUrls.forEach(objectUrl => URL.revokeObjectURL(objectUrl));
         };
     });
@@ -441,100 +350,7 @@
                     {/if}
                 </div>
             {/if}
-            <div id="flashcards-outer-div">
-                {#if flashcardsMaximized}
-                    <div class="flex">
-                        <button
-                            id="flashcards-unmaximize"
-                            class="faint"
-                            onclick={unmaximizeFlashcards}
-                        >
-                            <IconBackArrow /> Back
-                        </button>
-                    </div>
-                {/if}
-                <div>
-                    <div
-                        class="card double"
-                        id="flashcard"
-                        onclick={flashcardsFlip}
-                    >
-                        <div class="content">
-                            <div
-                                class="front"
-                                id="flashcard-front"
-                            >
-                                <div>
-                                <div style="white-space:pre-wrap">{terms?.[flashcardsIndex]?.term ?? "term"}</div>
-                                {#if terms?.[flashcardsIndex]?.termImageUrl != null}
-                                <div><img src={terms[flashcardsIndex].termImageUrl} alt="term image" class="flashcard-term-image"></div>
-                                {/if}
-                                </div>
-                            </div>
-                            <div
-                                class="back"
-                                id="flashcard-back"
-                            >
-                                <div>
-                                <div style="white-space:pre-wrap">{terms?.[flashcardsIndex]?.def ?? "definition"}</div>
-                                {#if terms?.[flashcardsIndex]?.defImageUrl != null}
-                                <div><img src={terms[flashcardsIndex].defImageUrl} alt="definition image" class="flashcard-term-image"></div>
-                                {/if}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="caption">
-                        <div
-                            class="progress-bar thin yay"
-                            style="margin-left: 0.4rem; margin-right: 0.4rem;"
-                        >
-                            <div
-                                style="width: {terms != null
-                                    ? ((flashcardsIndex + 1) / terms?.length) *
-                                      100
-                                    : '20'}%"
-                            ></div>
-                        </div>
-                    </div>
-                    <div class="caption centerThree">
-                        <p id="flashcards-count">
-                            {flashcardsIndex + 1}/{terms?.length ?? "?"}
-                        </p>
-                        <div class="flex justifyselfcenter compact-gap">
-                            <button
-                                id="flashcards-prev-button"
-                                class="faint"
-                                aria-label="Previous Card"
-                                onclick={flashcardsPrev}
-                            >
-                                <IconArrowLeft />
-                            </button>
-                            <button
-                                id="flashcards-flip-button"
-                                class="faint"
-                                onclick={flashcardsFlip}>Flip</button
-                            >
-                            <button
-                                id="flashcards-next-button"
-                                class="faint"
-                                aria-label="Next Card"
-                                onclick={flashcardsNext}
-                            >
-                                <IconArrowRight />
-                            </button>
-                        </div>
-                        <div class="flex end">
-                            <!--<button id="flashcards-maximize-button">
-                <i class="nf nf-md-fullscreen"></i>
-              </button>
-              <button id="flashcards-unmaximize-button" class="hide">
-                <i class="nf nf-md-fullscreen_exit"></i>
-              </button>-->
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <Flashcards {terms} {flashcardsMaximized} {unmaximizeFlashcards} />
             {#if !flashcardsMaximized}
                 <div id="terms-and-stuff-outer-div">
                     <div class="caption grid list">
@@ -960,33 +776,11 @@
         </div>
     </div>
 </main>
-{#if showConfetti}
-    <!-- fullscreen confetti -->
-    <div
-        style="position: fixed; top: -50px; left 0px; margin-top: 0px; height: 100vh; width: 100vw; display: flex; justify-content: center; overflow: hidden; pointer-events: none;"
-    >
-        <Confetti
-            x={[-5, 5]}
-            y={[0, 0.1]}
-            delay={[0, 6000]}
-            duration={4000}
-            amount="1000"
-            fallDistance="200vh"
-        />
-    </div>
-{/if}
 
 <style>
     .term-image {
         max-width: 18.6rem;
         max-height: 300px;
-        margin: 0px;
-        padding: 0px;
-        border-radius: 0.8rem;
-    }
-    .flashcard-term-image {
-        max-width: 300px;
-        max-height: 200px;
         margin: 0px;
         padding: 0px;
         border-radius: 0.8rem;
