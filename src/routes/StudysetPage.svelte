@@ -722,6 +722,240 @@
                     ></FolderPicker>
                 {/if}
             {/if}
+<!--            {#if showExportModal}
+                <div class="modal" transition:fade={{ duration: 200 }}>
+                    <div class="content">
+                        <div class="grid import-terms-split">
+                            <div>
+                                <p>Between term & definition</p>
+                                <div
+                                    class="flex compact-gap nowrap"
+                                    style="flex-direction: column; align-items: start; align-content: start;"
+                                >
+                                    <div
+                                        class="flex compact-gap nowrap"
+                                        style="flex-direction: column; align-content: start;"
+                                    >
+                                        <button
+                                            class="button-box {exportTermDefDelimiterRadioSelect ==
+                                            'tab'
+                                                ? 'selected'
+                                                : ''}"
+                                            onclick={() =>
+                                                (exportTermDefDelimiterRadioSelect =
+                                                    "tab")}
+                                        >
+                                            <IconCheckmark
+                                                class="button-box-selected-icon"
+                                            ></IconCheckmark>
+                                            Tab
+                                        </button>
+                                        <button
+                                            class="button-box {exportTermDefDelimiterRadioSelect ==
+                                            'comma'
+                                                ? 'selected'
+                                                : ''}"
+                                            onclick={() =>
+                                                (exportTermDefDelimiterRadioSelect =
+                                                    "comma")}
+                                        >
+                                            <IconCheckmark
+                                                class="button-box-selected-icon"
+                                            ></IconCheckmark>
+                                            Comma
+                                        </button>
+                                        <button
+                                            class="button-box {exportTermDefDelimiterRadioSelect ==
+                                            'custom'
+                                                ? 'selected'
+                                                : ''}"
+                                            onclick={() =>
+                                                (exportTermDefDelimiterRadioSelect =
+                                                    "custom")}
+                                        >
+                                            <IconCheckmark
+                                                class="button-box-selected-icon"
+                                            ></IconCheckmark>
+                                            Custom
+                                        </button>
+                                    </div>
+                                </div>
+                                {#if exportTermDefDelimiterRadioSelect == "custom"}
+                                    <input
+                                        type="text"
+                                        placeholder="Term Delimiter"
+                                        id="export-custom-termdef-delimiter-input"
+                                        class="slightly-smaller-textbox"
+                                        transition:scale={{ duration: 400 }}
+                                    />
+                                {/if}
+                            </div>
+                            <div>
+                                <p>Between rows</p>
+                                <div
+                                    class="flex compact-gap nowrap"
+                                    style="flex-direction: column; align-items: start; align-content: start;"
+                                >
+                                    <div
+                                        class="flex compact-gap nowrap"
+                                        style="flex-direction: column; align-content: start;"
+                                    >
+                                        <button
+                                            class="button-box {exportRowDelimiterRadioSelect ==
+                                            'newline'
+                                                ? 'selected'
+                                                : ''}"
+                                            onclick={() =>
+                                                (exportRowDelimiterRadioSelect =
+                                                    "newline")}
+                                        >
+                                            <IconCheckmark
+                                                class="button-box-selected-icon"
+                                            ></IconCheckmark>
+                                            New line
+                                        </button>
+                                        <button
+                                            class="button-box {exportRowDelimiterRadioSelect ==
+                                            'semicolon'
+                                                ? 'selected'
+                                                : ''}"
+                                            onclick={() =>
+                                                (exportRowDelimiterRadioSelect =
+                                                    "semicolon")}
+                                        >
+                                            <IconCheckmark
+                                                class="button-box-selected-icon"
+                                            ></IconCheckmark>
+                                            Semicolon
+                                        </button>
+                                        <button
+                                            class="button-box {exportRowDelimiterRadioSelect ==
+                                            'custom'
+                                                ? 'selected'
+                                                : ''}"
+                                            onclick={() =>
+                                                (exportRowDelimiterRadioSelect =
+                                                    "custom")}
+                                        >
+                                            <IconCheckmark
+                                                class="button-box-selected-icon"
+                                            ></IconCheckmark>
+                                            Custom
+                                        </button>
+                                    </div>
+                                </div>
+                                {#if exportRowDelimiterRadioSelect == "custom"}
+                                    <input
+                                        type="text"
+                                        placeholder="Row Delimiter"
+                                        id="export-custom-row-delimiter-input"
+                                        class="slightly-smaller-textbox"
+                                        transition:scale={{ duration: 400 }}
+                                    />
+                                {/if}
+                            </div>
+                        </div>
+                        <textarea
+                            id="export-textarea"
+                            class="vertical"
+                            rows="3"
+                            placeholder="Press the export button, then copy terms here"
+                        ></textarea>
+                        <div class="flex">
+                            <button
+                                onclick={function () {
+                                    var termDefDelimiter;
+                                    var rowDelimiter;
+                                    if (
+                                        exportTermDefDelimiterRadioSelect ==
+                                        "tab"
+                                    ) {
+                                        termDefDelimiter = "\t";
+                                    } else if (
+                                        exportTermDefDelimiterRadioSelect ==
+                                        "comma"
+                                    ) {
+                                        termDefDelimiter = ",";
+                                    } else if (
+                                        exportTermDefDelimiterRadioSelect ==
+                                        "custom"
+                                    ) {
+                                        termDefDelimiter = exportCustomTermDefDelimiter;
+                                        if (termDefDelimiter == "") {
+                                            alert(
+                                                "Custom delimiter can't be blank >:(",
+                                            );
+                                            return;
+                                        }
+                                    }
+                                    if (
+                                        exportRowDelimiterRadioSelect ==
+                                        "newline"
+                                    ) {
+                                        rowDelimiter = "\n";
+                                    } else if (
+                                        exportRowDelimiterRadioSelect ==
+                                        "semicolon"
+                                    ) {
+                                        rowDelimiter = ";";
+                                    } else if (
+                                        exportRowDelimiterRadioSelect ==
+                                        "custom"
+                                    ) {
+                                        rowDelimiter = exportCustomRowDelimiter;
+                                        if (rowDelimiter == "") {
+                                            alert(
+                                                "Custom delimiter can't be blank >:(",
+                                            );
+                                            return;
+                                        }
+                                    }
+
+
+                                    var pastedData = document.getElementById(
+                                        "import-terms-paste-textarea",
+                                    ).value;
+                                    const terms2dArray = [];
+                                    terms.forEach(term => {
+                                        terms2dArray.push()
+                                    })
+                                    addTermsFrom2DArray(
+                                        pastedData
+                                            .split(rowDelimiter)
+                                            .map((row) =>
+                                                row
+                                                    ? row.split(
+                                                          termDefDelimiter,
+                                                      )
+                                                    : ["", ""],
+                                            ),
+                                    );
+
+                                    /* after importing, if there was a delimiter at the end, it will create a blank last term,
+                      check the last term and remove it if it's blank */
+                                    if (
+                                        terms[terms.length - 1].term === "" &&
+                                        terms[terms.length - 1].def === ""
+                                    ) {
+                                        terms.splice(terms.length - 1, 1);
+                                    }
+
+                                    unsavedChanges = true;
+
+                                    /* hide the modal after importing */
+                                    showImportTermsModal = false;
+                                }}>Import</button
+                            >
+                            <button
+                                class="alt"
+                                onclick={function () {
+                                    showImportTermsModal = false;
+                                }}>Cancel</button
+                            >
+                        </div>
+                    </div>
+                </div>
+            {/if} -->
         </div>
     </div>
 </main>
