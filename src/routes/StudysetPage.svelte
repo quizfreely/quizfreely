@@ -722,6 +722,7 @@
                     ></FolderPicker>
                 {/if}
             {/if}
+<!-- TODO: WORK IN PROGRESS export terms -->
 <!--            {#if showExportModal}
                 <div class="modal" transition:fade={{ duration: 200 }}>
                     <div class="content">
