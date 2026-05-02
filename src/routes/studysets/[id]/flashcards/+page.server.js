@@ -48,6 +48,7 @@ export async function load({ params, cookies }) {
           if (apiRes?.data?.studyset) {
             return {
               terms: apiRes.data.studyset.terms,
+              cloudId: params.id,
               authed: authed,
               authedUser: authedUser
             }

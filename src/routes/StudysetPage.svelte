@@ -337,14 +337,17 @@
             <Flashcards {terms} />
                 <div id="terms-and-stuff-outer-div">
                     <div class="caption grid list">
-                        <button
+                        <a
                             id="flashcards-maximize"
-                            class="alt"
-                            onclick={maximizeFlashcards}
+                            class="button alt"
+                            href="{data.local ?
+                                `/studyset/local/flashcards?id=${data.localId}` :
+                                `/studysets/${data.studysetId}flashcards`
+                            }"
                         >
                             <IconFlashcards />
                             Flashcards
-                        </button>
+                        </a>
                         {#if data.local}
                             <!-- <a href="/studyset/local/review-mode?id={ data.localId }" class="button alt"> -->
                             <!--   <IconReviewModeBook /> -->
