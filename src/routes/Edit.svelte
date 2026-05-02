@@ -12,7 +12,7 @@
     import IconLocal from "$lib/icons/Local.svelte";
     import IconCheckmark from "$lib/icons/Checkmark.svelte";
     import IconTrash from "$lib/icons/Trash.svelte";
-    import IconArrowLeft from "$lib/icons/ArrowLeft.svelte";
+    import IconBackArrow from "$lib/icons/BackArrow.svelte";
     import IconMoreDotsV from "$lib/icons/MoreDotsVertical.svelte";
     import IconArrowUp from "$lib/icons/ArrowUp.svelte";
     import IconArrowDown from "$lib/icons/ArrowDown.svelte";
@@ -897,7 +897,7 @@
                         )
                     }
                 >
-                    <IconArrowLeft />
+                    <IconBackArrow />
                     Back
                 </a>
             </div>
