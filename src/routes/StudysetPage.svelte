@@ -6,7 +6,7 @@
     import { fade } from "svelte/transition";
     let { data } = $props();
 
-    import Flashcards from "./Flashcards.svelte";
+    import Flashcards from "../lib/components/Flashcards.svelte";
     import Dropdown from "$lib/components/Dropdown.svelte";
     import FolderPicker from "$lib/components/FolderPicker.svelte";
 
@@ -101,20 +101,6 @@
         }
     }
 
-    let flashcardsMaximized = $state(false);
-    function maximizeFlashcards() {
-        flashcardsMaximized = true;
-        footerState.hideFooter = true;
-    }
-    function unmaximizeFlashcards() {
-        flashcardsMaximized = false;
-        footerState.hideFooter = false;
-    }
-
-    beforeNavigate(() => {
-        footerState.hideFooter = false;
-    });
-
     let saved = $state(data?.studyset?.saved ?? false);
     let folderId = $state(data?.studyset?.folder?.id ?? null);
     let folderName = $state(data?.studyset?.folder?.name ?? null);
@@ -149,7 +135,6 @@
 <main>
     <div class="grid page">
         <div class="content">
-            {#if !flashcardsMaximized}
                 <div id="title-and-menu-outer-div">
                     {#if folderName}
                         <div
@@ -349,9 +334,7 @@
                         </div>
                     {/if}
                 </div>
-            {/if}
-            <Flashcards {terms} {flashcardsMaximized} {unmaximizeFlashcards} />
-            {#if !flashcardsMaximized}
+            <Flashcards {terms} />
                 <div id="terms-and-stuff-outer-div">
                     <div class="caption grid list">
                         <button
@@ -537,7 +520,6 @@
                         }}
                     ></FolderPicker>
                 {/if}
-            {/if}
 <!-- TODO: WORK IN PROGRESS export terms -->
 <!--            {#if showExportModal}
                 <div class="modal" transition:fade={{ duration: 200 }}>
