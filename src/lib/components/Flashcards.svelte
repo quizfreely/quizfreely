@@ -5,17 +5,18 @@
     import IconBackArrow from "$lib/icons/BackArrow.svelte";
 
     let {
+        initTerm,
         terms,
         nextFunc,
         prevFunc
     } = $props();
 
-    let flashcardsIndex = $state(0);
+    let term = $state(initTerm);
+    let termsIndex = $state(0);
     let defSide = $state(false);
 
     function flashcardsFlip() {
         defSide = !defSide;
-        document.getElementById("flashcard").classList.toggle("flip");
     }
     function flashcardsPrev() {
         if (prevFunc) {
@@ -99,90 +100,79 @@
     });
 </script>
 
-<div id="flashcards-outer-div">
-    <div>
-        <!-- svelte-ignore a11y_click_events_have_key_events -->
-        <!-- svelte-ignore a11y_no_static_element_interactions -->
-        <!-- there's an accessible flip button as a seperate element, and you can also press space to flip (without any focus)
-             the onclick handler for the div is just an extra feature that does the same thing the button does -->
-        <div
-            class="card double {defSide ? "flip" : ""}"
-            bind:this={flashcard}
-            onclick={flashcardsFlip}
-        >
-            <div class="content">
-                <div
-                    class="front"
-                    id="flashcard-front"
-                >
-                    <div>
-                    <div style="white-space:pre-wrap">{terms?.[flashcardsIndex]?.term ?? "term"}</div>
-                    {#if terms?.[flashcardsIndex]?.termImageUrl != null}
-                    <div><img src={terms[flashcardsIndex].termImageUrl} alt="term" class="flashcard-term-image"></div>
-                    {/if}
-                    </div>
-                </div>
-                <div
-                    class="back"
-                    id="flashcard-back"
-                >
-                    <div>
-                    <div style="white-space:pre-wrap">{terms?.[flashcardsIndex]?.def ?? "definition"}</div>
-                    {#if terms?.[flashcardsIndex]?.defImageUrl != null}
-                    <div><img src={terms[flashcardsIndex].defImageUrl} alt="definition" class="flashcard-term-image"></div>
-                    {/if}
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="caption">
+<div>
+    <!-- svelte-ignore a11y_click_events_have_key_events -->
+    <!-- svelte-ignore a11y_no_static_element_interactions -->
+    <!-- there's an accessible flip button as a seperate element, and you can also press space to flip (without any focus) -->
+    <div
+        class="card double {defSide ? "flip" : ""}"
+        onclick={flashcardsFlip}
+    >
+        <div class="content">
             <div
-                class="progress-bar thin yay"
-                style="margin-left: 0.4rem; margin-right: 0.4rem;"
+                class="front"
             >
-                <div
-                    style="width: {terms != null
-                        ? ((flashcardsIndex + 1) / terms?.length) *
-                          100
-                        : '20'}%"
-                ></div>
+                <div>
+                <div style="white-space:pre-wrap">{terms?.[flashcardsIndex]?.term ?? "term"}</div>
+                {#if terms?.[flashcardsIndex]?.termImageUrl != null}
+                <div><img src={terms[flashcardsIndex].termImageUrl} alt="term" class="flashcard-term-image"></div>
+                {/if}
+                </div>
+            </div>
+            <div
+                class="back"
+            >
+                <div>
+                <div style="white-space:pre-wrap">{terms?.[flashcardsIndex]?.def ?? "definition"}</div>
+                {#if terms?.[flashcardsIndex]?.defImageUrl != null}
+                <div><img src={terms[flashcardsIndex].defImageUrl} alt="definition" class="flashcard-term-image"></div>
+                {/if}
+                </div>
             </div>
         </div>
-        <div class="caption centerThree">
-            <p id="flashcards-count">
-                {flashcardsIndex + 1}<span class="fg0">/{terms?.length ?? "?"}</span>
-            </p>
-            <div class="flex justifyselfcenter compact-gap">
-                <button
-                    id="flashcards-prev-button"
-                    class="faint"
-                    aria-label="Previous Card"
-                    onclick={flashcardsPrev}
-                >
-                    <IconArrowLeft />
-                </button>
-                <button
-                    id="flashcards-flip-button"
-                    class="faint"
-                    onclick={flashcardsFlip}>Flip</button
-                >
-                <button
-                    id="flashcards-next-button"
-                    class="faint"
-                    aria-label="Next Card"
-                    onclick={flashcardsNext}
-                >
-                    <IconArrowRight />
-                </button>
-            </div>
-            <div class="flex end">
-                <!--<button id="flashcards-maximize-button">
-    <i class="nf nf-md-fullscreen"></i>
-  </button>
-  <button id="flashcards-unmaximize-button" class="hide">
-    <i class="nf nf-md-fullscreen_exit"></i>
-  </button>-->
-            </div>
+    </div>
+    <div class="caption">
+        <div
+            class="progress-bar thin yay"
+            style="margin-left: 0.4rem; margin-right: 0.4rem;"
+        >
+            <div
+                style="width: {terms != null
+                    ? ((flashcardsIndex + 1) / terms?.length) *
+                      100
+                    : '20'}%"
+            ></div>
+        </div>
+    </div>
+    <div class="caption centerThree">
+        <p>{flashcardsIndex + 1}<span class="fg0">/{terms?.length ?? "?"}</span></p>
+        <div class="flex justifyselfcenter compact-gap">
+            <button
+                class="faint"
+                aria-label="Previous Card"
+                onclick={flashcardsPrev}
+            >
+                <IconArrowLeft />
+            </button>
+            <button
+                class="faint"
+                onclick={flashcardsFlip}>Flip</button
+            >
+            <button
+                class="faint"
+                aria-label="Next Card"
+                onclick={flashcardsNext}
+            >
+                <IconArrowRight />
+            </button>
+        </div>
+        <div class="flex end">
+            <!--<button id="flashcards-maximize-button">
+                <i class="nf nf-md-fullscreen"></i>
+            </button>
+            <button id="flashcards-unmaximize-button" class="hide">
+                <i class="nf nf-md-fullscreen_exit"></i>
+            </button>-->
         </div>
     </div>
 </div>
