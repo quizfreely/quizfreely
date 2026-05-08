@@ -342,7 +342,7 @@
                             class="button alt"
                             href="{data.local ?
                                 `/studyset/local/flashcards?id=${data.localId}` :
-                                `/studysets/${data.studysetId}flashcards`
+                                `/studysets/${data.studyset.id}/flashcards`
                             }"
                         >
                             <IconFlashcards />

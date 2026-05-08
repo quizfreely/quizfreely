@@ -32,6 +32,7 @@
     "prosemirror-keymap": "^1.2.3",
     "prosemirror-model": "^1.25.1",
     "prosemirror-state": "^1.4.3",
-    "prosemirror-view": "^1.39.3"
+    "prosemirror-view": "^1.39.3",
+    "ts-fsrs": "^5.3.2"
   }
 }
