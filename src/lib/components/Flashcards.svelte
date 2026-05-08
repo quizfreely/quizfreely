@@ -12,7 +12,7 @@
     } = $props();
 
     let term = $state(initTerm);
-    let termsIndex = $state(0);
+    let flashcardsIndex = $state(0);
     let defSide = $state(false);
 
     function flashcardsFlip() {
