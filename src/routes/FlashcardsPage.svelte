@@ -2,6 +2,7 @@
     import { onMount } from "svelte";
     import Flashcards from "$lib/components/Flashcards.svelte";
     import { idbApiLayer } from "$lib/idb-api-layer";
+    import { createEmptyCard, fsrs, Rating } from "ts-fsrs";
     import BackArrow from "$lib/icons/BackArrow.svelte";
     import Checkmark from "$lib/icons/Checkmark.svelte";
 
@@ -24,6 +25,25 @@
                     }
                 })
             })();
+
+            // TODO: HERE (2)
+            const scheduler = fsrs();
+            const card = createEmptyCard();
+            const preview = scheduler.repeat(card, new Date());
+            console.log(preview[Rating.Again].card)
+            console.log(preview[Rating.Hard].card)
+            console.log(preview[Rating.Good].card)
+            console.log(preview[Rating.Easy].card)
+            console.log(scheduler.next(card, new Date(), Rating.Good, ({ card, log }) => ({
+  card: {
+    ...card,
+  },
+  log: {
+    ...log,
+  },
+})))
+
+
             /* return cleanup func to revoke image object urls for local terms */
             return () => {
                 objectUrls.forEach(objectUrl => URL.revokeObjectURL(objectUrl));
