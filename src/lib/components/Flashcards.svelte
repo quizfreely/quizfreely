@@ -4,14 +4,8 @@
     import IconArrowRight from "$lib/icons/ArrowRight.svelte";
     import IconBackArrow from "$lib/icons/BackArrow.svelte";
 
-    let {
-        initTerm,
-        terms,
-        nextFunc,
-        prevFunc
-    } = $props();
+    let { terms } = $props();
 
-    let term = $state(initTerm);
     let flashcardsIndex = $state(0);
     let defSide = $state(false);
 
@@ -19,22 +13,13 @@
         defSide = !defSide;
     }
     function flashcardsPrev() {
-        if (prevFunc) {
-            prevFunc();
-        } else {
-            if (flashcardsIndex > 0) {
-                flashcardsIndex -= 1;
-            }
+        if (flashcardsIndex > 0) {
+            flashcardsIndex -= 1;
         }
     }
     function flashcardsNext() {
-        if (nextFunc) {
-            nextFunc();
-        } else {
-            if (flashcardsIndex < terms?.length - 1) {
-                flashcardsIndex += 1;
-            }
-
+        if (flashcardsIndex < terms?.length - 1) {
+            flashcardsIndex += 1;
         }
     }
 
