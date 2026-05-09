@@ -2,15 +2,41 @@
     import { onMount } from "svelte";
     import Flashcards from "$lib/components/Flashcards.svelte";
     import { idbApiLayer } from "$lib/idb-api-layer";
-    import { createEmptyCard, fsrs, Rating } from "ts-fsrs";
+    import { createEmptyCard, fsrs, Rating, TypeConvert, show_diff_message } from "ts-fsrs";
     import BackArrow from "$lib/icons/BackArrow.svelte";
     import Checkmark from "$lib/icons/Checkmark.svelte";
 
     let { data, local, localId, cloudId } = $props();
-    let terms = $state(data?.terms);
+    let terms = $state(data?.terms ?? []);
     let objectUrls = [];
-    if (local) {
-        onMount(() => {
+    let preview = $state(null);
+    const TIMEUNITFORMAT = ['s', 'm', 'h', 'd', ' month', ' year'];
+    const fsrsStates = ["NEW", "LEARNING", "REVIEW", "RELEARNING"];
+    const fsrsRatings = ["MANUAL", "HARD", "GOOD", "EASY"];
+    function fsrsNextAfterHandler({card, log}) {
+        return {
+            card: {
+                ...card,
+                due: card.due.toISOString(),
+                last_review: card?.last_review?.toISOString() ?? null,
+                state: fsrsCards[card.state]
+            },
+            log: {
+                ...log,
+                due: log.due.toISOString(),
+                rating: fsrsRatings[log.rating],
+                review: log.review.toISOString(),
+                state: fsrsStates[log.state]
+            }
+        };
+    }
+
+    function sortTermsByCards() {
+        terms.sort((a, b) => a.due - b.due);
+    }
+
+    onMount(() => {
+        if (local) {
             (async () => {
                 terms = await idbApiLayer.getTermsByStudysetId(localId, {
                     termImageUrl: true,
@@ -23,33 +49,49 @@
                     if (term.defImageUrl != null) {
                         objectUrls.push(term.defImageUrl);
                     }
+                    if (term.card == null) {
+                        term.card = createEmptyCard();
+                    } else {
+                        term.card = TypeConvert.card(term.card);
+                    }
                 })
+                sortTermsByCards();
             })();
+        }
 
-            // TODO: HERE (2)
-            const scheduler = fsrs();
-            const card = createEmptyCard();
-            const preview = scheduler.repeat(card, new Date());
-            console.log(preview[Rating.Again].card)
-            console.log(preview[Rating.Hard].card)
-            console.log(preview[Rating.Good].card)
-            console.log(preview[Rating.Easy].card)
-            console.log(scheduler.next(card, new Date(), Rating.Good, ({ card, log }) => ({
-  card: {
-    ...card,
-  },
-  log: {
-    ...log,
-  },
-})))
+        // TODO: HERE
+        const scheduler = fsrs();
+        const card = createEmptyCard();
+        console.log(card)
+        preview = scheduler.repeat(card, new Date());
+        console.log(preview[Rating.Again].card)
+        console.log(preview[Rating.Hard].card)
+        console.log(preview[Rating.Good].card)
+        console.log(preview[Rating.Easy].card)
+        console.log(
+            scheduler.next(card, new Date(), Rating.Good, ({ card, log }) => ({
+            }))
+        )
+        console.log(TypeConvert.card({
+            "due": "2026-05-17T01:21:15.050Z",
+            "stability": 8.2956,
+            "difficulty": 1,
+            "elapsed_days": 0,
+            "scheduled_days": 8,
+            "reps": 1,
+            "lapses": 0,
+            "learning_steps": 0,
+            "state": 2,
+            "last_review": "2026-05-09T01:21:15.050Z"
+        }))
 
-
-            /* return cleanup func to revoke image object urls for local terms */
-            return () => {
+        /* return cleanup func to revoke image object urls for local terms */
+        return () => {
+            if (local) {
                 objectUrls.forEach(objectUrl => URL.revokeObjectURL(objectUrl));
-            };
-        });
-    }
+            }
+        };
+    });
 
     let testYourself = $state(true);
 </script>
@@ -71,20 +113,40 @@
                     {#if testYourself}
                         <div class="flex center">
                             <div class="flex col">
-                                <button class="button-box">Again</button>
-                                2 seconds
+                                <button class="button-box ohno">Again</button>
+                                <span class="fg0">{preview == null ? "" : show_diff_message(
+                                    preview[Rating.Again].card.due,
+                                    preview[Rating.Again].card.last_review,
+                                    true,
+                                    TIMEUNITFORMAT
+                                )}</span>
                             </div>
                             <div class="flex col">
                                 <button class="button-box">Hard</button>
-                                2 seconds
+                                <span class="fg0">{preview == null ? "" : show_diff_message(
+                                    preview[Rating.Hard].card.due,
+                                    preview[Rating.Hard].card.last_review,
+                                    true,
+                                    TIMEUNITFORMAT
+                                )}</span>
                             </div>
                             <div class="flex col">
                                 <button class="button-box">Good</button>
-                                2 seconds
+                                <span class="fg0">{preview == null ? "" : show_diff_message(
+                                    preview[Rating.Good].card.due,
+                                    preview[Rating.Good].card.last_review,
+                                    true,
+                                    TIMEUNITFORMAT
+                                )}</span>
                             </div>
                             <div class="flex col">
                                 <button class="button-box">Easy</button>
-                                2 seconds
+                                <span class="fg0">{preview == null ? "" : show_diff_message(
+                                    preview[Rating.Easy].card.due,
+                                    preview[Rating.Easy].card.last_review,
+                                    true,
+                                    TIMEUNITFORMAT
+                                )}</span>
                             </div>
                         </div>
                     {/if}
