@@ -1,6 +1,7 @@
 <script>
     import { onMount } from "svelte";
     import { fly } from "svelte/transition";
+    import { prefersReducedMotion } from "svelte/motion";
     import IconArrowLeft from "$lib/icons/ArrowLeft.svelte";
     import IconArrowRight from "$lib/icons/ArrowRight.svelte";
     import IconBackArrow from "$lib/icons/BackArrow.svelte";
@@ -17,6 +18,8 @@
 
     let defSide = $state(false);
     let index = $state(0);
+    let transKeyInc = $state(0);
+    let transKey = $derived(index + transKeyInc);
     let direction = $state(1);
 
     function flip() {
@@ -35,7 +38,11 @@
             defSide = false;
         }
         if (prevFunc) {
-            prevFunc();
+            const transToPrev = prevFunc();
+            if (transToPrev === true) {
+                direction = -1;
+                transKeyInc++;
+            }
         }
     }
     function next() {
@@ -48,7 +55,11 @@
             defSide = false;
         }
         if (nextFunc) {
-            nextFunc();
+            const transToNext = nextFunc();
+            if (transToNext === true) {
+                direction = 1;
+                transKeyInc++;
+            }
         }
     }
 
@@ -116,7 +127,7 @@
 
 <div>
     <div class="keyed-flashcards-container card-size">
-    {#key index}
+    {#key transKey}
     <!-- svelte-ignore a11y_click_events_have_key_events -->
     <!-- svelte-ignore a11y_no_static_element_interactions -->
     <!-- there's an accessible flip button as a seperate element, and you can also press space to flip (without any focus) -->
@@ -124,7 +135,8 @@
         class="card double {defSide && !prompt ? "flip" : ""}"
         onclick={flip}
         transition:fly={{
-            x: direction * 100,
+            x: prefersReducedMotion.current ?
+                0 : (direction * 100),
             duration: 200
         }}
     >
