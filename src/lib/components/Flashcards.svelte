@@ -1,25 +1,55 @@
 <script>
     import { onMount } from "svelte";
+    import { fly } from "svelte/transition";
     import IconArrowLeft from "$lib/icons/ArrowLeft.svelte";
     import IconArrowRight from "$lib/icons/ArrowRight.svelte";
     import IconBackArrow from "$lib/icons/BackArrow.svelte";
 
-    let { terms } = $props();
+    let {
+        termsList = true,
+        terms,
+        term,
+        nextFunc,
+        prevFunc,
+        showPrompt = false,
+        prompt
+    } = $props();
 
-    let flashcardsIndex = $state(0);
     let defSide = $state(false);
+    let index = $state(0);
+    let unflipDefFlag = $state(false);
 
-    function flashcardsFlip() {
+    function flip() {
+        if (showPrompt) {
+            return;
+        }
         defSide = !defSide;
+        unflipDefFlag = false;
     }
-    function flashcardsPrev() {
-        if (flashcardsIndex > 0) {
-            flashcardsIndex -= 1;
+    function prev() {
+        if (showPrompt) {
+            return;
+        }
+        if (termsList && index > 0) {
+            index -= 1;
+            defSide = false;
+            unflipDefFlag = true;
+        }
+        if (prevFunc) {
+            prevFunc();
         }
     }
-    function flashcardsNext() {
-        if (flashcardsIndex < terms?.length - 1) {
-            flashcardsIndex += 1;
+    function next() {
+        if (showPrompt) {
+            return;
+        }
+        if (termsList && index < terms?.length - 1) {
+            index += 1;
+            defSide = false;
+            unflipDefFlag = true;
+        }
+        if (nextFunc) {
+            nextFunc();
         }
     }
 
@@ -39,12 +69,12 @@
                 case "ArrowLeft":
                 case "h":
                 case "j":
-                    flashcardsPrev();
+                    prev();
                     break;
                 case "ArrowRight":
                 case "l":
                 case "k":
-                    flashcardsNext();
+                    next();
                     break;
                 case " " /* space */:
                     /* prevent scrolling,
@@ -70,7 +100,7 @@
             if (e.key == " ") {
                 /* flip in keyup to only flip once */
                 e.preventDefault();
-                flashcardsFlip();
+                flip();
             }
         }
 
@@ -86,36 +116,44 @@
 </script>
 
 <div>
+    {#key index}
     <!-- svelte-ignore a11y_click_events_have_key_events -->
     <!-- svelte-ignore a11y_no_static_element_interactions -->
     <!-- there's an accessible flip button as a seperate element, and you can also press space to flip (without any focus) -->
     <div
-        class="card double {defSide ? "flip" : ""}"
-        onclick={flashcardsFlip}
+        class="card double {defSide && !prompt ? "flip" : ""}"
+        onclick={flip}
     >
         <div class="content">
             <div
                 class="front"
             >
                 <div>
-                <div style="white-space:pre-wrap">{terms?.[flashcardsIndex]?.term ?? "term"}</div>
-                {#if terms?.[flashcardsIndex]?.termImageUrl != null}
-                <div><img src={terms[flashcardsIndex].termImageUrl} alt="term" class="flashcard-term-image"></div>
-                {/if}
+                    {#if showPrompt}
+                        {@render prompt?.()}
+                    {:else}
+                        <div style="white-space:pre-wrap">{(termsList ? terms?.[index] : term)?.term ?? "term"}</div>
+                        {#if (termsList ? terms?.[index] : term)?.termImageUrl != null}
+                            <div><img src={(termsList ? terms[index] : term).termImageUrl} alt="term" class="flashcard-term-image"></div>
+                        {/if}
+                    {/if}
                 </div>
             </div>
             <div
                 class="back"
             >
                 <div>
-                <div style="white-space:pre-wrap">{terms?.[flashcardsIndex]?.def ?? "definition"}</div>
-                {#if terms?.[flashcardsIndex]?.defImageUrl != null}
-                <div><img src={terms[flashcardsIndex].defImageUrl} alt="definition" class="flashcard-term-image"></div>
-                {/if}
+                    {#if !showPrompt && !unflipDefFlag}
+                        <div style="white-space:pre-wrap">{(termsList ? terms?.[index] : term)?.def ?? "definition"}</div>
+                        {#if (termsList ? terms?.[index] : term)?.defImageUrl != null}
+                            <div><img src={(termsList ? terms[index] : term).defImageUrl} alt="definition" class="flashcard-term-image"></div>
+                        {/if}
+                    {/if}
                 </div>
             </div>
         </div>
     </div>
+    {/key}
     <div class="caption">
         <div
             class="progress-bar thin yay"
@@ -123,30 +161,33 @@
         >
             <div
                 style="width: {terms != null
-                    ? ((flashcardsIndex + 1) / terms?.length) *
+                    ? ((index + 1) / terms?.length) *
                       100
                     : '20'}%"
             ></div>
         </div>
     </div>
     <div class="caption centerThree">
-        <p>{flashcardsIndex + 1}<span class="fg0">/{terms?.length ?? "?"}</span></p>
+        <p>{index + 1}<span class="fg0">/{terms?.length ?? "?"}</span></p>
         <div class="flex justifyselfcenter compact-gap">
             <button
                 class="faint"
                 aria-label="Previous Card"
-                onclick={flashcardsPrev}
+                onclick={prev}
+                disabled={showPrompt}
             >
                 <IconArrowLeft />
             </button>
             <button
                 class="faint"
-                onclick={flashcardsFlip}>Flip</button
+                onclick={flip}
+                disabled={showPrompt}>Flip</button
             >
             <button
                 class="faint"
                 aria-label="Next Card"
-                onclick={flashcardsNext}
+                onclick={next}
+                disabled={showPrompt}
             >
                 <IconArrowRight />
             </button>

@@ -9,8 +9,11 @@
     let { data, local, localId, cloudId } = $props();
     let terms = $state(data?.terms ?? []);
     let objectUrls = [];
+
+    let showPrompt = false;
+
     let preview = $state(null);
-    const TIMEUNITFORMAT = ['s', 'm', 'h', 'd', ' month', ' year'];
+    const TIMEUNITFORMAT = ['s', 'm', 'h', 'd', ' months', ' years'];
     const fsrsStates = ["NEW", "LEARNING", "REVIEW", "RELEARNING"];
     const fsrsRatings = ["MANUAL", "HARD", "GOOD", "EASY"];
     function fsrsNextAfterHandler({card, log}) {
@@ -95,6 +98,10 @@
 
     let testYourself = $state(true);
 </script>
+{#snippet flashcardsPromptAddNew()}
+    <p>Test Wow</p>
+    <button>ojala</button>
+{/snippet}
 <div class="grid page">
     <div class="content">
         <div class="flex">
@@ -105,7 +112,7 @@
             {/if}
         </div>
         {#if terms?.length > 0}
-            <Flashcards {terms}></Flashcards>
+            <Flashcards {terms} showPrompt={true} prompt={flashcardsPromptAddNew}></Flashcards>
         {/if}
         <div class="caption" style="min-height: 4rem;">
             <div>
