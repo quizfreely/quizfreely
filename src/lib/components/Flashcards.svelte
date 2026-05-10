@@ -17,7 +17,7 @@
 
     let defSide = $state(false);
     let index = $state(0);
-    let direction = $state(0);
+    let direction = $state(1);
 
     function flip() {
         if (showPrompt) {
@@ -123,7 +123,10 @@
     <div
         class="card double {defSide && !prompt ? "flip" : ""}"
         onclick={flip}
-        transition:fly={{x:direction*80,duration:200}}
+        transition:fly={{
+            x: direction * 100,
+            duration: 200
+        }}
     >
         <div class="content">
             <div
@@ -215,6 +218,7 @@
     }
     .keyed-flashcards-container {
         position: relative;
+        overflow: hidden;
     }
     .keyed-flashcards-container > .card {
         position: absolute;

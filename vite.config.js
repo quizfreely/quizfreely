@@ -6,6 +6,7 @@ export default defineConfig({
 		sveltekit()
 	],
 	server: {
+        hmr: false,
 		port: process?.env?.PORT ?? 8080,
 		proxy: {
 			"/api/": {
