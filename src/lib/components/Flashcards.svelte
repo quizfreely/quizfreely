@@ -17,23 +17,22 @@
 
     let defSide = $state(false);
     let index = $state(0);
-    let unflipDefFlag = $state(false);
+    let direction = $state(0);
 
     function flip() {
         if (showPrompt) {
             return;
         }
         defSide = !defSide;
-        unflipDefFlag = false;
     }
     function prev() {
         if (showPrompt) {
             return;
         }
         if (termsList && index > 0) {
+            direction = -1;
             index -= 1;
             defSide = false;
-            unflipDefFlag = true;
         }
         if (prevFunc) {
             prevFunc();
@@ -44,9 +43,9 @@
             return;
         }
         if (termsList && index < terms?.length - 1) {
+            direction = 1;
             index += 1;
             defSide = false;
-            unflipDefFlag = true;
         }
         if (nextFunc) {
             nextFunc();
@@ -116,6 +115,7 @@
 </script>
 
 <div>
+    <div class="keyed-flashcards-container card-size">
     {#key index}
     <!-- svelte-ignore a11y_click_events_have_key_events -->
     <!-- svelte-ignore a11y_no_static_element_interactions -->
@@ -123,6 +123,7 @@
     <div
         class="card double {defSide && !prompt ? "flip" : ""}"
         onclick={flip}
+        transition:fly={{x:direction*80,duration:200}}
     >
         <div class="content">
             <div
@@ -143,7 +144,7 @@
                 class="back"
             >
                 <div>
-                    {#if !showPrompt && !unflipDefFlag}
+                    {#if !showPrompt}
                         <div style="white-space:pre-wrap">{(termsList ? terms?.[index] : term)?.def ?? "definition"}</div>
                         {#if (termsList ? terms?.[index] : term)?.defImageUrl != null}
                             <div><img src={(termsList ? terms[index] : term).defImageUrl} alt="definition" class="flashcard-term-image"></div>
@@ -154,6 +155,7 @@
         </div>
     </div>
     {/key}
+    </div>
     <div class="caption">
         <div
             class="progress-bar thin yay"
@@ -210,5 +212,13 @@
         margin: 0px;
         padding: 0px;
         border-radius: 0.8rem;
+    }
+    .keyed-flashcards-container {
+        position: relative;
+    }
+    .keyed-flashcards-container > .card {
+        position: absolute;
+        inset: 0;
+        margin-top: 0px;
     }
 </style>
