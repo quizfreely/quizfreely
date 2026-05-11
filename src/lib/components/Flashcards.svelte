@@ -10,8 +10,11 @@
         termsList = true,
         terms,
         term,
-        nextFunc,
-        prevFunc,
+        nextFunc, /* called when termsList false, return false to hide next trans */
+        prevFunc, /* called when termsList false, return false to hide prev trans */
+        onFlip, /* called when flipped (all the time, return nothing) */
+        onNext, /* called when termsList true (return nothing) */
+        onPrev, /* called when termsList true (return nothing) */
         showPrompt = false,
         prompt
     } = $props();
@@ -27,6 +30,10 @@
             return;
         }
         defSide = !defSide;
+
+        if (onFlip) {
+            onFlip();
+        }
     }
     function prev() {
         if (showPrompt) {
@@ -36,10 +43,13 @@
             direction = -1;
             index -= 1;
             defSide = false;
+            if (onPrev) {
+                onPrev();
+            }
         }
-        if (prevFunc) {
+        if (!termsList && prevFunc) {
             const transToPrev = prevFunc();
-            if (transToPrev === true) {
+            if (transToPrev !== false) {
                 direction = -1;
                 transKeyInc++;
             }
@@ -53,10 +63,13 @@
             direction = 1;
             index += 1;
             defSide = false;
+            if (onNext) {
+                onNext();
+            }
         }
-        if (nextFunc) {
+        if (!termsList && nextFunc) {
             const transToNext = nextFunc();
-            if (transToNext === true) {
+            if (transToNext !== false) {
                 direction = 1;
                 transKeyInc++;
             }
@@ -132,11 +145,16 @@
     <!-- svelte-ignore a11y_no_static_element_interactions -->
     <!-- there's an accessible flip button as a seperate element, and you can also press space to flip (without any focus) -->
     <div
-        class="card double {defSide && !prompt ? "flip" : ""}"
+        class="card double {defSide && !showPrompt ? "flip" : ""}"
         onclick={flip}
-        transition:fly={{
+        in:fly={{
             x: prefersReducedMotion.current ?
                 0 : (direction * 100),
+            duration: 200
+        }}
+        out:fly={{
+            x: prefersReducedMotion.current ?
+                0 : (direction * -100),
             duration: 200
         }}
     >
