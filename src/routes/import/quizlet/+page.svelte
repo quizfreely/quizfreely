@@ -127,7 +127,7 @@
                     })
                 });
                 const termsResp = await rawTermsResp.json();
-                if (resp?.data?.createTerms == null) {
+                if (termsResp?.data?.createTerms == null) {
                     console.error("Error creating imported terms", termsResp);
                     errMsgTxt = "Error adding imported terms";
                     showErrMsg = true;
