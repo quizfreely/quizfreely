@@ -81,6 +81,7 @@
             sortOrder: index
         }));
         if (data.authed) {
+            let newStudysetId;
             try {
                 const rawResp = await fetch("/api/graphql", {
                     method: "POST",
@@ -108,6 +109,7 @@
                     showErrMsg = true;
                     return;
                 }
+                newStudysetId = resp.data.createStudyset.id;
 
                 const rawTermsResp = await fetch("/api/graphql", {
                     method: "POST",
@@ -121,7 +123,7 @@
     }
 }`,
                         variables: {
-                            studysetId: resp.data.createStudyset.id,
+                            studysetId: newStudysetId,
                             terms: termInputs
                         }
                     })
@@ -133,7 +135,7 @@
                     showErrMsg = true;
                     return;
                 }
-                goto(`/studysets/${resp.data.createStudyset.id}`);
+                goto(`/studysets/${newStudysetId}`);
             } catch (err) {
                 console.error("Error making API req(s) creating studyset/terms after import", err);
                 errMsgTxt = "Error creating studyset with imported terms";
