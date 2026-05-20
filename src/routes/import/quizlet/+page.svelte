@@ -92,7 +92,7 @@
     createStudyset(studyset: {
         title: $title,
         private: false
-    }, draft: false): {
+    }, draft: false) {
         id
     }
 }`,
