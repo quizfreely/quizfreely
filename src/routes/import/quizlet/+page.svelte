@@ -1,7 +1,7 @@
 <script>
     import { onMount } from "svelte";
     import { goto } from "$app/navigation";
-    import { slide } from "svelte/transition";
+    import { slide, crossfade, fade } from "svelte/transition";
     import { idbApiLayer } from "$lib/idb-api-layer";
     import LinkIcon from "$lib/icons/Link.svelte";
     import PlusIcon from "$lib/icons/Plus.svelte";
@@ -13,11 +13,29 @@
     let showErrDetails = $state(false);
     let errMsgTxt = $state("");
     let errDetailsTxt = $state("");
+    let showLoading = $state(false);
+    let loadingMsgIndex = $state(-1);
+    const loadingMsgs = [
+        "This can take some time",
+        "Still fetching & importing...",
+        "This sometimes takes a while",
+        "Still working...",
+        "This typically takes less than 1 minute",
+        "Still loading...",
+        "This process might take a bit",
+        "Sorry, still loading...",
+        "Importing sometimes takes a while",
+        "Sorry, still importing...",
+        "This can take a bit sometimes",
+        "Sorry, still loading...",
+        "So sorry, this is taking a while",
+        "So sorry, still loading..."
+    ];
     async function importButton() {
-        console.log(link)
-        console.log(normalizeUrlHttps(link))
         showErrMsg = false;
         showErrDetails = false;
+        showLoading = false;
+        loadingMsgIndex = -1;
         if (link == null || link.length == 0) {
             errMsgTxt = "Empty link! Paste a link to import."
             showErrMsg = true;
@@ -31,6 +49,19 @@
             return;
         }
 
+        showLoading = true;
+        const loadingMsgInterval = setInterval(() => {
+            if (loadingMsgIndex >= loadingMsgs.length - 1) {
+                clearInterval(loadingMsgInterval);
+            } else {
+                loadingMsgIndex++;
+            }
+        }, 6000);
+        await importTerms(url);
+        showLoading = false;
+        clearInterval(loadingMsgInterval);
+    }
+    async function importTerms(url) {
         let title;
         let terms;
         try {
@@ -216,8 +247,14 @@
         textbox.addEventListener("keyup", keyupFunc);
         return () => {
             textbox.removeEventListener("keyup", keyupFunc);
-        }
-    })
+        };
+    });
+    const [crossfadeOut, crossfadeIn] = crossfade({
+        duration: 800,
+        fallback: (node, _params, _intro) => fade(node, {
+            duration: 400
+        })
+    });
 </script>
 <svelte:head>
   <title>Import From Quizlet to Quizfreely</title>
@@ -244,6 +281,23 @@
                     {/if}
                 </div>
                 {/if}
+                {#if showLoading}
+                    <div class="flex" style="align-items: center; justify-content: center; gap: 1.2rem;" transition:slide>
+                        <div class="spinner size-1.2rem fg1 speed-slow"></div>
+                        <span style="font-size: 1.4rem;">Loading</span>
+                    </div>
+                    {#if loadingMsgIndex >= 0}
+                        <div class="grid overlap-loading-msg-container" transition:fade={{ duration: 400 }}>
+                            {#each [loadingMsgs[loadingMsgIndex]] as loadingMsg (loadingMsgIndex)}
+                                <p class="fg0 center overlap-loading-msg" in:crossfadeIn={{
+                                    key: loadingMsgIndex
+                                }} out:crossfadeOut={{
+                                    key: loadingMsgIndex
+                                }}>{loadingMsg}</p>
+                            {/each}
+                        </div>
+                    {/if}
+                {/if}
             </div>
         </div>
     </div>
@@ -252,3 +306,11 @@
 <!--     <div class="content"> -->
 <!--     </div> -->
 <!-- </div> -->
+<style>
+.overlap-loading-msg-container {
+    grid-template-areas: "stack";
+}
+.overlap-loading-msg {
+    grid-area: stack;
+}
+</style>
