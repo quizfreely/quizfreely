@@ -261,7 +261,7 @@
 </svelte:head>
 <div class="grid intro" style="border-bottom: none; gap: 1rem;">
     <div class="content">
-        <h1 class="h2">Import from Quizlet</h1>
+        <h1 class="h3">Import from Quizlet</h1>
         <div class="flex" style="flex-direction: column; align-items: center;">
             <div class="flex" style="flex-direction: column; align-items: stretch;">
                 <p style="font-size: 1.2rem; margin-top: 2rem; text-align: start;">Paste a link below</p>
