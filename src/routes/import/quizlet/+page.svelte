@@ -259,7 +259,7 @@
 <svelte:head>
   <title>Import From Quizlet to Quizfreely</title>
 </svelte:head>
-<div class="grid intro" style="border-bottom: none;">
+<div class="grid intro" style="border-bottom: none; gap: 1rem;">
     <div class="content">
         <h1 class="h2">Import from Quizlet</h1>
         <div class="flex" style="flex-direction: column; align-items: center;">
@@ -269,9 +269,9 @@
                     <LinkIcon class="searchbar-icon"></LinkIcon>
                     <input type="text" placeholder="https://quizlet.com/1234..." autocomplete="off" autocapitalize="off" spellcheck="false" bind:value={link} bind:this={textbox}>
                 </div>
-                <button onclick={importButton}>
+                <button onclick={importButton} style="{showLoading ? "opacity: 0.6;" : ""}" disabled={showLoading}>
                     <PlusIcon></PlusIcon>
-                    Import
+                    {showLoading ? "Importing..." : "Import"}
                 </button>
                 {#if showErrMsg}
                 <div class="box ohno" transition:slide>
@@ -282,8 +282,8 @@
                 </div>
                 {/if}
                 {#if showLoading}
-                    <div class="flex" style="align-items: center; justify-content: center; gap: 1.2rem;" transition:slide>
-                        <div class="spinner size-1.2rem fg1 speed-slow"></div>
+                    <div class="flex" style="margin-top: 2rem; align-items: center; justify-content: center; gap: 1.2rem;" transition:slide>
+                        <div class="spinner size-1.2rem fg1 speed-slower"></div>
                         <span style="font-size: 1.4rem;">Loading</span>
                     </div>
                     {#if loadingMsgIndex >= 0}
