@@ -40,6 +40,7 @@
     let termImageModalIsDefSide = $state(false);
     let termImageModalFiles = $state();
     let termImageModalFileInputBox = $state();
+    let termAddImageLoading = $state(false);
     let isDraft = $state(false);
     let showRemoveTermImageModal = $state(false);
     let removeTermImageModalTerm;
@@ -837,6 +838,15 @@
             navigation.cancel();
         }
     });
+
+    function showTermAddImageLoading() {
+        termAddImageLoading = true;
+        termImageModalFileInputBox.showLoading();
+    }
+    function hideTermAddImageLoading() {
+        termAddImageLoading = false;
+        termImageModalFileInputBox.hideLoading();
+    }
 </script>
 
 <svelte:head>
@@ -1454,9 +1464,11 @@
                         <h4>{(termImageModalTerm?.[termImageModalIsDefSide ? "defImageUrl" : "termImageUrl"] == null) ? "Add Image" : "Update Image"}</h4>
                         <FileInputBox accept="image/jpeg, image/png, image/webp, .jpeg, .jpg, .png, .webp" bind:this={termImageModalFileInputBox} onChangeCallback={(files) => termImageModalFiles = files}></FileInputBox>
                         <div class="flex">
-                            <button class="pretty-button-disableable" disabled={termImageModalFiles == null || termImageModalFiles.length == 0} onclick={async () => {
+                            <button class="pretty-button-disableable" disabled={termAddImageLoading || termImageModalFiles == null || termImageModalFiles.length == 0} onclick={async () => {
                                 if (data.local) {
+                                    showTermAddImageLoading()
                                     const returnedBlob = await idbLayerImg.processAndUpdateTermImage(termImageModalTerm.id, termImageModalIsDefSide, termImageModalFiles[0]);
+                                    hideTermAddImageLoading()
                                     if (returnedBlob != null) {
                                         const newObjectUrl = URL.createObjectURL(returnedBlob);
                                         termImageModalTerm[termImageModalIsDefSide ? "defImageUrl" : "termImageUrl"] = newObjectUrl;
@@ -1465,10 +1477,12 @@
                                     showTermImageModal = false;
                                     termImageModalFileInputBox.clear();
                                 } else {
+                                    showTermAddImageLoading()
                                     const raw = await fetch(`/api/term-images/${termImageModalTerm.id}/${termImageModalIsDefSide ? "def" : "term"}`, {
                                         method: "PUT",
                                         body: termImageModalFiles[0]
                                     });
+                                    hideTermAddImageLoading()
                                     const resp = await raw.json();
                                     if (resp?.data?.imageUrl == null) {
                                         console.error("Error in term-image-upload resp: ", resp);

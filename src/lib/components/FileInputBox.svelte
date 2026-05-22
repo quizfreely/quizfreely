@@ -5,15 +5,21 @@
     let dropArea;
     let fileInput;
     let highlightDropArea = $state(false);
+    let loading = $state(false);
 
     export function clear() {
         files = new DataTransfer().files
         fileInput.value = "";
         filesArray = [];
     }
-
     export function getFiles() {
         return files;
+    }
+    export function showLoading(show = true) {
+        loading = show === false ? false : true;
+    }
+    export function hideLoading() {
+        loading = false;
     }
 </script>
 
@@ -70,7 +76,14 @@
         if (onChangeCallback) {
             onChangeCallback(files);
         }
-    }}>
+    }}
+>
+    {#if loading}
+        <div class="flex" style="align-items: center;">
+            <div class="spinner fg1 size-1.6rem speed-slow"></div>
+            <span style="font-size: 1.2rem;">Uploading</span>
+        </div>
+    {:else}
     <span>Drag & Drop Here or Select {multiple ? "Files" : "File"}</span>
     <label class="button">
         Select {multiple ? "File" : "File"}
@@ -82,6 +95,7 @@
             }
         }}>
     </label>
+    {/if}
     {#if filesArray.length > 0}
     <div style="width: 100%; padding-bottom: 0px; padding-top: 1rem; padding-left: 0px; padding-right: 0px;">
     <span class="fg0">Selected:</span>
