@@ -55,6 +55,23 @@
       </div>
     </div>
     <div>
+      <p class="fg0">Features</p>
+      <div
+        class="flex col compact-gap"
+        style="width:fit-content; margin-top: 0.6rem;"
+      >
+        <a href="/import/quizlet">
+            Import From Quizlet
+        </a>
+        <a href="/import/scholarsome">
+            Import From Scholarsome
+        </a>
+        <a href="/import">
+            All Import Options
+        </a>
+      </div>
+    </div>
+    <div>
       <p class="fg0">Development</p>
       <div
         class="flex col compact-gap"
@@ -68,8 +85,6 @@
         >
         <a href="https://quizfreely.org/docs">Documentation</a>
       </div>
-    </div>
-    <div>
       <p class="fg0">Community</p>
       <div
         class="flex col compact-gap"
