@@ -6,7 +6,7 @@
     import LinkIcon from "$lib/icons/Link.svelte";
     import PlusIcon from "$lib/icons/Plus.svelte";
     import GridIcon from "$lib/icons/AppsGrid.svelte"
-    import QuizevilIcon from "$lib/icons/Quizevil.svelte"
+    import QuizevilLogotype from "$lib/icons/QuizevilLogotype.svelte"
     let { data } = $props();
 
     let link = $state("");
@@ -264,9 +264,8 @@
 <div class="grid intro" style="border-bottom: none; gap: 1rem;">
     <div class="content">
         <span class="b" style="font-size: 1.6rem;">Import from</span>
-        <div class="flex" style="align-items: center; justify-content: center; gap: 1.2rem; margin-top: 0.2rem;">
-            <QuizevilIcon width="3rem" height="3rem"></QuizevilIcon>
-            <span style="margin-bottom: 0px; font-size: 2.2rem;">Quizlet</span>
+        <div class="flex" style="align-items: center; justify-content: center; gap: 1.2rem; margin-top: 0.4rem;">
+            <QuizevilLogotype width="auto" height="2.4rem"></QuizevilLogotype>
         </div>
         <div class="flex" style="flex-direction: column; align-items: center;">
             <div class="flex" style="flex-direction: column; align-items: stretch;">

@@ -6,7 +6,7 @@
     import LinkIcon from "$lib/icons/Link.svelte";
     import PlusIcon from "$lib/icons/Plus.svelte";
     import GridIcon from "$lib/icons/AppsGrid.svelte"
-    import ScholarsomeIcon from "$lib/icons/Scholarsome.svelte"
+    import ScholarsomeLogotype from "$lib/icons/ScholarsomeLogotype.svelte"
     let { data } = $props();
 
     let link = $state("");
@@ -277,9 +277,8 @@
 <div class="grid intro" style="border-bottom: none; gap: 1rem;">
     <div class="content">
         <span class="b" style="font-size: 1.6rem;">Import from</span>
-        <div class="flex" style="align-items: center; justify-content: center; gap: 1.2rem; margin-top: 0.2rem;">
-            <ScholarsomeIcon width="3rem" height="3rem"></ScholarsomeIcon>
-            <span style="margin-bottom: 0px; font-size: 2.2rem;">Scholarsome</span>
+        <div class="flex" style="align-items: center; justify-content: center; gap: 1.2rem; margin-top: 0.4rem;">
+            <ScholarsomeLogotype width="auto" height="3.6rem"></ScholarsomeLogotype>
         </div>
         <div class="flex" style="flex-direction: column; align-items: center;">
             <div class="flex" style="flex-direction: column; align-items: stretch;">
