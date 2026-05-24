@@ -5,7 +5,8 @@ export async function load({ cookies, url }) {
     let userResult = await fetchAuthData({ cookies })
     return {
         localId: localId,
-      authed: userResult.authed,
-      authedUser: userResult?.authedUser
+        authed: userResult.authed,
+        authedUser: userResult?.authedUser,
+        initShowImport: url.searchParams.has("import")
     }
 }
