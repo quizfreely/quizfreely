@@ -69,7 +69,7 @@
                 </div>
             </button>
         </div>
-        <div style="margin-top: 6rem;">
+        <div style="margin-top: 4rem;">
             <p class="fg0">Create terms instead of importing?</p>
             <button class="button alt text fg0" style="margin-top: 0.4rem;" onclick={() => newStudysetButtonWImport(false)}>
                 <PencilIcon></PencilIcon>
