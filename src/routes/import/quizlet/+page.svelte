@@ -5,7 +5,7 @@
     import { idbApiLayer } from "$lib/idb-api-layer";
     import LinkIcon from "$lib/icons/Link.svelte";
     import PlusIcon from "$lib/icons/Plus.svelte";
-    import GridIcon from "$lib/icons/AppsGridIcon.svelte"
+    import GridIcon from "$lib/icons/AppsGrid.svelte"
     import QuizevilIcon from "$lib/icons/Quizevil.svelte"
     let { data } = $props();
 

@@ -264,6 +264,10 @@
                 <IconPlus />
                 New Studyset
             </button>
+            <a href="/import" class="button alt">
+                <IconPlus />
+                Import
+            </a>
             {#if data.authed}
                 <button class="alt" onclick={() => openNewFolderModal()}>
                     <FolderIcon></FolderIcon>

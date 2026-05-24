@@ -3,9 +3,10 @@
     import QuizevilIcon from "$lib/icons/Quizevil.svelte";
     import ScholarsomeIcon from "$lib/icons/Scholarsome.svelte";
     import PlusIcon from "$lib/icons/Plus.svelte";
+    import PencilIcon from "$lib/icons/Pencil.svelte";
     let { data } = $props();
 
-    async function newStudysetButtonWImport() {
+    async function newStudysetButtonWImport(show = true) {
         if (data.authed) {
             const raw = await fetch("/api/graphql", {
                 method: "POST",
@@ -27,13 +28,13 @@
                 })
             });
             const res = await raw.json();
-            goto(`/studyset/edit/${res?.data?.createStudyset?.id}?import`)
+            goto(`/studyset/edit/${res?.data?.createStudyset?.id}${show === false ? "" : "?import"}`)
         } else {
             const id = await idbApiLayer.createStudyset({
                 title: "",
                 draft: true
             });
-            goto(`/studyset/local/edit?id=${id}&import`)
+            goto(`/studyset/local/edit?id=${id}${show === false ? "" : "&import"}`)
         }
     }
 </script>
@@ -42,8 +43,8 @@
 </svelte:head>
 <div class="grid page">
     <div class="content">
-        <h1 class="h3" style="margin-top: 2rem;">Import</h1>
-        <p class="fg0">Import directly from a link</p>
+        <h1 class="h3" style="margin-top: 2rem; margin-bottom: 2rem;">Import</h1>
+        <p>Import directly from a link</p>
         <div class="flex">
             <a href="/import/quizlet" class="button large button-box">
                 <div class="flex" style="align-items: center; flex-wrap: nowrap;">
@@ -59,13 +60,20 @@
             </a>
         </div>
         <div class="separator">or</div>
-        <p class="fg0">Copy &amp; paste terms yourself</p>
+        <p>Copy &amp; paste terms yourself</p>
         <div class="flex">
-            <button class="button large button-box" onclick={newStudysetButtonWImport}>
+            <button class="button large button-box" onclick={() => newStudysetButtonWImport()}>
                 <div class="flex" style="align-items: center; flex-wrap: nowrap;">
                     <PlusIcon width="2rem" height="2rem"></PlusIcon>
                     <span>Import Terms</span>
                 </div>
+            </button>
+        </div>
+        <div style="margin-top: 6rem;">
+            <p class="fg0">Create terms instead of importing?</p>
+            <button class="button alt text fg0" style="margin-top: 0.4rem;" onclick={() => newStudysetButtonWImport(false)}>
+                <PencilIcon></PencilIcon>
+                New Studyset
             </button>
         </div>
     </div>
