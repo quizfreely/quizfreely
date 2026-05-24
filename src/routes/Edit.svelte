@@ -1,0 +1,1642 @@
+<script>
+    import Noscript from "$lib/components/Noscript.svelte";
+    import { onMount, mount, tick } from "svelte";
+    import { env } from '$env/dynamic/public';
+    import { idbApiLayer, idbLayerImg } from "$lib/idb-api-layer";
+    import { goto, beforeNavigate } from "$app/navigation";
+    import { cancelNprogressTimeout } from "$lib/stores/nprogressTimeout.js";
+    let { data } = $props();
+    import Dropdown from "$lib/components/Dropdown.svelte";
+    import SubjectPicker from "$lib/components/SubjectPicker.svelte";
+
+    import IconLocal from "$lib/icons/Local.svelte";
+    import IconCheckmark from "$lib/icons/Checkmark.svelte";
+    import IconTrash from "$lib/icons/Trash.svelte";
+    import IconBackArrow from "$lib/icons/BackArrow.svelte";
+    import IconMoreDotsV from "$lib/icons/MoreDotsVertical.svelte";
+    import IconArrowUp from "$lib/icons/ArrowUp.svelte";
+    import IconArrowDown from "$lib/icons/ArrowDown.svelte";
+    import IconPlus from "$lib/icons/Plus.svelte";
+    import MenuIcon from "$lib/icons/Menu.svelte";
+    import ImageIcon from "$lib/icons/Image.svelte";
+    import XMarkIcon from "$lib/icons/CloseXMark.svelte";
+    import PencilIcon from "$lib/icons/Pencil.svelte";
+
+    import { flip } from "svelte/animate";
+    import { scale, fade } from "svelte/transition";
+
+    import AutoResizeTextarea from "$lib/components/AutoResizeTextarea.svelte";
+    import FileInputBox from "$lib/components/FileInputBox.svelte";
+
+    var showImportTermsModal = $state(data.initShowImport ?? false);
+    var showExitConfirmationModal = $state(false);
+    var showSubjectPicker = $state(false);
+    let selectedSubject = $state(null);
+    var unsavedChanges = false;
+    var bypassUnsavedChangesConfirmation = false;
+    let objectUrls = [];
+    let showTermImageModal = $state(false);
+    let termImageModalTerm = $state();
+    let termImageModalIsDefSide = $state(false);
+    let termImageModalFiles = $state();
+    let termImageModalFileInputBox = $state();
+    let termAddImageLoading = $state(false);
+    let isDraft = $state(false);
+    let showRemoveTermImageModal = $state(false);
+    let removeTermImageModalTerm;
+    let removeTermImageModalIsDefSide;
+
+    var terms = $state([]);
+    var existingTermIdsToDelete = [];
+    var key = 0;
+    function addTerm(term, def, id, termImageUrl, defImageUrl) {
+        terms.push({
+            id: id,
+            term: term ?? "",
+            def: def ?? "",
+            termImageUrl,
+            defImageUrl,
+            key: key,
+        });
+        key++;
+    }
+    function insertTerm(index, term, def, id, termImageUrl, defImageUrl) {
+        terms.splice(index, 0, {
+            id: id,
+            term: term ?? "",
+            def: def ?? "",
+            termImageUrl,
+            defImageUrl,
+            key: key,
+        });
+        key++;
+    }
+    function moveTerm(oldIndex, newIndex) {
+        if (
+            oldIndex >= 0 &&
+            oldIndex < terms.length &&
+            newIndex >= 0 &&
+            newIndex < terms.length
+        ) {
+            var term = terms[oldIndex];
+            terms.splice(oldIndex, 1);
+            terms.splice(newIndex, 0, term);
+        }
+    }
+    let deletedTermRegister;
+    function deleteTerm(index, copyToRegister) {
+        if (terms[index].id != null) {
+            existingTermIdsToDelete.push(terms[index].id);
+        }
+        const deletedTerm = terms.splice(index, 1)?.[0];
+        if (copyToRegister) {
+            deletedTermRegister = deletedTerm;
+        }
+    }
+    function unmarkForDeletion(id) {
+        const index = existingTermIdsToDelete.indexOf(id);
+        if (index >= 0) {
+            existingTermIdsToDelete.splice(index, 1);
+        }
+    }
+
+    // NOTE: this old function only handles term/def text, no id, sort order, or term/def image
+    // if we ever want to use it for exporting terms to raw text/CSV we'll need this but mabye updated
+    // like how addTermsFrom2DArray is used for importing terms from CSV/text
+    //
+    // function termsTo2DArray() {
+    //     var arr = [];
+    //     for (var index = 0; index < terms.length; index++) {
+    //         arr.push([terms[index].term, terms[index].def]);
+    //     }
+    //     return arr;
+    // }
+
+    function addTermsFrom2DArray(arr) {
+        for (var row = 0; row < arr.length; row++) {
+            addTerm(arr[row][0], arr[row][1]);
+        }
+    }
+
+    async function initTerm(termsCount, term, def) {
+        let sortOrder = termsCount;
+        if (termsCount == null) {
+            sortOrder = terms.length;
+        }
+        if (data.local) {
+            return await idbApiLayer.createTerms(data.localId, [{
+                term: term ?? "",
+                def: def ?? "",
+                sortOrder: sortOrder
+            }]); /* returns last key */
+        } else {
+            const raw = await fetch("/api/graphql", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    query: `mutation initTerm($studysetId: ID!, $term: String, $def: String, $sortOrder: Int!) {
+    createTerms(
+        studysetId: $studysetId,
+        terms: [{
+            term: $term,
+            def: $def,
+            sortOrder: $sortOrder
+        }]
+    ) {
+        id
+    }
+}`,
+                    variables: {
+                        studysetId: data.studysetId,
+                        term: term ?? "",
+                        def: def ?? "",
+                        sortOrder: sortOrder
+                    }
+                })
+            });
+            const resp = await raw.json();
+            if (resp.errors != null || resp?.data == null) {
+                console.error("Err(s) in initTerm query/resp: ", resp);
+            }
+            return resp.data.createTerms[0].id;
+        }
+    }
+
+    let defFocused = $state(false);
+    let focusedRow = $state(0);
+    let showFocusBorder = $state(false);
+    let useOhnoColorFocusBorder = $state(false);
+    let keySeq = [];
+    function addToKeySeq(key) {
+        if ("hjkl".includes(key)) {
+            resetKeySeq();
+            /* dont return cause we want to remove ohnocolorfocusborder below */
+        } else if (key == "Backspace") {
+            keySeq.pop();
+        } else {
+            keySeq.push(key);
+        }
+        if (keySeq.length == 1 && keySeq[0] == "d") {
+            showFocusBorder = true;
+            useOhnoColorFocusBorder = true;
+        } else {
+            useOhnoColorFocusBorder = false;
+        }
+        return keySeq;
+    }
+    function resetKeySeq() {
+        keySeq = [];
+    }
+    onMount(() => {
+        (async function () {
+            if (data.authed && !data.local) {
+                document
+                    .getElementById("edit-private-false")
+                    .addEventListener("click", function () {
+                        document
+                            .getElementById("edit-private-false")
+                            .classList.add("selected");
+                        document
+                            .getElementById("edit-private-true")
+                            .classList.remove("selected");
+                    });
+                document
+                    .getElementById("edit-private-true")
+                    .addEventListener("click", function () {
+                        document
+                            .getElementById("edit-private-false")
+                            .classList.remove("selected");
+                        document
+                            .getElementById("edit-private-true")
+                            .classList.add("selected");
+                    });
+            }
+            if (data.studysetId) {
+                if (data.authed) {
+                    fetch("/api/graphql", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            Accept: "application/json",
+                        },
+                        credentials: "same-origin",
+                        body: JSON.stringify({
+                            query: `
+                                query GetStudyset($id: ID!) {
+                                    studyset(id: $id) {
+                                        title
+                                        private
+                                        draft
+                                        subject {
+                                            name
+                                            id
+                                        }
+                                        terms {
+                                            id
+                                            term
+                                            def
+                                            termImageUrl
+                                            defImageUrl
+                                        }
+                                    }
+                                }
+                            `,
+                            variables: {
+                                id: data.studysetId,
+                            },
+                        }),
+                    })
+                        .then((response) => response.json())
+                        .then((result) => {
+                            if (result.errors) {
+                                alert("Error loading studyset");
+                                console.error(result.errors);
+                            } else {
+                                const studyset = result.data.studyset;
+                                document.getElementById("edit-title").value =
+                                    studyset.title;
+                                if (studyset.private) {
+                                    document
+                                        .getElementById("edit-private-false")
+                                        .classList.remove("selected");
+                                    document
+                                        .getElementById("edit-private-true")
+                                        .classList.add("selected");
+                                } else {
+                                    document
+                                        .getElementById("edit-private-false")
+                                        .classList.add("selected");
+                                    document
+                                        .getElementById("edit-private-true")
+                                        .classList.remove("selected");
+                                }
+                                if (studyset.terms != null) {
+                                    studyset.terms.forEach((t) => {
+                                        addTerm(t.term, t.def, t.id, t.termImageUrl, t.defImageUrl);
+                                    });
+                                }
+                                selectedSubject = studyset.subject;
+                                isDraft = studyset.draft;
+
+                                if (studyset.draft && terms.length == 0) {
+                                    addTerm();
+                                }
+                            }
+                        });
+                } else {
+                    console.error("Unexpected situation: studyset is not local but user is not logged in")
+                }
+            } else {
+                const studysetRecord = await idbApiLayer.getStudysetById(
+                    data.localId,
+                    {
+                        terms: {
+                            termImageUrl: true,
+                            defImageUrl: true
+                        }
+                    },
+                );
+                if (studysetRecord) {
+                    document.getElementById("edit-title").value =
+                        studysetRecord.title;
+                    if (studysetRecord.terms != null) {
+                        studysetRecord.terms.forEach((t) => {
+                            addTerm(t.term, t.def, t.id, t.termImageUrl, t.defImageUrl);
+                            if (t?.termImageUrl != null) {
+                                objectUrls.push(t.termImageUrl);
+                            }
+                            if (t?.defImageUrl != null) {
+                                objectUrls.push(t.defImageUrl);
+                            }
+                        });
+                    }
+                    isDraft = studysetRecord.draft;
+
+                    if (studysetRecord.draft && terms.length == 0) {
+                        addTerm();
+                    }
+                }
+            }
+        })();
+
+        function moveUpButForKeydown(refocus) {
+            const index = focusedRow;
+            const newIndex = focusedRow - 1;
+            const wasDefFocused = defFocused;
+
+            if (newIndex >= 0) {
+                moveTerm(index, newIndex);
+                unsavedChanges = true;
+
+                tick().then(() => {
+                    focusedRow = newIndex;
+                    if (refocus) {
+                        if (wasDefFocused) {
+                            terms?.[newIndex]?.defTextarea?.focus();
+                        } else {
+                            terms?.[newIndex]?.termTextarea?.focus();
+                        }
+                    }
+                });
+            }
+        }
+        function moveDownButForKeydown(refocus) {
+            const index = focusedRow;
+            const newIndex = focusedRow + 1;
+            const wasDefFocused = defFocused;
+
+            if (newIndex < terms?.length) {
+                moveTerm(index, newIndex);
+                unsavedChanges = true;
+
+                tick().then(() => {
+                    focusedRow = newIndex;
+                    if (refocus) {
+                        if (wasDefFocused) {
+                            terms?.[newIndex]?.defTextarea?.focus();
+                        } else {
+                            terms?.[newIndex]?.termTextarea?.focus();
+                        }
+                    }
+                });
+            }
+        }
+        function onKeydown(event) {
+            if (event.key === "Enter" && event.ctrlKey && !event.altKey) {
+                event.preventDefault();
+                addTerm();
+                unsavedChanges = true;
+                tick().then(() => {
+                    terms?.[terms?.length - 1]?.termTextarea?.focus();
+                });
+                return;
+            }
+            if (
+                (event.key === "Enter" && event.altKey) ||
+                (event.key === "o" &&
+                    !(
+                        document.activeElement?.tagName === "INPUT" ||
+                        document.activeElement?.tagName === "TEXTAREA" ||
+                        document.activeElement?.isContentEditable
+                    ))
+            ) {
+                event.preventDefault();
+                let indexWeWant = 0;
+                if (focusedRow + 1 <= terms?.length) {
+                    indexWeWant = focusedRow + 1;
+                }
+                insertTerm(indexWeWant);
+                unsavedChanges = true;
+
+                tick().then(() => {
+                    focusedRow = indexWeWant;
+                    terms?.[indexWeWant]?.termTextarea?.focus();
+                });
+                return;
+            }
+            if (
+                event.key === "O" &&
+                !(
+                    document.activeElement?.tagName === "INPUT" ||
+                    document.activeElement?.tagName === "TEXTAREA" ||
+                    document.activeElement?.isContentEditable
+                )
+            ) {
+                event.preventDefault();
+                insertTerm(focusedRow);
+                unsavedChanges = true;
+
+                tick().then(() => {
+                    terms?.[focusedRow]?.termTextarea?.focus();
+                });
+                return;
+            }
+
+            if (event.key === "ArrowUp" && event.altKey && !event.shiftKey) {
+                event.preventDefault();
+                if (defFocused) {
+                    terms?.[focusedRow - 1]?.defTextarea?.focus();
+                } else {
+                    terms?.[focusedRow - 1]?.termTextarea?.focus();
+                }
+                return;
+            }
+            if (event.key === "ArrowDown" && event.altKey && !event.shiftKey) {
+                event.preventDefault();
+                if (defFocused) {
+                    terms?.[focusedRow + 1]?.defTextarea?.focus();
+                } else {
+                    terms?.[focusedRow + 1]?.termTextarea?.focus();
+                }
+                return;
+            }
+
+            if (event.key === "ArrowUp" && event.altKey && event.shiftKey) {
+                event.preventDefault();
+                moveUpButForKeydown(true);
+                return;
+            }
+            if (event.key === "ArrowDown" && event.altKey && event.shiftKey) {
+                event.preventDefault();
+                moveDownButForKeydown(true);
+                return;
+            }
+
+            if (
+                (event.key === "j" ||
+                    (event.key === "ArrowDown" &&
+                        !event.shiftKey &&
+                        !event.ctrlKey)) &&
+                !(
+                    document.activeElement?.tagName === "INPUT" ||
+                    document.activeElement?.tagName === "TEXTAREA" ||
+                    document.activeElement?.isContentEditable
+                )
+            ) {
+                event.preventDefault();
+                if (focusedRow + 1 < terms?.length) {
+                    focusedRow++;
+                }
+                showFocusBorder = true;
+                return;
+            }
+            if (
+                (event.key === "k" ||
+                    (event.key === "ArrowUp" &&
+                        !event.shiftKey &&
+                        !event.ctrlKey)) &&
+                !(
+                    document.activeElement?.tagName === "INPUT" ||
+                    document.activeElement?.tagName === "TEXTAREA" ||
+                    document.activeElement?.isContentEditable
+                )
+            ) {
+                event.preventDefault();
+                if (focusedRow - 1 >= 0) {
+                    focusedRow--;
+                }
+                showFocusBorder = true;
+                return;
+            }
+            if (
+                (event.key === "h" || event.key === "ArrowLeft") &&
+                !(
+                    document.activeElement?.tagName === "INPUT" ||
+                    document.activeElement?.tagName === "TEXTAREA" ||
+                    document.activeElement?.isContentEditable
+                )
+            ) {
+                event.preventDefault();
+                defFocused = false;
+                showFocusBorder = true;
+                return;
+            }
+            if (
+                (event.key === "l" || event.key === "ArrowRight") &&
+                !(
+                    document.activeElement?.tagName === "INPUT" ||
+                    document.activeElement?.tagName === "TEXTAREA" ||
+                    document.activeElement?.isContentEditable
+                )
+            ) {
+                event.preventDefault();
+                defFocused = true;
+                showFocusBorder = true;
+                return;
+            }
+            if (
+                event.key === "ArrowDown" &&
+                (event.shiftKey || event.ctrlKey) &&
+                !(
+                    document.activeElement?.tagName === "INPUT" ||
+                    document.activeElement?.tagName === "TEXTAREA" ||
+                    document.activeElement?.isContentEditable
+                )
+            ) {
+                event.preventDefault();
+                moveDownButForKeydown(false);
+                return;
+            }
+            if (
+                event.key === "ArrowUp" &&
+                (event.shiftKey || event.ctrlKey) &&
+                !(
+                    document.activeElement?.tagName === "INPUT" ||
+                    document.activeElement?.tagName === "TEXTAREA" ||
+                    document.activeElement?.isContentEditable
+                )
+            ) {
+                event.preventDefault();
+                moveUpButForKeydown(false);
+                return;
+            }
+            if (
+                !(event.ctrlKey || event.altKey) &&
+                !(
+                    document.activeElement?.tagName === "INPUT" ||
+                    document.activeElement?.tagName === "TEXTAREA" ||
+                    document.activeElement?.isContentEditable
+                ) &&
+                (event.key === "i" || event.key === "Enter")
+            ) {
+                event.preventDefault();
+                if (defFocused) {
+                    terms?.[focusedRow]?.defTextarea?.focus();
+                } else {
+                    terms?.[focusedRow]?.termTextarea?.focus();
+                }
+                return;
+            }
+        }
+        function onKeyup(event) {
+            if (event.key === "Escape") {
+                document?.activeElement?.blur();
+                resetKeySeq();
+                if (showFocusBorder) {
+                    showFocusBorder = false;
+                }
+                return;
+            }
+            if (
+                [
+                    "Alt",
+                    "AltGraph",
+                    "CapsLock",
+                    "Control",
+                    "Fn",
+                    "FnLock",
+                    "Hyper",
+                    "Meta",
+                    "NumLock",
+                    "ScrollLock",
+                    "Shift",
+                    "Super",
+                    "Symbol",
+                    "SymbolLock",
+                    "Compose",
+                    "Dead",
+                ].includes(event.key)
+            ) {
+                return;
+            }
+            if (
+                event.key == "p" &&
+                !(
+                    document.activeElement?.tagName === "INPUT" ||
+                    document.activeElement?.tagName === "TEXTAREA" ||
+                    document.activeElement?.isContentEditable
+                )
+            ) {
+                if (deletedTermRegister) {
+                    let indexWeWant = 0;
+                    if (focusedRow + 1 <= terms?.length) {
+                        indexWeWant = focusedRow + 1;
+                    }
+                    insertTerm(
+                        indexWeWant,
+                        deletedTermRegister?.term,
+                        deletedTermRegister?.def,
+                        deletedTermRegister?.id ?? undefined,
+                    );
+
+                    tick().then(() => {
+                        focusedRow = indexWeWant;
+                    });
+
+                    if (deletedTermRegister?.id) {
+                        unmarkForDeletion(deletedTermRegister?.id);
+
+                        /* next time, if i paste again, i need a new id,
+                        so set .id to undefined, but keep .term and .def */
+                        deletedTermRegister.id = undefined;
+                    }
+                }
+                resetKeySeq();
+                return;
+            }
+            if (
+                event.key == "P" &&
+                !(
+                    document.activeElement?.tagName === "INPUT" ||
+                    document.activeElement?.tagName === "TEXTAREA" ||
+                    document.activeElement?.isContentEditable
+                )
+            ) {
+                if (deletedTermRegister) {
+                    insertTerm(
+                        focusedRow,
+                        deletedTermRegister?.term,
+                        deletedTermRegister?.def,
+                        deletedTermRegister?.id ?? undefined,
+                    );
+
+                    if (deletedTermRegister?.id) {
+                        unmarkForDeletion(deletedTermRegister?.id);
+
+                        /* next time, if i paste again, i need a new id,
+                        so set .id to undefined, but keep .term and .def */
+                        deletedTermRegister.id = undefined;
+                    }
+                }
+                resetKeySeq();
+                return;
+            }
+            if (
+                !(
+                    document.activeElement?.tagName === "INPUT" ||
+                    document.activeElement?.tagName === "TEXTAREA" ||
+                    document.activeElement?.isContentEditable
+                )
+            ) {
+                const newKeySeq = addToKeySeq(event.key);
+                if (
+                    newKeySeq.length == 2 &&
+                    newKeySeq[0] == "d" &&
+                    newKeySeq[1] == "d"
+                ) {
+                    deleteTerm(focusedRow, true);
+                    resetKeySeq();
+
+                    tick().then(() => {
+                        if (focusedRow == terms?.length) {
+                            focusedRow--;
+                        }
+                    });
+                }
+            }
+        }
+        window.addEventListener("keydown", onKeydown);
+        window.addEventListener("keyup", onKeyup);
+        return () => {
+            window.removeEventListener("keydown", onKeydown);
+            window.removeEventListener("keyup", onKeyup);
+            objectUrls.forEach(objectUrl => {
+                URL.revokeObjectURL(objectUrl);
+            })
+        };
+    });
+
+    var updateLocalStudysetCooldown = false;
+    function updateLocalStudyset() {
+        if (updateLocalStudysetCooldown) {
+            return;
+        }
+
+        updateLocalStudysetCooldown = true;
+        setTimeout(function () {
+            updateLocalStudysetCooldown = false;
+        }, 2000);
+
+        let existingTerms = [];
+        let newTerms = [];
+        for (let index = 0; index < terms.length; index++) {
+            if (terms[index].id != null) {
+                existingTerms.push({
+                    id: terms[index].id,
+                    term: terms[index].term,
+                    def: terms[index].def,
+                    sortOrder: index,
+                });
+            } else {
+                newTerms.push({
+                    term: terms[index].term,
+                    def: terms[index].def,
+                    sortOrder: index,
+                });
+            }
+        }
+
+        (async () => {
+            await idbApiLayer.updateStudyset({
+                id: data.localId,
+                title: document.getElementById("edit-title").value,
+                draft: false
+            });
+            if (existingTerms.length > 0) {
+                await idbApiLayer.updateTerms(existingTerms);
+            }
+            if (newTerms.length > 0) {
+                await idbApiLayer.createTerms(data.localId, newTerms);
+            }
+            if (existingTermIdsToDelete.length > 0) {
+                await idbApiLayer.deleteTerms(existingTermIdsToDelete);
+            }
+            goto("/studyset/local?id=" + data.localId);
+        })();
+    }
+
+    var updateCloudStudysetCooldown = false;
+    function updateCloudStudyset() {
+        if (updateCloudStudysetCooldown) {
+            return;
+        }
+
+        updateCloudStudysetCooldown = true;
+        setTimeout(function () {
+            updateCloudStudysetCooldown = false;
+        }, 2000);
+
+        let existingTerms = [];
+        let newTerms = [];
+        for (let index = 0; index < terms.length; index++) {
+            if (terms[index].id != null) {
+                existingTerms.push({
+                    id: terms[index].id,
+                    term: terms[index].term,
+                    def: terms[index].def,
+                    sortOrder: index,
+                });
+            } else {
+                newTerms.push({
+                    term: terms[index].term,
+                    def: terms[index].def,
+                    sortOrder: index,
+                });
+            }
+        }
+
+        fetch("/api/graphql", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Accept: "application/json",
+            },
+            credentials: "same-origin",
+            body: JSON.stringify({
+                query: `mutation UpdateStudysetAndTerms($id: ID!, $studyset: StudysetInput, $terms: [TermInput!]!, $newTerms: [NewTermInput!]!, $deleteTerms: [ID!]!) {
+                    updateStudyset(id: $id, studyset: $studyset, draft: false) { id }
+                    updateTerms(studysetId: $id, terms: $terms) { id }
+                    createTerms(studysetId: $id, terms: $newTerms) { id }
+                    deleteTerms(studysetId: $id, ids: $deleteTerms)
+                }`,
+                variables: {
+                    id: data.studysetId,
+                    studyset: {
+                        title: document.getElementById("edit-title").value,
+                        private: document
+                            .getElementById("edit-private-true")
+                            .classList.contains("selected"),
+                        subjectId: selectedSubject?.id ?? null,
+                    },
+                    terms: existingTerms,
+                    newTerms: newTerms,
+                    deleteTerms: existingTermIdsToDelete,
+                },
+            }),
+        })
+            .then((response) => response.json())
+            .then((result) => {
+                if (result.errors) {
+                    console.log(result);
+                    alert("Error updating studyset");
+                } else {
+                    goto("/studysets/" + data.studysetId);
+                }
+            });
+    }
+    function saveButton() {
+        bypassUnsavedChangesConfirmation = true;
+        if (data.local) {
+            updateLocalStudyset();
+        } else {
+            updateCloudStudyset();
+        }
+
+        // fetch("/dashboard/set-dashboard-state", {
+        //     method: "POST",
+        //     credentials: "include",
+        // });
+    }
+
+    let importTermsTermDefDelimiterRadioSelect = $state("tab");
+    let importTermsRowDelimiterRadioSelect = $state("newline");
+
+    let navigatingToURL = $state("");
+    beforeNavigate(function (navigation) {
+        if (unsavedChanges && !bypassUnsavedChangesConfirmation) {
+            navigatingToURL = navigation?.to?.url;
+            if (navigation.type !== "leave") {
+                /* when navigation.type is NOT "leave",
+                it's controlled by SvelteKit, so we can
+                show our js confirmation modal */
+                showExitConfirmationModal = true;
+            }
+            /* our routes/+layout.svelte shows a progress bar
+            if navigation takes too long, so we cancel the timer
+            when we cancel navigation, so that it doesn't show */
+            cancelNprogressTimeout();
+
+            /* run it again a little delayed to make sure it cancels the timeout after layout actually finishes creating the timeout */
+            setTimeout(cancelNprogressTimeout, 50);
+
+            /* if navigation.type is "leave",
+            then its controlled by the browser &
+            the browser shows it's own native modal
+            when we use `.cancel()` */
+            navigation.cancel();
+        }
+    });
+
+    function showTermAddImageLoading() {
+        termAddImageLoading = true;
+        termImageModalFileInputBox.showLoading();
+    }
+    function hideTermAddImageLoading() {
+        termAddImageLoading = false;
+        termImageModalFileInputBox.hideLoading();
+    }
+</script>
+
+<svelte:head>
+    <title>Quizfreely</title>
+</svelte:head>
+
+{#snippet termImage(term, isDefSide)}
+    {#if term?.[isDefSide ? "defImageUrl" : "termImageUrl"] == null}
+        <div class="flex" style="margin-top: 0.2rem;">
+            <button class="faint img-button-thin-fit text fg0" onclick={async () => {
+                if (term.id == null) {
+                    term.id = await initTerm(); /* returns ID */
+                }
+
+                showTermImageModal = true;
+                termImageModalTerm = term;
+                termImageModalIsDefSide = isDefSide;
+            }}>
+                <ImageIcon></ImageIcon> Add Image
+            </button>
+        </div>
+    {:else}
+        <div class="flex" style="flex-direction: column; flex-wrap: nowrap; gap: 0.2rem; margin-top: 0.6rem;">
+            <div><img src={term?.[isDefSide ? "defImageUrl" : "termImageUrl"]} class="term-image"></div>
+            <div class="flex" style="margin-top: 0px; row-gap: 0.2rem; column-gap: 0.4rem;">
+                <button class="faint img-button-thin-fit text fg0" onclick={async () => {
+                    showTermImageModal = true;
+                    termImageModalTerm = term;
+                    termImageModalIsDefSide = isDefSide;
+                }}>
+                    <PencilIcon></PencilIcon> Edit Image
+                </button>
+                <button class="faint img-button-thin-fit text fg0" onclick={async () => {
+                    showRemoveTermImageModal = true;
+                    removeTermImageModalTerm = term;
+                    removeTermImageModalIsDefSide = isDefSide;
+                }}>
+                    <XMarkIcon></XMarkIcon> Remove Image
+                </button>
+            </div>
+        </div>
+    {/if}
+{/snippet}
+
+<Noscript />
+<main>
+    <div class="grid page" style="min-height: 80vh;">
+        <div class="content">
+            <div>
+                <a
+                    class="button faint"
+                    data-sveltekit-preload-data="false"
+                    href={isDraft ?
+                        "/dashboard" :
+                        (data.local ?
+                            "/studyset/local?id=" + data.localId :
+                            "/studysets/" + data.studysetId
+                        )
+                    }
+                >
+                    <IconBackArrow />
+                    Back
+                </a>
+            </div>
+            <input id="edit-title" type="text" placeholder="Title" class="title-textbox" />
+            {#if data.authed && !data.local}
+                <div id="edit-private-div">
+                    <div class="flex">
+                        <button
+                            class="button-box selected"
+                            id="edit-private-false"
+                            onclick={() => (unsavedChanges = true)}
+                        >
+                            <IconCheckmark class="button-box-selected-icon" />
+                            Public
+                        </button>
+                        <button
+                            class="button-box"
+                            id="edit-private-true"
+                            onclick={() => (unsavedChanges = true)}
+                        >
+                            <IconCheckmark class="button-box-selected-icon" />
+                            Private
+                        </button>
+                    </div>
+                </div>
+                <div class="flex" style="align-items: center;">
+                    <button
+                        class="button-box flex"
+                        style="display: flex; gap: 0.4rem; align-items: center;"
+                        onclick={() => (showSubjectPicker = true)}
+                    >
+                        <MenuIcon class="text fg0"></MenuIcon>
+                        <span
+                            ><span class="fg0">Subject:</span>
+                            {selectedSubject?.name ?? "None"}</span
+                        >
+                    </button>
+                </div>
+            {/if}
+
+            <div id="edit-terms-rows">
+                {#each terms as term, index (term.key)}
+                    <div
+                        class="grid box term-row-box"
+                        animate:flip={{ duration: 400 }}
+                        transition:scale={{ duration: 400 }}
+                    >
+                        <div>
+                            <AutoResizeTextarea
+                                div={{
+                                    class: "term-row-box-term",
+                                }}
+                                textarea={{
+                                    placeholder: "Term",
+                                    rows: "2",
+                                    oninput: () => {
+                                        if (!unsavedChanges) {
+                                            unsavedChanges = true;
+                                        }
+                                    },
+                                    onfocus: () => {
+                                        defFocused = false;
+                                        focusedRow = index;
+                                        showFocusBorder = false;
+                                        resetKeySeq();
+                                    },
+                                    style: `transition-duration: 0.2s; ${
+                                        showFocusBorder &&
+                                        useOhnoColorFocusBorder &&
+                                        !defFocused &&
+                                        focusedRow == index
+                                            ? "border-color: var(--ohno);"
+                                            : showFocusBorder &&
+                                                !defFocused &&
+                                                focusedRow == index
+                                              ? "border-color: var(--main)"
+                                              : ""
+                                    }`,
+                                }}
+                                bind:value={term.term}
+                                bind:textareaElement={term.termTextarea}
+                            />
+                            {#if env.ENABLE_TERM_IMAGES != "false"}
+                            {@render termImage(term, false)}
+                            {/if}
+                        </div>
+                        <div>
+                            <AutoResizeTextarea
+                                div={{
+                                    class: "term-row-box-def",
+                                }}
+                                textarea={{
+                                    placeholder: "Definition",
+                                    rows: "2",
+                                    oninput: () => {
+                                        if (!unsavedChanges) {
+                                            unsavedChanges = true;
+                                        }
+                                    },
+                                    onfocus: () => {
+                                        defFocused = true;
+                                        focusedRow = index;
+                                        showFocusBorder = false;
+                                        resetKeySeq();
+                                    },
+                                    style: `transition-duration: 0.2s; ${
+                                        showFocusBorder &&
+                                        useOhnoColorFocusBorder &&
+                                        defFocused &&
+                                        focusedRow == index
+                                            ? "border-color: var(--ohno);"
+                                            : showFocusBorder &&
+                                                defFocused &&
+                                                focusedRow == index
+                                              ? "border-color: var(--main)"
+                                              : ""
+                                    }`,
+                                }}
+                                bind:value={term.def}
+                                bind:textareaElement={term.defTextarea}
+                            />
+                            {#if env.ENABLE_TERM_IMAGES != "false"}
+                            {@render termImage(term, true)}
+                            {/if}
+                        </div>
+                        <div class="flex center term-row-box-actions">
+                            <Dropdown
+                                button={{
+                                    class: "dropdown-toggle",
+                                    "aria-label": "Actions dropdown menu",
+                                }}
+                            >
+                                {#snippet buttonContent()}
+                                    <IconMoreDotsV />
+                                {/snippet}
+                                {#snippet divContent(hide)}
+                                    <button
+                                        onclick={function (event) {
+                                            moveTerm(index, index - 1);
+                                            unsavedChanges = true;
+                                            hide();
+                                        }}
+                                    >
+                                        <IconArrowUp /> Move up
+                                    </button>
+                                    <button
+                                        onclick={function (event) {
+                                            moveTerm(index, index + 1);
+                                            unsavedChanges = true;
+                                            hide();
+                                        }}
+                                    >
+                                        <IconArrowDown /> Move down
+                                    </button>
+                                    <button
+                                        onclick={function (event) {
+                                            insertTerm(index + 1);
+                                            unsavedChanges = true;
+                                            hide();
+                                        }}
+                                    >
+                                        <IconPlus /> Add Below
+                                    </button>
+                                    <button
+                                        class="ohno"
+                                        onclick={function () {
+                                            deleteTerm(index);
+                                            unsavedChanges = true;
+                                        }}
+                                    >
+                                        <IconTrash /> Delete
+                                    </button>
+                                {/snippet}
+                            </Dropdown>
+                        </div>
+                    </div>
+                {:else}
+                    <div class="box">
+                        <p class="fg0">
+                            No terms?
+                            <span class="line"
+                                >Tap "add term" to create one or use "import
+                                terms" to transfer them from somewhere else.</span
+                            >
+                        </p>
+                    </div>
+                {/each}
+            </div>
+            <div class="box">
+                <div class="flex">
+                    <button
+                        onclick={function () {
+                            addTerm();
+                            unsavedChanges = true;
+                            tick().then(() =>
+                                terms?.[
+                                    terms?.length - 1
+                                ]?.termTextarea?.focus(),
+                            );
+                        }}
+                    >
+                        <IconPlus />
+                        Add term
+                    </button>
+                    <button
+                        class="alt"
+                        onclick={function () {
+                            showImportTermsModal = true;
+                        }}
+                    >
+                        <IconPlus />
+                        Import terms
+                    </button>
+                </div>
+            </div>
+            <div class="flex" style="align-items:center;">
+                <button
+                    data-sveltekit-preload-data="false"
+                    onclick={saveButton}
+                >
+                    <IconCheckmark />
+                    {#if isDraft}
+                        Create
+                    {:else}
+                        Save
+                    {/if}
+                </button>
+                <a
+                    class="button alt"
+                    data-sveltekit-preload-data="false"
+                    href={isDraft ?
+                        "/dashboard" :
+                        (data.local ?
+                            "/studyset/local?id=" + data.localId :
+                            "/studysets/" + data.studysetId
+                        )
+                    }
+                >
+                    Cancel
+                </a>
+            </div>
+
+            {#if isDraft && !data.authed}
+                <p class="text fg0" style="margin-top: 2rem;">
+                    This studyset will be local & private.
+                    <span class="optional-line"><a href="/sign-in">Sign in</a> or <a href="/sign-up">create an account</a> to post public studysets.</span>
+                </p>
+            {:else if !data.authed}
+                <p class="text fg0" style="margin-top: 2rem;">
+                    This studyset is local & private.
+                    <span class="optional-line"><a href="/sign-in">Sign in</a> or <a href="/sign-up">create an account</a> to post public studysets.</span>
+                </p>
+            {/if}
+
+            {#if showImportTermsModal}
+                <div class="modal" transition:fade={{ duration: 200 }}>
+                    <div class="content">
+                        <div class="grid import-terms-split">
+                            <div>
+                                <p>Between term & definition</p>
+                                <div
+                                    class="flex compact-gap nowrap"
+                                    style="flex-direction: column; align-items: start; align-content: start;"
+                                >
+                                    <div
+                                        class="flex compact-gap nowrap"
+                                        style="flex-direction: column; align-content: start;"
+                                    >
+                                        <button
+                                            class="button-box {importTermsTermDefDelimiterRadioSelect ==
+                                            'tab'
+                                                ? 'selected'
+                                                : ''}"
+                                            onclick={() =>
+                                                (importTermsTermDefDelimiterRadioSelect =
+                                                    "tab")}
+                                        >
+                                            <IconCheckmark
+                                                class="button-box-selected-icon"
+                                            ></IconCheckmark>
+                                            Tab
+                                        </button>
+                                        <button
+                                            class="button-box {importTermsTermDefDelimiterRadioSelect ==
+                                            'comma'
+                                                ? 'selected'
+                                                : ''}"
+                                            onclick={() =>
+                                                (importTermsTermDefDelimiterRadioSelect =
+                                                    "comma")}
+                                        >
+                                            <IconCheckmark
+                                                class="button-box-selected-icon"
+                                            ></IconCheckmark>
+                                            Comma
+                                        </button>
+                                        <button
+                                            class="button-box {importTermsTermDefDelimiterRadioSelect ==
+                                            'custom'
+                                                ? 'selected'
+                                                : ''}"
+                                            onclick={() =>
+                                                (importTermsTermDefDelimiterRadioSelect =
+                                                    "custom")}
+                                        >
+                                            <IconCheckmark
+                                                class="button-box-selected-icon"
+                                            ></IconCheckmark>
+                                            Custom
+                                        </button>
+                                    </div>
+                                </div>
+                                {#if importTermsTermDefDelimiterRadioSelect == "custom"}
+                                    <input
+                                        type="text"
+                                        placeholder="Term Delimiter"
+                                        id="import-terms-custom-termdef-delimiter-input"
+                                        class="slightly-smaller-textbox"
+                                        transition:scale={{ duration: 400 }}
+                                    />
+                                {/if}
+                            </div>
+                            <div>
+                                <p>Between rows</p>
+                                <div
+                                    class="flex compact-gap nowrap"
+                                    style="flex-direction: column; align-items: start; align-content: start;"
+                                >
+                                    <div
+                                        class="flex compact-gap nowrap"
+                                        style="flex-direction: column; align-content: start;"
+                                    >
+                                        <button
+                                            class="button-box {importTermsRowDelimiterRadioSelect ==
+                                            'newline'
+                                                ? 'selected'
+                                                : ''}"
+                                            onclick={() =>
+                                                (importTermsRowDelimiterRadioSelect =
+                                                    "newline")}
+                                        >
+                                            <IconCheckmark
+                                                class="button-box-selected-icon"
+                                            ></IconCheckmark>
+                                            New line
+                                        </button>
+                                        <button
+                                            class="button-box {importTermsRowDelimiterRadioSelect ==
+                                            'semicolon'
+                                                ? 'selected'
+                                                : ''}"
+                                            onclick={() =>
+                                                (importTermsRowDelimiterRadioSelect =
+                                                    "semicolon")}
+                                        >
+                                            <IconCheckmark
+                                                class="button-box-selected-icon"
+                                            ></IconCheckmark>
+                                            Semicolon
+                                        </button>
+                                        <button
+                                            class="button-box {importTermsRowDelimiterRadioSelect ==
+                                            'custom'
+                                                ? 'selected'
+                                                : ''}"
+                                            onclick={() =>
+                                                (importTermsRowDelimiterRadioSelect =
+                                                    "custom")}
+                                        >
+                                            <IconCheckmark
+                                                class="button-box-selected-icon"
+                                            ></IconCheckmark>
+                                            Custom
+                                        </button>
+                                    </div>
+                                </div>
+                                {#if importTermsRowDelimiterRadioSelect == "custom"}
+                                    <input
+                                        type="text"
+                                        placeholder="Row Delimiter"
+                                        id="import-terms-custom-row-delimiter-input"
+                                        class="slightly-smaller-textbox"
+                                        transition:scale={{ duration: 400 }}
+                                    />
+                                {/if}
+                            </div>
+                        </div>
+                        <textarea
+                            id="import-terms-paste-textarea"
+                            class="vertical"
+                            rows="3"
+                            placeholder="Paste data here, then press the import button"
+                        ></textarea>
+                        <p class="fg0" style="font-size: 0.9rem; margin-top: 0.4rem;">Import from a link instead? <a href="/import" style="font-size: 0.9rem;">More Import Options</a></p>
+                        <div class="flex" style="margin-top: 1.4rem;">
+                            <button
+                                onclick={function () {
+                                    var termDefDelimiter;
+                                    var rowDelimiter;
+                                    if (
+                                        importTermsTermDefDelimiterRadioSelect ==
+                                        "tab"
+                                    ) {
+                                        termDefDelimiter = "\t";
+                                    } else if (
+                                        importTermsTermDefDelimiterRadioSelect ==
+                                        "comma"
+                                    ) {
+                                        termDefDelimiter = ",";
+                                    } else if (
+                                        importTermsTermDefDelimiterRadioSelect ==
+                                        "custom"
+                                    ) {
+                                        termDefDelimiter =
+                                            document.getElementById(
+                                                "import-terms-custom-termdef-delimiter-input",
+                                            ).value;
+                                        if (termDefDelimiter == "") {
+                                            alert(
+                                                "Custom delimiter can't be blank >:(",
+                                            );
+                                            return;
+                                        }
+                                    }
+                                    if (
+                                        importTermsRowDelimiterRadioSelect ==
+                                        "newline"
+                                    ) {
+                                        rowDelimiter = "\n";
+                                    } else if (
+                                        importTermsRowDelimiterRadioSelect ==
+                                        "semicolon"
+                                    ) {
+                                        rowDelimiter = ";";
+                                    } else if (
+                                        importTermsRowDelimiterRadioSelect ==
+                                        "custom"
+                                    ) {
+                                        rowDelimiter = document.getElementById(
+                                            "import-terms-custom-row-delimiter-input",
+                                        ).value;
+                                        if (rowDelimiter == "") {
+                                            alert(
+                                                "Custom delimiter can't be blank >:(",
+                                            );
+                                            return;
+                                        }
+                                    }
+
+                                    /* we add a blank term when users create a studyset,
+                      so if a user imports terms without changing that blank term
+                      we probably don't want them to have a blank term right before their imported terms
+                      
+                      so we check if there's only one, blank, term, and delete it if so before importing terms */
+                                    if (
+                                        terms.length === 1 &&
+                                        terms[0].term === "" &&
+                                        terms[0].def === ""
+                                    ) {
+                                        terms.splice(0, 1);
+                                    }
+
+                                    var pastedData = document.getElementById(
+                                        "import-terms-paste-textarea",
+                                    ).value;
+                                    addTermsFrom2DArray(
+                                        pastedData
+                                            .split(rowDelimiter)
+                                            .map((row) =>
+                                                row
+                                                    ? row.split(
+                                                          termDefDelimiter,
+                                                      )
+                                                    : ["", ""],
+                                            ),
+                                    );
+
+                                    /* after importing, if there was a delimiter at the end, it will create a blank last term,
+                      check the last term and remove it if it's blank */
+                                    if (
+                                        terms[terms.length - 1].term === "" &&
+                                        terms[terms.length - 1].def === ""
+                                    ) {
+                                        terms.splice(terms.length - 1, 1);
+                                    }
+
+                                    unsavedChanges = true;
+
+                                    /* hide the modal after importing */
+                                    showImportTermsModal = false;
+                                }}>Import</button
+                            >
+                            <button
+                                class="alt"
+                                onclick={function () {
+                                    showImportTermsModal = false;
+                                }}>Cancel</button
+                            >
+                        </div>
+                    </div>
+                </div>
+            {/if}
+            {#snippet subjectPickerErrMsg()}
+                <div class="box ohno">
+                    <p>Error setting subject :(</p>
+                </div>
+            {/snippet}
+            {#if showSubjectPicker}
+                <SubjectPicker
+                    closeCallback={() => (showSubjectPicker = false)}
+                    selectCallback={(subject) => {
+                        selectedSubject = subject;
+                        showSubjectPicker = false;
+                        unsavedChanges = true;
+                    }}
+                ></SubjectPicker>
+            {/if}
+            {#if showExitConfirmationModal}
+                <div class="modal" transition:fade={{ duration: 200 }}>
+                    <div class="content">
+                        <h4>Save changes?</h4>
+                        <div class="flex flexcolonmobile">
+                            <button
+                                data-sveltekit-preload-data="false"
+                                onclick={saveButton}
+                                class="yay alt"
+                            >
+                                <IconCheckmark />
+                                Save
+                            </button>
+                            <button
+                                class="alt"
+                                onclick={function () {
+                                    showExitConfirmationModal = false;
+                                }}>Continue Editing</button
+                            >
+                            <button
+                                class="button ohno alt"
+                                data-sveltekit-preload-data="false"
+                                onclick={function () {
+                                    bypassUnsavedChangesConfirmation = true;
+                                    goto(navigatingToURL);
+                                }}
+                            >
+                                <IconTrash />
+                                Discard Changes
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            {/if}
+            {#if showTermImageModal}
+                <div class="modal" transition:fade={{ duration: 200 }}>
+                    <div class="content">
+                        <h4>{(termImageModalTerm?.[termImageModalIsDefSide ? "defImageUrl" : "termImageUrl"] == null) ? "Add Image" : "Update Image"}</h4>
+                        <FileInputBox accept="image/jpeg, image/png, image/webp, .jpeg, .jpg, .png, .webp" bind:this={termImageModalFileInputBox} onChangeCallback={(files) => termImageModalFiles = files}></FileInputBox>
+                        <div class="flex">
+                            <button class="pretty-button-disableable" disabled={termAddImageLoading || termImageModalFiles == null || termImageModalFiles.length == 0} onclick={async () => {
+                                if (data.local) {
+                                    showTermAddImageLoading()
+                                    const returnedBlob = await idbLayerImg.processAndUpdateTermImage(termImageModalTerm.id, termImageModalIsDefSide, termImageModalFiles[0]);
+                                    hideTermAddImageLoading()
+                                    if (returnedBlob != null) {
+                                        const newObjectUrl = URL.createObjectURL(returnedBlob);
+                                        termImageModalTerm[termImageModalIsDefSide ? "defImageUrl" : "termImageUrl"] = newObjectUrl;
+                                        objectUrls.push(newObjectUrl);
+                                    }
+                                    showTermImageModal = false;
+                                    termImageModalFileInputBox.clear();
+                                } else {
+                                    showTermAddImageLoading()
+                                    const raw = await fetch(`/api/term-images/${termImageModalTerm.id}/${termImageModalIsDefSide ? "def" : "term"}`, {
+                                        method: "PUT",
+                                        body: termImageModalFiles[0]
+                                    });
+                                    hideTermAddImageLoading()
+                                    const resp = await raw.json();
+                                    if (resp?.data?.imageUrl == null) {
+                                        console.error("Error in term-image-upload resp: ", resp);
+                                    } else {
+                                        termImageModalTerm[termImageModalIsDefSide ? "defImageUrl" : "termImageUrl"] = resp.data.imageUrl;
+                                    }
+                                    showTermImageModal = false;
+                                    termImageModalFileInputBox.clear();
+                                }
+                            }}>
+                                <IconCheckmark></IconCheckmark> Save
+                            </button>
+                            <button class="alt" onclick={() => {
+                                showTermImageModal = false;
+                                termImageModalFileInputBox.clear();
+                            }}>
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            {/if}
+            {#if showRemoveTermImageModal}
+                <div class="modal" transition:fade={{ duration: 200 }}>
+                    <div class="content">
+                        <h4>Remove Image?</h4>
+                        <p>Are you sure you want to remove this term's image?</p>
+                        <div class="flex">
+                            <button class="ohno" onclick={async () => {
+                                if (data.local) {
+                                    const oldObjectUrl = removeTermImageModalTerm[
+                                        removeTermImageModalIsDefSide ? "defImageUrl" : "termImageUrl"
+                                    ];
+
+                                    const success = await idbLayerImg.removeTermImage(removeTermImageModalTerm.id, removeTermImageModalIsDefSide);
+                                    if (success) {
+                                        removeTermImageModalTerm[removeTermImageModalIsDefSide ? "defImageUrl" : "termImageUrl"] = null;
+                                        URL.revokeObjectURL(oldObjectUrl);
+                                    } else {
+                                        alert("Error removing term image :(")
+                                    }
+                                    showRemoveTermImageModal = false;
+                                } else {
+                                    const raw = await fetch(`/api/term-images/${removeTermImageModalTerm.id}/${removeTermImageModalIsDefSide ? "def" : "term"}`, {
+                                        method: "DELETE"
+                                    });
+                                    const resp = await raw.json();
+                                    if (resp?.error) {
+                                        console.error("Error in remove-term-image resp: ", resp);
+                                    } else {
+                                        removeTermImageModalTerm[removeTermImageModalIsDefSide ? "defImageUrl" : "termImageUrl"] = null;
+                                    }
+                                    showRemoveTermImageModal = false;
+                                }
+                            }}>
+                                <IconTrash></IconTrash> Remove
+                            </button>
+                            <button class="alt" onclick={() => {
+                                showRemoveTermImageModal = false;
+                            }}>
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            {/if}
+        </div>
+    </div>
+</main>
+
+<style>
+    .term-row-box {
+        gap: 1rem;
+        grid-template-rows: auto;
+        grid-template-columns: 1fr 1fr auto;
+        grid-template-areas: "term def actions";
+        padding-bottom: 0.4rem;
+    }
+
+    .term-row-box > :global(.term-row-box-term) {
+        grid-area: term;
+        resize: none;
+    }
+    .term-row-box > :global(.term-row-box-def) {
+        grid-area: def;
+        resize: none;
+    }
+    .term-row-box-actions {
+        grid-area: actions;
+    }
+
+    .flexcolonmobile {
+        flex-direction: row;
+        align-content: center;
+    }
+    @media only screen and (max-width: 800px) {
+        .flexcolonmobile {
+            flex-direction: column;
+            align-content: start;
+        }
+
+        .term-row-box {
+            grid-template-rows: auto auto;
+            grid-template-columns: 1fr auto;
+            grid-template-areas:
+                "term actions"
+                "def actions";
+        }
+    }
+
+    .import-terms-split {
+        display: grid;
+        gap: 1rem;
+        grid-template-rows: auto;
+        grid-template-columns: 1fr 1fr;
+    }
+    #import-terms-paste-textarea {
+        width: 100%;
+    }
+
+    .slightly-smaller-textbox {
+        width: 10rem;
+    }
+
+    button.img-button-thin-fit,
+    .button.img-button-thin-fit {
+        padding: 0.4rem 0.6rem;
+        font-size: 0.9rem;
+    }
+
+    button.pretty-button-disableable:disabled,
+    .button.pretty-button-disableable:disabled,
+    button.pretty-button-disableable.disabled,
+    .button.pretty-button-disableable.disabled {
+        opacity: 0.6;
+    }
+
+    .term-image {
+        max-width: 400px;
+        max-height: 300px;
+        margin: 0px;
+        padding: 0px;
+        border-radius: 0.8rem;
+    }
+
+    .title-textbox,
+    input.title-textbox {
+        width: 100%;
+    }
+    .title-textbox,
+    input.title-textbox,
+    .title-textbox::placeholder,
+    input.title-textbox::placeholder {
+        font-size: 1.6rem;
+    }
+</style>
