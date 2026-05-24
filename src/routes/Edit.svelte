@@ -28,7 +28,7 @@
     import AutoResizeTextarea from "$lib/components/AutoResizeTextarea.svelte";
     import FileInputBox from "$lib/components/FileInputBox.svelte";
 
-    var showImportTermsModal = $state(false);
+    var showImportTermsModal = $state(data.initShowImport ?? false);
     var showExitConfirmationModal = $state(false);
     var showSubjectPicker = $state(false);
     let selectedSubject = $state(null);

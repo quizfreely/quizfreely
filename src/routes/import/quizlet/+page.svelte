@@ -5,6 +5,8 @@
     import { idbApiLayer } from "$lib/idb-api-layer";
     import LinkIcon from "$lib/icons/Link.svelte";
     import PlusIcon from "$lib/icons/Plus.svelte";
+    import GridIcon from "$lib/icons/AppsGridIcon.svelte"
+    import QuizevilIcon from "$lib/icons/Quizevil.svelte"
     let { data } = $props();
 
     let link = $state("");
@@ -257,11 +259,15 @@
     });
 </script>
 <svelte:head>
-  <title>Import From Quizlet to Quizfreely</title>
+  <title>Import Quizlets to Quizfreely</title>
 </svelte:head>
 <div class="grid intro" style="border-bottom: none; gap: 1rem;">
     <div class="content">
-        <h1 class="h3">Import from Quizlet</h1>
+        <span class="b" style="font-size: 1.6rem;">Import terms from</span>
+        <div class="flex" style="align-items: center; justify-content: center; gap: 1.2rem; margin-top: 0.2rem;">
+            <QuizevilIcon width="3rem" height="3rem"></QuizevilIcon>
+            <span style="margin-bottom: 0px; font-size: 2.2rem;">Quizlet</span>
+        </div>
         <div class="flex" style="flex-direction: column; align-items: center;">
             <div class="flex" style="flex-direction: column; align-items: stretch;">
                 <p style="font-size: 1.2rem; margin-top: 2rem; text-align: start;">Paste a link below</p>
@@ -298,6 +304,13 @@
                         </div>
                     {/if}
                 {/if}
+                <div style="margin-top: 4rem; text-align: start;">
+                    <p class="fg0">Import terms from other sources?</p>
+                    <a href="/import" class="button alt">
+                        <GridIcon></GridIcon>
+                        More Import Options
+                    </a>
+                </div>
             </div>
         </div>
     </div>
