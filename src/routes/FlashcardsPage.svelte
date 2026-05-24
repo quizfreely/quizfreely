@@ -114,7 +114,7 @@
         };
     });
 
-    let testYourself = $state(true);
+    // let testYourself = $state(true);
 
     function prevFunc() {
         console.log(`sessionTermsIndex: ${sessionTermsIndex},
@@ -183,7 +183,7 @@ newTermsIndex: ${newTermsIndex}`);
         </div>
         {#if terms}
             <Flashcards
-                termsList={!testYourself}
+                termsList={true}
                 {term}
                 terms={allTerms}
                 {showPrompt}
@@ -192,68 +192,68 @@ newTermsIndex: ${newTermsIndex}`);
                 {nextFunc}
             ></Flashcards>
         {/if}
-        <div class="caption" style="min-height: 4rem;">
-            <div>
-                <div style="min-height: 6rem;">
-                    {#if testYourself}
-                        <div class="flex center">
-                            <div class="flex col card-rating-button-container">
-                                <button class="button-box ohno">Again</button>
-                                <span class="fg0">{preview == null ? "" : show_diff_message(
-                                    preview[Rating.Again].card.due,
-                                    preview[Rating.Again].card.last_review,
-                                    true,
-                                    TIMEUNITFORMAT
-                                )}</span>
-                            </div>
-                            <div class="flex col card-rating-button-container">
-                                <button class="button-box">Hard</button>
-                                <span class="fg0">{preview == null ? "" : show_diff_message(
-                                    preview[Rating.Hard].card.due,
-                                    preview[Rating.Hard].card.last_review,
-                                    true,
-                                    TIMEUNITFORMAT
-                                )}</span>
-                            </div>
-                            <div class="flex col card-rating-button-container">
-                                <button class="button-box">Good</button>
-                                <span class="fg0">{preview == null ? "" : show_diff_message(
-                                    preview[Rating.Good].card.due,
-                                    preview[Rating.Good].card.last_review,
-                                    true,
-                                    TIMEUNITFORMAT
-                                )}</span>
-                            </div>
-                            <div class="flex col card-rating-button-container">
-                                <button class="button-box">Easy</button>
-                                <span class="fg0">{preview == null ? "" : show_diff_message(
-                                    preview[Rating.Easy].card.due,
-                                    preview[Rating.Easy].card.last_review,
-                                    true,
-                                    TIMEUNITFORMAT
-                                )}</span>
-                            </div>
-                        </div>
-                    {/if}
-                </div>
-                <div class="flex center" style="margin-top: 2rem;">
-                    <button class="button-box flashcard-mode-button {testYourself ? "selected" : ""}" onclick={() => testYourself = true}>
-                        <Checkmark class="button-box-selected-icon"></Checkmark>
-                        <div>
-                            <p class="top-text">Test Yourself</p>
-                            <p class="btm-text">Flashcards with Spaced Repetition</p>
-                        </div>
-                    </button>
-                    <button class="button-box flashcard-mode-button {testYourself ? "" : "selected"}" onclick={() => testYourself = false}>
-                        <Checkmark class="button-box-selected-icon"></Checkmark>
-                        <div>
-                            <p class="top-text">View</p>
-                            <p class="btm-text">Flip through flashcards</p>
-                        </div>
-                    </button>
-                </div>
-            </div>
-        </div>
+        <!-- <div class="caption" style="min-height: 4rem;"> -->
+        <!--     <div> -->
+        <!--         <div style="min-height: 6rem;"> -->
+        <!--             {#if testYourself} -->
+        <!--                 <div class="flex center"> -->
+        <!--                     <div class="flex col card-rating-button-container"> -->
+        <!--                         <button class="button-box ohno">Again</button> -->
+        <!--                         <span class="fg0">{preview == null ? "" : show_diff_message( -->
+        <!--                             preview[Rating.Again].card.due, -->
+        <!--                             preview[Rating.Again].card.last_review, -->
+        <!--                             true, -->
+        <!--                             TIMEUNITFORMAT -->
+        <!--                         )}</span> -->
+        <!--                     </div> -->
+        <!--                     <div class="flex col card-rating-button-container"> -->
+        <!--                         <button class="button-box">Hard</button> -->
+        <!--                         <span class="fg0">{preview == null ? "" : show_diff_message( -->
+        <!--                             preview[Rating.Hard].card.due, -->
+        <!--                             preview[Rating.Hard].card.last_review, -->
+        <!--                             true, -->
+        <!--                             TIMEUNITFORMAT -->
+        <!--                         )}</span> -->
+        <!--                     </div> -->
+        <!--                     <div class="flex col card-rating-button-container"> -->
+        <!--                         <button class="button-box">Good</button> -->
+        <!--                         <span class="fg0">{preview == null ? "" : show_diff_message( -->
+        <!--                             preview[Rating.Good].card.due, -->
+        <!--                             preview[Rating.Good].card.last_review, -->
+        <!--                             true, -->
+        <!--                             TIMEUNITFORMAT -->
+        <!--                         )}</span> -->
+        <!--                     </div> -->
+        <!--                     <div class="flex col card-rating-button-container"> -->
+        <!--                         <button class="button-box">Easy</button> -->
+        <!--                         <span class="fg0">{preview == null ? "" : show_diff_message( -->
+        <!--                             preview[Rating.Easy].card.due, -->
+        <!--                             preview[Rating.Easy].card.last_review, -->
+        <!--                             true, -->
+        <!--                             TIMEUNITFORMAT -->
+        <!--                         )}</span> -->
+        <!--                     </div> -->
+        <!--                 </div> -->
+        <!--             {/if} -->
+        <!--         </div> -->
+        <!--         <div class="flex center" style="margin-top: 2rem;"> -->
+        <!--             <button class="button-box flashcard-mode-button {testYourself ? "selected" : ""}" onclick={() => testYourself = true}> -->
+        <!--                 <Checkmark class="button-box-selected-icon"></Checkmark> -->
+        <!--                 <div> -->
+        <!--                     <p class="top-text">Test Yourself</p> -->
+        <!--                     <p class="btm-text">Flashcards with Spaced Repetition</p> -->
+        <!--                 </div> -->
+        <!--             </button> -->
+        <!--             <button class="button-box flashcard-mode-button {testYourself ? "" : "selected"}" onclick={() => testYourself = false}> -->
+        <!--                 <Checkmark class="button-box-selected-icon"></Checkmark> -->
+        <!--                 <div> -->
+        <!--                     <p class="top-text">View</p> -->
+        <!--                     <p class="btm-text">Flip through flashcards</p> -->
+        <!--                 </div> -->
+        <!--             </button> -->
+        <!--         </div> -->
+        <!--     </div> -->
+        <!-- </div> -->
     </div>
 </div>
 
