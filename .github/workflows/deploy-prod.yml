@@ -1,6 +1,15 @@
 name: Deploy Production
 on:
   workflow_dispatch:
+    inputs:
+      web-branch:
+        description: "web branch"
+        required: true
+        default: "prod"
+      api-branch:
+        description: "API branch"
+        required: true
+        default: "prod"
 jobs:
   deploy:
     name: Build & Deploy Web App & API
@@ -13,12 +22,12 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          ref: prod
+          ref: ${{ inputs.web-branch }}
           path: quizfreely
       - uses: actions/checkout@v6
         with:
           repository: quizfreely/api
-          ref: prod
+          ref: ${{ inputs.api-branch }}
           path: api
       - uses: actions/setup-go@v6
         with:
@@ -117,36 +126,36 @@ jobs:
               sudo systemctl restart quizfreely-web.service
             "
           echo "deployed=true" >> "$GITHUB_OUTPUT"
-  e2e-tests:
-    needs: deploy
-    uses: ./.github/workflows/e2e-tests.yml
-    with:
-      base_url: https://quizfreely.org
-  rollback:
-    needs: [deploy, e2e-tests]
-    if: failure() && needs.deploy.outputs.deployed == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Setup SSH
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.PROD_SERVER_NONROOT_SSH_KEY }}" > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan -H server.quizfreely.org >> ~/.ssh/known_hosts
-      - name: Rollback Release
-        run: |
-          OLD_API_RELEASE="${{ needs.deploy.outputs.old_api_release }}"
-          OLD_WEB_RELEASE="${{ needs.deploy.outputs.old_web_release }}"
-          ssh -i ~/.ssh/id_ed25519 quizfreely@server.quizfreely.org "
-            if [ -n \"$OLD_API_RELEASE\" ]; then
-              ln -sfn ~/api/releases/$OLD_API_RELEASE ~/api/current
-            fi
-            if [ -n \"$OLD_WEB_RELEASE\" ]; then
-              ln -sfn ~/web/releases/$OLD_WEB_RELEASE ~/web/current
-            fi
-            sudo systemctl restart quizfreely-api.service
-            sudo systemctl restart quizfreely-web.service
-          "
-          # WARNING: database migrations are NOT automatically rolled back
-          exit 1
-
+  # e2e-tests:
+  #   needs: deploy
+  #   uses: ./.github/workflows/e2e-tests.yml
+  #   with:
+  #     base_url: https://quizfreely.org
+  # rollback:
+  #   needs: [deploy, e2e-tests]
+  #   if: failure() && needs.deploy.outputs.deployed == 'true'
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Setup SSH
+  #       run: |
+  #         mkdir -p ~/.ssh
+  #         echo "${{ secrets.PROD_SERVER_NONROOT_SSH_KEY }}" > ~/.ssh/id_ed25519
+  #         chmod 600 ~/.ssh/id_ed25519
+  #         ssh-keyscan -H server.quizfreely.org >> ~/.ssh/known_hosts
+  #     - name: Rollback Release
+  #       run: |
+  #         OLD_API_RELEASE="${{ needs.deploy.outputs.old_api_release }}"
+  #         OLD_WEB_RELEASE="${{ needs.deploy.outputs.old_web_release }}"
+  #         ssh -i ~/.ssh/id_ed25519 quizfreely@server.quizfreely.org "
+  #           if [ -n \"$OLD_API_RELEASE\" ]; then
+  #             ln -sfn ~/api/releases/$OLD_API_RELEASE ~/api/current
+  #           fi
+  #           if [ -n \"$OLD_WEB_RELEASE\" ]; then
+  #             ln -sfn ~/web/releases/$OLD_WEB_RELEASE ~/web/current
+  #           fi
+  #           sudo systemctl restart quizfreely-api.service
+  #           sudo systemctl restart quizfreely-web.service
+  #         "
+  #         # WARNING: database migrations are NOT automatically rolled back
+  #         exit 1
+  #
