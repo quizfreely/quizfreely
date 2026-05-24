@@ -279,6 +279,7 @@
                     <PlusIcon></PlusIcon>
                     {showLoading ? "Importing..." : "Import"}
                 </button>
+                <div style="min-height: 2rem;">
                 {#if showErrMsg}
                 <div class="box ohno" transition:slide>
                     <p>{errMsgTxt}</p>
@@ -304,9 +305,10 @@
                         </div>
                     {/if}
                 {/if}
-                <div style="margin-top: 4rem; text-align: start;">
+                </div>
+                <div style="margin-top: 2rem; text-align: start;">
                     <p class="fg0">Import terms from other sources?</p>
-                    <a href="/import" class="button alt">
+                    <a href="/import" class="button alt text fg1" style="margin-top: 0.4rem;">
                         <GridIcon></GridIcon>
                         More Import Options
                     </a>
