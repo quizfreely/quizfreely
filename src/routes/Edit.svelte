@@ -1301,7 +1301,8 @@
                             rows="3"
                             placeholder="Paste data here, then press the import button"
                         ></textarea>
-                        <div class="flex">
+                        <p class="fg0" style="font-size: 0.9rem; margin-top: 0.4rem;">Import from a link instead? <a href="/import" style="font-size: 0.9rem;">More Import Options</a></p>
+                        <div class="flex" style="margin-top: 1.4rem;">
                             <button
                                 onclick={function () {
                                     var termDefDelimiter;
