@@ -272,7 +272,7 @@
     });
 </script>
 <svelte:head>
-  <title>Import From Scholarsome to Quizfreely</title>
+  <title>Import Scholarsome Sets to Quizfreely</title>
 </svelte:head>
 <div class="grid intro" style="border-bottom: none; gap: 1rem;">
     <div class="content">

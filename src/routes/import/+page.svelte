@@ -39,7 +39,7 @@
     }
 </script>
 <svelte:head>
-    <title>Import to Quizfreely</title>
+    <title>Import Terms to Quizfreely</title>
 </svelte:head>
 <div class="grid page">
     <div class="content">

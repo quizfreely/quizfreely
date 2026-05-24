@@ -259,7 +259,7 @@
     });
 </script>
 <svelte:head>
-  <title>Import Quizlets to Quizfreely</title>
+  <title>Import Quizlet Sets to Quizfreely</title>
 </svelte:head>
 <div class="grid intro" style="border-bottom: none; gap: 1rem;">
     <div class="content">
