@@ -20,51 +20,113 @@
         showErrMsg = false;
         showErrDetails = false;
         showLoading = false;
-        if (link == null || link.length == 0) {
+        if (link == null || link.trim().length == 0) {
             errMsgTxt = "Empty link! Paste a link to import."
             showErrMsg = true;
             return;
         }
         
-        const url = normalizeUrlHttps(link);
+        const url = parseUrl(link);
         if (url === null) {
             errMsgTxt = "Invalid Link!"
             showErrMsg = true;
             return;
         }
+        const pathBeforeIdStartIndex = url.pathname.indexOf("/study-set/");
+        const pathBeforeIdIndex = pathBeforeIdStartIndex + ("/study-set/").length;
+        if (pathBeforeIdStartIndex < 0 || pathBeforeIdIndex >= url.pathname.length - 1) {
+            errMsgTxt = "Invalid Link!"
+            showErrMsg = true;
+            return;
+        }
+        const pathBeforeId = url.pathname.substring(0, pathBeforeIdIndex).trim();
+        const pathWithAndAfterId = url.pathname.substring(pathBeforeIdIndex).trim();
+        if (pathWithAndAfterId.length < 1) {
+            errMsgTxt = "Invalid Link!"
+            showErrMsg = true;
+            return;
+        }
+        const pathPartsWithAndAfterId = pathWithAndAfterId.split("/");
+        if (pathPartsWithAndAfterId.length == 0 || pathPartsWithAndAfterId[0].trim().length < 1) {
+            errMsgTxt = "Invalid Link!"
+            showErrMsg = true;
+            return;
+        }
+        const studysetId = pathPartsWithAndAfterId[0].trim();
+        url.pathname = pathBeforeId.replace("/study-set/", "/api/sets/") + studysetId;
+        url.hash = "";
+        url.search = "";
 
         showLoading = true;
-        await importTerms(url);
+        await importTerms(url.toString());
         showLoading = false;
     }
-    async function importTerms(url) {
+    async function importTerms(apiUrl) {
         let title;
         let terms;
         try {
-            const rawResp = await fetch("/api/web-import", {
-                method: "POST",
-                body: JSON.stringify({
-                    url
-                })
-            });
+            const rawResp = await fetch(apiUrl);
             const resp = await rawResp.json();
-            if (resp.error != null && resp.errorMsg != null) {
-                errMsgTxt = resp.errorMsg;
-                showErrMsg = true;
-                return;
-            } else if (resp.error != null) {
+            if (resp == null) {
                 errMsgTxt = "Error importing terms!";
-                errDetailsTxt = resp.error;
+                errDetailsTxt = "Empty API response";
                 showErrMsg = true;
                 showErrDetails = true;
                 return;
+            } else if (rawResp.status == 404 && resp.message.length > 0) {
+                errMsgTxt = "Studyset not found";
+                errDetailsTxt = resp.message;
+                showErrMsg = true;
+                showErrDetails = true;
+                return;
+            } else if (rawResp.status == 404) {
+                errMsgTxt = "API responded with 404 Not Found";
+                showErrMsg = true;
+                return;
+            } else if (rawResp.status != 200 && resp.message.length > 0) {
+                errMsgTxt = "API responded with an error";
+                errDetailsTxt = resp.message;
+                showErrMsg = true;
+                showErrDetails = true;
+                return;
+            } else if (resp?.data?.cards != null) {
+                title = resp.data.title;
+                const parser = new DOMParser();
+                terms = resp.data.cards.map((card, index) => {
+                    if (card == null) {
+                        return {
+                            term: "",
+                            def: "",
+                            sortOrder: index
+                        };
+                    }
+
+                    let term = card.term;
+                    let def = card.definition;
+                    if (card.term?.trim()?.length > 0) {
+                        const doc = parser.parseFromString(card.term, "text/html");
+                        term = doc.body.textContent || "";
+                    }
+                    if (card.definition?.trim()?.length > 0) {
+                        const doc = parser.parseFromString(card.definition, "text/html");
+                        def = doc.body.textContent || "";
+                    }
+                    return {
+                        term,
+                        def,
+                        sortOrder: card.index
+                    };
+                });
             } else {
-                terms = resp.terms;
-                title = resp.title;
+                errMsgTxt = "API response doesn't have terms";
+                errDetailsTxt = JSON.stringify(resp, null, 4);
+                showErrMsg = true;
+                showErrDetails = true;
+                return;
             }
         } catch (err) {
-            console.error("Error making web import API req", err);
-            errMsgTxt = "Error connecting to server to import terms";
+            console.error("Error making scholarsome API req", err);
+            errMsgTxt = "Error connecting to API to import terms";
             showErrMsg = true;
             if (err?.message) {
                 errDetailsTxt = err.message;
@@ -82,11 +144,6 @@
         title = title?.trim();
         title = title?.length > 0 ? title : "Imported Studyset"
 
-        const termInputs = terms.map(([term, def], index) => ({
-            term,
-            def,
-            sortOrder: index
-        }));
         if (data.authed) {
             let newStudysetId;
             try {
@@ -131,7 +188,7 @@
 }`,
                         variables: {
                             studysetId: newStudysetId,
-                            terms: termInputs
+                            terms
                         }
                     })
                 });
@@ -144,7 +201,7 @@
                 }
                 goto(`/studysets/${newStudysetId}`);
             } catch (err) {
-                console.error("Error making API req(s) creating studyset/terms after import", err);
+                console.error("Error making (qzfr) API req(s) creating studyset/terms after import", err);
                 errMsgTxt = "Error creating studyset with imported terms";
                 showErrMsg = true;
                 return;
@@ -155,7 +212,7 @@
                     title,
                     draft: false
                 });
-                await idbApiLayer.createTerms(newLocalId, termInputs);
+                await idbApiLayer.createTerms(newLocalId, terms);
                 goto(`/studyset/local?id=${newLocalId}`);
             } catch (err) {
                 console.error("Error creating local studyset/terms after import", err);
@@ -167,14 +224,13 @@
     }
 
     /*
-        returns input string as url with https protocol or returns null if invalid
-        will change http to https & will add protocol if input has none
+        returns input string as URL object or returns null if invalid
+        will add https protocol if input has no protocol, will keep http if input has it
         will return null (invalid) if protocol is specified but is not http or https
         ignores surrounding whitespace
-        will return null (invalid) if string is empty or only whitespace
-        will return null (invalid) if hostname has no dots, this markes things like localhost urls invalid (web APIs will not be able to retrieve them anyway)
+        will return null (invalid) if input is empty or only whitespace
     */
-    function normalizeUrlHttps(input) {
+    function parseUrl(input) {
         if (typeof input !== "string") {
             return null;
         }
@@ -192,24 +248,13 @@
         try {
             const urlObj = new URL(url);
 
-            if (!urlObj.hostname.includes(".")) {
-                return null;
-            }
-
-            if (urlObj.hostname.endsWith(".")) {
-                return null;
-            }
-
-            if (urlObj.protocol == "https:") {
-                return urlObj.toString();
-            } else if (urlObj.protocol == "http:") {
-                urlObj.protocol = "https:";
-                return urlObj.toString();
+            if (urlObj.protocol == "https:" || urlObj.protocol == "http:") {
+                return urlObj;
             } else {
                 return null;
             }
         } catch (err) {
-            console.error("error parsing url in normalizeUrlHttps", err);
+            console.error("error parsing url in parseUrl", err);
             return null;
         }
     }
