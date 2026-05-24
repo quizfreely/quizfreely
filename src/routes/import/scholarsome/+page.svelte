@@ -278,7 +278,7 @@
     <div class="content">
         <span class="b" style="font-size: 1.6rem;">Import from</span>
         <div class="flex" style="align-items: center; justify-content: center; gap: 1.2rem; margin-top: 0.4rem;">
-            <ScholarsomeLogotype width="auto" height="3.6rem"></ScholarsomeLogotype>
+            <ScholarsomeLogotype width="auto" height="3.6rem" role="img" aria-label="Scholarsome"></ScholarsomeLogotype>
         </div>
         <div class="flex" style="flex-direction: column; align-items: center;">
             <div class="flex" style="flex-direction: column; align-items: stretch;">
