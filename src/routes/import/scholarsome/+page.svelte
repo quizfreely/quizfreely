@@ -1,12 +1,12 @@
 <script>
     import { onMount } from "svelte";
     import { goto } from "$app/navigation";
-    import { slide, crossfade, fade } from "svelte/transition";
+    import { slide } from "svelte/transition";
     import { idbApiLayer } from "$lib/idb-api-layer";
     import LinkIcon from "$lib/icons/Link.svelte";
     import PlusIcon from "$lib/icons/Plus.svelte";
     import GridIcon from "$lib/icons/AppsGridIcon.svelte"
-    import QuizevilIcon from "$lib/icons/Quizevil.svelte"
+    import ScholarsomeIcon from "$lib/icons/Scholarsome.svelte"
     let { data } = $props();
 
     let link = $state("");
@@ -16,28 +16,10 @@
     let errMsgTxt = $state("");
     let errDetailsTxt = $state("");
     let showLoading = $state(false);
-    let loadingMsgIndex = $state(-1);
-    const loadingMsgs = [
-        "This can take some time",
-        "Still fetching & importing...",
-        "This sometimes takes a while",
-        "Still working...",
-        "This typically takes less than 1 minute",
-        "Still loading...",
-        "This process might take a bit",
-        "Sorry, still loading...",
-        "Importing sometimes takes a while",
-        "Sorry, still importing...",
-        "This can take a bit sometimes",
-        "Sorry, still loading...",
-        "So sorry, this is taking a while",
-        "So sorry, still loading..."
-    ];
     async function importButton() {
         showErrMsg = false;
         showErrDetails = false;
         showLoading = false;
-        loadingMsgIndex = -1;
         if (link == null || link.length == 0) {
             errMsgTxt = "Empty link! Paste a link to import."
             showErrMsg = true;
@@ -52,16 +34,8 @@
         }
 
         showLoading = true;
-        const loadingMsgInterval = setInterval(() => {
-            if (loadingMsgIndex >= loadingMsgs.length - 1) {
-                clearInterval(loadingMsgInterval);
-            } else {
-                loadingMsgIndex++;
-            }
-        }, 6000);
         await importTerms(url);
         showLoading = false;
-        clearInterval(loadingMsgInterval);
     }
     async function importTerms(url) {
         let title;
@@ -251,29 +225,23 @@
             textbox.removeEventListener("keyup", keyupFunc);
         };
     });
-    const [crossfadeOut, crossfadeIn] = crossfade({
-        duration: 800,
-        fallback: (node, _params, _intro) => fade(node, {
-            duration: 400
-        })
-    });
 </script>
 <svelte:head>
-  <title>Import Quizlets to Quizfreely</title>
+  <title>Import From Scholarsome to Quizfreely</title>
 </svelte:head>
 <div class="grid intro" style="border-bottom: none; gap: 1rem;">
     <div class="content">
         <span class="b" style="font-size: 1.6rem;">Import from</span>
         <div class="flex" style="align-items: center; justify-content: center; gap: 1.2rem; margin-top: 0.2rem;">
-            <QuizevilIcon width="3rem" height="3rem"></QuizevilIcon>
-            <span style="margin-bottom: 0px; font-size: 2.2rem;">Quizlet</span>
+            <ScholarsomeIcon width="3rem" height="3rem"></ScholarsomeIcon>
+            <span style="margin-bottom: 0px; font-size: 2.2rem;">Scholarsome</span>
         </div>
         <div class="flex" style="flex-direction: column; align-items: center;">
             <div class="flex" style="flex-direction: column; align-items: stretch;">
                 <p style="font-size: 1.2rem; margin-top: 2rem; text-align: start;">Paste a link below</p>
                 <div class="searchbar" style="min-width: 24rem; max-width: 30rem; margin-bottom: 0px; box-shadow: 0px 1px 2px 1px var(--button-box-shadow-color);">
                     <LinkIcon class="searchbar-icon"></LinkIcon>
-                    <input type="text" placeholder="https://quizlet.com/1234..." autocomplete="off" autocapitalize="off" spellcheck="false" bind:value={link} bind:this={textbox}>
+                    <input type="text" placeholder="https://scholarsome.com/study-set/..." autocomplete="off" autocapitalize="off" spellcheck="false" bind:value={link} bind:this={textbox}>
                 </div>
                 <button onclick={importButton} style="{showLoading ? "opacity: 0.6;" : ""}" disabled={showLoading}>
                     <PlusIcon></PlusIcon>
@@ -292,17 +260,6 @@
                         <div class="spinner size-1.2rem fg1 speed-slower"></div>
                         <span style="font-size: 1.4rem;">Loading</span>
                     </div>
-                    {#if loadingMsgIndex >= 0}
-                        <div class="grid overlap-loading-msg-container" transition:fade={{ duration: 400 }}>
-                            {#each [loadingMsgs[loadingMsgIndex]] as loadingMsg (loadingMsgIndex)}
-                                <p class="fg0 center overlap-loading-msg" in:crossfadeIn={{
-                                    key: loadingMsgIndex
-                                }} out:crossfadeOut={{
-                                    key: loadingMsgIndex
-                                }}>{loadingMsg}</p>
-                            {/each}
-                        </div>
-                    {/if}
                 {/if}
                 <div style="margin-top: 4rem; text-align: start;">
                     <p class="fg0">Import terms from other sources?</p>
@@ -319,11 +276,3 @@
 <!--     <div class="content"> -->
 <!--     </div> -->
 <!-- </div> -->
-<style>
-.overlap-loading-msg-container {
-    grid-template-areas: "stack";
-}
-.overlap-loading-msg {
-    grid-area: stack;
-}
-</style>
