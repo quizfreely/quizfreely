@@ -210,7 +210,7 @@
                             </Dropdown>
                         </div>
                     {:else if data.local}
-                        <div id="edit-menu" class="flex">
+                        <div id="edit-menu" class="flex" style="align-items: center;">
                             <a
                                 href="/studyset/local/edit?id={data.localId}"
                                 class="button"
