@@ -268,7 +268,7 @@
             <QuizevilLogotype width="auto" height="2.2rem" role="img" aria-label="Quizlet"></QuizevilLogotype>
         </div>
         <div class="flex" style="flex-direction: column; align-items: center;">
-            <div class="flex" style="flex-direction: column; align-items: stretch; width: 26rem;">
+            <div class="flex" style="flex-direction: column; align-items: stretch; width: 26rem; max-width: 100%;">
                 <p style="font-size: 1.2rem; margin-top: 2rem; text-align: start;">Paste a link below</p>
                 <div class="searchbar" style="width: 100%; margin-bottom: 0px; box-shadow: 0px 1px 2px 1px var(--button-box-shadow-color);">
                     <LinkIcon class="searchbar-icon"></LinkIcon>
