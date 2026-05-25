@@ -11,6 +11,9 @@
     let selectedItems = $state([]);
     let showStartErr = $state(false);
     let startErrMsg = $state("");
+    const PAIRS_COUNT = 6;
+    const RANDOM_LOOP_MAX_TRIES = 40;
+
     if (!local && (terms == null || terms.length == 0)) {
         showStartErr = true;
         startErrMsg = "There aren't enough terms in this studyset!";
@@ -18,8 +21,6 @@
         selectTerms();
     }
 
-    const PAIRS_COUNT = 6;
-    const RANDOM_LOOP_MAX_TRIES = 40;
     function selectTerms() {
         const indicies = [];
         for (let n = 0; n < PAIRS_COUNT; n++) {
