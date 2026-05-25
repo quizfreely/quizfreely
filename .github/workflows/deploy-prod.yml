@@ -154,17 +154,17 @@ jobs:
           ssh -i ~/.ssh/id_ed25519 \
             quizfreely@server.quizfreely.org "
               cd ~/api
-              if [ '${{ inputs.update_api }}' = 'true']; then
+              if [ '${{ inputs.update_api }}' = 'true' ]; then
                 dbmate -e DB_MIGRATION_URL migrate
                 ln -sfn ~/api/releases/$NEW_API_RELEASE ~/api/current
               fi
-              if [ '${{ inputs.update_web }}' = 'true']; then
+              if [ '${{ inputs.update_web }}' = 'true' ]; then
                 ln -sfn ~/web/releases/$NEW_WEB_RELEASE ~/web/current
               fi
-              if [ '${{ inputs.update_api }}' = 'true']; then
+              if [ '${{ inputs.update_api }}' = 'true' ]; then
                 sudo systemctl restart quizfreely-api.service
               fi
-              if [ '${{ inputs.update_web }}' = 'true']; then
+              if [ '${{ inputs.update_web }}' = 'true' ]; then
                 sudo systemctl restart quizfreely-web.service
               fi
             "
