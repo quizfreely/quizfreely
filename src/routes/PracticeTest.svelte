@@ -194,15 +194,33 @@
     );
     let questionComponents = $state([]);
     function setupStart() {
+        showInputErr = false
         if (terms == null || terms.length < 1) {
-            alert("oops, not enough terms");
             console.log("Terms array: ", terms);
+            inputErrMsg = "Sorry, there's not enough terms to take a practice test with";
+            showInputErr = true;
             return;
         }
 
         let questionsCount = defaultQuestionsCount;
         if (!isNaN(parseInt(questionsCountEntered))) {
-            questionsCount = questionsCountEntered;
+            console.log("questionsCountEntered: " + questionsCountEntered)
+            questionsCount = parseInt(questionsCountEntered);
+        } else if (questionsCountEntered != null && questionsCountEntered.trim().length > 0) {
+            inputErrMsg = "Invalid questions count. Please enter a number";
+            showInputErr = true;
+            return;
+        }
+
+        if (questionsCount == 0) {
+            inputErrMsg = "Invalid questions count. You can't have 0 questions";
+            showInputErr = true;
+            return;
+        }
+        if (questionsCount < 0) {
+            inputErrMsg = "Invalid questions count. You can't have a negative number of questions 😭";
+            showInputErr = true;
+            return;
         }
 
         let questionTypesEnabledArray = [];
@@ -213,6 +231,11 @@
                 }
             },
         );
+        if (questionTypesEnabledArray.length == 0) {
+            inputErrMsg = "Select 1 or more question types to enable";
+            showInputErr = true;
+            return;
+        }
 
         let numMCQsToAssign = 0;
         let numTrueFalseQsToAssign = 0;
@@ -707,6 +730,9 @@ FRQs: ${numFRQsToAssign}`,
     }
     let submitted = $state(data?.alreadyOver);
     let submitting = false;
+
+    let showInputErr = $state(false);
+    let inputErrMsg = $state("");
 </script>
 
 <div class="grid page">
@@ -868,6 +894,11 @@ FRQs: ${numFRQsToAssign}`,
                         ><CheckmarkIcon></CheckmarkIcon> Start</button
                     >
                 </div>
+                {#if showInputErr}
+                    <div class="box ohno" transition:slide>
+                        {inputErrMsg}
+                    </div>
+                {/if}
                 <div
                     class="flex compact-gap"
                     style="margin-top: 2rem; align-items: end; justify-content: space-between; flex-wrap: wrap;"
