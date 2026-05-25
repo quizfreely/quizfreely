@@ -777,6 +777,8 @@ FRQs: ${numFRQsToAssign}`,
                 <div style="margin-top: 0.4rem;">
                     <input
                         type="text"
+                        inputmode="numeric"
+                        pattern="[0-9]*"
                         placeholder={defaultQuestionsCount}
                         style="max-width: 4rem;"
                         bind:value={questionsCountEntered}
