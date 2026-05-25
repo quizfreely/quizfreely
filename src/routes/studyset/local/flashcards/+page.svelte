@@ -3,4 +3,4 @@
 
     let { data } = $props();
 </script>
-<FlashcardsPage local={true} localId={data.localId}></FlashcardsPage>
+<FlashcardsPage local={true} localId={data.localId} {data}></FlashcardsPage>
