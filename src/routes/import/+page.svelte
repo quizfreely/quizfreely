@@ -1,5 +1,6 @@
 <script>
     import { goto } from "$app/navigation";
+    import { idbApiLayer } from "$lib/idb-api-layer";
     import QuizevilIcon from "$lib/icons/Quizevil.svelte";
     import ScholarsomeIcon from "$lib/icons/Scholarsome.svelte";
     import PlusIcon from "$lib/icons/Plus.svelte";
