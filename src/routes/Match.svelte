@@ -122,6 +122,19 @@
             navigation.cancel();
         }
     });
+
+    let selectedLastTarget;
+    let selectedLastItem;
+    let selectedNowTarget;
+    let selectedNowItem;
+    let selectedNowIndex;
+    function resetBothSelected() {
+        selectedLastTarget = null;
+        selectedLastItem = null;
+        selectedNowTarget = null;
+        selectedNowItem = null;
+        selectedNowIndex = null;
+    }
 </script>
 <div class="qzfr-match-head">
     <a href="{local ? `/studyset/local?id=${localId}` : `/studysets/${cloudId}`}" class="button faint">
@@ -130,8 +143,36 @@
     </a>
 </div>
 <div class="grid qzfr-match-grid">
-    {#each selectedItems as item}
-        <button class="button-box">{item.showDef ? item.def : item.term}</button>
+    {#each selectedItems as item, index}
+        <button class="button-box" onclick={(ev) => {
+            if (selectedNowIndex == index) {
+                ev.target.classList.remove("selected");
+                resetBothSelected();
+                return;
+            }
+            if (ev.target.classList.contains("ohno") || ev.target.classList.contains("yay")) {
+                return;
+            }
+            selectedLastTarget = selectedNowTarget;
+            selectedLastItem = selectedNowItem;
+            selectedNowTarget = ev.target;
+            selectedNowItem = item;
+            selectedNowIndex = index;
+
+            ev.target.classList.add("selected");
+            if (selectedLastItem != null && item.showDef ?
+                selectedLastItem.def.trim() == item.def.trim() :
+                selectedLastItem.term.trim() == item.term.trim()
+            ) {
+                selectedLastTarget.classList.add("yay");
+                ev.target.classList.add("yay");
+                resetBothSelected();
+            } else if (selectedLastItem != null) {
+                selectedLastTarget.classList.add("ohno");
+                ev.target.classList.add("ohno");
+                resetBothSelected();
+            }
+        }}>{item.showDef ? item.def : item.term}</button>
     {/each}
 </div>
 {#if showExitConfirmationModal}
@@ -180,19 +221,25 @@
 {/if}
 <style>
     .qzfr-match-head {
-        padding: 0px 4rem;
-        padding-top: 2rem;
+        padding: 0px 8rem;
+        margin-top: 2rem;
     }
     .grid.qzfr-match-grid {
         grid-template-columns: 1fr 1fr 1fr 1fr;
-        grid-template-rows: 1fr 1fr 1fr;
+        grid-template-rows: auto auto auto;
         gap: 1rem;
-        padding: 0px 4rem;
+        padding: 0px 8rem;
         margin-top: 2rem;
-        height: 80vh;
+        min-height: 80vh;
     }
     @media only screen and (max-width: 1000px) {
-        grid-template-columns: 1fr 1fr 1fr;
-        grid-template-rows: 1fr 1fr 1fr 1fr;
+        .grid.qzfr-match-grid {
+            grid-template-columns: 1fr 1fr 1fr;
+            grid-template-rows: auto auto auto auto;
+            padding: 0px 4rem;
+        }
+        .qzfr-match-head {
+            padding: 0px 4rem;
+        }
     }
 </style>
