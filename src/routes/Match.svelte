@@ -123,6 +123,10 @@
         }
     });
 
+    let showSameSideWarning = $state(false);
+    let tmpWarnItem1 = null;
+    let tmpWarnItem2 = null;
+
     let selectedItem;
 </script>
 <div class="qzfr-match-head">
@@ -130,6 +134,11 @@
         <BackIcon></BackIcon>
         Back
     </a>
+    {#if showSameSideWarning}
+        <div class="box warn">
+            Same side selected twice!
+        </div>
+    {/if}
 </div>
 <div class="grid qzfr-match-grid">
     {#each items as item, index}
@@ -137,10 +146,21 @@
             item.selected || item.answered ? "selected" : ""
         } {
             item.answered ? (item.correct ? "yay" : "ohno") : ""
+        } {
+            item.tmpWarn ? "warn" : ""
         }" disabled={item.answered} onclick={(ev) => {
             // if (item.answered) {
             //     return;
             // }
+            if (tmpWarnItem1 != null) {
+                tmpWarnItem1.tmpWarn = false
+                tmpWarnItem1.selected = false
+            }
+            if (tmpWarnItem2 != null) {
+                tmpWarnItem2.tmpWarn = false
+                tmpWarnItem2.selected = false
+            }
+            
             if (item.selected) {
                 item.selected = false;
                 selectedItem = null;
@@ -157,6 +177,10 @@
                         selectedItem.term.trim() != selectedItem.def.trim() &&
                         item.term.trim() != item.def.trim()
                     ) {
+                        selectedItem.tmpWarn = true;
+                        item.tmpWarn = true;
+                        tmpWarnItem1 = selectedItem;
+                        tmpWarnItem2 = item;
                         selectedItem = null;
                         showSameSideWarning = true;
                         return;
@@ -166,6 +190,7 @@
                     selectedItem.correct = true;
                     item.correct = true;
                 }
+                showSameSideWarning = false;
                 selectedItem.answered = true;
                 item.answered = true;
                 selectedItem = null;
