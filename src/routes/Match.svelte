@@ -123,6 +123,28 @@
         }
     });
 
+    function anyPairsLeft() {
+        const unanswered = items.filter(item => !item.answered);
+        for (let index = 0; index < unanswered.length; index++) {
+            const item = unanswered[index];
+            const hasMatch = unanswered.some((item2, index2) => (
+                index != index2 &&
+                item.showDef ?
+                    item.def.trim() == item2.def.trim() :
+                    item.term.trim() == item2.term.trim() &&
+                !(
+                    item.showDef == item2.showDef &&
+                    item.term.trim() != item.def.trim() &&
+                    item2.term.trim() != item2.def.trim()
+                )
+            ));
+            if (hasMatch) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     let showSameSideWarning = $state(false);
     let tmpWarnItem1 = null;
     let tmpWarnItem2 = null;
@@ -196,6 +218,10 @@
                 selectedItem = null;
             } else {
                 selectedItem = item;
+            }
+
+            if (!anyPairsLeft()) {
+                alert("done?")
             }
         }}>{item.showDef ? item.def : item.term}</button>
     {/each}
