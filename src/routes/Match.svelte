@@ -8,7 +8,7 @@
 
     let { local, cloudId, localId, data } = $props();
     let terms = data.terms;
-    let selectedItems = $state([]);
+    let items = $state([]);
     let showStartErr = $state(false);
     let startErrMsg = $state("");
     const PAIRS_COUNT = 6;
@@ -35,7 +35,7 @@
             }
             indicies.push(randomIndex);
         }
-        selectedItems = shuffleInPlace([
+        items = shuffleInPlace([
             ...indicies.map(index => ({
                 ...terms[index],
                 showDef: false
@@ -123,18 +123,7 @@
         }
     });
 
-    let selectedLastTarget;
-    let selectedLastItem;
-    let selectedNowTarget;
-    let selectedNowItem;
-    let selectedNowIndex;
-    function resetBothSelected() {
-        selectedLastTarget = null;
-        selectedLastItem = null;
-        selectedNowTarget = null;
-        selectedNowItem = null;
-        selectedNowIndex = null;
-    }
+    let selectedItem;
 </script>
 <div class="qzfr-match-head">
     <a href="{local ? `/studyset/local?id=${localId}` : `/studysets/${cloudId}`}" class="button faint">
@@ -143,34 +132,45 @@
     </a>
 </div>
 <div class="grid qzfr-match-grid">
-    {#each selectedItems as item, index}
-        <button class="button-box" onclick={(ev) => {
-            if (selectedNowIndex == index) {
-                ev.target.classList.remove("selected");
-                resetBothSelected();
+    {#each items as item, index}
+        <button class="button-box {
+            item.selected || item.answered ? "selected" : ""
+        } {
+            item.answered ? (item.correct ? "yay" : "ohno") : ""
+        }" disabled={item.answered} onclick={(ev) => {
+            // if (item.answered) {
+            //     return;
+            // }
+            if (item.selected) {
+                item.selected = false;
+                selectedItem = null;
                 return;
             }
-            if (ev.target.classList.contains("ohno") || ev.target.classList.contains("yay")) {
-                return;
-            }
-            selectedLastTarget = selectedNowTarget;
-            selectedLastItem = selectedNowItem;
-            selectedNowTarget = ev.target;
-            selectedNowItem = item;
-            selectedNowIndex = index;
-
-            ev.target.classList.add("selected");
-            if (selectedLastItem != null && item.showDef ?
-                selectedLastItem.def.trim() == item.def.trim() :
-                selectedLastItem.term.trim() == item.term.trim()
-            ) {
-                selectedLastTarget.classList.add("yay");
-                ev.target.classList.add("yay");
-                resetBothSelected();
-            } else if (selectedLastItem != null) {
-                selectedLastTarget.classList.add("ohno");
-                ev.target.classList.add("ohno");
-                resetBothSelected();
+            item.selected = true;
+            if (selectedItem != null) {
+                if (item.showDef ?
+                    selectedItem.def.trim() == item.def.trim() :
+                    selectedItem.term.trim() == item.term.trim()
+                ) {
+                    if (
+                        selectedItem.showDef == item.showDef &&
+                        selectedItem.term.trim() != selectedItem.def.trim() &&
+                        item.term.trim() != item.def.trim()
+                    ) {
+                        selectedItem = null;
+                        showSameSideWarning = true;
+                        return;
+                    }
+                    selectedItem.answered = true;
+                    item.answered = true;
+                    selectedItem.correct = true;
+                    item.correct = true;
+                }
+                selectedItem.answered = true;
+                item.answered = true;
+                selectedItem = null;
+            } else {
+                selectedItem = item;
             }
         }}>{item.showDef ? item.def : item.term}</button>
     {/each}
