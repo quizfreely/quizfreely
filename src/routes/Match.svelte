@@ -54,9 +54,40 @@
         return arr;
     }
 
+    let startTime;
+    let timerAnimationFrame;
+    // let lastRender = 0;
+    let timerTxtNode;
+    let timerTxtNodeExtra;
+    function updateTimer(now) {
+        timerAnimationFrame = requestAnimationFrame(updateTimer);
+        if (startTime == null) {
+            return;
+        }
+        // if (now - lastRender < 50) {
+        //     return;
+        // }
+        // lastRender = now;
+        const ms = now - startTime;
+        if (ms > 86400000) {
+            timerTxtNode.data = "24h+ 😭"
+            timerTxtNodeExtra.data = "";
+            cancelAnimationFrame(updateTimer);
+            return;
+        }
+        const totalSec = (ms / 1000) | 0;
+        const min = (totalSec / 60) | 0;
+        const sec = totalSec % 60;
+        const subSec = ((ms % 1000) / 10) | 0;
+        timerTxtNode.data = (min < 10 ? '0'+min : min)+':'+(sec < 10 ? '0'+sec : sec);
+        timerTxtNodeExtra.data = '.'+(subSec < 10 ? '0'+subSec : subSec);
+    }
+
     let objectUrls = [];
-    if (local) {
-        onMount(() => {
+    let timerSpan;
+    let timerSpanExtra;
+    onMount(() => {
+        if (local) {
             (async () => {
                 const studyset = await idbApiLayer.getStudysetById(localId, {
                     terms: {
@@ -81,13 +112,20 @@
                 })
                 selectTerms();
             })();
-            return () => {
-                objectUrls.forEach(objectUrl => {
-                    URL.revokeObjectURL(objectUrl)
-                });
-            }
-        })
-    }
+        }
+
+        timerTxtNode = document.createTextNode("0:00");
+        timerTxtNodeExtra = document.createTextNode(".00");
+        timerSpan.replaceChildren(timerTxtNode);
+        timerSpanExtra.replaceChildren(timerTxtNodeExtra);
+        timerAnimationFrame = requestAnimationFrame(updateTimer);
+        return () => {
+            cancelAnimationFrame(timerAnimationFrame);
+            objectUrls.forEach(objectUrl => {
+                URL.revokeObjectURL(objectUrl)
+            });
+        }
+    })
 
     var showExitConfirmationModal = $state(false);
     var showTest = $state(data.alreadyOver);
@@ -145,17 +183,41 @@
         return false;
     }
 
-    let showSameSideWarning = $state(false);
-    let tmpWarnItem1 = null;
-    let tmpWarnItem2 = null;
+    let timeElapsed;
+    let showDone = $state(false);
+    let showPerfect = $state(false);
+    let correctCount = $state(0);
+    let incorrectCount = $state(0);
+    function matchDone() {
+        timeElapsed = performance.now() - startTime;
+        cancelAnimationFrame(timerAnimationFrame);
+        showDone = true;
+        items.forEach(item => {
+            if (item.answered && item.correct) {
+                correctCount++;
+            } else if (item.answered) {
+                incorrectCount++;
+            }
+        });
+        showPerfect = correctCount >= PAIRS_COUNT;
+    }
 
+    let showSameSideWarning = $state(false);
+    let tmpWarnItem1;
+    let tmpWarnItem2;
     let selectedItem;
 </script>
-<div class="qzfr-match-head">
-    <a href="{local ? `/studyset/local?id=${localId}` : `/studysets/${cloudId}`}" class="button faint">
+<div class="grid qzfr-match-head">
+    <a href="{local ? `/studyset/local?id=${localId}` : `/studysets/${cloudId}`}" class="button faint" style="justify-self: start;">
         <BackIcon></BackIcon>
         Back
     </a>
+    <div style="justify-self: center;"><span class="qzfr-timer" bind:this={timerSpan}>0:00</span><span class="qzfr-timer fg0" bind:this={timerSpanExtra}>.00</span></div>
+    <div class="flex" style="justify-content: end;">
+        {#if showDone}
+            <button class="alt yayy">View Results</button>
+        {/if}
+    </div>
     {#if showSameSideWarning}
         <div class="flex qzfr-match-head-overlap-msg" style="justify-content: center;" transition:fade={{duration: 200}}>
             <div class="box warn">
@@ -173,9 +235,10 @@
         } {
             item.tmpWarn ? "warn" : ""
         }" disabled={item.answered} onclick={(ev) => {
-            // if (item.answered) {
-            //     return;
-            // }
+            if (startTime == null) {
+                startTime = performance.now();
+            }
+
             if (tmpWarnItem1 != null) {
                 tmpWarnItem1.tmpWarn = false
                 tmpWarnItem1.selected = false
@@ -223,7 +286,7 @@
             }
 
             if (!anyPairsLeft()) {
-                alert("done?")
+                matchDone();
             }
         }}>{item.showDef ? item.def : item.term}</button>
     {/each}
@@ -257,7 +320,7 @@
         </div>
     </div>
 {/if}
-{#if false}
+{#if showDone && showPerfect}
     <!-- fullscreen confetti if 100% accuracy -->
     <div
         style="position: fixed; top: -50px; left 0px; margin: 0px; padding: 0px; height: 100vh; width: 100vw; display: flex; justify-content: center; overflow: hidden; pointer-events: none;"
@@ -273,10 +336,19 @@
     </div>
 {/if}
 <style>
-    .qzfr-match-head {
+    .qzfr-timer {
+        font-family: monospace;
+        font-size: 1.4rem;
+    }
+    .qzfr-match-head,
+    .grid.qzfr-match-head {
+        position: relative;
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        grid-template-rows: auto;
         padding: 0px 8rem;
         margin-top: 2rem;
-        position: relative;
+        align-items: center;
     }
     .qzfr-match-head-overlap-msg {
         position: absolute;
@@ -299,13 +371,9 @@
             grid-template-rows: auto auto auto auto;
             padding: 0px 4rem;
         }
-        .qzfr-match-head {
+        .qzfr-match-head,
+        .grid.qzfr-match-head {
             padding: 0px 4rem;
         }
-    }
-
-    .qzfr-match-grid .qzfr-match-overlay::before {
-        content: "";
-        z-index: 10; 
     }
 </style>
