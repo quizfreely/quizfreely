@@ -157,8 +157,10 @@
         Back
     </a>
     {#if showSameSideWarning}
-        <div class="box warn">
-            Same side selected twice!
+        <div class="flex qzfr-match-head-overlap-msg" style="justify-content: center;" transition:fade={{duration: 200}}>
+            <div class="box warn">
+                Same side selected twice!
+            </div>
         </div>
     {/if}
 </div>
@@ -274,6 +276,14 @@
     .qzfr-match-head {
         padding: 0px 8rem;
         margin-top: 2rem;
+        position: relative;
+    }
+    .qzfr-match-head-overlap-msg {
+        position: absolute;
+        top: 0px;
+        left: 0px;
+        margin-top: 0px;
+        width: 100%;
     }
     .grid.qzfr-match-grid {
         grid-template-columns: 1fr 1fr 1fr 1fr;
@@ -292,5 +302,10 @@
         .qzfr-match-head {
             padding: 0px 4rem;
         }
+    }
+
+    .qzfr-match-grid .qzfr-match-overlay::before {
+        content: "";
+        z-index: 10; 
     }
 </style>
