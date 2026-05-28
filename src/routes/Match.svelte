@@ -2,9 +2,11 @@
     import { onMount } from "svelte";
     import { goto, beforeNavigate } from "$app/navigation";
     import { idbApiLayer } from "$lib/idb-api-layer";
+    import { cancelNprogressTimeout } from "$lib/stores/nprogressTimeout.js";
     import { slide, fade } from "svelte/transition";
     import { Confetti } from "svelte-confetti";
     import BackIcon from "$lib/icons/BackArrow.svelte";
+    import ExitIcon from "$lib/icons/Exit.svelte";
 
     let { local, cloudId, localId, data } = $props();
     let terms = data.terms;
@@ -129,13 +131,11 @@
 
     var showExitConfirmationModal = $state(false);
     var showTest = $state(data.alreadyOver);
-    var takingActualPracticeTest = $state(false);
     var bypassExitConfirmation = false;
     let navigatingToURL = $state("");
     beforeNavigate(function (navigation) {
         if (
-            takingActualPracticeTest &&
-            questionsAnswered > 0 &&
+            startTime != null &&
             !bypassExitConfirmation
         ) {
             navigatingToURL = navigation?.to?.url;
