@@ -1130,13 +1130,9 @@ FRQs: ${numFRQsToAssign}`,
                                         },
                                         body: JSON.stringify({
                                             query: `mutation recordPracticeTest(
-    $input: PracticeTestInput,
-    $termProgress: [TermProgressInput!]!
+    $input: PracticeTestInput
 ) {
     recordPracticeTest(input: $input) {
-        id
-    }
-    updateTermProgress(termProgress: $termProgress) {
         id
     }
 }`,
@@ -1150,11 +1146,6 @@ FRQs: ${numFRQsToAssign}`,
                                                     questions:
                                                         questionDataArray,
                                                 },
-                                                /* .values() returns a map iterator, which JSON.stringify does NOT automatically turn into an array,
-                                        so we use the spread operator to make it into an array that JSON.stringify() can use */
-                                                termProgress: [
-                                                    ...termProgressToUpdate.values(),
-                                                ],
                                             },
                                         }),
                                     });
@@ -1193,11 +1184,6 @@ FRQs: ${numFRQsToAssign}`,
                                             questions: questionDataArray,
                                         }),
                                     ),
-                                );
-                                /* .values() returns a map iterator (not an array),
-                        but that's fine because idbApiLayer.updateTermProgress() accepts any iteratable type */
-                                await idbApiLayer.updateTermProgress(
-                                    termProgressToUpdate.values(),
                                 );
                                 submitted = true;
                             }
