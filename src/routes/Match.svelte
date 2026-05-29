@@ -242,10 +242,12 @@
             if (tmpWarnItem1 != null) {
                 tmpWarnItem1.tmpWarn = false
                 tmpWarnItem1.selected = false
+                tmpWarnItem1 = null;
             }
             if (tmpWarnItem2 != null) {
                 tmpWarnItem2.tmpWarn = false
                 tmpWarnItem2.selected = false
+                tmpWarnItem2 = null;
             }
             
             if (item.selected) {
@@ -337,8 +339,8 @@
 {/if}
 <style>
     .qzfr-timer {
-        font-family: monospace;
-        font-size: 1.4rem;
+        /* font-family: monospace; */
+        font-size: 1.6rem;
     }
     .qzfr-match-head,
     .grid.qzfr-match-head {
