@@ -337,7 +337,7 @@
                     {/if}
                 </div>
             {#snippet flashcardsCaptionEnd()}
-                <a href="{data.local ? `/studyset/local/flashcards?id=${data.localId}` : `/studysets/${data.studysetId}/flashcards`}" class="button faint" aria-label="Fullscreen Flashcards">
+                <a href="{data.local ? `/studyset/local/flashcards?id=${data.localId}` : `/studysets/${data.studyset.id}/flashcards`}" class="button faint" aria-label="Fullscreen Flashcards">
                     <FullscreenIcon></FullscreenIcon>
                 </a>
             {/snippet}
