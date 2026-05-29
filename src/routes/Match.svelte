@@ -57,6 +57,7 @@
     }
 
     let startTime;
+    let inProgress = $state(false);
     let timerAnimationFrame;
     // let lastRender = 0;
     let timerTxtNode;
@@ -135,7 +136,7 @@
     let navigatingToURL = $state("");
     beforeNavigate(function (navigation) {
         if (
-            startTime != null &&
+            inProgress &&
             !bypassExitConfirmation
         ) {
             navigatingToURL = navigation?.to?.url;
@@ -191,6 +192,7 @@
     function matchDone() {
         timeElapsed = performance.now() - startTime;
         cancelAnimationFrame(timerAnimationFrame);
+        inProgress = false;
         showDone = true;
         items.forEach(item => {
             if (item.answered && item.correct) {
@@ -235,8 +237,9 @@
         } {
             item.tmpWarn ? "warn" : ""
         }" disabled={item.answered} onclick={(ev) => {
-            if (startTime == null) {
+            if (!inProgress) {
                 startTime = performance.now();
+                inProgress = true;
             }
 
             if (tmpWarnItem1 != null) {
