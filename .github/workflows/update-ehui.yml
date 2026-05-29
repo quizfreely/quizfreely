@@ -22,8 +22,8 @@ jobs:
           cp ehui/site/themes/light.min.css "quizfreely/static/immutable/themes/light-$timestamp.min.css"
           cp ehui/site/themes/dark.min.css "quizfreely/static/immutable/themes/dark-$timestamp.min.css"
           sed -E -i \
-            -e "s/ehui-[0-9]{4}-[0-9]{2}-[0-9]{2}.min.css/ehui-$timestamp.min.css/g" \
-            -e "s/%theme%-[0-9]{4}-[0-9]{2}-[0-9]{2}.min.css/%theme%-$timestamp.min.css/g" \
+            -e "s/ehui-[0-9]{4}-[0-9]{2}-[0-9]{2}_[0-9]{2}.[0-9]{2}.min.css/ehui-$timestamp.min.css/g" \
+            -e "s/%theme%-[0-9]{4}-[0-9]{2}-[0-9]{2}_[0-9]{2}.[0-9]{2}.min.css/%theme%-$timestamp.min.css/g" \
             quizfreely/src/app.html
       - name: Commit & push
         run: |
