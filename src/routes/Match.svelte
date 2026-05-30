@@ -64,7 +64,7 @@
     let timerTxtNodeExtra;
     function updateTimer(now) {
         timerAnimationFrame = requestAnimationFrame(updateTimer);
-        if (lastRender != null && now - lastRender < 20) {
+        if (lastRender != null && now - lastRender < 10) {
             return;
         }
         lastRender = now;
