@@ -117,7 +117,7 @@
             })();
         }
 
-        timerTxtNode = document.createTextNode("0:00");
+        timerTxtNode = document.createTextNode("00:00");
         timerTxtNodeExtra = document.createTextNode(".00");
         timerSpan.replaceChildren(timerTxtNode);
         timerSpanExtra.replaceChildren(timerTxtNodeExtra);
