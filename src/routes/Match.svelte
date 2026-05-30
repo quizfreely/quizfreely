@@ -201,7 +201,7 @@
                 incorrectCount++;
             }
         });
-        showPerfect = correctCount >= PAIRS_COUNT;
+        showPerfect = correctCount >= PAIRS_COUNT * 2;
     }
 
     let showSameSideWarning = $state(false);
