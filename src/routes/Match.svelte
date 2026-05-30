@@ -59,18 +59,18 @@
     let startTime;
     let inProgress = $state(false);
     let timerAnimationFrame;
-    // let lastRender = 0;
+    let lastRender;
     let timerTxtNode;
     let timerTxtNodeExtra;
     function updateTimer(now) {
         timerAnimationFrame = requestAnimationFrame(updateTimer);
+        if (lastRender != null && now - lastRender < 20) {
+            return;
+        }
+        lastRender = now;
         if (startTime == null) {
             return;
         }
-        // if (now - lastRender < 50) {
-        //     return;
-        // }
-        // lastRender = now;
         const ms = now - startTime;
         if (ms > 86400000) {
             timerTxtNode.data = "24h+ 😭"
