@@ -277,14 +277,15 @@
                         showSameSideWarning = true;
                         return;
                     }
-                    selectedItem.answered = true;
-                    item.answered = true;
                     selectedItem.correct = true;
                     item.correct = true;
                 }
                 showSameSideWarning = false;
                 selectedItem.answered = true;
                 item.answered = true;
+                const itemData = {...item};
+                item.pairedItem = {...selectedItem};
+                selectedItem.pairedItem = itemData;
                 selectedItem = null;
             } else {
                 selectedItem = item;
