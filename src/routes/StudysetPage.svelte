@@ -112,10 +112,16 @@
 <svelte:head>
     {#if title}
         <title>{title} - Quizfreely</title>
+        <meta property="og:title" content="{title} - Quizfreely" />
     {:else}
         <title>Quizfreely</title>
+        <meta property="og:title" content="Quizfreely" />
     {/if}
     <meta name="robots" content="noindex, follow" />
+    <meta name="description" content="Study with free flashcards, practice tests, and review activities on Quizfreely." />
+    <meta name="og:description" content="Study with free flashcards, practice tests, and review activities on Quizfreely." />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Quizfreely" />
 </svelte:head>
 
 {#snippet folderPickerErrMsg()}
