@@ -5,6 +5,7 @@
     import ForwardLongArrowIcon from "$lib/icons/ForwardRightArrowLong.svelte";
     import ExitIcon from "$lib/icons/Exit.svelte";
     import CheckmarkIcon from "$lib/icons/Checkmark.svelte";
+    import PracticeTestIcon from "$lib/icons/PracticeTestChecklist.svelte";
     import MCQ from "$lib/questionComponents/MCQ.svelte";
     import FRQ from "$lib/questionComponents/FRQ.svelte";
     import TrueFalseQuestion from "$lib/questionComponents/TrueFalseQuestion.svelte";
@@ -169,13 +170,9 @@
 
     let questionsCountEntered = $state();
 
-    let defaultQuestionsCount = $derived.by(() => {
-        if (terms?.length < 30) {
-            return terms?.length;
-        } else {
-            return 20;
-        }
-    });
+    let defaultQuestionsCount = $derived(
+        terms?.length < 30 ? terms.length : 20
+    );
 
     function shuffleArray(ogArray) {
         let arr = [...ogArray];
@@ -793,7 +790,10 @@ FRQs: ${numFRQsToAssign}`,
         {/if}
         {#if showSetup}
             <div id="setup" transition:slide={{ duration: 400 }}>
-                <p class="h4">Practice Test</p>
+                <div class="flex" style="align-items: center; margin-bottom: 1rem;">
+                    <PracticeTestIcon width="2.2rem" height="2.2rem"></PracticeTestIcon>
+                    <h1 class="h3" style="margin-bottom: 0px;">Practice Test</h1>
+                </div>
                 <p>
                     There {terms?.length == 1 ? "is" : "are"}
                     {terms?.length ?? "?"}
@@ -901,7 +901,7 @@ FRQs: ${numFRQsToAssign}`,
                 {/if}
                 <div
                     class="flex compact-gap"
-                    style="margin-top: 2rem; align-items: end; justify-content: space-between; flex-wrap: wrap;"
+                    style="margin-top: 3rem; align-items: end; justify-content: space-between; flex-wrap: wrap;"
                 >
                     <p class="h4" style="margin-bottom: 0px;">
                         Completed Practice Tests
