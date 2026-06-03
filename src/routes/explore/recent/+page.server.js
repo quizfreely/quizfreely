@@ -19,7 +19,7 @@ export async function load({ cookies, url }) {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        query: `query($after: String, $before: String, $day: String, $week: String, $month: String) {
+        query: `query($after: String, $before: String, $day: String, $month: String) {
               authed
               authedUser {
                 id
@@ -38,7 +38,6 @@ export async function load({ cookies, url }) {
                 pageInfo { hasNextPage hasPreviousPage startCursor endCursor }
               }
               countDay: ${recentlyUpdated ? 'studysetUpdateCount' : 'studysetCount'}(after: $day, includePrivate: true)
-              countWeek: ${recentlyUpdated ? 'studysetUpdateCount' : 'studysetCount'}(after: $week, includePrivate: true)
               countMonth: ${recentlyUpdated ? 'studysetUpdateCount' : 'studysetCount'}(after: $month, includePrivate: true)
               countTotal: ${recentlyUpdated ? 'studysetUpdateCount' : 'studysetCount'}(includePrivate: true)
             }`,
@@ -46,7 +45,6 @@ export async function load({ cookies, url }) {
           after,
           before,
           day: dayStart,
-          week: weekStart,
           month: monthStart
         }
       })
@@ -61,17 +59,6 @@ export async function load({ cookies, url }) {
     const createdConn = apiRes?.data?.recentlyCreatedStudysets;
     const updatedConn = apiRes?.data?.recentlyUpdatedStudysets;
 
-    let totalCount = apiRes?.data?.countTotal ?? 0;
-    let newCount = apiRes?.data?.countDay ?? 0;
-    let newPeriod = "today";
-    if ((newCount <= 0 && apiRes?.data?.countWeek >= 1) || (newCount <= 2 && apiRes?.data?.countWeek > 3) || (newCount < 10 && apiRes?.data?.countWeek >= 10)) {
-      newCount = apiRes?.data?.countWeek ?? 0;
-      newPeriod = "this week";
-    }
-    if (newCount < 10 && apiRes?.data?.countMonth >= 10) {
-      newCount = apiRes?.data?.countMonth ?? 0;
-      newPeriod = "this month";
-    }
 
     return {
       explorePage: recentlyUpdated ? "recently-updated" : "recently-created",
@@ -79,9 +66,9 @@ export async function load({ cookies, url }) {
       recentlyUpdatedStudysets: updatedConn?.edges?.map((e) => e.node) ?? [],
       pageInfo: recentlyUpdated ? updatedConn?.pageInfo : createdConn?.pageInfo,
       recentlyUpdated,
-      newCount,
-      newPeriod,
-      totalCount,
+      dailyCount: apiRes?.data?.countDay ?? 0,
+      monthlyCount: apiRes?.data?.countMonth ?? 0,
+      totalCount: apiRes?.data?.countTotal ?? 0,
       authed: authed,
       authedUser: authedUser,
       header: {
