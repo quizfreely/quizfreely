@@ -37,21 +37,32 @@ export function handle({ event, resolve }) {
     event.locals.theme = theme;
     return resolve(event, {
         transformPageChunk: function ({ html }) {
-            return html.replace(
-                "%theme%", theme
-            ).replace(
-                "%theme%", theme
-            ); /* run `replace` exactly twice,
+            /* run `replace` exactly twice for theme:
             once for %theme% in html's class attribute,
             and again for %theme% in the css href
             see web/src/app.html for details
             
             we run it a fixed number of times
-            and do not use replaceAll
-            because there might be edge cases
+            and do NOT use replaceAll
+            because there might be pages
             where %theme% is literally in rendered html
-            that we don't want to replace,
+            that we do NOT want to replace,
             for example documentation might have `%theme%` */
+            return html.replace(
+                "%theme%", theme
+            ).replace(
+                "%theme%", theme
+            ).replace(
+                "<!--%enable_goatcounter%-->",
+                env.ENABLE_GOATCOUNTER == "true" ? "" : "<!--"
+            ).replace(
+                "%goatcounter_endpoint%",
+                env.GOATCOUNTER_ENDPOINT ?? ""
+            ).replace(
+                "<!--%enable_goatcounter_end%-->",
+                env.ENABLE_GOATCOUNTER == "true" ? "" : "-->"
+            );
+            /* %enable_goatcounter% and %enable_goatcounter_end% get removed if GoatCounter is enabled or becomes a comment around GoatCounter's script tag if not enabled */
         }
     });
 }

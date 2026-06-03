@@ -26,9 +26,13 @@ beforeNavigate(function () {
         }, 200)
     );
 })
-afterNavigate(function () {
+afterNavigate(function ({ type, to }) {
     cancelNprogressTimeout();
     NProgress.done();
+
+    if (type != "enter" && to?.url != null && window?.goatcounter != null) {
+        window.goatcounter.count();
+    }
 })
 </script>
 
