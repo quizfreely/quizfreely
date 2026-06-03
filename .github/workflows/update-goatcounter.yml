@@ -8,12 +8,15 @@ jobs:
     steps:
       - name: Clone quizfreely/quizfreely
         run: git clone https://github.com/quizfreely/quizfreely.git quizfreely
-      - name: Download GoatCounter JavaScript
+      - name: Download GoatCounter JavaScript & Update Tag
         run: |
           timestamp=$(date +"%F_%H.%M")
           rm -rf quizfreely/static/immutable/goatcounter
           mkdir -p quizfreely/static/immutable/goatcounter
           curl -o "quizfreely/static/immutable/goatcounter/count-$timestamp.js" https://gc.zgo.at/count.js
+          sed -E -i \
+            -e "s/goatcounter\/count-[0-9]{4}-[0-9]{2}-[0-9]{2}_[0-9]{2}.[0-9]{2}.js/goatcounter\/count-$timestamp.js/g" \
+            quizfreely/src/app.html
       - name: Commit & Push
         run: |
           cd quizfreely
