@@ -53,13 +53,13 @@ export function handle({ event, resolve }) {
             ).replace(
                 "%theme%", theme
             ).replace(
-                "<!--%enable_goatcounter%-->",
+                "%enable_goatcounter%",
                 env.ENABLE_GOATCOUNTER == "true" ? "" : "<!--"
             ).replace(
                 "%goatcounter_endpoint%",
-                env.GOATCOUNTER_ENDPOINT ?? ""
+                env.GOATCOUNTER_ENDPOINT
             ).replace(
-                "<!--%enable_goatcounter_end%-->",
+                "%enable_goatcounter_end%",
                 env.ENABLE_GOATCOUNTER == "true" ? "" : "-->"
             );
             /* %enable_goatcounter% and %enable_goatcounter_end% get removed if GoatCounter is enabled or becomes a comment around GoatCounter's script tag if not enabled */
