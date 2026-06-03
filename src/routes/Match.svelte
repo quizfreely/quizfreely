@@ -1,5 +1,5 @@
 <script>
-    import { onMount } from "svelte";
+    import { onMount, tick } from "svelte";
     import { goto, beforeNavigate } from "$app/navigation";
     import { idbApiLayer } from "$lib/idb-api-layer";
     import { cancelNprogressTimeout } from "$lib/stores/nprogressTimeout.js";
@@ -7,6 +7,8 @@
     import { Confetti } from "svelte-confetti";
     import BackIcon from "$lib/icons/BackArrow.svelte";
     import ExitIcon from "$lib/icons/Exit.svelte";
+    import CheckmarkIcon from "$lib/icons/Checkmark.svelte";
+    import GridIcon from "$lib/icons/AppsGrid.svelte";
 
     let { local, cloudId, localId, data } = $props();
     let terms = data.terms;
@@ -117,11 +119,6 @@
             })();
         }
 
-        timerTxtNode = document.createTextNode("00:00");
-        timerTxtNodeExtra = document.createTextNode(".00");
-        timerSpan.replaceChildren(timerTxtNode);
-        timerSpanExtra.replaceChildren(timerTxtNodeExtra);
-        timerAnimationFrame = requestAnimationFrame(updateTimer);
         return () => {
             cancelAnimationFrame(timerAnimationFrame);
             objectUrls.forEach(objectUrl => {
@@ -184,74 +181,137 @@
         return false;
     }
 
-    let timeElapsed;
+    let timeElapsedMs;
     let showDone = $state(false);
     let showPerfect = $state(false);
     let correctCount = $state(0);
     let incorrectCount = $state(0);
     function matchDone() {
-        timeElapsed = performance.now() - startTime;
+        if (showDone) {
+            return;
+        }
+        showDone = true;
+        timeElapsedMs = performance.now() - startTime;
         cancelAnimationFrame(timerAnimationFrame);
         inProgress = false;
-        showDone = true;
         items.forEach(item => {
             if (item.answered && item.correct) {
                 correctCount++;
-            } else if (item.answered) {
-                incorrectCount++;
             }
         });
         showPerfect = correctCount >= PAIRS_COUNT * 2;
+        console.log(JSON.parse(JSON.stringify(items)));
     }
 
     let showSameSideWarning = $state(false);
+    let showIncorrectAlert = $state(true);
     let tmpWarnItem1;
     let tmpWarnItem2;
+    let tmpIncorrectItem1;
+    let tmpIncorrectItem2;
     let selectedItem;
+    let showStart = $state(true);
+
+    function dismissSameSideWarn() {
+        showSameSideWarning = false;
+        if (tmpWarnItem1 != null) {
+            tmpWarnItem1.tmpWarn = false
+            tmpWarnItem1.selected = false
+            tmpWarnItem1 = null;
+        }
+        if (tmpWarnItem2 != null) {
+            tmpWarnItem2.tmpWarn = false
+            tmpWarnItem2.selected = false
+            tmpWarnItem2 = null;
+        }
+    }
+    function dismissIncorrectAlert() {
+        showIncorrectAlert = false;
+        if (tmpWarnItem1 != null) {
+            tmpWarnItem1.tmpWarn = false
+            tmpWarnItem1.selected = false
+            tmpWarnItem1 = null;
+        }
+        if (tmpWarnItem2 != null) {
+            tmpWarnItem2.tmpWarn = false
+            tmpWarnItem2.selected = false
+            tmpWarnItem2 = null;
+        }
+    }
 </script>
 <div class="grid qzfr-match-head">
     <a href="{local ? `/studyset/local?id=${localId}` : `/studysets/${cloudId}`}" class="button faint" style="justify-self: start;">
         <BackIcon></BackIcon>
         Back
     </a>
-    <div style="justify-self: center;"><span class="qzfr-timer" bind:this={timerSpan}>0:00</span><span class="qzfr-timer fg0" bind:this={timerSpanExtra}>.00</span></div>
-    <div class="flex" style="justify-content: end;">
-        {#if showDone}
-            <button class="alt yayy">View Results</button>
-        {/if}
-    </div>
-    {#if showSameSideWarning}
-        <div class="flex qzfr-match-head-overlap-msg" style="justify-content: center;" transition:fade={{duration: 200}}>
-            <div class="box warn">
-                Same side selected twice!
-            </div>
-        </div>
+    {#if !showStart && !showDone}
+    <div style="justify-self: center;"><span class="qzfr-timer" bind:this={timerSpan}>00:00</span><span class="qzfr-timer fg0" bind:this={timerSpanExtra}>.00</span></div>
+    <div></div>
     {/if}
 </div>
+{#if showStart}
+<div class="flex" style="justify-content: center; margin-top: 4rem;">
+    <div>
+        <div class="flex" style="align-items: center; margin-bottom: 1rem;">
+            <GridIcon width="2.2rem" height="2.2rem"></GridIcon>
+            <h1 class="h3" style="margin-bottom: 0px;">Match</h1>
+        </div>
+        <p>
+            <span class="line">Tap matching terms one after another to select a pair.</span>
+            <span class="line">Tap a selected term again to clear selection.</span>
+        </p>
+        <button class="large" style="width: 100%; margin-top: 1.4rem;" onclick={async () => {
+            showStart = false;
+            await tick();
+            startTime = performance.now();
+            timerTxtNode = document.createTextNode("00:00");
+            timerTxtNodeExtra = document.createTextNode(".00");
+            timerSpan.replaceChildren(timerTxtNode);
+            timerSpanExtra.replaceChildren(timerTxtNodeExtra);
+            timerAnimationFrame = requestAnimationFrame(updateTimer);
+        }}><CheckmarkIcon width="1em" height="1em"></CheckmarkIcon> Start</button>
+    </div>
+</div>
+{:else if showDone}
+<div class="flex" style="justify-content: center; margin-top: 4rem;">
+    <div>
+        <div class="flex" style="align-items: center; margin-bottom: 1rem;">
+            <p class="h3" style="margin-bottom: 0px;">
+                <span class={correctCount >= PAIRS_COUNT * 2 - 1 ? "yay" : correctCount <= PAIRS_COUNT ? "ohno" : ""}>{correctCount}</span>/{PAIRS_COUNT * 2} Correct in {
+                    (timeElapsedMs > 60000 ? Math.floor(timeElapsedMs/60000)+"m " : "") + (timeElapsedMs/1000).toFixed(1)+"s"
+                }
+            </p>
+        </div>
+        <p>
+            <span class="line">Tap matching terms one after another to select a pair.</span>
+            <span class="line">Tap a selected term again to clear selection.</span>
+        </p>
+        <button class="large" style="width: 100%; margin-top: 1.4rem;" onclick={async () => {
+            showStart = false;
+            await tick();
+            startTime = performance.now();
+            timerTxtNode = document.createTextNode("00:00");
+            timerTxtNodeExtra = document.createTextNode(".00");
+            timerSpan.replaceChildren(timerTxtNode);
+            timerSpanExtra.replaceChildren(timerTxtNodeExtra);
+            timerAnimationFrame = requestAnimationFrame(updateTimer);
+        }}><CheckmarkIcon width="1em" height="1em"></CheckmarkIcon> Start</button>
+    </div>
+</div>
+{:else}
 <div class="grid qzfr-match-grid">
     {#each items as item, index}
         <button class="button-box {
-            item.selected || item.answered ? "selected" : ""
+            item.selected || item.answeredCorrect ? "selected" : ""
         } {
-            item.answered ? (item.correct ? "yay" : "ohno") : ""
-        } {
-            item.tmpWarn ? "warn" : ""
+            item.answeredCorrect ? "yay" : (item.incorrect ? "ohno" : (
+                item.tmpWarn ? "warn" : ""
+            ))
         }" disabled={item.answered} onclick={(ev) => {
             if (!inProgress) {
-                startTime = performance.now();
                 inProgress = true;
             }
 
-            if (tmpWarnItem1 != null) {
-                tmpWarnItem1.tmpWarn = false
-                tmpWarnItem1.selected = false
-                tmpWarnItem1 = null;
-            }
-            if (tmpWarnItem2 != null) {
-                tmpWarnItem2.tmpWarn = false
-                tmpWarnItem2.selected = false
-                tmpWarnItem2 = null;
-            }
             
             if (item.selected) {
                 item.selected = false;
@@ -279,13 +339,14 @@
                     }
                     selectedItem.correct = true;
                     item.correct = true;
+                    selectedItem.answered = true;
+                    item.answered = true;
+                } else {
+                    selectedItem.incorrect = true;
+                    item.incorrect = true;
+                    tmpIncorrectItem1 = selectedItem;
+                    tmpIncorrectItem2 = item;
                 }
-                showSameSideWarning = false;
-                selectedItem.answered = true;
-                item.answered = true;
-                const itemData = {...item};
-                item.pairedItem = {...selectedItem};
-                selectedItem.pairedItem = itemData;
                 selectedItem = null;
             } else {
                 selectedItem = item;
@@ -297,6 +358,36 @@
         }}>{item.showDef ? item.def : item.term}</button>
     {/each}
 </div>
+    {#if showSameSideWarning}
+        <div class="grid qzfr-match-overlap-msg" style="justify-items: center; align-items: center;" transition:fade={{duration: 100}} onclick={dismissSameSideWarn}>
+            <div class="content">
+                <div class="box warn" style="padding: 1.4rem;">
+                    <span style="font-size: 1.4rem;">
+                        Same side selected twice!
+                        <span class="line">Try Again</span>
+                    </span>
+                </div>
+                <div class="flex" style="justify-content: center;">
+                <button class="large faint" onclick={dismissSameSideWarn}>Tap anywhere to dismiss</button>
+                </div>
+            </div>
+        </div>
+    {:else if showIncorrectAlert}
+        <div class="grid qzfr-match-overlap-msg" style="justify-items: center; align-items: center;" transition:fade={{duration: 100}} onclick={dismissIncorrectAlert}>
+            <div class="content">
+                <div class="box ohno" style="padding: 1.4rem;">
+                    <span style="font-size: 1.4rem;">
+                        Incorrect!
+                        <span class="line">Try Again</span>
+                    </span>
+                </div>
+                <div class="flex" style="justify-content: center;">
+                <button class="large faint" onclick={dismissIncorrectAlert}>Tap anywhere to dismiss</button>
+                </div>
+            </div>
+        </div>
+    {/if}
+{/if}
 {#if showExitConfirmationModal}
     <div class="modal" transition:fade={{ duration: 200 }}>
         <div class="content">
@@ -341,6 +432,7 @@
         />
     </div>
 {/if}
+
 <style>
     .qzfr-timer {
         /* font-family: monospace; */
@@ -348,7 +440,6 @@
     }
     .qzfr-match-head,
     .grid.qzfr-match-head {
-        position: relative;
         display: grid;
         grid-template-columns: 1fr 1fr 1fr;
         grid-template-rows: auto;
@@ -356,12 +447,27 @@
         margin-top: 2rem;
         align-items: center;
     }
-    .qzfr-match-head-overlap-msg {
-        position: absolute;
+    .qzfr-match-overlap-msg {
+        position: fixed;
         top: 0px;
         left: 0px;
-        margin-top: 0px;
         width: 100%;
+        height: 100%;
+        margin-top: 0px;
+    }
+    .qzfr-match-overlap-msg::before {
+        content: "";
+        position: fixed;
+        z-index: 101;
+        top: 0px;
+        left: 0px;
+        width: 100%;
+        height: 100%;
+        background-color: var(--bg-0);
+        opacity: 0.4;
+    }
+    .qzfr-match-overlap-msg .content {
+        z-index: 102;
     }
     .grid.qzfr-match-grid {
         grid-template-columns: 1fr 1fr 1fr 1fr;

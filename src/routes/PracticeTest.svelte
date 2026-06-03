@@ -357,7 +357,7 @@ FRQs: ${numFRQsToAssign}`,
                     addTrueFalseQuestion(term);
                     break;
                 case "match":
-                    addMatchQuestion(term);
+                    // addMatchQuestion(term);
                     break;
                 case "frq":
                     addFRQ(term);

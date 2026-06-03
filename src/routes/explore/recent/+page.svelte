@@ -32,11 +32,19 @@
 
 <div class="flex center">
     <div class="flex" style="flex-direction: column; gap: 0.2rem;">
-        <span style="font-size: 2rem;">{data.newCount}</span>
+        <span style="font-size: 2rem;">{data.dailyCount}</span>
         <div class="text fg0">
-            studyset{data.newCount === 1 ? "" : "s"}
+            studyset{data.dailyCount === 1 ? "" : "s"}
             {data.recentlyUpdated ? "updated" : "created"}
-            <span class="line">{data.newPeriod}</span>
+            <span class="line">today</span>
+        </div>
+    </div>
+    <div class="flex" style="flex-direction: column; gap: 0.2rem;">
+        <span style="font-size: 2rem;">{data.monthlyCount}</span>
+        <div class="text fg0">
+            studyset{data.monthlyCount === 1 ? "" : "s"}
+            {data.recentlyUpdated ? "updated" : "created"}
+            <span class="line">this month</span>
         </div>
     </div>
     <div class="flex" style="flex-direction: column; gap: 0.2rem;">
