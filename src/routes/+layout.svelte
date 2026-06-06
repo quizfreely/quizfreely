@@ -29,10 +29,6 @@ beforeNavigate(function () {
 afterNavigate(function ({ type, to }) {
     cancelNprogressTimeout();
     NProgress.done();
-
-    if (type != "enter" && to?.url != null && window?.goatcounter != null) {
-        window.goatcounter.count();
-    }
 })
 </script>
 
@@ -40,7 +36,7 @@ afterNavigate(function ({ type, to }) {
 <Header />
 {/if}
 {#key data.transPageKey}
-<div in:fade={{ duration: 120, delay: 120, easing: sineIn }} out:fade={{ duration: 120, easing: sineOut }}>
+<div data-m:load={page?.data?.authed ? "authed=true" : "authed=false"} in:fade={{ duration: 120, delay: 120, easing: sineIn }} out:fade={{ duration: 120, easing: sineOut }}>
     <div style="min-height: 70vh">
         {@render children()}
     </div>
