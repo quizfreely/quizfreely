@@ -53,16 +53,16 @@ export function handle({ event, resolve }) {
             ).replace(
                 "%theme%", theme
             ).replace(
-                "%enable_goatcounter%",
-                env.ENABLE_GOATCOUNTER == "true" ? "" : "<!--"
+                "%enable_medama%",
+                env.ENABLE_MEDAMA == "true" ? "" : "<!--"
             ).replace(
-                "%goatcounter_endpoint%",
-                env.GOATCOUNTER_ENDPOINT
-            ).replace(
-                "%enable_goatcounter_end%",
-                env.ENABLE_GOATCOUNTER == "true" ? "" : "-->"
+                "%enable_medama_end%",
+                env.ENABLE_MEDAMA == "true" ? "" : "-->"
             );
-            /* %enable_goatcounter% and %enable_goatcounter_end% get removed if GoatCounter is enabled or becomes a comment around GoatCounter's script tag if not enabled */
+            /* %enable_medama% gets removed if medama is enabled,
+             * or becomes a comment around the script tag if not enabled.
+             * replaceAll is NOT used because we only want to replace the first occurance (in the <head> of the HTML)
+             * and preserve any text that litterally includes %enable_medama% */
         }
     });
 }
