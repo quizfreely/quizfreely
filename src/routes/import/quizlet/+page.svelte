@@ -53,8 +53,9 @@
         }
 
         navigator.sendBeacon("/medama/api/event/hit", JSON.stringify({
-            g: window.location.hostname,
             b: window.medama.uid,
+            e: "custom",
+            g: window.location.hostname,
             d: {
                 import_start: "quizlet"
             }
@@ -179,8 +180,9 @@
                 }
                 if (env.ENABLE_MEDAMA == "true") {
                     navigator.sendBeacon("/medama/api/event/hit", JSON.stringify({
-                        g: window.location.hostname,
                         b: window.medama.uid,
+                        e: "custom",
+                        g: window.location.hostname,
                         d: {
                             import_success: "quizlet, cloud",
                         }
@@ -202,8 +204,9 @@
                 await idbApiLayer.createTerms(newLocalId, termInputs);
                 if (env.ENABLE_MEDAMA == "true") {
                     navigator.sendBeacon("/medama/api/event/hit", JSON.stringify({
-                        g: window.location.hostname,
                         b: window.medama.uid,
+                        e: "custom",
+                        g: window.location.hostname,
                         d: {
                             import_success: "quizlet, local",
                         }
