@@ -1,0 +1,15 @@
+[Unit]
+Description=Medama Analytics Server
+After=network.target
+
+[Service]
+User=medama
+WorkingDirectory=/opt/medama
+ExecStart=/opt/medama/medama
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
