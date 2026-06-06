@@ -3,6 +3,7 @@
     import { goto } from "$app/navigation";
     import { slide, crossfade, fade } from "svelte/transition";
     import { idbApiLayer } from "$lib/idb-api-layer";
+    import { env } from "$env/dynamic/public";
     import LinkIcon from "$lib/icons/Link.svelte";
     import PlusIcon from "$lib/icons/Plus.svelte";
     import GridIcon from "$lib/icons/AppsGrid.svelte"
@@ -50,6 +51,14 @@
             showErrMsg = true;
             return;
         }
+
+        navigator.sendBeacon("/medama/api/event/hit", JSON.stringify({
+            g: window.location.hostname,
+            b: window.medama.uid,
+            d: {
+                import_start: "quizlet"
+            }
+        }));
 
         showLoading = true;
         const loadingMsgInterval = setInterval(() => {
@@ -168,6 +177,15 @@
                     showErrMsg = true;
                     return;
                 }
+                if (env.ENABLE_MEDAMA == "true") {
+                    navigator.sendBeacon("/medama/api/event/hit", JSON.stringify({
+                        g: window.location.hostname,
+                        b: window.medama.uid,
+                        d: {
+                            import_success: "quizlet, cloud",
+                        }
+                    }));
+                }
                 goto(`/studysets/${newStudysetId}`);
             } catch (err) {
                 console.error("Error making API req(s) creating studyset/terms after import", err);
@@ -182,6 +200,15 @@
                     draft: false
                 });
                 await idbApiLayer.createTerms(newLocalId, termInputs);
+                if (env.ENABLE_MEDAMA == "true") {
+                    navigator.sendBeacon("/medama/api/event/hit", JSON.stringify({
+                        g: window.location.hostname,
+                        b: window.medama.uid,
+                        d: {
+                            import_success: "quizlet, local",
+                        }
+                    }));
+                }
                 goto(`/studyset/local?id=${newLocalId}`);
             } catch (err) {
                 console.error("Error creating local studyset/terms after import", err);
