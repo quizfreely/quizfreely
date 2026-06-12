@@ -110,6 +110,7 @@
       <div class="grid thin-centered">
         <div class="content">
           <h2>Sign In</h2>
+          <form>
           <div>
             <input
               type="text"
@@ -133,6 +134,7 @@
           <div>
             <button id="signinButton">Sign in</button>
           </div>
+          </form>
           <div class="separator">or</div>
           <div>
             {#if env.ENABLE_OAUTH_GOOGLE == "true"}
