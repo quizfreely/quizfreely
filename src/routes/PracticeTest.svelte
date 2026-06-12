@@ -789,7 +789,7 @@ FRQs: ${numFRQsToAssign}`,
             </div>
         {/if}
         {#if showSetup}
-            <div id="setup" transition:slide={{ duration: 400 }}>
+            <div transition:slide={{ duration: 400 }}>
                 <div class="flex" style="align-items: center; margin-bottom: 1rem;">
                     <PracticeTestIcon width="2.2rem" height="2.2rem"></PracticeTestIcon>
                     <h1 class="h3" style="margin-bottom: 0px;">Practice Test</h1>

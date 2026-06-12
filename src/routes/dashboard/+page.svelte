@@ -253,7 +253,7 @@
 <Noscript />
 <div>
     {#if !data.authed}
-        <p id="dashboard-noaccount-alert" class="fg0">
+        <p class="fg0">
             You're not signed in, so your sets will be saved locally (on your
             device)
         </p>

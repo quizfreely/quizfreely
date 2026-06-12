@@ -143,7 +143,7 @@
 <main>
     <div class="grid page">
         <div class="content">
-                <div id="title-and-menu-outer-div">
+                <div>
                     {#if folderName}
                         <div
                             class="flex compact-gap"
@@ -388,7 +388,7 @@
                         </a>
                     </div>
 
-                    <table class="outer caption box" id="terms-table">
+                    <table class="outer caption box">
                         <tbody>
                             <tr>
                                 <th>Term</th>

@@ -122,7 +122,7 @@
 </script>
 
 {#if data.authed}
-<div id="account-signedin-div" class="box">
+<div class="box">
   <div class="flex compact-gap align-end" id="display-name-view-div">
     <p>
       <span class="h6">Display name:</span>
