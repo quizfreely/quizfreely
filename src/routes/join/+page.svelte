@@ -115,7 +115,7 @@
         <h1 class="h3 center" style="margin-bottom: 0px;">Join Game</h1>
         {#if !codeEntered}
         <div>
-        <input class="large-textbox-thing" style="max-width: 16rem;" type="text" id="gameCode" placeholder="A100 B200" autocomplete="off" bind:value={gameCode} oninput={(e) => {
+        <input class="large-textbox-thing" style="max-width: 16rem;" type="text" placeholder="A100 B200" autocomplete="off" bind:value={gameCode} oninput={(e) => {
             let pos = e.target.selectionStart ?? 0;
             gameCode = gameCode.toUpperCase().replaceAll(" ", "");
             if (gameCode.length > 4) {
@@ -133,7 +133,7 @@
         </div>
         {:else}
         <div>
-        <input class="large-textbox-thing" style="max-width: 16rem;" type="text" id="gameCode" placeholder="Name" autocomplete="off" bind:value={uniqueName} transition:scale={{duration: 400}} onkeyup={(e) => {
+        <input class="large-textbox-thing" style="max-width: 16rem;" type="text" placeholder="Name" autocomplete="off" bind:value={uniqueName} transition:scale={{duration: 400}} onkeyup={(e) => {
             if (e.key == "Enter") {
                 joinButton();
             }
