@@ -9,14 +9,8 @@
 
   let showErr = $state(false);
   let errMsg = $state("");
-
-  onMount(function () {
-    if (!data.authed) {
-      if (window.location.search.includes("?error")) {
-        var urlParams = new URLSearchParams(window.location.search);
-        showErr = true;
-        errMsg = "<b>Error</b>: " + urlParams.get("error");
-      }
+  let signinPasswordValue = $state("");
+  let signinUsernameValue = $state("");
 
       function signinSubmit() {
         fetch("/api/v0/auth/sign-in", {
@@ -25,8 +19,8 @@
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            username: document.getElementById("signinUsernameInput").value,
-            password: document.getElementById("signinPasswordInput").value,
+            username: signinUsernameValue,
+            password: signinPasswordValue,
           }),
         })
           .then(function (rawResponse) {
@@ -60,16 +54,15 @@
             errMsg = "Error: Can't connect for some reason <b>:(</b>";
           });
       }
-      document
-        .getElementById("signinButton")
-        .addEventListener("click", signinSubmit);
-      document
-        .getElementById("signinPasswordInput")
-        .addEventListener("keyup", function (event) {
-          if (event.key == "Enter") {
-            signinSubmit();
-          }
-        });
+
+  onMount(function () {
+    if (!data.authed) {
+      if (window.location.search.includes("?error")) {
+        var urlParams = new URLSearchParams(window.location.search);
+        showErr = true;
+        errMsg = "<b>Error</b>: " + urlParams.get("error");
+      }
+
     }
   });
 </script>
@@ -94,7 +87,7 @@
     </div>
   {/if}
   {#if data.authed}
-    <div id="signedin-div" class="grid thin-centered">
+    <div class="grid thin-centered">
       <div class="content">
         <div class="box" style="margin-top: 6rem;">
           <p class="h3">You're signed in!</p>
@@ -106,7 +99,7 @@
       </div>
     </div>
   {:else}
-    <div id="account-div">
+    <div>
       <div class="grid thin-centered">
         <div class="content">
           <h2>Sign In</h2>
@@ -115,7 +108,7 @@
             <input
               type="text"
               class="fullWidth"
-              id="signinUsernameInput"
+              bind:value={signinUsernameValue}
               placeholder="Username"
               name="username"
               autocomplete="username"
@@ -125,14 +118,17 @@
             <input
               type="password"
               class="fullWidth"
-              id="signinPasswordInput"
+              bind:value={signinPasswordValue}
               placeholder="Password"
               name="password"
               autocomplete="current-password"
             />
           </div>
           <div>
-            <button id="signinButton">Sign in</button>
+            <button type="submit" onclick={(ev) => {
+                ev.preventDefault();
+                signinSubmit();
+            }}>Sign in</button>
           </div>
           </form>
           <div class="separator">or</div>
@@ -194,7 +190,6 @@
       <div class="grid thin-centered">
         <div class="content">
           <p><a href="./sign-up">Sign up</a> to create an account</p>
-          <p id="mainSignupErrortext" class="box red hide">Error</p>
         </div>
       </div>
     </div>
