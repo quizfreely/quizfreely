@@ -248,7 +248,6 @@
     }
     .keyed-flashcards-container {
         position: relative;
-        overflow: hidden;
     }
     .keyed-flashcards-container > .card {
         position: absolute;
