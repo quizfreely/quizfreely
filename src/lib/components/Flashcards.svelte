@@ -253,6 +253,7 @@
             inset: -2rem;
             overflow: clip;
             pointer-events: none; /* click-through because this overlaps other buttons/elements */
+            border-radius: 0.8rem;
         }
         .keyed-flashcards-clip-wrapper > .card {
             pointer-events: auto; /* reset click-through from the wrapper so the card itself is still clickable */
