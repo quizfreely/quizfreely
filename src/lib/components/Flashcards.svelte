@@ -141,54 +141,56 @@
 
 <div>
     <div class="keyed-flashcards-container card-size">
-    {#key transKey}
-    <!-- svelte-ignore a11y_click_events_have_key_events -->
-    <!-- svelte-ignore a11y_no_static_element_interactions -->
-    <!-- there's an accessible flip button as a seperate element, and you can also press space to flip (without any focus) -->
-    <div
-        class="card double {defSide && !showPrompt ? "flip" : ""}"
-        onclick={flip}
-        in:fly={{
-            x: prefersReducedMotion.current ?
-                0 : (direction * 100),
-            duration: 200
-        }}
-        out:fly={{
-            x: prefersReducedMotion.current ?
-                0 : (direction * -100),
-            duration: 200
-        }}
-    >
-        <div class="content">
+        <div class="keyed-flashcards-clip-wrapper">
+            {#key transKey}
+            <!-- svelte-ignore a11y_click_events_have_key_events -->
+            <!-- svelte-ignore a11y_no_static_element_interactions -->
+            <!-- there's an accessible flip button as a seperate element, and you can also press space to flip (without any focus) -->
             <div
-                class="front"
+                class="card double {defSide && !showPrompt ? "flip" : ""}"
+                onclick={flip}
+                in:fly={{
+                    x: prefersReducedMotion.current ?
+                        0 : (direction * 100),
+                    duration: 200
+                }}
+                out:fly={{
+                    x: prefersReducedMotion.current ?
+                        0 : (direction * -100),
+                    duration: 200
+                }}
             >
-                <div>
-                    {#if showPrompt}
-                        {@render prompt?.()}
-                    {:else}
-                        <div style="white-space:pre-wrap">{(termsList ? terms?.[index] : term)?.term ?? "term"}</div>
-                        {#if (termsList ? terms?.[index] : term)?.termImageUrl != null}
-                            <div><img src={(termsList ? terms[index] : term).termImageUrl} alt="term" class="flashcard-term-image"></div>
-                        {/if}
-                    {/if}
+                <div class="content">
+                    <div
+                        class="front"
+                    >
+                        <div>
+                            {#if showPrompt}
+                                {@render prompt?.()}
+                            {:else}
+                                <div style="white-space:pre-wrap">{(termsList ? terms?.[index] : term)?.term ?? "term"}</div>
+                                {#if (termsList ? terms?.[index] : term)?.termImageUrl != null}
+                                    <div><img src={(termsList ? terms[index] : term).termImageUrl} alt="term" class="flashcard-term-image"></div>
+                                {/if}
+                            {/if}
+                        </div>
+                    </div>
+                    <div
+                        class="back"
+                    >
+                        <div>
+                            {#if !showPrompt}
+                                <div style="white-space:pre-wrap">{(termsList ? terms?.[index] : term)?.def ?? "definition"}</div>
+                                {#if (termsList ? terms?.[index] : term)?.defImageUrl != null}
+                                    <div><img src={(termsList ? terms[index] : term).defImageUrl} alt="definition" class="flashcard-term-image"></div>
+                                {/if}
+                            {/if}
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div
-                class="back"
-            >
-                <div>
-                    {#if !showPrompt}
-                        <div style="white-space:pre-wrap">{(termsList ? terms?.[index] : term)?.def ?? "definition"}</div>
-                        {#if (termsList ? terms?.[index] : term)?.defImageUrl != null}
-                            <div><img src={(termsList ? terms[index] : term).defImageUrl} alt="definition" class="flashcard-term-image"></div>
-                        {/if}
-                    {/if}
-                </div>
-            </div>
+            {/key}
         </div>
-    </div>
-    {/key}
     </div>
     <div class="caption">
         <div
@@ -242,13 +244,31 @@
         padding: 0px;
         border-radius: 0.8rem;
     }
-    .keyed-flashcards-container {
-        position: relative;
-        overflow: hidden;
-    }
-    .keyed-flashcards-container > .card {
-        position: absolute;
-        inset: 0;
-        margin-top: 0px;
+    :global {
+        .keyed-flashcards-container {
+            position: relative;
+        }
+        .keyed-flashcards-clip-wrapper {
+            position: absolute;
+            inset: -2rem;
+            overflow: clip;
+            pointer-events: none; /* click-through because this overlaps other buttons/elements */
+        }
+        .keyed-flashcards-clip-wrapper > .card {
+            pointer-events: auto; /* reset click-through from the wrapper so the card itself is still clickable */
+            position: absolute;
+            inset: 2rem;
+            margin-top: 0px;
+            width: auto;
+            height: auto;
+        }
+        @media only screen and (max-width: 800px) {
+            .keyed-flashcards-clip-wrapper {
+                inset: -1rem;
+            }
+            .keyed-flashcards-clip-wrapper > .card {
+                inset: 1rem;
+            }
+        }
     }
 </style>
