@@ -57,14 +57,14 @@
         url.hash = "";
         url.search = "";
 
-        navigator.sendBeacon("/medama/api/event/hit", JSON.stringify({
-            b: window.medama.uid,
-            e: "custom",
-            g: window.location.hostname,
-            d: {
-                import_start: "scholarsome"
-            }
-        }));
+        // navigator.sendBeacon("/medama/api/event/hit", JSON.stringify({
+        //     b: window.medama.uid,
+        //     e: "custom",
+        //     g: window.location.hostname,
+        //     d: {
+        //         import_start: "scholarsome"
+        //     }
+        // }));
 
         showLoading = true;
         await importTerms(url.toString());
@@ -208,16 +208,16 @@
                     showErrMsg = true;
                     return;
                 }
-                if (env.ENABLE_MEDAMA == "true") {
-                    navigator.sendBeacon("/medama/api/event/hit", JSON.stringify({
-                        b: window.medama.uid,
-                        e: "custom",
-                        g: window.location.hostname,
-                        d: {
-                            import_success: "scholarsome, cloud",
-                        }
-                    }));
-                }
+                // if (env.ENABLE_MEDAMA == "true") {
+                //     navigator.sendBeacon("/medama/api/event/hit", JSON.stringify({
+                //         b: window.medama.uid,
+                //         e: "custom",
+                //         g: window.location.hostname,
+                //         d: {
+                //             import_success: "scholarsome, cloud",
+                //         }
+                //     }));
+                // }
                 goto(`/studysets/${newStudysetId}`);
             } catch (err) {
                 console.error("Error making (qzfr) API req(s) creating studyset/terms after import", err);
@@ -232,16 +232,16 @@
                     draft: false
                 });
                 await idbApiLayer.createTerms(newLocalId, terms);
-                if (env.ENABLE_MEDAMA == "true") {
-                    navigator.sendBeacon("/medama/api/event/hit", JSON.stringify({
-                        b: window.medama.uid,
-                        e: "custom",
-                        g: window.location.hostname,
-                        d: {
-                            import_success: "scholarsome, local",
-                        }
-                    }));
-                }
+                // if (env.ENABLE_MEDAMA == "true") {
+                //     navigator.sendBeacon("/medama/api/event/hit", JSON.stringify({
+                //         b: window.medama.uid,
+                //         e: "custom",
+                //         g: window.location.hostname,
+                //         d: {
+                //             import_success: "scholarsome, local",
+                //         }
+                //     }));
+                // }
                 goto(`/studyset/local?id=${newLocalId}`);
             } catch (err) {
                 console.error("Error creating local studyset/terms after import", err);

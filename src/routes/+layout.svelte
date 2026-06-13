@@ -10,6 +10,7 @@ import { nprogressTimeout, cancelNprogressTimeout } from "$lib/stores/nprogressT
 import { get } from "svelte/store";
 import { footerState } from '$lib/components/footer.svelte.js';
 import { page } from '$app/state';
+import { host as medamaHost, load, unload } from "svelte-medama";
 let { children, data } = $props();
 
 NProgress.configure({
