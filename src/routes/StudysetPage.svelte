@@ -3,7 +3,7 @@
     import { onMount } from "svelte";
     import { idbApiLayer } from "$lib/idb-api-layer";
     import { goto, beforeNavigate } from "$app/navigation";
-    import { fade } from "svelte/transition";
+    import { fade, slide } from "svelte/transition";
     let { data } = $props();
 
     import Flashcards from "../lib/components/Flashcards.svelte";
