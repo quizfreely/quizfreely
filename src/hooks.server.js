@@ -52,17 +52,7 @@ export function handle({ event, resolve }) {
                 "%theme%", theme
             ).replace(
                 "%theme%", theme
-            ).replace(
-                "%enable_medama%",
-                env.ENABLE_MEDAMA == "true" ? "" : "<!--"
-            ).replace(
-                "%enable_medama_end%",
-                env.ENABLE_MEDAMA == "true" ? "" : "-->"
             );
-            /* %enable_medama% gets removed if medama is enabled,
-             * or becomes a comment around the script tag if not enabled.
-             * replaceAll is NOT used because we only want to replace the first occurance (in the <head> of the HTML)
-             * and preserve any text that litterally includes %enable_medama% */
         }
     });
 }

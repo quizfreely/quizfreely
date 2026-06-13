@@ -17,6 +17,7 @@ NProgress.configure({
     showSpinner: false
 });
 beforeNavigate(function () {
+    
     const currentTimeout = get(nprogressTimeout);
     if (currentTimeout) {
         clearTimeout(currentTimeout);
