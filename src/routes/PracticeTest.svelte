@@ -679,6 +679,7 @@ FRQs: ${numFRQsToAssign}`,
     var bypassExitConfirmation = false;
     let navigatingToURL = $state("");
     setCancelBeforeNavigate((navigation) => {
+        /* NOTE: ALWAYS CLEAN UP WITH setCancelBeforeNavigate(undefined) IN ONMOUNT'S CLEANUP FUNC */
         if (
             takingActualPracticeTest &&
             questionsAnswered > 0 &&

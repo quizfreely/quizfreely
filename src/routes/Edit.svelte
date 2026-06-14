@@ -781,6 +781,7 @@
 
     let navigatingToURL = $state("");
     setCancelBeforeNavigate((navigation) => {
+        /* NOTE: ALWAYS CLEAN UP WITH setCancelBeforeNavigate(undefined) IN ONMOUNT'S CLEANUP FUNC */
         if (unsavedChanges && !bypassUnsavedChangesConfirmation) {
             navigatingToURL = navigation?.to?.url;
             if (navigation.type !== "leave") {
