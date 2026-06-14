@@ -16,9 +16,6 @@ quizfreely.org {
         handle_path /realtime/* {
             reverse_proxy localhost:8000
         }
-        handle_path /medama/* {
-            reverse_proxy localhost:8083
-        }
 
         handle_path /docs* {
                 root * /srv/quizfreely-docs/www
@@ -31,6 +28,10 @@ quizfreely.org {
                         rewrite * 404.html                                                         
                         file_server                                                                
                 }                                                                                  
+        }
+
+        handle /umami* {
+            reverse_proxy localhost:8083
         }
         
         @immutable {
@@ -58,9 +59,6 @@ quizfreely.org {
 }
 www.quizfreely.org, quizfreely.com, www.quizfreely.com, quizfreely.ehan.dev, quizlate.ehan.dev {
         redir https://quizfreely.org{uri} permanent
-}
-analytics.quizfreely.org {
-        reverse_proxy localhost:8083
 }
 *.static.quizfreely.org {
 	reverse_proxy localhost:3902 {

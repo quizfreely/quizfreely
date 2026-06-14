@@ -39,13 +39,9 @@ export default defineConfig(({ mode }) => {
                 return path.replace(/^\/usercontent/, "");
             }
         },
-        ...(env?.ENABLE_MEDAMA == "true" && env?.MEDAMA_PROXY_TARGET_URL?.length > 0 ? {
-            "/medama/": {
-                target: env?.MEDAMA_PROXY_TARGET_URL,
-                changeOrigin: true,
-                rewrite: function (path) {
-                    return path.replace(/^\/medama/, "");
-                }
+        ...(env?.ENABLE_UMAMI == "true" && env?.UMAMI_PROXY_TARGET_URL?.length > 0 ? {
+            "/umami": {
+                target: env?.UMAMI_PROXY_TARGET_URL
             }
         } : {})
         // "/classes/api/": {

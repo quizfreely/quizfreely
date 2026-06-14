@@ -6,33 +6,61 @@ import { sineIn, sineOut } from "svelte/easing";
 import NProgress from "nprogress";
 import "$lib/nprogress/modified-nprogress.css";
 import { beforeNavigate, afterNavigate } from "$app/navigation";
-import { nprogressTimeout, cancelNprogressTimeout } from "$lib/stores/nprogressTimeout.js";
-import { get } from "svelte/store";
 import { footerState } from '$lib/components/footer.svelte.js';
 import { page } from '$app/state';
-import { host as medamaHost, load, unload } from "svelte-medama";
+import { env } from "$env/dynamic/public";
+import { cancelBeforeNavigate } from "$lib/nav.svelte.js";
 let { children, data } = $props();
+const ENABLE_UMAMI = env.ENABLE_UMAMI === "true";
 
 NProgress.configure({
     showSpinner: false
 });
+let nprogressTimeout;
 beforeNavigate(function () {
-    
-    const currentTimeout = get(nprogressTimeout);
-    if (currentTimeout) {
-        clearTimeout(currentTimeout);
+    clearTimeout(nprogressTimeout);
+    nprogressTimeout = undefined;
+
+    /* if a page might cancel navigation, it puts its beforeNavigate logic in cancelBeforeNavigate (which is a shared state)
+    it returns true if it cancelled navigation to stop the rest of this layout's beforeNavigate, like nprogress */
+    if (cancelBeforeNavigate?.() === true) {
+        return;
     }
-    nprogressTimeout.set(
-        setTimeout(function () {
-            NProgress.start();
-        }, 200)
-    );
+
+    nprogressTimeout = setTimeout(() => {
+        NProgress.start();
+    }, 200);
 })
 afterNavigate(function ({ type, to }) {
-    cancelNprogressTimeout();
+    clearTimeout(nprogressTimeout);
+    nprogressTimeout = undefined;
     NProgress.done();
+
+    if (window?.umami != null) {
+        if (page?.data?.authed) {
+            window.umami.identify({
+                id: page?.data?.authedUser?.id,
+                displayName: page?.data?.authedUser?.displayName,
+                username: page?.data?.authedUser?.username,
+                authType: page?.data?.authedUser?.authType,
+                oauthGoogleEmail: page?.data?.authedUser?.oauthGoogleEmail
+            });
+        }
+        window.umami.track();
+    }
 })
 </script>
+<svelte:head>
+    {#if ENABLE_UMAMI}
+        <script
+            defer
+            src="/umami/script.js"
+            data-website-id="{env.UMAMI_SITE_ID}"
+            data-auto-track="false"
+            data-performance="true"
+        ></script>
+    {/if}
+</svelte:head>
 
 {#if !page?.data?.header?.hideHeader}
 <Header />
