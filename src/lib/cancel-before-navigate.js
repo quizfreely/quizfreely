@@ -6,7 +6,7 @@
  * 
  * @type {((nav: BeforeNavigate) => boolean | undefined) | undefined}
  */
-const cancelBeforeNavigateFunc = undefined;
+let cancelBeforeNavigateFunc = undefined;
 
 /**
  * Set func to call before root layout's BeforeNavigate logic
