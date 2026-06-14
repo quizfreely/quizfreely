@@ -1,8 +1,8 @@
 <script>
     import { onMount, tick } from "svelte";
-    import { goto, beforeNavigate } from "$app/navigation";
+    import { goto } from "$app/navigation";
+    import { setCancelBeforeNavigate } from "$lib/cancel-before-navigate.js";
     import { idbApiLayer } from "$lib/idb-api-layer";
-    import { cancelNprogressTimeout } from "$lib/stores/nprogressTimeout.js";
     import { slide, fade } from "svelte/transition";
     import { Confetti } from "svelte-confetti";
     import BackIcon from "$lib/icons/BackArrow.svelte";
@@ -131,7 +131,7 @@
     var showTest = $state(data.alreadyOver);
     var bypassExitConfirmation = false;
     let navigatingToURL = $state("");
-    beforeNavigate(function (navigation) {
+    setCancelBeforeNavigate((navigation) => {
         if (
             inProgress &&
             !bypassExitConfirmation
@@ -143,19 +143,15 @@
                 show our js confirmation modal */
                 showExitConfirmationModal = true;
             }
-            /* our routes/+layout.svelte shows a progress bar
-            if navigation takes too long, so we cancel the timer
-            when we cancel navigation, so that it doesn't show */
-            cancelNprogressTimeout();
-
-            /* run it again a little delayed to make sure it cancels the timeout after layout actually finishes creating the timeout */
-            setTimeout(cancelNprogressTimeout, 50);
 
             /* if navigation.type is "leave",
             then its controlled by the browser &
             the browser shows it's own native modal
             when we use `.cancel()` */
             navigation.cancel();
+            return true;
+        } else {
+            return false;
         }
     });
 

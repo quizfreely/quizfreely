@@ -9,7 +9,7 @@ import { beforeNavigate, afterNavigate } from "$app/navigation";
 import { footerState } from '$lib/components/footer.svelte.js';
 import { page } from '$app/state';
 import { env } from "$env/dynamic/public";
-import { cancelBeforeNavigate } from "$lib/nav.svelte.js";
+import { getCancelBeforeNavigate } from "$lib/cancel-before-navigate.js";
 let { children, data } = $props();
 const ENABLE_UMAMI = env.ENABLE_UMAMI === "true";
 
@@ -17,13 +17,13 @@ NProgress.configure({
     showSpinner: false
 });
 let nprogressTimeout;
-beforeNavigate(function () {
+beforeNavigate((nav) => {
     clearTimeout(nprogressTimeout);
     nprogressTimeout = undefined;
 
     /* if a page might cancel navigation, it puts its beforeNavigate logic in cancelBeforeNavigate (which is a shared state)
     it returns true if it cancelled navigation to stop the rest of this layout's beforeNavigate, like nprogress */
-    if (cancelBeforeNavigate?.() === true) {
+    if (getCancelBeforeNavigate()?.(nav) === true) {
         return;
     }
 

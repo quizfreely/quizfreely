@@ -2,7 +2,7 @@
     import Noscript from "$lib/components/Noscript.svelte";
     import { onMount } from "svelte";
     import { idbApiLayer } from "$lib/idb-api-layer";
-    import { goto, beforeNavigate } from "$app/navigation";
+    import { goto } from "$app/navigation";
     import { fade, slide } from "svelte/transition";
     let { data } = $props();
 
