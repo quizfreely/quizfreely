@@ -1,5 +1,5 @@
 <script>
-    import { onMount, tick } from "svelte";
+    import { onMount, tick, onDestroy } from "svelte";
     import { goto } from "$app/navigation";
     import { setCancelBeforeNavigate } from "$lib/cancel-before-navigate.js";
     import { idbApiLayer } from "$lib/idb-api-layer";
@@ -124,6 +124,7 @@
             objectUrls.forEach(objectUrl => {
                 URL.revokeObjectURL(objectUrl)
             });
+            setCancelBeforeNavigate(undefined);
         }
     })
 
@@ -154,6 +155,8 @@
             return false;
         }
     });
+
+    
 
     function anyPairsLeft() {
         const unanswered = items.filter(item => !item.answered);

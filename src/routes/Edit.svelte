@@ -641,7 +641,8 @@
             window.removeEventListener("keyup", onKeyup);
             objectUrls.forEach(objectUrl => {
                 URL.revokeObjectURL(objectUrl);
-            })
+            });
+            setCancelBeforeNavigate(undefined);
         };
     });
 

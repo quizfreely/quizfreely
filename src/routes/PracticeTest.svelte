@@ -155,7 +155,8 @@
         return () => {
             objectKeys.forEach(objectKey => {
                 URL.revokeObjectURL(objectKey);
-            })
+            });
+            setCancelBeforeNavigate(undefined);
         }
     });
 
