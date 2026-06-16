@@ -31,21 +31,22 @@ beforeNavigate((nav) => {
             NProgress.start();
     }, 200);
 })
-afterNavigate(function ({ type, to }) {
+afterNavigate(nav => {
     clearTimeout(nprogressTimeout);
     nprogressTimeout = undefined;
     NProgress.done();
 
-    if (window?.umami != null) {
-        if (page?.data?.authed) {
-            window.umami.identify({
-                id: page?.data?.authedUser?.id,
-                displayName: page?.data?.authedUser?.displayName,
-                username: page?.data?.authedUser?.username,
-                authType: page?.data?.authedUser?.authType,
-                oauthGoogleEmail: page?.data?.authedUser?.oauthGoogleEmail
-            });
-        }
+    if (window?.umami != null && page?.data?.authed) {
+        window.umami.identify({
+            id: page?.data?.authedUser?.id,
+            displayName: page?.data?.authedUser?.displayName,
+            username: page?.data?.authedUser?.username,
+            authType: page?.data?.authedUser?.authType,
+            oauthGoogleEmail: page?.data?.authedUser?.oauthGoogleEmail,
+            authed: page?.data?.authed
+        });
+    }
+    if (window?.umami != null && nav.type !== "enter") {
         window.umami.track();
     }
 })
@@ -58,6 +59,7 @@ afterNavigate(function ({ type, to }) {
             data-website-id="{env.UMAMI_SITE_ID}"
             data-auto-track="false"
             data-performance="true"
+            onload="window.umami.track()"
         ></script>
     {/if}
 </svelte:head>
