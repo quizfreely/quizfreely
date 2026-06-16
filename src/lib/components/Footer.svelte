@@ -6,10 +6,12 @@
 </script>
 
 <div
+  id="footer-wave"
   class="wave-top bg0"
   transition:slide={{ duration: 400 }}
 ></div>
 <footer
+  id="footer"
   class="background-bg0"
   transition:slide={{ duration: 400 }}
   style="border: none; margin: 0px; padding-top: 1rem; padding-bottom: 8rem;"
@@ -32,7 +34,6 @@
       href="https://hcb.hackclub.com/donations/start/quizfreely"
       class="button faint love"
       style="margin-left: 0.2rem;"
-      data-m:click="donate_link=footer"
     >
       <HeartIcon></HeartIcon> Donate
     </a>
