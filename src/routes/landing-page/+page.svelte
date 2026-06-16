@@ -88,7 +88,7 @@
             <span class="optional-line-600px">We're fiscally sponsored by <a class="link-love with-underline" href="https://the.hackfoundation.org">The Hack Foundation</a>, a <span style="white-space: nowrap;">501(c)(3)</span> nonprofit.</span>
         </p>
         <div class="flex">
-          <a class="button large love" href="https://hcb.hackclub.com/donations/start/quizfreely" data-m:click="donate_link=landing_page">
+          <a class="button large love" href="https://hcb.hackclub.com/donations/start/quizfreely">
             <HeartIcon></HeartIcon>
             Donate
           </a>
