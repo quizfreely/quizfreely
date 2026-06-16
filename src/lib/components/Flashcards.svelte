@@ -16,8 +16,7 @@
         onNext, /* called when termsList true (return nothing) */
         onPrev, /* called when termsList true (return nothing) */
         showPrompt = false,
-        prompt,
-        captionEnd
+        prompt
     } = $props();
 
     let defSide = $state(false);
@@ -231,7 +230,12 @@
             </button>
         </div>
         <div class="flex end">
-            {@render captionEnd?.()}
+            <!--<button id="flashcards-maximize-button">
+                <i class="nf nf-md-fullscreen"></i>
+            </button>
+            <button id="flashcards-unmaximize-button" class="hide">
+                <i class="nf nf-md-fullscreen_exit"></i>
+            </button>-->
         </div>
     </div>
 </div>
