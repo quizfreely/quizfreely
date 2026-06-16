@@ -24,8 +24,6 @@
     import BookmarkIcon from "$lib/icons/Bookmark.svelte";
     import FolderIcon from "$lib/icons/Folder.svelte";
     import AngleRIcon from "$lib/icons/AngleRight.svelte";
-    import FullscreenIcon from "$lib/icons/FullscreenMaximize.svelte";
-    import GridIcon from "$lib/icons/AppsGrid.svelte";
 
     import { footerState } from "$lib/components/footer.svelte.js";
 
@@ -123,7 +121,6 @@
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Quizfreely" />
 </svelte:head>
-
 {#snippet folderPickerErrMsg()}
     <div class="box ohno" transition:slide={{ duration: 400 }}>
         <p>Error adding to/changing folder :(</p>
@@ -143,7 +140,7 @@
 <main>
     <div class="grid page">
         <div class="content">
-                <div>
+                <div id="title-and-menu-outer-div">
                     {#if folderName}
                         <div
                             class="flex compact-gap"
@@ -342,53 +339,63 @@
                         </div>
                     {/if}
                 </div>
-            {#snippet flashcardsCaptionEnd()}
-                <a href="{data.local ? `/studyset/local/flashcards?id=${data.localId}` : `/studysets/${data.studyset.id}/flashcards`}" class="button faint" aria-label="Fullscreen Flashcards">
-                    <FullscreenIcon></FullscreenIcon>
-                </a>
-            {/snippet}
-            <Flashcards {terms} captionEnd={flashcardsCaptionEnd} />
+            <Flashcards {terms} />
                 <div id="terms-and-stuff-outer-div">
                     <div class="caption grid list">
-                        <!-- <a -->
-                        <!--     id="flashcards-maximize" -->
-                        <!--     class="button alt" -->
-                        <!--     href="{data.local ? -->
-                        <!--         `/studyset/local/flashcards?id=${data.localId}` : -->
-                        <!--         `/studysets/${data.studyset.id}/flashcards` -->
-                        <!--     }" -->
-                        <!-- > -->
-                        <!--     <IconFlashcards /> -->
-                        <!--     Flashcards -->
-                        <!-- </a> -->
-                        <!-- <a href="/studyset/local/review-mode?id={ data.localId }" class="button alt"> -->
-                        <!--   <IconReviewModeBook /> -->
-                        <!--   Review Mode -->
-                        <!-- </a> -->
                         <a
-                            href="{data.local ? `/studyset/local/match?id=${data.localId}` : `/studysets/${data.studyset?.id}/match`}"
+                            id="flashcards-maximize"
                             class="button alt"
+                            href="{data.local ?
+                                `/studyset/local/flashcards?id=${data.localId}` :
+                                `/studysets/${data.studyset.id}/flashcards`
+                            }"
                         >
-                            <GridIcon />
-                            Match
+                            <IconFlashcards />
+                            Flashcards
                         </a>
-                        <a
-                            href="{data.local ? `/studyset/local/practice-test?id=${data.localId}` : `/studysets/${data.studyset?.id}/practice-test`}"
-                            class="button alt"
-                        >
-                            <IconPracticeTestChecklist />
-                            Practice Test
-                        </a>
-                        <a
-                            href="{data.local ? `/studyset/local/stats?id=${data.localId}` : `/studysets/${data.studyset?.id}/stats`}"
-                            class="button alt"
-                        >
-                            <IconGraph />
-                            Progress &amp; Stats
-                        </a>
+                        {#if data.local}
+                            <!-- <a href="/studyset/local/review-mode?id={ data.localId }" class="button alt"> -->
+                            <!--   <IconReviewModeBook /> -->
+                            <!--   Review Mode -->
+                            <!-- </a> -->
+                            <a
+                                href="/studyset/local/practice-test?id={data.localId}"
+                                class="button alt"
+                            >
+                                <IconPracticeTestChecklist />
+                                Practice Test
+                            </a>
+                            <a
+                                href="/studyset/local/stats?id={data.localId}"
+                                class="button alt"
+                            >
+                                <IconGraph />
+                                Progress &amp; Stats
+                            </a>
+                        {:else if data.studyset}
+                            <!-- <a href="/studysets/{ data.studyset.id }/review-mode" class="button alt"> -->
+                            <!--   <IconReviewModeBook /> -->
+                            <!--   Review Mode -->
+                            <!-- </a> -->
+                            <a
+                                href="/studysets/{data.studyset
+                                    .id}/practice-test"
+                                class="button alt"
+                            >
+                                <IconPracticeTestChecklist />
+                                Practice Test
+                            </a>
+                            <a
+                                href="/studysets/{data.studyset.id}/stats"
+                                class="button alt"
+                            >
+                                <IconGraph />
+                                Progress &amp; Stats
+                            </a>
+                        {/if}
                     </div>
 
-                    <table class="outer caption box">
+                    <table class="outer caption box" id="terms-table">
                         <tbody>
                             <tr>
                                 <th>Term</th>
