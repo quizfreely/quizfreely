@@ -45,11 +45,6 @@
     let showRemoveTermImageModal = $state(false);
     let removeTermImageModalTerm;
     let removeTermImageModalIsDefSide;
-    let editTitleValue = $state("");
-    let editPrivate = $state(false);
-    let importTermsCustomTermdefDelimiterValue = $state("");
-    let importTermsCustomRowDelimiterValue = $state("");
-    let importTermsPasteValue = $state("");
 
     var terms = $state([]);
     var existingTermIdsToDelete = [];
@@ -196,6 +191,28 @@
     }
     onMount(() => {
         (async function () {
+            if (data.authed && !data.local) {
+                document
+                    .getElementById("edit-private-false")
+                    .addEventListener("click", function () {
+                        document
+                            .getElementById("edit-private-false")
+                            .classList.add("selected");
+                        document
+                            .getElementById("edit-private-true")
+                            .classList.remove("selected");
+                    });
+                document
+                    .getElementById("edit-private-true")
+                    .addEventListener("click", function () {
+                        document
+                            .getElementById("edit-private-false")
+                            .classList.remove("selected");
+                        document
+                            .getElementById("edit-private-true")
+                            .classList.add("selected");
+                    });
+            }
             if (data.studysetId) {
                 if (data.authed) {
                     fetch("/api/graphql", {
@@ -238,8 +255,23 @@
                                 console.error(result.errors);
                             } else {
                                 const studyset = result.data.studyset;
-                                editTitleValue = studyset.title;
-                                editPrivate = studyset.private ?? false;
+                                document.getElementById("edit-title").value =
+                                    studyset.title;
+                                if (studyset.private) {
+                                    document
+                                        .getElementById("edit-private-false")
+                                        .classList.remove("selected");
+                                    document
+                                        .getElementById("edit-private-true")
+                                        .classList.add("selected");
+                                } else {
+                                    document
+                                        .getElementById("edit-private-false")
+                                        .classList.add("selected");
+                                    document
+                                        .getElementById("edit-private-true")
+                                        .classList.remove("selected");
+                                }
                                 if (studyset.terms != null) {
                                     studyset.terms.forEach((t) => {
                                         addTerm(t.term, t.def, t.id, t.termImageUrl, t.defImageUrl);
@@ -267,7 +299,8 @@
                     },
                 );
                 if (studysetRecord) {
-                    editTitleValue = studysetRecord.title;
+                    document.getElementById("edit-title").value =
+                        studysetRecord.title;
                     if (studysetRecord.terms != null) {
                         studysetRecord.terms.forEach((t) => {
                             addTerm(t.term, t.def, t.id, t.termImageUrl, t.defImageUrl);
@@ -679,7 +712,7 @@
         (async () => {
             await idbApiLayer.updateStudyset({
                 id: data.localId,
-                title: editTitleValue,
+                title: document.getElementById("edit-title").value,
                 draft: false
             });
             if (existingTerms.length > 0) {
@@ -742,8 +775,10 @@
                 variables: {
                     id: data.studysetId,
                     studyset: {
-                        title: editTitleValue,
-                        private: editPrivate,
+                        title: document.getElementById("edit-title").value,
+                        private: document
+                            .getElementById("edit-private-true")
+                            .classList.contains("selected"),
                         subjectId: selectedSubject?.id ?? null,
                     },
                     terms: existingTerms,
@@ -873,26 +908,22 @@
                     Back
                 </a>
             </div>
-            <input type="text" placeholder="Title" class="title-textbox" bind:value={editTitleValue} />
+            <input id="edit-title" type="text" placeholder="Title" class="title-textbox" />
             {#if data.authed && !data.local}
-                <div>
+                <div id="edit-private-div">
                     <div class="flex">
                         <button
-                            class="button-box {editPrivate ? "" : "selected"}"
-                            onclick={() => {
-                                unsavedChanges = true;
-                                editPrivate = false;
-                            }}
+                            class="button-box selected"
+                            id="edit-private-false"
+                            onclick={() => (unsavedChanges = true)}
                         >
                             <IconCheckmark class="button-box-selected-icon" />
                             Public
                         </button>
                         <button
-                            class="button-box {editPrivate ? "selected" : ""}"
-                            onclick={() => {
-                                unsavedChanges = true
-                                editPrivate = true;
-                            }}
+                            class="button-box"
+                            id="edit-private-true"
+                            onclick={() => (unsavedChanges = true)}
                         >
                             <IconCheckmark class="button-box-selected-icon" />
                             Private
@@ -914,7 +945,7 @@
                 </div>
             {/if}
 
-            <div>
+            <div id="edit-terms-rows">
                 {#each terms as term, index (term.key)}
                     <div
                         class="grid box term-row-box"
@@ -1190,7 +1221,7 @@
                                     <input
                                         type="text"
                                         placeholder="Term Delimiter"
-                                        bind:value={importTermsCustomTermdefDelimiterValue}
+                                        id="import-terms-custom-termdef-delimiter-input"
                                         class="slightly-smaller-textbox"
                                         transition:scale={{ duration: 400 }}
                                     />
@@ -1254,18 +1285,18 @@
                                     <input
                                         type="text"
                                         placeholder="Row Delimiter"
+                                        id="import-terms-custom-row-delimiter-input"
                                         class="slightly-smaller-textbox"
-                                        bind:value={importTermsCustomRowDelimiterValue}
                                         transition:scale={{ duration: 400 }}
                                     />
                                 {/if}
                             </div>
                         </div>
                         <textarea
-                            class="import-terms-paste-textarea vertical"
+                            id="import-terms-paste-textarea"
+                            class="vertical"
                             rows="3"
                             placeholder="Paste data here, then press the import button"
-                            bind:value={importTermsPasteValue}
                         ></textarea>
                         <p class="fg0" style="font-size: 0.9rem; margin-top: 0.4rem;">Import from a link instead? <a href="/import" style="font-size: 0.9rem;">More Import Options</a></p>
                         <div class="flex" style="margin-top: 1.4rem;">
@@ -1287,7 +1318,10 @@
                                         importTermsTermDefDelimiterRadioSelect ==
                                         "custom"
                                     ) {
-                                        termDefDelimiter = importTermsCustomTermdefDelimiterValue;
+                                        termDefDelimiter =
+                                            document.getElementById(
+                                                "import-terms-custom-termdef-delimiter-input",
+                                            ).value;
                                         if (termDefDelimiter == "") {
                                             alert(
                                                 "Custom delimiter can't be blank >:(",
@@ -1309,7 +1343,9 @@
                                         importTermsRowDelimiterRadioSelect ==
                                         "custom"
                                     ) {
-                                        rowDelimiter = importTermsCustomRowDelimiterValue;
+                                        rowDelimiter = document.getElementById(
+                                            "import-terms-custom-row-delimiter-input",
+                                        ).value;
                                         if (rowDelimiter == "") {
                                             alert(
                                                 "Custom delimiter can't be blank >:(",
@@ -1331,7 +1367,9 @@
                                         terms.splice(0, 1);
                                     }
 
-                                    var pastedData = importTermsPasteValue;
+                                    var pastedData = document.getElementById(
+                                        "import-terms-paste-textarea",
+                                    ).value;
                                     addTermsFrom2DArray(
                                         pastedData
                                             .split(rowDelimiter)
@@ -1559,7 +1597,7 @@
         grid-template-rows: auto;
         grid-template-columns: 1fr 1fr;
     }
-    .import-terms-paste-textarea {
+    #import-terms-paste-textarea {
         width: 100%;
     }
 
