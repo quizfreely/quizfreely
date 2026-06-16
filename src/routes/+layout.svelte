@@ -8,10 +8,8 @@ import "$lib/nprogress/modified-nprogress.css";
 import { beforeNavigate, afterNavigate } from "$app/navigation";
 import { footerState } from '$lib/components/footer.svelte.js';
 import { page } from '$app/state';
-import { env } from "$env/dynamic/public";
 import { getCancelBeforeNavigate } from "$lib/cancel-before-navigate.js";
 let { children, data } = $props();
-const ENABLE_UMAMI = env.ENABLE_UMAMI === "true";
 
 NProgress.configure({
     showSpinner: false
@@ -51,18 +49,6 @@ afterNavigate(nav => {
     }
 })
 </script>
-<svelte:head>
-    {#if ENABLE_UMAMI}
-        <script
-            defer
-            src="/umami/script.js"
-            data-website-id="{env.UMAMI_SITE_ID}"
-            data-auto-track="false"
-            data-performance="true"
-            onload="window.umami.track()"
-        ></script>
-    {/if}
-</svelte:head>
 
 {#if !page?.data?.header?.hideHeader}
 <Header />
