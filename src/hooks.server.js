@@ -48,11 +48,29 @@ export function handle({ event, resolve }) {
             where %theme% is literally in rendered html
             that we do NOT want to replace,
             for example documentation might have `%theme%` */
-            return html.replace(
+            let result = html.replace(
                 "%theme%", theme
             ).replace(
                 "%theme%", theme
             );
+            /* run `replace` (NOT replaceAll) for umami
+            & turn script tag into comment if disabled */
+            if (env.ENABLE_UMAMI == "true") {
+                result = result.replace(
+                    "%enable_umami%", ""
+                ).replace(
+                    "%umami_site_id%", env.UMAMI_SITE_ID
+                ).replace(
+                    "%enable_umami_end%", ""
+                );
+            } else {
+                result = result.replace(
+                    "%enable_umami%", "<!--"
+                ).replace(
+                    "%enable_umami_end%", "-->"
+                );
+            }
+            return result;
         }
     });
 }
