@@ -29,6 +29,10 @@ quizfreely.org {
                         file_server                                                                
                 }                                                                                  
         }
+
+        handle /umami* {
+            reverse_proxy localhost:8083
+        }
         
         @immutable {
                 path /immutable/*

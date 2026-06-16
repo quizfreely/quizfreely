@@ -3,10 +3,11 @@
     import { goto } from "$app/navigation";
     import { slide, crossfade, fade } from "svelte/transition";
     import { idbApiLayer } from "$lib/idb-api-layer";
+    import { env } from "$env/dynamic/public";
     import LinkIcon from "$lib/icons/Link.svelte";
     import PlusIcon from "$lib/icons/Plus.svelte";
     import GridIcon from "$lib/icons/AppsGrid.svelte"
-    import QuizevilLogotype from "$lib/icons/QuizevilLogotype.svelte"
+    import QuizevilLogotype from "$lib/svg/QuizevilLogotype.svelte"
     let { data } = $props();
 
     let link = $state("");
@@ -50,6 +51,15 @@
             showErrMsg = true;
             return;
         }
+
+        // navigator.sendBeacon("/medama/api/event/hit", JSON.stringify({
+        //     b: window.medama.uid,
+        //     e: "custom",
+        //     g: window.location.hostname,
+        //     d: {
+        //         import_start: "quizlet"
+        //     }
+        // }));
 
         showLoading = true;
         const loadingMsgInterval = setInterval(() => {
@@ -168,6 +178,16 @@
                     showErrMsg = true;
                     return;
                 }
+                // if (env.ENABLE_MEDAMA == "true") {
+                //     navigator.sendBeacon("/medama/api/event/hit", JSON.stringify({
+                //         b: window.medama.uid,
+                //         e: "custom",
+                //         g: window.location.hostname,
+                //         d: {
+                //             import_success: "quizlet, cloud",
+                //         }
+                //     }));
+                // }
                 goto(`/studysets/${newStudysetId}`);
             } catch (err) {
                 console.error("Error making API req(s) creating studyset/terms after import", err);
@@ -182,6 +202,16 @@
                     draft: false
                 });
                 await idbApiLayer.createTerms(newLocalId, termInputs);
+                // if (env.ENABLE_MEDAMA == "true") {
+                //     navigator.sendBeacon("/medama/api/event/hit", JSON.stringify({
+                //         b: window.medama.uid,
+                //         e: "custom",
+                //         g: window.location.hostname,
+                //         d: {
+                //             import_success: "quizlet, local",
+                //         }
+                //     }));
+                // }
                 goto(`/studyset/local?id=${newLocalId}`);
             } catch (err) {
                 console.error("Error creating local studyset/terms after import", err);
@@ -265,7 +295,7 @@
     <div class="content">
         <span class="b" style="font-size: 1.6rem;">Import from</span>
         <div class="flex" style="align-items: center; justify-content: center; gap: 1.2rem; margin-top: 0.4rem;">
-            <QuizevilLogotype width="auto" height="2.2rem" role="img" aria-label="Quizlet"></QuizevilLogotype>
+            <QuizevilLogotype style="width: auto; height: 2.2rem;" role="img" aria-label="Quizlet"></QuizevilLogotype>
         </div>
         <div class="flex" style="flex-direction: column; align-items: center;">
             <div class="flex" style="flex-direction: column; align-items: stretch; width: 26rem; max-width: 100%;">

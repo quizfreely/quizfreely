@@ -5,12 +5,13 @@
     import ForwardLongArrowIcon from "$lib/icons/ForwardRightArrowLong.svelte";
     import ExitIcon from "$lib/icons/Exit.svelte";
     import CheckmarkIcon from "$lib/icons/Checkmark.svelte";
+    import PracticeTestIcon from "$lib/icons/PracticeTestChecklist.svelte";
     import MCQ from "$lib/questionComponents/MCQ.svelte";
     import FRQ from "$lib/questionComponents/FRQ.svelte";
     import TrueFalseQuestion from "$lib/questionComponents/TrueFalseQuestion.svelte";
     import { slide, fade } from "svelte/transition";
-    import { goto, beforeNavigate } from "$app/navigation";
-    import { cancelNprogressTimeout } from "$lib/stores/nprogressTimeout.js";
+    import { goto } from "$app/navigation";
+    import { setCancelBeforeNavigate } from "$lib/cancel-before-navigate.js";
     import { fancyTimestamp } from "$lib/fancyTimestamp";
     import { Confetti } from "svelte-confetti";
     let { data } = $props();
@@ -154,7 +155,8 @@
         return () => {
             objectKeys.forEach(objectKey => {
                 URL.revokeObjectURL(objectKey);
-            })
+            });
+            setCancelBeforeNavigate(undefined);
         }
     });
 
@@ -169,13 +171,9 @@
 
     let questionsCountEntered = $state();
 
-    let defaultQuestionsCount = $derived.by(() => {
-        if (terms?.length < 30) {
-            return terms?.length;
-        } else {
-            return 20;
-        }
-    });
+    let defaultQuestionsCount = $derived(
+        terms?.length < 30 ? terms.length : 20
+    );
 
     function shuffleArray(ogArray) {
         let arr = [...ogArray];
@@ -360,7 +358,7 @@ FRQs: ${numFRQsToAssign}`,
                     addTrueFalseQuestion(term);
                     break;
                 case "match":
-                    addMatchQuestion(term);
+                    // addMatchQuestion(term);
                     break;
                 case "frq":
                     addFRQ(term);
@@ -680,7 +678,8 @@ FRQs: ${numFRQsToAssign}`,
     var takingActualPracticeTest = $state(false);
     var bypassExitConfirmation = false;
     let navigatingToURL = $state("");
-    beforeNavigate(function (navigation) {
+    setCancelBeforeNavigate((navigation) => {
+        /* NOTE: ALWAYS CLEAN UP WITH setCancelBeforeNavigate(undefined) IN ONMOUNT'S CLEANUP FUNC */
         if (
             takingActualPracticeTest &&
             questionsAnswered > 0 &&
@@ -693,19 +692,15 @@ FRQs: ${numFRQsToAssign}`,
                 show our js confirmation modal */
                 showExitConfirmationModal = true;
             }
-            /* our routes/+layout.svelte shows a progress bar
-            if navigation takes too long, so we cancel the timer
-            when we cancel navigation, so that it doesn't show */
-            cancelNprogressTimeout();
-
-            /* run it again a little delayed to make sure it cancels the timeout after layout actually finishes creating the timeout */
-            setTimeout(cancelNprogressTimeout, 50);
 
             /* if navigation.type is "leave",
             then its controlled by the browser &
             the browser shows it's own native modal
             when we use `.cancel()` */
             navigation.cancel();
+            return true;
+        } else {
+            return false;
         }
     });
 
@@ -792,8 +787,11 @@ FRQs: ${numFRQsToAssign}`,
             </div>
         {/if}
         {#if showSetup}
-            <div id="setup" transition:slide={{ duration: 400 }}>
-                <p class="h4">Practice Test</p>
+            <div transition:slide={{ duration: 400 }}>
+                <div class="flex" style="align-items: center; margin-bottom: 1rem;">
+                    <PracticeTestIcon width="2.2rem" height="2.2rem"></PracticeTestIcon>
+                    <h1 class="h3" style="margin-bottom: 0px;">Practice Test</h1>
+                </div>
                 <p>
                     There {terms?.length == 1 ? "is" : "are"}
                     {terms?.length ?? "?"}
@@ -901,7 +899,7 @@ FRQs: ${numFRQsToAssign}`,
                 {/if}
                 <div
                     class="flex compact-gap"
-                    style="margin-top: 2rem; align-items: end; justify-content: space-between; flex-wrap: wrap;"
+                    style="margin-top: 3rem; align-items: end; justify-content: space-between; flex-wrap: wrap;"
                 >
                     <p class="h4" style="margin-bottom: 0px;">
                         Completed Practice Tests

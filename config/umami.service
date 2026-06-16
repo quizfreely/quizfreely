@@ -1,0 +1,17 @@
+[Unit]
+Description=Umami Analytics
+After=network.target postgresql.service
+
+[Service]
+User=umami
+WorkingDirectory=/home/umami/umami
+ExecStart=/usr/bin/pnpm start
+Environment="NODE_ENV=production" "PORT=8083"
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
+

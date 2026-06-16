@@ -3,8 +3,8 @@
     import { onMount, mount, tick } from "svelte";
     import { env } from '$env/dynamic/public';
     import { idbApiLayer, idbLayerImg } from "$lib/idb-api-layer";
-    import { goto, beforeNavigate } from "$app/navigation";
-    import { cancelNprogressTimeout } from "$lib/stores/nprogressTimeout.js";
+    import { goto } from "$app/navigation";
+    import { setCancelBeforeNavigate } from "$lib/cancel-before-navigate.js";
     let { data } = $props();
     import Dropdown from "$lib/components/Dropdown.svelte";
     import SubjectPicker from "$lib/components/SubjectPicker.svelte";
@@ -674,7 +674,8 @@
             window.removeEventListener("keyup", onKeyup);
             objectUrls.forEach(objectUrl => {
                 URL.revokeObjectURL(objectUrl);
-            })
+            });
+            setCancelBeforeNavigate(undefined);
         };
     });
 
@@ -814,7 +815,8 @@
     let importTermsRowDelimiterRadioSelect = $state("newline");
 
     let navigatingToURL = $state("");
-    beforeNavigate(function (navigation) {
+    setCancelBeforeNavigate((navigation) => {
+        /* NOTE: ALWAYS CLEAN UP WITH setCancelBeforeNavigate(undefined) IN ONMOUNT'S CLEANUP FUNC */
         if (unsavedChanges && !bypassUnsavedChangesConfirmation) {
             navigatingToURL = navigation?.to?.url;
             if (navigation.type !== "leave") {
@@ -823,19 +825,14 @@
                 show our js confirmation modal */
                 showExitConfirmationModal = true;
             }
-            /* our routes/+layout.svelte shows a progress bar
-            if navigation takes too long, so we cancel the timer
-            when we cancel navigation, so that it doesn't show */
-            cancelNprogressTimeout();
-
-            /* run it again a little delayed to make sure it cancels the timeout after layout actually finishes creating the timeout */
-            setTimeout(cancelNprogressTimeout, 50);
-
             /* if navigation.type is "leave",
             then its controlled by the browser &
             the browser shows it's own native modal
             when we use `.cancel()` */
             navigation.cancel();
+            return true;
+        } else {
+            return false;
         }
     });
 

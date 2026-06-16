@@ -2,8 +2,8 @@
     import Noscript from "$lib/components/Noscript.svelte";
     import { onMount } from "svelte";
     import { idbApiLayer } from "$lib/idb-api-layer";
-    import { goto, beforeNavigate } from "$app/navigation";
-    import { fade } from "svelte/transition";
+    import { goto } from "$app/navigation";
+    import { fade, slide } from "svelte/transition";
     let { data } = $props();
 
     import Flashcards from "../lib/components/Flashcards.svelte";
@@ -110,12 +110,17 @@
 <svelte:head>
     {#if title}
         <title>{title} - Quizfreely</title>
+        <meta property="og:title" content="{title} - Quizfreely" />
     {:else}
         <title>Quizfreely</title>
+        <meta property="og:title" content="Quizfreely" />
     {/if}
     <meta name="robots" content="noindex, follow" />
+    <meta name="description" content="Study with free flashcards, practice tests, and review activities on Quizfreely." />
+    <meta name="og:description" content="Study with free flashcards, practice tests, and review activities on Quizfreely." />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Quizfreely" />
 </svelte:head>
-
 {#snippet folderPickerErrMsg()}
     <div class="box ohno" transition:slide={{ duration: 400 }}>
         <p>Error adding to/changing folder :(</p>

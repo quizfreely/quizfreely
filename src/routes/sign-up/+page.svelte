@@ -9,30 +9,24 @@
 
   let showErr = $state(false);
   let errMsg = $state("");
-
-  onMount(function () {
-    if (!data.authed) {
-      if (window.location.search.includes("?error")) {
-        var urlParams = new URLSearchParams(window.location.search);
-        showErr = true;
-        errMsg = "<b>Error</b>: " + urlParams.get("error");
-      }
+  let signupUsernameValue = $state("");
+  let signupPasswordValue = $state("");
+  let signupPasswordConfirmValue = $state("");
 
       function signupSubmit() {
         if (
-          document.getElementById("signupPasswordInput").value ===
-          document.getElementById("signupPasswordConfirmInput").value
+            signupPasswordValue != null &&
+            signupPasswordValue === signupPasswordConfirmValue
         ) {
           showErr = false;
-          var username = document.getElementById("signupUsernameInput").value;
           fetch("/api/v0/auth/sign-up", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              username: username,
-              password: document.getElementById("signupPasswordInput").value,
+              username: signupUsernameValue,
+              password: signupPasswordValue,
             }),
           })
             .then(function (rawRes) {
@@ -77,16 +71,14 @@
             '<span class="line">Make sure you retyped your password how you want!</span>';
         }
       }
-      document
-        .getElementById("signupButton")
-        .addEventListener("click", signupSubmit);
-      document
-        .getElementById("signupPasswordConfirmInput")
-        .addEventListener("keyup", function (event) {
-          if (event.key == "Enter") {
-            signupSubmit();
-          }
-        });
+
+  onMount(function () {
+    if (!data.authed) {
+      if (window.location.search.includes("?error")) {
+        var urlParams = new URLSearchParams(window.location.search);
+        showErr = true;
+        errMsg = "<b>Error</b>: " + urlParams.get("error");
+      }
     }
   });
 </script>
@@ -111,7 +103,7 @@
     </div>
   {/if}
   {#if data.authed}
-    <div id="signedin-div" class="grid thin-centered">
+    <div class="grid thin-centered">
       <div class="content">
         <div class="box" style="margin-top: 6rem;">
           <p class="h3">You're signed in!</p>
@@ -123,15 +115,16 @@
       </div>
     </div>
   {:else}
-    <div id="account-div">
+    <div>
       <div class="grid thin-centered">
         <div class="content">
           <h2>Sign Up</h2>
+          <form>
           <div>
             <input
               type="text"
               class="fullWidth"
-              id="signupUsernameInput"
+              bind:value={signupUsernameValue}
               placeholder="Username"
               name="username"
               autocomplete="username"
@@ -141,7 +134,7 @@
             <input
               type="password"
               class="fullWidth"
-              id="signupPasswordInput"
+              bind:value={signupPasswordValue}
               placeholder="Password"
               name="password"
               autocomplete="new-password"
@@ -151,15 +144,19 @@
             <input
               type="password"
               class="fullWidth"
-              id="signupPasswordConfirmInput"
+              bind:value={signupPasswordConfirmValue}
               placeholder="Retype Password"
               name="confirm-password"
               autocomplete="new-password"
             />
           </div>
           <div>
-            <button id="signupButton">Create account</button>
+            <button type="submit" onclick={(ev) => {
+                ev.preventDefault();
+                signupSubmit();
+            }}>Create account</button>
           </div>
+          </form>
           <div class="separator">or</div>
           <div>
             {#if env.ENABLE_OAUTH_GOOGLE == "true"}

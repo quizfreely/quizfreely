@@ -6,7 +6,7 @@
     import LinkIcon from "$lib/icons/Link.svelte";
     import PlusIcon from "$lib/icons/Plus.svelte";
     import GridIcon from "$lib/icons/AppsGrid.svelte"
-    import ScholarsomeLogotype from "$lib/icons/ScholarsomeLogotype.svelte"
+    import ScholarsomeLogotype from "$lib/svg/ScholarsomeLogotype.svelte"
     let { data } = $props();
 
     let link = $state("");
@@ -56,6 +56,15 @@
         url.pathname = pathBeforeId.replace("/study-set/", "/api/sets/") + studysetId;
         url.hash = "";
         url.search = "";
+
+        // navigator.sendBeacon("/medama/api/event/hit", JSON.stringify({
+        //     b: window.medama.uid,
+        //     e: "custom",
+        //     g: window.location.hostname,
+        //     d: {
+        //         import_start: "scholarsome"
+        //     }
+        // }));
 
         showLoading = true;
         await importTerms(url.toString());
@@ -199,6 +208,16 @@
                     showErrMsg = true;
                     return;
                 }
+                // if (env.ENABLE_MEDAMA == "true") {
+                //     navigator.sendBeacon("/medama/api/event/hit", JSON.stringify({
+                //         b: window.medama.uid,
+                //         e: "custom",
+                //         g: window.location.hostname,
+                //         d: {
+                //             import_success: "scholarsome, cloud",
+                //         }
+                //     }));
+                // }
                 goto(`/studysets/${newStudysetId}`);
             } catch (err) {
                 console.error("Error making (qzfr) API req(s) creating studyset/terms after import", err);
@@ -213,6 +232,16 @@
                     draft: false
                 });
                 await idbApiLayer.createTerms(newLocalId, terms);
+                // if (env.ENABLE_MEDAMA == "true") {
+                //     navigator.sendBeacon("/medama/api/event/hit", JSON.stringify({
+                //         b: window.medama.uid,
+                //         e: "custom",
+                //         g: window.location.hostname,
+                //         d: {
+                //             import_success: "scholarsome, local",
+                //         }
+                //     }));
+                // }
                 goto(`/studyset/local?id=${newLocalId}`);
             } catch (err) {
                 console.error("Error creating local studyset/terms after import", err);
@@ -278,7 +307,7 @@
     <div class="content">
         <span class="b" style="font-size: 1.6rem;">Import from</span>
         <div class="flex" style="align-items: center; justify-content: center; gap: 1.2rem; margin-top: 0.4rem;">
-            <ScholarsomeLogotype width="auto" height="3.6rem" role="img" aria-label="Scholarsome"></ScholarsomeLogotype>
+            <ScholarsomeLogotype style="width: auto; height: 3.6rem;" role="img" aria-label="Scholarsome"></ScholarsomeLogotype>
         </div>
         <div class="flex" style="flex-direction: column; align-items: center;">
             <div class="flex" style="flex-direction: column; align-items: stretch; width: 26rem; max-width: 100%;">
