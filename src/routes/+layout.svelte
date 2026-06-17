@@ -9,6 +9,7 @@ import { beforeNavigate, afterNavigate } from "$app/navigation";
 import { footerState } from '$lib/components/footer.svelte.js';
 import { page } from '$app/state';
 import { getCancelBeforeNavigate } from "$lib/cancel-before-navigate.js";
+import { env } from "$env/dynamic/public";
 let { children, data } = $props();
 
 NProgress.configure({
@@ -43,9 +44,17 @@ afterNavigate(nav => {
             oauthGoogleEmail: page?.data?.authedUser?.oauthGoogleEmail,
             authed: page?.data?.authed
         });
+    } else if (window?.umami != null) {
+        window.umami.identify({
+            authed: false
+        });
     }
     if (window?.umami != null && nav.type !== "enter") {
-        window.umami.track();
+        window.umami.track(payload => ({
+            ...payload,
+            title: document.title,
+            url: window.location.href
+        });
     }
 })
 </script>
