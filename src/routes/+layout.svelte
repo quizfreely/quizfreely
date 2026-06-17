@@ -54,7 +54,7 @@ afterNavigate(nav => {
             ...payload,
             title: document.title,
             url: window.location.href
-        });
+        }));
     }
 })
 </script>
