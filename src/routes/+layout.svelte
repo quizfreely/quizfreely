@@ -63,7 +63,7 @@ afterNavigate(nav => {
 <Header />
 {/if}
 {#key data.transPageKey}
-<div data-m:load={page?.data?.authed ? "authed=true" : "authed=false"} in:fade={{ duration: 120, delay: 120, easing: sineIn }} out:fade={{ duration: 120, easing: sineOut }}>
+<div in:fade={{ duration: 120, delay: 120, easing: sineIn }} out:fade={{ duration: 120, easing: sineOut }}>
     <div style="min-height: 70vh">
         {@render children()}
     </div>
