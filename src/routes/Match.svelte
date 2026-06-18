@@ -157,30 +157,6 @@
         }
     });
 
-    
-
-    function anyPairsLeft() {
-        const unanswered = items.filter(item => !item.answered);
-        for (let index = 0; index < unanswered.length; index++) {
-            const item = unanswered[index];
-            const hasMatch = unanswered.some((item2, index2) => (
-                index != index2 &&
-                item.showDef ?
-                    item.def.trim() == item2.def.trim() :
-                    item.term.trim() == item2.term.trim() &&
-                !(
-                    item.showDef == item2.showDef &&
-                    item.term.trim() != item.def.trim() &&
-                    item2.term.trim() != item2.def.trim()
-                )
-            ));
-            if (hasMatch) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     let timeElapsedMs;
     let showDone = $state(false);
     let showPerfect = $state(false);
@@ -204,7 +180,7 @@
     }
 
     let showSameSideWarning = $state(false);
-    let showIncorrectAlert = $state(true);
+    let showIncorrectAlert = $state(false);
     let tmpWarnItem1;
     let tmpWarnItem2;
     let tmpIncorrectItem1;
@@ -227,15 +203,15 @@
     }
     function dismissIncorrectAlert() {
         showIncorrectAlert = false;
-        if (tmpWarnItem1 != null) {
-            tmpWarnItem1.tmpWarn = false
-            tmpWarnItem1.selected = false
-            tmpWarnItem1 = null;
+        if (tmpIncorrectItem1 != null) {
+            tmpIncorrectItem1.incorrect = false
+            tmpIncorrectItem1.selected = false
+            tmpIncorrectItem1 = null;
         }
-        if (tmpWarnItem2 != null) {
-            tmpWarnItem2.tmpWarn = false
-            tmpWarnItem2.selected = false
-            tmpWarnItem2 = null;
+        if (tmpIncorrectItem2 != null) {
+            tmpIncorrectItem2.incorrect = false
+            tmpIncorrectItem2.selected = false
+            tmpIncorrectItem2 = null;
         }
     }
 </script>
@@ -302,16 +278,17 @@
 <div class="grid qzfr-match-grid">
     {#each items as item, index}
         <button class="button-box {
-            item.selected || item.answeredCorrect ? "selected" : ""
+            item.selected || item.correct || item.incorrect || item.tmpWarn ? "selected" : ""
         } {
-            item.answeredCorrect ? "yay" : (item.incorrect ? "ohno" : (
-                item.tmpWarn ? "warn" : ""
-            ))
-        }" disabled={item.answered} onclick={(ev) => {
+            item.correct ? "yay qzfr-fade-trans" : (
+                item.incorrect ? "ohno" : (
+                    item.tmpWarn ? "warn" : ""
+                )
+            )
+        }" disabled={item.correct} onclick={(ev) => {
             if (!inProgress) {
                 inProgress = true;
             }
-
             
             if (item.selected) {
                 item.selected = false;
@@ -319,7 +296,9 @@
                 return;
             }
             item.selected = true;
-            if (selectedItem != null) {
+            if (selectedItem == null) {
+                selectedItem = item;
+            } else {
                 if (item.showDef ?
                     selectedItem.def.trim() == item.def.trim() :
                     selectedItem.term.trim() == item.term.trim()
@@ -335,21 +314,18 @@
                         tmpWarnItem2 = item;
                         selectedItem = null;
                         showSameSideWarning = true;
-                        return;
+                    } else {
+                        selectedItem.correct = true;
+                        item.correct = true;
                     }
-                    selectedItem.correct = true;
-                    item.correct = true;
-                    selectedItem.answered = true;
-                    item.answered = true;
                 } else {
                     selectedItem.incorrect = true;
                     item.incorrect = true;
                     tmpIncorrectItem1 = selectedItem;
                     tmpIncorrectItem2 = item;
+                    showIncorrectAlert = true;
                 }
                 selectedItem = null;
-            } else {
-                selectedItem = item;
             }
 
             if (!anyPairsLeft()) {
@@ -375,7 +351,7 @@
     {:else if showIncorrectAlert}
         <div class="grid qzfr-match-overlap-msg" style="justify-items: center; align-items: center;" transition:fade={{duration: 100}} onclick={dismissIncorrectAlert}>
             <div class="content">
-                <div class="box ohno" style="padding: 1.4rem;">
+                <div class="box center ohno" style="padding: 1.4rem;">
                     <span style="font-size: 1.4rem;">
                         Incorrect!
                         <span class="line">Try Again</span>
@@ -464,7 +440,7 @@
         width: 100%;
         height: 100%;
         background-color: var(--bg-0);
-        opacity: 0.4;
+        opacity: 0.8;
     }
     .qzfr-match-overlap-msg .content {
         z-index: 102;
@@ -487,5 +463,18 @@
         .grid.qzfr-match-head {
             padding: 0px 4rem;
         }
+    }
+    @keyframes qzfrFadeTransAnim {
+        0% {
+            opacity: 1;
+            visibility: visible;
+        }
+        100% {
+            opacity: 0;
+            visibility: hidden;
+        }
+    }
+    .qzfr-fade-trans {
+        animation: qzfrFadeTransAnim 1s ease-in-out forwards;
     }
 </style>
