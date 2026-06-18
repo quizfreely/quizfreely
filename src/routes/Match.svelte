@@ -9,6 +9,7 @@
     import ExitIcon from "$lib/icons/Exit.svelte";
     import CheckmarkIcon from "$lib/icons/Checkmark.svelte";
     import GridIcon from "$lib/icons/AppsGrid.svelte";
+    import RepeatIcon from "$lib/icons/Repeat.svelte";
 
     let { local, cloudId, localId, data } = $props();
     let terms = data.terms;
@@ -77,7 +78,7 @@
         if (ms > 86400000) {
             timerTxtNode.data = "24h+ 😭"
             timerTxtNodeExtra.data = "";
-            cancelAnimationFrame(updateTimer);
+            cancelAnimationFrame(timerAnimationFrame);
             return;
         }
         const totalSec = (ms / 1000) | 0;
@@ -89,8 +90,8 @@
     }
 
     let objectUrls = [];
-    let timerSpan;
-    let timerSpanExtra;
+    let timerSpan = $state(undefined);
+    let timerSpanExtra = $state(undefined);
     onMount(() => {
         if (local) {
             (async () => {
@@ -157,11 +158,10 @@
         }
     });
 
-    let timeElapsedMs;
+    let timeElapsedMs = $state(0);
     let showDone = $state(false);
     let showPerfect = $state(false);
-    let correctCount = $state(0);
-    let incorrectCount = $state(0);
+    let incorrectPairs = $state([]);
     function matchDone() {
         if (showDone) {
             return;
@@ -170,13 +170,7 @@
         timeElapsedMs = performance.now() - startTime;
         cancelAnimationFrame(timerAnimationFrame);
         inProgress = false;
-        items.forEach(item => {
-            if (item.answered && item.correct) {
-                correctCount++;
-            }
-        });
-        showPerfect = correctCount >= PAIRS_COUNT * 2;
-        console.log(JSON.parse(JSON.stringify(items)));
+        showPerfect = incorrectPairs.length <= 0;
     }
 
     let showSameSideWarning = $state(false);
@@ -253,25 +247,24 @@
     <div>
         <div class="flex" style="align-items: center; margin-bottom: 1rem;">
             <p class="h3" style="margin-bottom: 0px;">
-                <span class={correctCount >= PAIRS_COUNT * 2 - 1 ? "yay" : correctCount <= PAIRS_COUNT ? "ohno" : ""}>{correctCount}</span>/{PAIRS_COUNT * 2} Correct in {
+                {
                     (timeElapsedMs > 60000 ? Math.floor(timeElapsedMs/60000)+"m " : "") + (timeElapsedMs/1000).toFixed(1)+"s"
-                }
+                } with <span class={incorrectPairs.length > 1 ? "ohno" : (incorrectPairs.length > 0 ? "warn" : "yay")}>
+                    {incorrectPairs.length} incorrect
+                </span>
             </p>
         </div>
         <p>
-            <span class="line">Tap matching terms one after another to select a pair.</span>
-            <span class="line">Tap a selected term again to clear selection.</span>
+            {
+                ((timeElapsedMs / PAIRS_COUNT) > 60000 ? Math.floor((timeElapsedMs/PAIRS_COUNT)/60000)+"m " : "") + ((timeElapsedMs/PAIRS_COUNT)/1000).toFixed(1)+"s"
+            } average time per question
         </p>
-        <button class="large" style="width: 100%; margin-top: 1.4rem;" onclick={async () => {
-            showStart = false;
-            await tick();
-            startTime = performance.now();
-            timerTxtNode = document.createTextNode("00:00");
-            timerTxtNodeExtra = document.createTextNode(".00");
-            timerSpan.replaceChildren(timerTxtNode);
-            timerSpanExtra.replaceChildren(timerTxtNodeExtra);
-            timerAnimationFrame = requestAnimationFrame(updateTimer);
-        }}><CheckmarkIcon width="1em" height="1em"></CheckmarkIcon> Start</button>
+        <a href={local ? `/studyset/local?id=${localId}` : `/studysets/${cloudId}`} class="button large" style="width: 100%; margin-top: 1.4rem;">
+            <CheckmarkIcon width="1em" height="1em"></CheckmarkIcon> Done
+        </a>
+        <button class="large alt" style="width: 100%; margin-top: 1.4rem;" onclick={() => {
+            window.location.reload()
+        }}><RepeatIcon width="1em" height="1em"></RepeatIcon> Play Again</button>
     </div>
 </div>
 {:else}
@@ -324,17 +317,27 @@
                     tmpIncorrectItem1 = selectedItem;
                     tmpIncorrectItem2 = item;
                     showIncorrectAlert = true;
+                    incorrectPairs.push([tmpIncorrectItem1, tmpIncorrectItem2]);
                 }
                 selectedItem = null;
             }
 
-            if (!anyPairsLeft()) {
+            let allCorrect = true;
+            for (let index = 0; index < items.length; index++) {
+                if (!items[index].correct) {
+                    allCorrect = false;
+                    break;
+                }
+            }
+            if (allCorrect) {
                 matchDone();
             }
         }}>{item.showDef ? item.def : item.term}</button>
     {/each}
 </div>
     {#if showSameSideWarning}
+        <!-- svelte-ignore a11y_click_events_have_key_events -->
+        <!-- svelte-ignore a11y_no_static_element_interactions -->
         <div class="grid qzfr-match-overlap-msg" style="justify-items: center; align-items: center;" transition:fade={{duration: 100}} onclick={dismissSameSideWarn}>
             <div class="content">
                 <div class="box warn" style="padding: 1.4rem;">
@@ -349,6 +352,8 @@
             </div>
         </div>
     {:else if showIncorrectAlert}
+        <!-- svelte-ignore a11y_click_events_have_key_events -->
+        <!-- svelte-ignore a11y_no_static_element_interactions -->
         <div class="grid qzfr-match-overlap-msg" style="justify-items: center; align-items: center;" transition:fade={{duration: 100}} onclick={dismissIncorrectAlert}>
             <div class="content">
                 <div class="box center ohno" style="padding: 1.4rem;">
