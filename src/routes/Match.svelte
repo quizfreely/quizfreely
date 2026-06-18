@@ -512,6 +512,15 @@
             padding: 0px 4rem;
         }
     }
+    @media only screen and (max-width: 800px) {
+        .grid.qzfr-match-grid {
+            padding: 0px 2rem;
+        }
+        .qzfr-match-head,
+        .grid.qzfr-match-head {
+            padding: 0px 2rem;
+        }
+    }
     @keyframes qzfrFadeTransAnim {
         0% {
             opacity: 1;
