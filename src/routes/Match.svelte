@@ -171,6 +171,46 @@
         cancelAnimationFrame(timerAnimationFrame);
         inProgress = false;
         showPerfect = incorrectPairs.length <= 0;
+
+        (async () => {
+            if (local || !data.authed) {
+                idbApiLayer.recordMatch({
+                    durationMs: timeElapsedMs,
+                    endTimestamp: new Date().toISOString(),
+                    incorrectPairs
+                })
+            } else {
+                try {
+                    const raw = await fetch("/api/graphql", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            query: `mutation recordMatch($durationMs: Float!, $incorrectPairs: [[ID!]!]!) {
+    recordMatch(match: {
+        durationMs: $durationMs,
+        incorrectPairs: $incorrectPairs
+    }) {
+        id
+    }
+}`,
+                            variables: {
+                                durationMs: timeElapsedMs,
+                                incorrectPairs
+                            }
+                        })
+                    });
+                    const resp = await raw.json();
+                    if (resp?.data?.id != null) {
+                        // TODO: WORK IN PROGRESS
+                    }
+                } catch (err) {
+                    console.error("Error saving cloud Match progress:", err);
+                    alert("Error saving Match progress")
+                }
+            }
+        })();
     }
 
     let showSameSideWarning = $state(false);
@@ -317,7 +357,10 @@
                     tmpIncorrectItem1 = selectedItem;
                     tmpIncorrectItem2 = item;
                     showIncorrectAlert = true;
-                    incorrectPairs.push([tmpIncorrectItem1, tmpIncorrectItem2]);
+                    incorrectPairs.push([
+                        tmpIncorrectItem1?.id,
+                        tmpIncorrectItem2?.id
+                    ]);
                 }
                 selectedItem = null;
             }
