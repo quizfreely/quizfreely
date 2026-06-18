@@ -248,7 +248,7 @@
         <div class="flex" style="align-items: center; margin-bottom: 1rem;">
             <p class="h3" style="margin-bottom: 0px;">
                 {
-                    (timeElapsedMs > 60000 ? Math.floor(timeElapsedMs/60000)+"m " : "") + (timeElapsedMs/1000).toFixed(1)+"s"
+                    (timeElapsedMs > 60000 ? Math.floor(timeElapsedMs/60000)+"m " : "") + (timeElapsedMs/1000).toFixed(2)+"s"
                 } with <span class={incorrectPairs.length > 1 ? "ohno" : (incorrectPairs.length > 0 ? "warn" : "yay")}>
                     {incorrectPairs.length} incorrect
                 </span>
@@ -256,7 +256,7 @@
         </div>
         <p>
             {
-                ((timeElapsedMs / PAIRS_COUNT) > 60000 ? Math.floor((timeElapsedMs/PAIRS_COUNT)/60000)+"m " : "") + ((timeElapsedMs/PAIRS_COUNT)/1000).toFixed(1)+"s"
+                ((timeElapsedMs / PAIRS_COUNT) > 60000 ? Math.floor((timeElapsedMs/PAIRS_COUNT)/60000)+"m " : "") + ((timeElapsedMs/PAIRS_COUNT)/1000).toFixed(2)+"s"
             } average time per question
         </p>
         <a href={local ? `/studyset/local?id=${localId}` : `/studysets/${cloudId}`} class="button large" style="width: 100%; margin-top: 1.4rem;">
