@@ -728,6 +728,12 @@ FRQs: ${numFRQsToAssign}`,
 
     let showInputErr = $state(false);
     let inputErrMsg = $state("");
+
+    let spelling = $state({
+        uno: false,
+        dos: false,
+        tres: false
+    });
 </script>
 
 <div class="grid page">
@@ -797,95 +803,151 @@ FRQs: ${numFRQsToAssign}`,
                     {terms?.length ?? "?"}
                     {terms?.length == 1 ? "term" : "terms"} in this studyset
                 </p>
-                <p style="margin-top: 1rem;">Questions:</p>
-                <div style="margin-top: 0.4rem;">
-                    <input
-                        type="text"
-                        inputmode="numeric"
-                        pattern="[0-9]*"
-                        placeholder={defaultQuestionsCount}
-                        style="max-width: 4rem;"
-                        bind:value={questionsCountEntered}
-                    />
+                <div class="flex" style="gap: 4rem; margin-top: 1rem;">
+                    <div>
+                        <p style="margin-top: 0px;">Questions:</p>
+                        <div style="margin-top: 0.4rem;">
+                            <input
+                                type="text"
+                                inputmode="numeric"
+                                pattern="[0-9]*"
+                                placeholder={defaultQuestionsCount}
+                                style="max-width: 4rem;"
+                                bind:value={questionsCountEntered}
+                            />
+                        </div>
+                    </div>
+                    <div>
+                        <p style="margin-top: 0px;">Answer with:</p>
+                        <div class="flex" style="margin-top: 0.6rem;">
+                            <button
+                                class="button-box {answerWith == 'DEF'
+                                    ? 'selected'
+                                    : ''}"
+                                style="display: flex;"
+                                onclick={() => (answerWith = "DEF")}
+                            >
+                                <CheckmarkIcon class="button-box-selected-icon"
+                                ></CheckmarkIcon>
+                                Definition
+                            </button>
+                            <button
+                                class="button-box {answerWith == 'TERM'
+                                    ? 'selected'
+                                    : ''}"
+                                style="display: flex;"
+                                onclick={() => (answerWith = "TERM")}
+                            >
+                                <CheckmarkIcon class="button-box-selected-icon"
+                                ></CheckmarkIcon>
+                                Term
+                            </button>
+                            <button
+                                class="button-box {answerWith == 'BOTH'
+                                    ? 'selected'
+                                    : ''}"
+                                style="display: flex;"
+                                onclick={() => (answerWith = "BOTH")}
+                            >
+                                <CheckmarkIcon class="button-box-selected-icon"
+                                ></CheckmarkIcon>
+                                Both
+                            </button>
+                        </div>
+                    </div>
                 </div>
-                <p style="margin-top: 1rem;">Answer with:</p>
-                <div class="flex" style="margin-top: 0.6rem;">
-                    <button
-                        class="button-box {answerWith == 'DEF'
-                            ? 'selected'
-                            : ''}"
-                        style="display: flex;"
-                        onclick={() => (answerWith = "DEF")}
-                    >
-                        <CheckmarkIcon class="button-box-selected-icon"
-                        ></CheckmarkIcon>
-                        Definition
-                    </button>
-                    <button
-                        class="button-box {answerWith == 'TERM'
-                            ? 'selected'
-                            : ''}"
-                        style="display: flex;"
-                        onclick={() => (answerWith = "TERM")}
-                    >
-                        <CheckmarkIcon class="button-box-selected-icon"
-                        ></CheckmarkIcon>
-                        Term
-                    </button>
-                    <button
-                        class="button-box {answerWith == 'BOTH'
-                            ? 'selected'
-                            : ''}"
-                        style="display: flex;"
-                        onclick={() => (answerWith = "BOTH")}
-                    >
-                        <CheckmarkIcon class="button-box-selected-icon"
-                        ></CheckmarkIcon>
-                        Both
-                    </button>
-                </div>
-                <p style="margin-top: 1rem;">Question types:</p>
-                <div
-                    style="display: grid; grid-template-columns: auto; justify-content: start; margin-top: 0.6rem;"
-                >
-                    <button
-                        class="button-box {questionTypesEnabled.mcq
-                            ? 'selected'
-                            : ''}"
-                        style="display: flex;"
-                        onclick={() =>
-                            (questionTypesEnabled.mcq =
-                                !questionTypesEnabled.mcq)}
-                    >
-                        <CheckmarkIcon class="button-box-selected-icon"
-                        ></CheckmarkIcon>
-                        Multiple Choice
-                    </button>
-                    <button
-                        class="button-box {questionTypesEnabled.trueFalse
-                            ? 'selected'
-                            : ''}"
-                        style="display: flex; margin-top: 0.4rem;"
-                        onclick={() =>
-                            (questionTypesEnabled.trueFalse =
-                                !questionTypesEnabled.trueFalse)}
-                    >
-                        <CheckmarkIcon class="button-box-selected-icon"
-                        ></CheckmarkIcon>
-                        True/False
-                    </button>
-                    <!-- <button class="button-box { questionTypesEnabled.match ? -->
-                    <!--     "selected" : "" -->
-                    <!-- }" style="display: flex; margin-top: 0.4rem;" onclick={() => questionTypesEnabled.match = !questionTypesEnabled.match}> -->
-                    <!--     <CheckmarkIcon class="button-box-selected-icon"></CheckmarkIcon> -->
-                    <!--     Matching -->
-                    <!-- </button> -->
-                    <!-- <button class="button-box { questionTypesEnabled.frq ? -->
-                    <!--     "selected" : "" -->
-                    <!-- }" style="display: flex; margin-top: 0.4rem;" onclick={() => questionTypesEnabled.frq = !questionTypesEnabled.frq}> -->
-                    <!--     <CheckmarkIcon class="button-box-selected-icon"></CheckmarkIcon> -->
-                    <!--     Free Response -->
-                    <!-- </button> -->
+                <div class="flex" style="gap: 4rem; margin-top: 2rem;">
+                    <div>
+                        <p style="margin-top: 0px;">Question types:</p>
+                        <div
+                            style="display: grid; grid-template-columns: auto; justify-content: start; margin-top: 0.6rem;"
+                        >
+                            <button
+                                class="button-box {questionTypesEnabled.mcq
+                                    ? 'selected'
+                                    : ''}"
+                                style="display: flex;"
+                                onclick={() =>
+                                    (questionTypesEnabled.mcq =
+                                        !questionTypesEnabled.mcq)}
+                            >
+                                <CheckmarkIcon class="button-box-selected-icon"
+                                ></CheckmarkIcon>
+                                Multiple Choice
+                            </button>
+                            <button
+                                class="button-box {questionTypesEnabled.trueFalse
+                                    ? 'selected'
+                                    : ''}"
+                                style="display: flex; margin-top: 0.4rem;"
+                                onclick={() =>
+                                    (questionTypesEnabled.trueFalse =
+                                        !questionTypesEnabled.trueFalse)}
+                            >
+                                <CheckmarkIcon class="button-box-selected-icon"
+                                ></CheckmarkIcon>
+                                True/False
+                            </button>
+                            <!-- <button class="button-box { questionTypesEnabled.match ? -->
+                            <!--     "selected" : "" -->
+                            <!-- }" style="display: flex; margin-top: 0.4rem;" onclick={() => questionTypesEnabled.match = !questionTypesEnabled.match}> -->
+                            <!--     <CheckmarkIcon class="button-box-selected-icon"></CheckmarkIcon> -->
+                            <!--     Matching -->
+                            <!-- </button> -->
+                            <button class="button-box { questionTypesEnabled.frq ?
+                                "selected" : ""
+                            }" style="display: flex; margin-top: 0.4rem;" onclick={() => questionTypesEnabled.frq = !questionTypesEnabled.frq}>
+                                <CheckmarkIcon class="button-box-selected-icon"></CheckmarkIcon>
+                                Free Response
+                            </button>
+                        </div>
+                    </div>
+                    <div>
+                        <p style="margin-top: 0px;">Test Spelling?</p>
+                        <div
+                            style="display: grid; grid-template-columns: auto; justify-content: start; margin-top: 0.6rem;"
+                        >
+                            <button
+                                class="button-box {spelling.typos
+                                    ? 'selected'
+                                    : ''}"
+                                style="display: flex;"
+                                onclick={() =>
+                                    (spelling.typos =
+                                        !spelling.typos)}
+                            >
+                                <CheckmarkIcon class="button-box-selected-icon"
+                                ></CheckmarkIcon>
+                                Spelling
+                            </button>
+                            <button
+                                class="button-box {spelling.accents
+                                    ? 'selected'
+                                    : ''}"
+                                style="display: flex; margin-top: 0.4rem;"
+                                onclick={() =>
+                                    (spelling.accents =
+                                        !spelling.accents)}
+                            >
+                                <CheckmarkIcon class="button-box-selected-icon"
+                                ></CheckmarkIcon>
+                                Accent Marks
+                            </button>
+                            <button
+                                class="button-box {spelling.tres
+                                    ? 'selected'
+                                    : ''}"
+                                style="display: flex; margin-top: 0.4rem;"
+                                onclick={() =>
+                                    (spelling.tres =
+                                        !spelling.tres)}
+                            >
+                                <CheckmarkIcon class="button-box-selected-icon"
+                                ></CheckmarkIcon>
+                                Punctuation
+                            </button>
+                        </div>
+                    </div>
                 </div>
                 <div class="flex" style="margin-top: 1rem;">
                     <button onclick={setupStart}
