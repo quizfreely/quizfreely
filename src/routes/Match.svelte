@@ -340,7 +340,6 @@
                 ).trim();
                 if (
                     itmTxtTrmd == slctdTxtTrmd &&
-                    item.showDef == selectedItem.showDef &&
                     item.term.trim() != item.def.trim() &&
                     selectedItem.term.trim() != selectedItem.def.trim()
                 ) {
@@ -351,8 +350,12 @@
                     selectedItem = null;
                     showSameSideWarning = true;
                 } else if (
-                    selectedItem.def.trim() == item.def.trim() ||
-                    selectedItem.term.trim() == item.term.trim()
+                    (item.showDef &&
+                    item.term.trim() == slctdTxtTrmd) ||
+                    item.def.trim() == slctdTxtTrmd ||
+                    (selectedItem.showDef &&
+                    selectedItem.term.trim() == itmTxtTrmd) ||
+                    selectedItem.def.trim() == itmTxtTrmd
                 ) {
                     selectedItem.correct = true;
                     item.correct = true;
