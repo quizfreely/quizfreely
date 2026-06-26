@@ -297,7 +297,7 @@
         <p>
             {
                 ((timeElapsedMs / PAIRS_COUNT) > 60000 ? Math.floor((timeElapsedMs/PAIRS_COUNT)/60000)+"m " : "") + ((timeElapsedMs/PAIRS_COUNT)/1000).toFixed(2)+"s"
-            } average time per question
+            } average time per pair
         </p>
         <a href={local ? `/studyset/local?id=${localId}` : `/studysets/${cloudId}`} class="button large" style="width: 100%; margin-top: 1.4rem;">
             <CheckmarkIcon width="1em" height="1em"></CheckmarkIcon> Done
@@ -375,7 +375,15 @@
             if (allCorrect) {
                 matchDone();
             }
-        }}>{item.showDef ? item.def : item.term}</button>
+        }}>
+            <p style="white-space: pre-wrap;">{item.showDef ? item.def : item.term}</p>
+            {#if (item.showDef ? item.defImageUrl : item.termImageUrl) != null}
+                <img
+                    src={item.showDef ? item.defImageUrl : item.termImageUrl}
+                    class="qzfr-item-img"
+                />
+            {/if}
+        </button>
     {/each}
 </div>
     {#if showSameSideWarning}
@@ -501,6 +509,11 @@
         margin-top: 2rem;
         min-height: 80vh;
     }
+    .qzfr-item-img {
+        border-radius: 0.8rem;
+        max-height: 20vh;
+        max-width: 18vw;
+    }
     @media only screen and (max-width: 1000px) {
         .grid.qzfr-match-grid {
             grid-template-columns: 1fr 1fr 1fr;
@@ -510,6 +523,10 @@
         .qzfr-match-head,
         .grid.qzfr-match-head {
             padding: 0px 4rem;
+        }
+        .qzfr-item-img {
+            max-height: 12vh;
+            max-width: 22vw;
         }
     }
     @media only screen and (max-width: 800px) {
