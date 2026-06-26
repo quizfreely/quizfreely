@@ -27,25 +27,25 @@
     }
 
     function selectTerms() {
-        const indicies = [];
+        const indices = [];
         for (let n = 0; n < PAIRS_COUNT; n++) {
             let randomIndex = Math.floor(Math.random() * terms.length);
             let tries = 0;
-            while (indicies.includes(randomIndex)) {
+            while (indices.includes(randomIndex)) {
                 if (tries >= RANDOM_LOOP_MAX_TRIES) {
                     break;
                 }
                 randomIndex = Math.floor(Math.random() * terms.length);
                 tries++;
             }
-            indicies.push(randomIndex);
+            indices.push(randomIndex);
         }
         items = shuffleInPlace([
-            ...indicies.map(index => ({
+            ...indices.map(index => ({
                 ...terms[index],
                 showDef: false
             })),
-            ...indicies.map(index => ({
+            ...indices.map(index => ({
                 ...terms[index],
                 showDef: true
             }))
@@ -332,9 +332,12 @@
             if (selectedItem == null) {
                 selectedItem = item;
             } else {
-                if (item.showDef ?
-                    selectedItem.def.trim() == item.def.trim() :
-                    selectedItem.term.trim() == item.term.trim()
+                if (
+                    (selectedItem.showDef ?
+                        selectedItem.def : selectedItem.term
+                    ).trim() == (item.showDef ?
+                        item.def : item.term
+                    ).trim()
                 ) {
                     if (
                         selectedItem.showDef == item.showDef &&
