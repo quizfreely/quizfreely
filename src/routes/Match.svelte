@@ -332,28 +332,30 @@
             if (selectedItem == null) {
                 selectedItem = item;
             } else {
+                const itmTxtTrmd = (item.showDef ?
+                    item.def : item.term
+                ).trim();
+                const slctdTxtTrmd = (selectedItem.showDef ?
+                    selectedItem.def : selectedItem.term
+                ).trim();
                 if (
-                    (selectedItem.showDef ?
-                        selectedItem.def : selectedItem.term
-                    ).trim() == (item.showDef ?
-                        item.def : item.term
-                    ).trim()
+                    itmTxtTrmd == slctdTxtTrmd &&
+                    item.showDef == selectedItem.showDef &&
+                    item.term.trim() != item.def.trim() &&
+                    selectedItem.term.trim() != selectedItem.def.trim()
                 ) {
-                    if (
-                        selectedItem.showDef == item.showDef &&
-                        selectedItem.term.trim() != selectedItem.def.trim() &&
-                        item.term.trim() != item.def.trim()
-                    ) {
-                        selectedItem.tmpWarn = true;
-                        item.tmpWarn = true;
-                        tmpWarnItem1 = selectedItem;
-                        tmpWarnItem2 = item;
-                        selectedItem = null;
-                        showSameSideWarning = true;
-                    } else {
-                        selectedItem.correct = true;
-                        item.correct = true;
-                    }
+                    selectedItem.tmpWarn = true;
+                    item.tmpWarn = true;
+                    tmpWarnItem1 = selectedItem;
+                    tmpWarnItem2 = item;
+                    selectedItem = null;
+                    showSameSideWarning = true;
+                } else if (
+                    selectedItem.def.trim() == item.def.trim() ||
+                    selectedItem.term.trim() == item.term.trim()
+                ) {
+                    selectedItem.correct = true;
+                    item.correct = true;
                 } else {
                     selectedItem.incorrect = true;
                     item.incorrect = true;
