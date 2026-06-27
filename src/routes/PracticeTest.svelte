@@ -6,9 +6,9 @@
     import ExitIcon from "$lib/icons/Exit.svelte";
     import CheckmarkIcon from "$lib/icons/Checkmark.svelte";
     import PracticeTestIcon from "$lib/icons/PracticeTestChecklist.svelte";
-    import MCQ from "$lib/questionComponents/MCQ.svelte";
-    import FRQ from "$lib/questionComponents/FRQ.svelte";
-    import TrueFalseQuestion from "$lib/questionComponents/TrueFalseQuestion.svelte";
+    import MCQ from "$lib/components/questions/MCQ.svelte";
+    import FRQ from "$lib/components/questions/FRQ.svelte";
+    import TFQ from "$lib/components/questions/TFQ.svelte";
     import { slide, fade } from "svelte/transition";
     import { goto } from "$app/navigation";
     import { setCancelBeforeNavigate } from "$lib/cancel-before-navigate.js";
@@ -21,15 +21,17 @@
     // maps questions from practice test data to objs with props for question components
     function mapPracticeTestQuestionToQuestionComponentFormat(q) {
         return {
-            type: q.questionType,
-            term: q?.mcq?.term ?? q?.trueFalseQuestion?.term,
-            answerWith: q?.mcq?.answerWith ?? q?.trueFalseQuestion?.answerWith,
-            answeredTerm: q.mcq?.answeredTerm,
-            answeredBool: q.trueFalseQuestion?.answeredBool,
-            distractors: q.mcq?.distractors,
-            distractor: q.trueFalseQuestion?.distractor,
-            correctChoiceIndex: q.mcq?.correctChoiceIndex,
-            wasCorrect: q?.mcq?.correct ?? q?.trueFalseQuestion?.correct,
+            type: q?.mcq != null ? "MCQ" : (q?.tfq != null ? "TFQ" : (q?.frq != null ? "FRQ" : "UNKNOWN")),
+            term: q?.mcq?.term ?? q?.tfq?.term,
+            answerWith: q?.mcq?.answerWith ?? q?.tfq?.answerWith ?? q?.frq?.answerWith,
+            answeredIndex: q?.mcq?.answeredIndex,
+            answeredBool: q?.tfq?.answeredBool,
+            answeredString: q?.frq?.answeredString,
+            distractors: q?.mcq?.distractors,
+            distractor: q?.tfq?.distractor,
+            correctChoiceIndex: q?.mcq?.correctChoiceIndex,
+            wasCorrect: q?.mcq?.correct ?? q?.tfq?.correct ?? q?.frq?.correct,
+            userMarkedCorrect: q?.frq?.userMarkedCorrect,
         };
     }
 
@@ -1198,13 +1200,7 @@ FRQs: ${numFRQsToAssign}`,
 }`,
                                             variables: {
                                                 input: {
-                                                    studysetId: data.studysetId,
-                                                    questionsCorrect:
-                                                        questionsCorrect,
-                                                    questionsTotal:
-                                                        questions.length,
-                                                    questions:
-                                                        questionDataArray,
+                                                    questions: questionDataArray,
                                                 },
                                             },
                                         }),
