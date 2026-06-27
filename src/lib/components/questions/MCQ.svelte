@@ -1,8 +1,8 @@
 <script>
     import CheckmarkIcon from "$lib/icons/Checkmark.svelte";
     import XMarkIcon from "$lib/icons/CloseXMark.svelte";
-    let { term, answerWith, distractors, viewOnly, showAccuracy, answerUpdateCallback, answeredTerm, correctChoiceIndex, showCorrectAnswer } = $props();
-    /* answeredTerm and correctChoiceIndex are only defined when reviewing questions from a completed practice test */
+    let { term, answerWith, distractors, viewOnly, showAccuracy, answerUpdateCallback, answeredIndex: initAnsweredIndex, correctChoiceIndex: initCorrectChoiceIndex, showCorrectAnswer } = $props();
+    /* initAnsweredIndex and initCorrectChoiceIndex are only defined when reviewing questions from a completed practice test */
     function shuffleInPlace(arr) {
         for (let index = arr.length - 1; index > 0; index--) {
             const randomIndex = Math.floor(Math.random() * (index + 1));
@@ -10,14 +10,14 @@
         }
         return arr;
     }
-    let correctAnswerIndex = correctChoiceIndex ?? Math.floor(
+    let correctChoiceIndex = initCorrectChoiceIndex ?? Math.floor(
         Math.random() * (distractors.length + 1)
     );
     let answers = $state(
-        correctChoiceIndex == null ?
+        initCorrectChoiceIndex == null ?
             [
                 ...shuffleInPlace(distractors).slice(
-                    0, correctAnswerIndex
+                    0, correctChoiceIndex
                 ),
                 {
                     id: term.id,
@@ -26,7 +26,7 @@
                     termImageUrl: term.termImageUrl,
                     defImageUrl: term.defImageUrl
                 },
-                ...distractors.slice(correctAnswerIndex)
+                ...distractors.slice(correctChoiceIndex)
             ] : [
                 ...distractors.slice(
                     0, correctChoiceIndex
@@ -44,18 +44,13 @@
             ]
     );
 
-    let answeredIndex = $state(answeredTerm == null ?
-        -1 : answers.findIndex(
-            a => a.id == answeredTerm.id
-        )
-    );
+    let answeredIndex = $state(initAnsweredIndex ?? null);
 
     export function getQuestion() {
-        if (answeredIndex == -1) {
+        if (answeredIndex == null || answeredIndex == -1) {
             console.log("Unanswered MCQ")
         }
         return {
-            questionType: "MCQ",
             mcq: {
                 term: {
                     id: term.id,
@@ -63,13 +58,8 @@
                     def: term.def
                 },
                 answerWith: answerWith,
-                correct: answeredIndex == correctAnswerIndex,
-                answeredTerm: answeredIndex >= 0 ?
-                    ({
-                        id: answers[answeredIndex]?.id,
-                        term: answers[answeredIndex]?.term,
-                        def: answers[answeredIndex]?.def
-                    }) : null,
+                correct: answeredIndex == correctChoiceIndex,
+                answeredIndex: answeredIndex,
                 distractors: distractors.map(distractor => {
                     return {
                         id: distractor.id,
@@ -77,7 +67,7 @@
                         def: distractor.def
                     }
                 }),
-                correctChoiceIndex: correctAnswerIndex
+                correctChoiceIndex: correctChoiceIndex
             }
         }
     }
@@ -104,16 +94,16 @@
     {/if}
     <div style="display: grid; gap: 0.2rem; grid-template-columns: auto; justify-content: start; margin-top: 0.6rem;">
         {#each answers as answer, index}
-            <button style="display: flex; justify-items: start; justify-content: start; text-align: start; margin-top: 0px;" class="button-box with-bordercolor-border { answeredIndex == index ? "selected" : ""} {showAccuracy && showCorrectAnswer && correctAnswerIndex == index ? "selected yay" : ""} {
+            <button style="display: flex; justify-items: start; justify-content: start; text-align: start; margin-top: 0px;" class="button-box with-bordercolor-border { answeredIndex == index ? "selected" : ""} {showAccuracy && showCorrectAnswer && correctChoiceIndex == index ? "selected yay" : ""} {
                 showAccuracy && index == answeredIndex ?
-                    (answeredIndex == correctAnswerIndex ?
+                    (answeredIndex == correctChoiceIndex ?
                         "yay" : "ohno"
                     ) : ""
             }" onclick={() => {
                 answeredIndex = index;
                 answerUpdateCallback()
             }} disabled={viewOnly}>
-                {#if showAccuracy && index != correctAnswerIndex}
+                {#if showAccuracy && index != correctChoiceIndex}
                     <XMarkIcon class="button-box-selected-icon"></XMarkIcon>
                 {:else}
                     <CheckmarkIcon class="button-box-selected-icon"></CheckmarkIcon>
@@ -130,7 +120,7 @@
             </button>
         {/each}
     </div>
-    {#if showAccuracy && answeredIndex != correctAnswerIndex}
+    {#if showAccuracy && answeredIndex != correctChoiceIndex}
         <div class="flex">
             {#if showCorrectAnswer}
                 <button class="faint" onclick={() => showCorrectAnswer = false}>

@@ -19,11 +19,10 @@ export async function load({cookies, params}) {
     practiceTest(id: $id) {
         id
         timestamp
-        studysetId
+        studysetIds
         questionsCorrect
         questionsTotal
         questions {
-            questionType
             mcq {
                 term {
                     id
@@ -32,11 +31,7 @@ export async function load({cookies, params}) {
                 }
                 answerWith
                 correct
-                answeredTerm {
-                    id
-                    term
-                    def
-                }
+                answeredIndex
                 distractors {
                     id
                     term
@@ -74,7 +69,7 @@ export async function load({cookies, params}) {
         return {
             practiceTestId: params.id,
             practiceTest: resp?.data?.practiceTest,
-            studysetId: resp?.data?.practiceTest?.studysetId,
+            studysetIds: resp?.data?.practiceTest?.studysetIds,
             authed: resp?.data?.authed,
             authedUser: resp?.data?.authedUser,
             settingsDateTimeFmtHours: cookies.get(

@@ -13,8 +13,7 @@
             console.log("Unanswered True/False Question")
         }
         return {
-            questionType: "TRUE_FALSE",
-            trueFalseQuestion: {
+            tfq: {
                 term: {
                     id: term.id,
                     term: term.term,
@@ -23,7 +22,7 @@
                 answerWith: answerWith,
                 correct: answeredBool == correctAnswerBool,
                 answeredBool: answeredBool,
-                distractor: {
+                distractor: correctAnswerBool ? null : {
                     id: distractor.id,
                     term: distractor.term,
                     def: distractor.def

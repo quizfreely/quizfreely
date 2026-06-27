@@ -40,7 +40,7 @@
         terms = data?.studyset?.terms;
         practiceTests = data?.studyset?.practiceTests;
     }
-    let alreadyOverLocalPTStudysetId = $state(-1);
+    let alreadyOverLocalPTStudysetIds = $state([]);
     let mounted = $state(false);
     onMount(() => {
         let objectKeys = [];
@@ -67,7 +67,7 @@
                         mapPracticeTestQuestionToQuestionComponentFormat,
                     );
                     questionsCorrect = pt.questionsCorrect;
-                    alreadyOverLocalPTStudysetId = pt.studysetId;
+                    alreadyOverLocalPTStudysetIds = pt.studysetIds;
                 }
             }
 
@@ -129,7 +129,7 @@
 
                 `terms` has already been populated during SSR (above, before onMount) */
                 practiceTests = await db.practiceTests
-                    .where("studysetId")
+                    .where("studysetIds")
                     .equals(data.studysetId)
                     .toArray();
                 practiceTests?.sort(
@@ -165,9 +165,7 @@
     let answerWith = $state("DEF"); // "TERM", "DEF", or "BOTH"
     let questionTypesEnabled = $state({
         mcq: true,
-        trueFalse: false,
-        // match: true,
-        match: false,
+        tfq: false,
         frq: false,
     });
 
@@ -238,25 +236,12 @@
         }
 
         let numMCQsToAssign = 0;
-        let numTrueFalseQsToAssign = 0;
-        let numMatchQsToAssign = 0;
+        let numTFQsToAssign = 0;
         let numFRQsToAssign = 0;
         let unassignedQuestionsCount = questionsCount;
 
         let unassignedQuestionTypesCount = questionTypesEnabledArray.length;
 
-        if (questionTypesEnabled.match) {
-            if (unassignedQuestionsCount >= 20) {
-                numMatchQsToAssign = 10;
-            } else if (unassignedQuestionsCount >= 10) {
-                numMatchQsToAssign = 5;
-            } else if (unassignedQuestionsCount >= 8) {
-                numMatchQsToAssign = 4;
-            }
-            unassignedQuestionsCount -= numMatchQsToAssign;
-
-            unassignedQuestionTypesCount--;
-        }
         if (questionTypesEnabled.frq) {
             numFRQsToAssign = Math.floor(
                 unassignedQuestionsCount / unassignedQuestionTypesCount,
@@ -265,11 +250,11 @@
 
             unassignedQuestionTypesCount--;
         }
-        if (questionTypesEnabled.trueFalse) {
-            numTrueFalseQsToAssign = Math.floor(
+        if (questionTypesEnabled.tfq) {
+            numTFQsToAssign = Math.floor(
                 unassignedQuestionsCount / unassignedQuestionTypesCount,
             );
-            unassignedQuestionsCount -= numTrueFalseQsToAssign;
+            unassignedQuestionsCount -= numTFQsToAssign;
 
             unassignedQuestionTypesCount--;
         }
@@ -281,15 +266,13 @@
         console.log(
             `Total: ${questionsCount},
 MCQs: ${numMCQsToAssign},
-True/False: ${numTrueFalseQsToAssign},
-Matching: ${numMatchQsToAssign},
+True/False: ${numTFQsToAssign},
 FRQs: ${numFRQsToAssign}`,
         );
 
         let remainingCounts = {
             mcq: numMCQsToAssign,
-            trueFalse: numTrueFalseQsToAssign,
-            match: numMatchQsToAssign,
+            tfq: numTFQsToAssign,
             frq: numFRQsToAssign,
         };
 
@@ -356,11 +339,8 @@ FRQs: ${numFRQsToAssign}`,
                 case "mcq":
                     addMCQ(term);
                     break;
-                case "trueFalse":
-                    addTrueFalseQuestion(term);
-                    break;
-                case "match":
-                    // addMatchQuestion(term);
+                case "tfq":
+                    addTFQ(term);
                     break;
                 case "frq":
                     addFRQ(term);
@@ -564,7 +544,7 @@ FRQs: ${numFRQsToAssign}`,
             questions.push(question);
         }
 
-        function addTrueFalseQuestion(term) {
+        function addTFQ(term) {
             let question = {
                 type: "TRUE_FALSE",
                 term: {
@@ -634,7 +614,7 @@ FRQs: ${numFRQsToAssign}`,
                 }
                 if (iterations > 99) {
                     console.log(
-                        "(addTrueFalseQuestion) Over 99 iterations to pick random distractor term",
+                        "(addTFQ) Over 99 iterations to pick random distractor term",
                     );
                     /* use fallback same term as distractor */
                     question.distractor = {
@@ -746,10 +726,10 @@ FRQs: ${numFRQsToAssign}`,
                 href={data.alreadyOver
                     ? data.local /* when alreadyOver is true, data.local means practice test is local,
                 but the studyset might be a cloud studyset */
-                        ? ("" + alreadyOverLocalPTStudysetId).includes("-")
+                        ? alreadyOverLocalPTStudysetIds?.length > 0 && ("" + alreadyOverLocalPTStudysetIds[0]).includes("-")
                             ? /* uuids have dashes/hyphens */
-                              `/studysets/${alreadyOverLocalPTStudysetId}`
-                            : `/studyset/local?id=${alreadyOverLocalPTStudysetId}`
+                              `/studysets/${alreadyOverLocalPTStudysetIds[0]}`
+                            : `/studyset/local?id=${alreadyOverLocalPTStudysetIds[0]}`
                         : `/studysets/${data.studysetId}`
                     : /* if the practice test is a cloud pt, then the studyset is always a cloud studyset,
                     but a local practice test can be for a local OR cloud studyset */
@@ -878,24 +858,18 @@ FRQs: ${numFRQsToAssign}`,
                                 Multiple Choice
                             </button>
                             <button
-                                class="button-box {questionTypesEnabled.trueFalse
+                                class="button-box {questionTypesEnabled.tfq
                                     ? 'selected'
                                     : ''}"
                                 style="display: flex; margin-top: 0.4rem;"
                                 onclick={() =>
-                                    (questionTypesEnabled.trueFalse =
-                                        !questionTypesEnabled.trueFalse)}
+                                    (questionTypesEnabled.tfq =
+                                        !questionTypesEnabled.tfq)}
                             >
                                 <CheckmarkIcon class="button-box-selected-icon"
                                 ></CheckmarkIcon>
                                 True/False
                             </button>
-                            <!-- <button class="button-box { questionTypesEnabled.match ? -->
-                            <!--     "selected" : "" -->
-                            <!-- }" style="display: flex; margin-top: 0.4rem;" onclick={() => questionTypesEnabled.match = !questionTypesEnabled.match}> -->
-                            <!--     <CheckmarkIcon class="button-box-selected-icon"></CheckmarkIcon> -->
-                            <!--     Matching -->
-                            <!-- </button> -->
                             <button class="button-box { questionTypesEnabled.frq ?
                                 "selected" : ""
                             }" style="display: flex; margin-top: 0.4rem;" onclick={() => questionTypesEnabled.frq = !questionTypesEnabled.frq}>
@@ -1027,13 +1001,13 @@ FRQs: ${numFRQsToAssign}`,
                             showAccuracy={questionsShowAccuracy}
                             {answerUpdateCallback}
                             bind:this={questionComponents[index]}
-                            answeredTerm={question.answeredTerm}
+                            answeredIndex={question.answeredIndex}
                             correctChoiceIndex={question.correctChoiceIndex}
                         ></MCQ>
                     </div>
                 {:else if question.type == "TRUE_FALSE"}
                     <div class="box">
-                        <TrueFalseQuestion
+                        <TFQ
                             term={question.term}
                             answerWith={question.answerWith}
                             distractor={question.distractor}
@@ -1043,7 +1017,7 @@ FRQs: ${numFRQsToAssign}`,
                             bind:this={questionComponents[index]}
                             answeredBool={question.answeredBool}
                             wasCorrect={question.wasCorrect}
-                        ></TrueFalseQuestion>
+                        ></TFQ>
                     </div>
                 {:else if question.type == "FRQ"}
                     <div class="box">
@@ -1090,7 +1064,7 @@ FRQs: ${numFRQsToAssign}`,
 
                                 const thisTermId =
                                     questionData.mcq?.term?.id ??
-                                    questionData.trueFalseQuestion?.term?.id;
+                                    questionData.tfq?.term?.id;
                                 if (thisTermId == null) {
                                     console.error(
                                         "term id from question is null(ish)! this might happen if new question types aren't fully implemented",
@@ -1098,14 +1072,14 @@ FRQs: ${numFRQsToAssign}`,
                                 }
                                 const thisAnswerWith =
                                     questionData.mcq?.answerWith ??
-                                    questionData.trueFalseQuestion?.answerWith;
+                                    questionData.tfq?.answerWith;
                                 let termCorrectIncrease = 0;
                                 let termIncorrectIncrease = 0;
                                 let defCorrectIncrease = 0;
                                 let defIncorrectIncrease = 0;
                                 if (
                                     questionData?.mcq?.correct ||
-                                    questionData?.trueFalseQuestion?.correct
+                                    questionData?.tfq?.correct
                                 ) {
                                     questionsCorrect++;
 
@@ -1233,10 +1207,6 @@ FRQs: ${numFRQsToAssign}`,
                                     JSON.parse(
                                         JSON.stringify({
                                             timestamp: new Date().toISOString(),
-                                            studysetId:
-                                                data.localId ?? data.studysetId,
-                                            questionsCorrect: questionsCorrect,
-                                            questionsTotal: questions.length,
                                             questions: questionDataArray,
                                         }),
                                     ),
