@@ -18,8 +18,7 @@ quizfreely.org {
         }
 
         handle_path /docs* {
-                root * /srv/quizfreely-docs/www
-                file_server
+            redir https://docs.quizfreely.org{uri} permanent
         }
 
         handle_errors 404 {
@@ -60,8 +59,15 @@ quizfreely.org {
 www.quizfreely.org, quizfreely.com, www.quizfreely.com, quizfreely.ehan.dev, quizlate.ehan.dev {
         redir https://quizfreely.org{uri} permanent
 }
-docs.quizfreely.org, docs.quizfreely.com {
-        redir https://quizfreely.org/docs{uri} temporary
+docs.quizfreely.org {
+        root * /srv/quizfreely-docs/www
+        encode zstd gzip
+
+        try_files {path} {path}/ /404.html
+        file_server
+}
+docs.quizfreely.com {
+        redir https://docs.quizfreely.org{uri} permanent
 }
 *.static.quizfreely.org {
 	reverse_proxy localhost:3902 {
