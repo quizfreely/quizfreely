@@ -39,7 +39,7 @@ export async function load({cookies, params}) {
                 }
                 correctChoiceIndex
             }
-            trueFalseQuestion {
+            tfq {
                 term {
                     id
                     term

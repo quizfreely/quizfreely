@@ -546,7 +546,7 @@ FRQs: ${numFRQsToAssign}`,
 
         function addTFQ(term) {
             let question = {
-                type: "TRUE_FALSE",
+                type: "TFQ",
                 term: {
                     id: term.id,
                     term: term.term,
@@ -1005,7 +1005,7 @@ FRQs: ${numFRQsToAssign}`,
                             correctChoiceIndex={question.correctChoiceIndex}
                         ></MCQ>
                     </div>
-                {:else if question.type == "TRUE_FALSE"}
+                {:else if question.type == "TFQ"}
                     <div class="box">
                         <TFQ
                             term={question.term}
