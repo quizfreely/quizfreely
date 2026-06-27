@@ -88,10 +88,10 @@
                     termImageUrl: true,
                     defImageUrl: true
                 });
-                prepareTermsByCards();
+                // prepareTermsByCards();
             })();
         } else {
-            prepareTermsByCards();
+            // prepareTermsByCards();
         }
 
         // const card = createEmptyCard();
@@ -114,7 +114,8 @@
         };
     });
 
-    let testYourself = $state(true);
+    // let testYourself = $state(true);
+    let testYourself = $state(false);
 
     function prevFunc() {
         console.log(`sessionTermsIndex: ${sessionTermsIndex},
@@ -168,13 +169,13 @@ newTermsIndex: ${newTermsIndex}`);
         return true;
     }
 </script>
-{#snippet flashcardsPromptAddNew()}
-    <p>Test Wow</p>
-    <button>velda</button>
-{/snippet}
+<!-- {#snippet flashcardsPromptAddNew()} -->
+<!--     <p>Test Wow</p> -->
+<!--     <button>velda</button> -->
+<!-- {/snippet} -->
 <div class="grid page">
     <div class="content">
-        <div class="flex">
+        <div class="flex" style="margin-bottom: 1rem;">
             {#if local}
                 <a href="/studyset/local?id={localId}" class="button faint"><BackArrow /> Back</a>
             {:else}
@@ -186,74 +187,74 @@ newTermsIndex: ${newTermsIndex}`);
                 termsList={true}
                 {term}
                 terms={allTerms}
-                {showPrompt}
-                prompt={flashcardsPromptAddNew}
+                <!-- {showPrompt} -->
+                <!-- prompt={flashcardsPromptAddNew} -->
                 {prevFunc}
                 {nextFunc}
             ></Flashcards>
         {/if}
-        <div class="caption" style="min-height: 4rem;">
-            <div>
-                <div style="min-height: 6rem;">
-                    {#if testYourself}
-                        <div class="flex center">
-                            <div class="flex col card-rating-button-container">
-                                <button class="button-box ohno">Again</button>
-                                <span class="fg0">{preview == null ? "" : show_diff_message(
-                                    preview[Rating.Again].card.due,
-                                    preview[Rating.Again].card.last_review,
-                                    true,
-                                    TIMEUNITFORMAT
-                                )}</span>
-                            </div>
-                            <div class="flex col card-rating-button-container">
-                                <button class="button-box">Hard</button>
-                                <span class="fg0">{preview == null ? "" : show_diff_message(
-                                    preview[Rating.Hard].card.due,
-                                    preview[Rating.Hard].card.last_review,
-                                    true,
-                                    TIMEUNITFORMAT
-                                )}</span>
-                            </div>
-                            <div class="flex col card-rating-button-container">
-                                <button class="button-box">Good</button>
-                                <span class="fg0">{preview == null ? "" : show_diff_message(
-                                    preview[Rating.Good].card.due,
-                                    preview[Rating.Good].card.last_review,
-                                    true,
-                                    TIMEUNITFORMAT
-                                )}</span>
-                            </div>
-                            <div class="flex col card-rating-button-container">
-                                <button class="button-box">Easy</button>
-                                <span class="fg0">{preview == null ? "" : show_diff_message(
-                                    preview[Rating.Easy].card.due,
-                                    preview[Rating.Easy].card.last_review,
-                                    true,
-                                    TIMEUNITFORMAT
-                                )}</span>
-                            </div>
-                        </div>
-                    {/if}
-                </div>
-                <div class="flex center" style="margin-top: 2rem;">
-                    <button class="button-box flashcard-mode-button {testYourself ? "selected" : ""}" onclick={() => testYourself = true}>
-                        <Checkmark class="button-box-selected-icon"></Checkmark>
-                        <div>
-                            <p class="top-text">Test Yourself</p>
-                            <p class="btm-text">Flashcards with Spaced Repetition</p>
-                        </div>
-                    </button>
-                    <button class="button-box flashcard-mode-button {testYourself ? "" : "selected"}" onclick={() => testYourself = false}>
-                        <Checkmark class="button-box-selected-icon"></Checkmark>
-                        <div>
-                            <p class="top-text">View</p>
-                            <p class="btm-text">Flip through flashcards</p>
-                        </div>
-                    </button>
-                </div>
-            </div>
-        </div>
+        <!-- <div class="caption" style="min-height: 4rem;"> -->
+        <!--     <div> -->
+        <!--         <div style="min-height: 6rem;"> -->
+        <!--             {#if testYourself} -->
+        <!--                 <div class="flex center"> -->
+        <!--                     <div class="flex col card-rating-button-container"> -->
+        <!--                         <button class="button-box ohno">Again</button> -->
+        <!--                         <span class="fg0">{preview == null ? "" : show_diff_message( -->
+        <!--                             preview[Rating.Again].card.due, -->
+        <!--                             preview[Rating.Again].card.last_review, -->
+        <!--                             true, -->
+        <!--                             TIMEUNITFORMAT -->
+        <!--                         )}</span> -->
+        <!--                     </div> -->
+        <!--                     <div class="flex col card-rating-button-container"> -->
+        <!--                         <button class="button-box">Hard</button> -->
+        <!--                         <span class="fg0">{preview == null ? "" : show_diff_message( -->
+        <!--                             preview[Rating.Hard].card.due, -->
+        <!--                             preview[Rating.Hard].card.last_review, -->
+        <!--                             true, -->
+        <!--                             TIMEUNITFORMAT -->
+        <!--                         )}</span> -->
+        <!--                     </div> -->
+        <!--                     <div class="flex col card-rating-button-container"> -->
+        <!--                         <button class="button-box">Good</button> -->
+        <!--                         <span class="fg0">{preview == null ? "" : show_diff_message( -->
+        <!--                             preview[Rating.Good].card.due, -->
+        <!--                             preview[Rating.Good].card.last_review, -->
+        <!--                             true, -->
+        <!--                             TIMEUNITFORMAT -->
+        <!--                         )}</span> -->
+        <!--                     </div> -->
+        <!--                     <div class="flex col card-rating-button-container"> -->
+        <!--                         <button class="button-box">Easy</button> -->
+        <!--                         <span class="fg0">{preview == null ? "" : show_diff_message( -->
+        <!--                             preview[Rating.Easy].card.due, -->
+        <!--                             preview[Rating.Easy].card.last_review, -->
+        <!--                             true, -->
+        <!--                             TIMEUNITFORMAT -->
+        <!--                         )}</span> -->
+        <!--                     </div> -->
+        <!--                 </div> -->
+        <!--             {/if} -->
+        <!--         </div> -->
+        <!--         <div class="flex center" style="margin-top: 2rem;"> -->
+        <!--             <button class="button-box flashcard-mode-button {testYourself ? "selected" : ""}" onclick={() => testYourself = true}> -->
+        <!--                 <Checkmark class="button-box-selected-icon"></Checkmark> -->
+        <!--                 <div> -->
+        <!--                     <p class="top-text">Test Yourself</p> -->
+        <!--                     <p class="btm-text">Flashcards with Spaced Repetition</p> -->
+        <!--                 </div> -->
+        <!--             </button> -->
+        <!--             <button class="button-box flashcard-mode-button {testYourself ? "" : "selected"}" onclick={() => testYourself = false}> -->
+        <!--                 <Checkmark class="button-box-selected-icon"></Checkmark> -->
+        <!--                 <div> -->
+        <!--                     <p class="top-text">View</p> -->
+        <!--                     <p class="btm-text">Flip through flashcards</p> -->
+        <!--                 </div> -->
+        <!--             </button> -->
+        <!--         </div> -->
+        <!--     </div> -->
+        <!-- </div> -->
     </div>
 </div>
 
