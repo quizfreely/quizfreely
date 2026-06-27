@@ -711,11 +711,11 @@ FRQs: ${numFRQsToAssign}`,
     let showInputErr = $state(false);
     let inputErrMsg = $state("");
 
-    let spelling = $state({
-        uno: false,
-        dos: false,
-        tres: false
-    });
+    // let spelling = $state({
+    //     uno: false,
+    //     dos: false,
+    //     tres: false
+    // });
 </script>
 
 <div class="grid page">
