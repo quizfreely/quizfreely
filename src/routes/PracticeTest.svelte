@@ -730,12 +730,12 @@ FRQs: ${numFRQsToAssign}`,
                             ? /* uuids have dashes/hyphens */
                               `/studysets/${alreadyOverLocalPTStudysetIds[0]}`
                             : `/studyset/local?id=${alreadyOverLocalPTStudysetIds[0]}`
-                        : `/studysets/${data.studysetId}`
+                        : `/studysets/${data.studysetId ?? data.studysetIds?.[0]}`
                     : /* if the practice test is a cloud pt, then the studyset is always a cloud studyset,
                     but a local practice test can be for a local OR cloud studyset */
                       data.local
                       ? `/studyset/local?id=${data.localId}`
-                      : `/studysets/${data.studysetId}`}
+                      : `/studysets/${data.studysetId ?? data.studysetIds?.[0]}`}
                 ><BackIcon></BackIcon> Back</a
             >
         </div>
