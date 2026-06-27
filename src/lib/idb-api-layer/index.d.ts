@@ -34,5 +34,7 @@ export declare const idbApiLayer: {
     getTopConfusionPairs: (termId: any, resolveProps?: any) => Promise<TermConfusionPair[]>;
     getTopReverseConfusionPairs: (confusedTermId: any, resolveProps?: any) => Promise<TermConfusionPair[]>;
     recordConfusionPairs: (confusionPairs: any) => Promise<boolean>;
-    recordPracticeTest: (practiceTest: any) => Promise<number>;
+    recordPracticeTest: (practiceTest: any) => Promise<import("./db").PracticeTest | undefined>;
+    updatePracticeTest: (id: number, practiceTest: any) => Promise<import("./db").PracticeTest | undefined>;
+    getPracticeTestsByTermId: (termId: number | string) => Promise<import("./db").PracticeTest[]>;
 };

@@ -30,7 +30,7 @@ export const idbApiLayer = {
             studysets[0].terms = await this.getTermsByStudysetId(id, resolveProps.terms === true ? undefined : resolveProps.terms);
         }
         if (resolveProps?.practiceTests) {
-            studysets[0].practiceTests = await db.practiceTests.where("studysetId").equals(id).toArray();
+            studysets[0].practiceTests = await db.practiceTests.where("studysetIds").equals(id).toArray();
             /* local timestamps are ISO strings in UTC, so alphanumeric/lexical sorting is the same as chronological sorting */
             studysets[0].practiceTests?.sort((a, b) => b.timestamp.localeCompare(a.timestamp));
         }
@@ -303,36 +303,52 @@ export const idbApiLayer = {
         return true;
     },
     recordPracticeTest: async function (practiceTest) {
-        return await db.transaction('rw', [db.practiceTests, db.termProgress, db.termProgressHistory], async () => {
+        return await db.transaction('rw', [db.practiceTests, db.termProgress, db.termProgressHistory, db.terms], async () => {
             const rnISOString = (new Date()).toISOString();
             const termProgressMap = new Map();
+            const studysetIds = new Set();
+            const questionTermIds = new Set();
+            const distractorTermIds = new Set();
+            let questionsCorrect = 0;
+            let questionsTotal = 0;
             if (practiceTest.questions && Array.isArray(practiceTest.questions)) {
+                questionsTotal = practiceTest.questions.length;
                 for (const q of practiceTest.questions) {
                     if (!q)
                         continue;
                     let termId = null;
                     let answerWith = null;
                     let correct = false;
-                    if (q.mcq && q.mcq.term) {
+                    if (q.mcq) {
+                        if (!q.mcq.term)
+                            throw new Error("MCQ question is missing term");
                         termId = q.mcq.term.id;
+                        questionTermIds.add(termId);
+                        (q.mcq.distractors || []).forEach((d) => { if (d.id)
+                            distractorTermIds.add(d.id); });
                         answerWith = q.mcq.answerWith;
                         correct = !!q.mcq.correct;
                     }
-                    else if (q.trueFalseQuestion && q.trueFalseQuestion.term) {
-                        termId = q.trueFalseQuestion.term.id;
-                        answerWith = q.trueFalseQuestion.answerWith;
-                        correct = !!q.trueFalseQuestion.correct;
+                    else if (q.tfq) {
+                        if (!q.tfq.term)
+                            throw new Error("TFQ question is missing term");
+                        termId = q.tfq.term.id;
+                        questionTermIds.add(termId);
+                        if (q.tfq.distractor?.id)
+                            distractorTermIds.add(q.tfq.distractor.id);
+                        answerWith = q.tfq.answerWith;
+                        correct = !!q.tfq.correct;
                     }
-                    else if (q.matchQuestion && q.matchQuestion.term) {
-                        termId = q.matchQuestion.term.id;
-                        answerWith = q.matchQuestion.answerWith;
-                        correct = !!q.matchQuestion.correct;
-                    }
-                    else if (q.frq && q.frq.term) {
+                    else if (q.frq) {
+                        if (!q.frq.term)
+                            throw new Error("FRQ question is missing term");
                         termId = q.frq.term.id;
+                        questionTermIds.add(termId);
                         answerWith = q.frq.answerWith;
                         correct = !!q.frq.correct || !!q.frq.userMarkedCorrect;
                     }
+                    if (correct)
+                        questionsCorrect++;
                     if (termId == null)
                         continue;
                     let tp = termProgressMap.get(termId);
@@ -374,6 +390,11 @@ export const idbApiLayer = {
                     }
                 }
             }
+            // Fetch studysetIds for all involved terms
+            const combinedTermIds = new Set([...questionTermIds, ...distractorTermIds]);
+            const allTerms = await db.terms.bulkGet(Array.from(combinedTermIds));
+            allTerms.forEach(t => { if (t?.studysetId)
+                studysetIds.add(t.studysetId); });
             for (const tp of termProgressMap.values()) {
                 const existingProgress = await db.termProgress.where("termId").equals(tp.termId).toArray();
                 if (existingProgress?.length > 0) {
@@ -434,7 +455,78 @@ export const idbApiLayer = {
                     });
                 }
             }
-            return await db.practiceTests.add(practiceTest);
+            practiceTest.questionsCorrect = questionsCorrect;
+            practiceTest.questionsTotal = questionsTotal;
+            practiceTest.studysetIds = Array.from(studysetIds);
+            practiceTest.questionTermIds = Array.from(questionTermIds);
+            practiceTest.distractorTermIds = Array.from(distractorTermIds);
+            if (!practiceTest.timestamp)
+                practiceTest.timestamp = rnISOString;
+            const id = await db.practiceTests.add(practiceTest);
+            return await db.practiceTests.get(id);
         });
+    },
+    updatePracticeTest: async function (id, practiceTest) {
+        return await db.transaction('rw', [db.practiceTests, db.terms], async () => {
+            const studysetIds = new Set();
+            const questionTermIds = new Set();
+            const distractorTermIds = new Set();
+            let questionsCorrect = 0;
+            let questionsTotal = 0;
+            if (practiceTest.questions && Array.isArray(practiceTest.questions)) {
+                questionsTotal = practiceTest.questions.length;
+                for (const q of practiceTest.questions) {
+                    if (!q)
+                        continue;
+                    let correct = false;
+                    if (q.mcq) {
+                        if (!q.mcq.term)
+                            throw new Error("MCQ question is missing term");
+                        questionTermIds.add(q.mcq.term.id);
+                        (q.mcq.distractors || []).forEach((d) => { if (d.id)
+                            distractorTermIds.add(d.id); });
+                        correct = !!q.mcq.correct;
+                    }
+                    else if (q.tfq) {
+                        if (!q.tfq.term)
+                            throw new Error("TFQ question is missing term");
+                        questionTermIds.add(q.tfq.term.id);
+                        if (q.tfq.distractor?.id)
+                            distractorTermIds.add(q.tfq.distractor.id);
+                        correct = !!q.tfq.correct;
+                    }
+                    else if (q.frq) {
+                        if (!q.frq.term)
+                            throw new Error("FRQ question is missing term");
+                        questionTermIds.add(q.frq.term.id);
+                        correct = !!q.frq.correct || !!q.frq.userMarkedCorrect;
+                    }
+                    if (correct)
+                        questionsCorrect++;
+                }
+            }
+            const combinedTermIds = new Set([...questionTermIds, ...distractorTermIds]);
+            const allTerms = await db.terms.bulkGet(Array.from(combinedTermIds));
+            allTerms.forEach(t => { if (t?.studysetId)
+                studysetIds.add(t.studysetId); });
+            await db.practiceTests.update(id, {
+                questions: practiceTest.questions,
+                questionsCorrect,
+                questionsTotal,
+                studysetIds: Array.from(studysetIds),
+                questionTermIds: Array.from(questionTermIds),
+                distractorTermIds: Array.from(distractorTermIds)
+            });
+            return await db.practiceTests.get(id);
+        });
+    },
+    getPracticeTestsByTermId: async function (termId) {
+        const tests = await db.practiceTests
+            .where("questionTermIds").equals(termId)
+            .or("distractorTermIds").equals(termId)
+            .distinct()
+            .toArray();
+        tests.sort((a, b) => b.timestamp.localeCompare(a.timestamp));
+        return tests;
     }
 };

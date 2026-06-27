@@ -32,33 +32,47 @@ interface Term {
     topConfusionPairs?: TermConfusionPair[];
     topReverseConfusionPairs?: TermConfusionPair[];
 }
+interface TermAtp {
+    id: number | string;
+    term: string;
+    def: string;
+}
 interface PracticeTest {
     id: number;
-    studysetId: number | string;
+    studysetIds: (number | string)[];
+    questionTermIds: (number | string)[];
+    distractorTermIds: (number | string)[];
     timestamp: string;
     questionsCorrect: number;
     questionsTotal: number;
     questions: Question[];
 }
 interface Question {
-    questionType: string;
     mcq?: MCQ;
-    trueFalseQuestion?: TrueFalseQuestion;
+    tfq?: TFQ;
+    frq?: FRQ;
 }
 interface MCQ {
     answerWith: string;
-    answeredTerm: Term;
+    term: TermAtp;
     correct: boolean;
     correctChoiceIndex: number;
-    distractors: Term[];
-    term: Term;
+    answeredIndex: number | null;
+    distractors: TermAtp[];
 }
-interface TrueFalseQuestion {
+interface TFQ {
     answerWith: string;
-    answeredBool: boolean;
+    term: TermAtp;
     correct: boolean;
-    distractor: Term;
-    term: Term;
+    answeredBool: boolean;
+    distractor?: TermAtp;
+}
+interface FRQ {
+    answerWith: string;
+    term: TermAtp;
+    correct: boolean;
+    userMarkedCorrect?: boolean;
+    answeredString: string;
 }
 interface TermProgress {
     id: number;
@@ -108,5 +122,5 @@ declare const db: Dexie & {
     termConfusionPairs: EntityTable<TermConfusionPair, "id">;
     images: EntityTable<Image, "key">;
 };
-export type { Studyset, Term, PracticeTest, Question, MCQ, TrueFalseQuestion, TermProgress, TermProgressHistory, TermConfusionPair };
+export type { Studyset, Term, TermAtp, PracticeTest, Question, MCQ, TFQ, FRQ, TermProgress, TermProgressHistory, TermConfusionPair };
 export { db };
