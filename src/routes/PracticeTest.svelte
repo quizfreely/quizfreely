@@ -878,52 +878,52 @@ FRQs: ${numFRQsToAssign}`,
                             </button>
                         </div>
                     </div>
-                    <div>
-                        <p style="margin-top: 0px;">Test Spelling?</p>
-                        <div
-                            style="display: grid; grid-template-columns: auto; justify-content: start; margin-top: 0.6rem;"
-                        >
-                            <button
-                                class="button-box {spelling.typos
-                                    ? 'selected'
-                                    : ''}"
-                                style="display: flex;"
-                                onclick={() =>
-                                    (spelling.typos =
-                                        !spelling.typos)}
-                            >
-                                <CheckmarkIcon class="button-box-selected-icon"
-                                ></CheckmarkIcon>
-                                Spelling
-                            </button>
-                            <button
-                                class="button-box {spelling.accents
-                                    ? 'selected'
-                                    : ''}"
-                                style="display: flex; margin-top: 0.4rem;"
-                                onclick={() =>
-                                    (spelling.accents =
-                                        !spelling.accents)}
-                            >
-                                <CheckmarkIcon class="button-box-selected-icon"
-                                ></CheckmarkIcon>
-                                Accent Marks
-                            </button>
-                            <button
-                                class="button-box {spelling.tres
-                                    ? 'selected'
-                                    : ''}"
-                                style="display: flex; margin-top: 0.4rem;"
-                                onclick={() =>
-                                    (spelling.tres =
-                                        !spelling.tres)}
-                            >
-                                <CheckmarkIcon class="button-box-selected-icon"
-                                ></CheckmarkIcon>
-                                Punctuation
-                            </button>
-                        </div>
-                    </div>
+                    <!-- <div> -->
+                        <!-- <p style="margin-top: 0px;">Test Spelling?</p> -->
+                        <!-- <div -->
+                        <!--     style="display: grid; grid-template-columns: auto; justify-content: start; margin-top: 0.6rem;" -->
+                        <!-- > -->
+                            <!-- <button -->
+                            <!--     class="button-box {spelling.typos -->
+                            <!--         ? 'selected' -->
+                            <!--         : ''}" -->
+                            <!--     style="display: flex;" -->
+                            <!--     onclick={() => -->
+                            <!--         (spelling.typos = -->
+                            <!--             !spelling.typos)} -->
+                            <!-- > -->
+                            <!--     <CheckmarkIcon class="button-box-selected-icon" -->
+                            <!--     ></CheckmarkIcon> -->
+                            <!--     Spelling -->
+                            <!-- </button> -->
+                            <!-- <button -->
+                            <!--     class="button-box {spelling.accents -->
+                            <!--         ? 'selected' -->
+                            <!--         : ''}" -->
+                            <!--     style="display: flex; margin-top: 0.4rem;" -->
+                            <!--     onclick={() => -->
+                            <!--         (spelling.accents = -->
+                            <!--             !spelling.accents)} -->
+                            <!-- > -->
+                            <!--     <CheckmarkIcon class="button-box-selected-icon" -->
+                            <!--     ></CheckmarkIcon> -->
+                            <!--     Accent Marks -->
+                            <!-- </button> -->
+                            <!-- <button -->
+                            <!--     class="button-box {spelling.tres -->
+                            <!--         ? 'selected' -->
+                            <!--         : ''}" -->
+                            <!--     style="display: flex; margin-top: 0.4rem;" -->
+                            <!--     onclick={() => -->
+                            <!--         (spelling.tres = -->
+                            <!--             !spelling.tres)} -->
+                            <!-- > -->
+                            <!--     <CheckmarkIcon class="button-box-selected-icon" -->
+                            <!--     ></CheckmarkIcon> -->
+                            <!--     Punctuation -->
+                            <!-- </button> -->
+                        <!-- </div> -->
+                    <!-- </div> -->
                 </div>
                 <div class="flex" style="margin-top: 1rem;">
                     <button onclick={setupStart}
