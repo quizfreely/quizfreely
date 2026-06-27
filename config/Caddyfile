@@ -60,6 +60,9 @@ quizfreely.org {
 www.quizfreely.org, quizfreely.com, www.quizfreely.com, quizfreely.ehan.dev, quizlate.ehan.dev {
         redir https://quizfreely.org{uri} permanent
 }
+docs.quizfreely.org, docs.quizfreely.com {
+        redir https://quizfreely.org/docs{uri} temporary
+}
 *.static.quizfreely.org {
 	reverse_proxy localhost:3902 {
                 health_uri       /health
