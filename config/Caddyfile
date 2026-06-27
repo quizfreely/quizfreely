@@ -19,7 +19,7 @@ quizfreely.org {
 
         redir /docs https://docs.quizfreely.org permanent
         handle_path /docs/* {
-            redir https://docs.quizfreely.org/{uri} permanent
+            redir https://docs.quizfreely.org{uri} permanent
         }
 
         handle /umami {
