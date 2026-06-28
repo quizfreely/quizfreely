@@ -1,14 +1,13 @@
 <script>
     import CheckmarkIcon from "$lib/icons/Checkmark.svelte";
     import XMarkIcon from "$lib/icons/CloseXMark.svelte";
-    let { term, answerWith, viewOnly, showAccuracy, answerUpdateCallback, showCorrectAnswer } = $props();
+    let { term, answerWith, viewOnly, showAccuracy, answerUpdateCallback, showCorrectAnswer, answeredString: initAnsweredString } = $props();
     let manuallyMarkedCorrect = $state(false);
     export function getQuestion() {
         if (answer == "") {
             console.log("Possibly Unanswered FRQ")
         }
         return {
-            questionType: "FRQ",
             frq: {
                 term: {
                     id: term.id,
@@ -28,7 +27,7 @@
     export function isAnswered() {
         return answer != "";
     }
-    let answer = $state("");
+    let answer = $state(initAnsweredString ?? "");
 </script>
 <div>
     <p class="fg0">Type the { answerWith == "DEF" ? "definition" : "term"}</p>

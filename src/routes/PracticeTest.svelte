@@ -20,17 +20,18 @@
 
     // maps questions from practice test data to objs with props for question components
     function mapPracticeTestQuestionToQuestionComponentFormat(q) {
+        const cq = q?.mcq ?? q?.tfq ?? q?.frq;
         return {
             type: q?.mcq != null ? "MCQ" : (q?.tfq != null ? "TFQ" : (q?.frq != null ? "FRQ" : "UNKNOWN")),
-            term: q?.mcq?.term ?? q?.tfq?.term,
-            answerWith: q?.mcq?.answerWith ?? q?.tfq?.answerWith ?? q?.frq?.answerWith,
+            term: cq?.term,
+            answerWith: cq?.answerWith,
             answeredIndex: q?.mcq?.answeredIndex,
             answeredBool: q?.tfq?.answeredBool,
             answeredString: q?.frq?.answeredString,
             distractors: q?.mcq?.distractors,
             distractor: q?.tfq?.distractor,
             correctChoiceIndex: q?.mcq?.correctChoiceIndex,
-            wasCorrect: q?.mcq?.correct ?? q?.tfq?.correct ?? q?.frq?.correct,
+            wasCorrect: cq?.correct,
             userMarkedCorrect: q?.frq?.userMarkedCorrect,
         };
     }
@@ -1029,6 +1030,7 @@ FRQs: ${numFRQsToAssign}`,
                             {index}
                             {answerUpdateCallback}
                             bind:this={questionComponents[index]}
+                            answeredString={question.answeredString}
                         ></FRQ>
                     </div>
                 {/if}
@@ -1062,24 +1064,25 @@ FRQs: ${numFRQsToAssign}`,
                                     questionComponent.getQuestion();
                                 questionDataArray.push(questionData);
 
-                                const thisTermId =
-                                    questionData.mcq?.term?.id ??
-                                    questionData.tfq?.term?.id;
+                                const thisTermId = questionData.mcq?.term?.id ??
+                                    questionData.tfq?.term?.id ??
+                                    questionData.frq?.term?.id;
                                 if (thisTermId == null) {
                                     console.error(
                                         "term id from question is null(ish)! this might happen if new question types aren't fully implemented",
                                     );
                                 }
-                                const thisAnswerWith =
-                                    questionData.mcq?.answerWith ??
-                                    questionData.tfq?.answerWith;
+                                const thisAnswerWith = questionData.mcq?.answerWith ??
+                                    questionData.tfq?.answerWith ??
+                                    questionData.frq?.answerWith;
                                 let termCorrectIncrease = 0;
                                 let termIncorrectIncrease = 0;
                                 let defCorrectIncrease = 0;
                                 let defIncorrectIncrease = 0;
                                 if (
                                     questionData?.mcq?.correct ||
-                                    questionData?.tfq?.correct
+                                    questionData?.tfq?.correct ||
+                                    questionData?.frq?.correct
                                 ) {
                                     questionsCorrect++;
 

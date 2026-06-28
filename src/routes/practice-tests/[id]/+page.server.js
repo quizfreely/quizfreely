@@ -54,6 +54,17 @@ export async function load({cookies, params}) {
                     def
                 }
             }
+            frq {
+                term {
+                    id
+                    term
+                    def
+                }
+                answerWith
+                correct
+                answeredString
+                userMarkedCorrect
+            }
         }
     }
 }`,
@@ -63,6 +74,7 @@ export async function load({cookies, params}) {
             })
         });
         const resp = await respRaw.json();
+console.log(JSON.stringify(resp, null, 4));
         if (resp?.data == null || resp?.errors != null) {
             console.log("Error in cloud practice test (viewing) load func api request. Response: ", resp);
         }
