@@ -1166,16 +1166,16 @@ FRQs: ${numFRQsToAssign}`,
                                         },
                                         body: JSON.stringify({
                                             query: `mutation recordPracticeTest(
-    $input: PracticeTestInput
+    $questions: [QuestionInput!]!
 ) {
-    recordPracticeTest(input: $input) {
+    recordPracticeTest(input: {
+        questions: $questions
+    }) {
         id
     }
 }`,
                                             variables: {
-                                                input: {
-                                                    questions: questionDataArray,
-                                                },
+                                                questions: questionDataArray,
                                             },
                                         }),
                                     });
