@@ -1,7 +1,7 @@
 <script>
     import CheckmarkIcon from "$lib/icons/Checkmark.svelte";
     import XMarkIcon from "$lib/icons/CloseXMark.svelte";
-    let { term, answerWith, viewOnly, showAccuracy, answerUpdateCallback, showCorrectAnswer, answeredString: initAnsweredString } = $props();
+    let { term, answerWith, viewOnly, showAccuracy, answerUpdateCallback, showCorrectAnswer, answeredString: initAnsweredString, userMarkedCorrectChangeAsyncCallback } = $props();
     let manuallyMarkedCorrect = $state(false);
     export function getQuestion() {
         if (answer == "") {
@@ -59,13 +59,23 @@
     {#if showAccuracy && manuallyMarkedCorrect}
         <div class="flex" style="align-items: center;">
             <p class="fg0">Manually marked correct</p>
-            <button class="warn alt" onclick={() => {
+            <button class="warn alt" onclick={async () => {
                 manuallyMarkedCorrect = false;
+                const callbackRes = await userMarkedCorrectChangeAsyncCallback?.(getQuestion());
+                if (callbackRes === false) {
+                    console.error("FRQ userMarkedCorrectChangeAsyncCallback returned false indicating error saving")
+                    manuallyMarkedCorrect = true; // show again to let user retry
+                }
             }}>Undo?</button>
         </div>
     {:else if showAccuracy && showCorrectAnswer && !getQuestion().frq.correct}
-        <button class="warn alt" onclick={() => {
+        <button class="warn alt" onclick={async () => {
             manuallyMarkedCorrect = true;
+            const callbackRes = await userMarkedCorrectChangeAsyncCallback?.(getQuestion());
+            if (callbackRes === false) {
+                console.error("FRQ userMarkedCorrectChangeAsyncCallback returned false indicating error saving")
+                manuallyMarkedCorrect = false; // show again to let user retry
+            }
         }}>Manually mark as correct?</button>
     {/if}
     {#if showAccuracy && showCorrectAnswer}

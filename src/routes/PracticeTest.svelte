@@ -1031,6 +1031,53 @@ FRQs: ${numFRQsToAssign}`,
                             {answerUpdateCallback}
                             bind:this={questionComponents[index]}
                             answeredString={question.answeredString}
+                            userMarkedCorrectChangeAsyncCallback={async (thisUpdatedQuestionData) => {
+                                const updatedQuestions = [];
+                                questionsCorrect = 0;
+                                questionComponents.forEach((q) => {
+                                    const qData = q.getQuestion();
+                                    if (qData?.correct) {
+                                        questionsCorrect++;
+                                    }
+                                    updatedQuestions.push(qData);
+                                });
+                                /* cloud uses UUIDs, UUIDs have hyphen/dash */
+                                if (recordedPracticeTestId != null && ("" + recordedPracticeTestId).includes("-")) {
+                                    try {
+                                        const raw = await fetch("/api/graphql", {
+                                            method: "POST",
+                                            headers: {
+                                                "Content-Type": "application/json"
+                                            },
+                                            body: JSON.stringify({
+                                                query: `mutation updatePT($id: ID!, $questions: [QuestionInput!]!) {
+    updatePracticeTest(id: $id, input: {
+        questions: $questions
+    }) { id }
+}`,
+                                                variables: {
+                                                    id: recordedPracticeTestId,
+                                                    questions: updatedQuestions
+                                                }
+                                            })
+                                        });
+                                        const resp = await raw.json();
+                                        if (resp?.data?.updatePracticeTest?.id == null) {
+                                            console.log("Err updating manually marked question, API resp:", resp);
+                                            return false;
+                                        } else {
+                                            return true;
+                                        }
+                                    } catch (err) {
+                                        console.error("Error updating manually marked correct question:", err);
+                                        return false;
+                                    }
+                                } else if (recordedPracticeTestId != null) {
+                                    idbApiLayer.updatePracticeTest(id: recordedPracticeTestId, questions)
+                                } else {
+                                    return false;
+                                }
+                            }}
                         ></FRQ>
                     </div>
                 {/if}
