@@ -702,10 +702,6 @@ FRQs: ${numFRQsToAssign}`,
     let showScore = $state(data?.alreadyOver);
     let questionsCorrect = $state(data?.practiceTest?.questionsCorrect ?? 0);
 
-    let recordedPracticeTestId;
-    if (data?.practiceTestId != null) {
-        recordedPracticeTestId = data.practiceTestId;
-    }
     let submitted = $state(data?.alreadyOver);
     let submitting = false;
 
@@ -1195,8 +1191,6 @@ FRQs: ${numFRQsToAssign}`,
                                     });
                                     let resp = await raw.json();
                                     if (resp?.data?.recordPracticeTest?.id) {
-                                        recordedPracticeTestId =
-                                            resp.data.recordPracticeTest.id;
                                         resp.data.recordPracticeTest.questions?.forEach?.((q, index) => {
                                             questionComponents?.[index]?.setQuestionId?.(q?.id)
                                         })
@@ -1220,7 +1214,7 @@ FRQs: ${numFRQsToAssign}`,
                                     );
                                 }
                             } else {
-                                await idbApiLayer.recordPracticeTest(
+                                const pt = await idbApiLayer.recordPracticeTest(
                                     JSON.parse(
                                         JSON.stringify({
                                             timestamp: new Date().toISOString(),
@@ -1229,6 +1223,9 @@ FRQs: ${numFRQsToAssign}`,
                                     ),
                                 );
                                 submitted = true;
+                                pt?.questions?.forEach?.((q, index) => {
+                                    questionComponents?.[index]?.setQuestionId(q?.id);
+                                });
                             }
                         }}
                     >
