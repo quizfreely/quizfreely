@@ -1,13 +1,20 @@
 <script>
+    import { idbApiLayer } from "$lib/idb-api-layer";
     import CheckmarkIcon from "$lib/icons/Checkmark.svelte";
     import XMarkIcon from "$lib/icons/CloseXMark.svelte";
-    let { term, answerWith, viewOnly, showAccuracy, answerUpdateCallback, showCorrectAnswer, answeredString: initAnsweredString, userMarkedCorrectChangeAsyncCallback } = $props();
+    let { term, answerWith, viewOnly, showAccuracy, answerUpdateCallback, showCorrectAnswer, answeredString: initAnsweredString, userMarkedCorrectChangeCallback, questionId: initQuestionId } = $props();
     let manuallyMarkedCorrect = $state(false);
+
+    let questionId = initQuestionId;
+    export function setQuestionId(id) {
+        questionId = id;
+    }
     export function getQuestion() {
         if (answer == "") {
             console.log("Possibly Unanswered FRQ")
         }
         return {
+            id: questionId,
             frq: {
                 term: {
                     id: term.id,
@@ -28,6 +35,47 @@
         return answer != "";
     }
     let answer = $state(initAnsweredString ?? "");
+
+    async function updateQForManualMarkedCorrect() {
+        if (questionId == null) {
+            return false;
+        }
+        const updatedQuestionData = getQuestion();
+        // UUIDs have dashes/hyphens. cloud uses UUIDs, local uses sequential ids.
+        if ((""+questionId).includes("-")) {
+            try {
+                const raw = await fetch("/api/graphql", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        query: `mutation userMarkedCorrectChangeFRQ($id: ID!, $c: Boolean!, $umc: Boolean) {
+    updatePracticeTestQuestion(id: $id, correct: $c, userMarkedCorrect: $umc): { id }
+}`,
+                        variables: {
+                            id: questionId,
+                            c: updatedQuestionData.correct,
+                            umc: updatedQuestionData.userMarkedCorrect
+                        }
+                    })
+                });
+                const resp = await raw.json();
+                return resp?.data?.updatePracticeTestQuestion?.id != null
+            } catch (err) {
+                console.error("Error in userMarkedCorrectChangeFRQ gql req:", err)
+                return false;
+            }
+        } else {
+            try {
+                const res = await idbApiLayer.updatePracticeTestQuestion(questionId, updatedQuestionData.correct, updatedQuestionData.userMarkedCorrect);
+                return res?.id != null;
+            } catch (err) {
+                console.error("Error from FRQ idbApiLayer updatePracticeTestQuesetion:", err);
+                return false;
+            }
+        }
+    }
 </script>
 <div>
     <p class="fg0">Type the { answerWith == "DEF" ? "definition" : "term"}</p>
@@ -60,21 +108,23 @@
         <div class="flex" style="align-items: center;">
             <p class="fg0">Manually marked correct</p>
             <button class="warn alt" onclick={async () => {
-                manuallyMarkedCorrect = false;
-                const callbackRes = await userMarkedCorrectChangeAsyncCallback?.(getQuestion());
-                if (callbackRes === false) {
-                    console.error("FRQ userMarkedCorrectChangeAsyncCallback returned false indicating error saving")
-                    manuallyMarkedCorrect = true; // show again to let user retry
+                if (await updateQForManualMarkedCorrect() === false) {
+                    console.error("error undoing manual correct marking on FRQ");
+                    alert("oops, it kind of didn't work. check your internet and everything");
+                } else {
+                    manuallyMarkedCorrect = false;
+                    userMarkedCorrectChangeCallback?.();
                 }
             }}>Undo?</button>
         </div>
     {:else if showAccuracy && showCorrectAnswer && !getQuestion().frq.correct}
         <button class="warn alt" onclick={async () => {
-            manuallyMarkedCorrect = true;
-            const callbackRes = await userMarkedCorrectChangeAsyncCallback?.(getQuestion());
-            if (callbackRes === false) {
-                console.error("FRQ userMarkedCorrectChangeAsyncCallback returned false indicating error saving")
-                manuallyMarkedCorrect = false; // show again to let user retry
+            if (await updateQForManualMarkedCorrect() === false) {
+                console.error("error manually marking FRQ correct");
+                alert("oops, it kind of didn't work. check your internet and everything");
+            } else {
+                manuallyMarkedCorrect = true;
+                userMarkedCorrectChangeCallback?.();
             }
         }}>Manually mark as correct?</button>
     {/if}

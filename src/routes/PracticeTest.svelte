@@ -1031,52 +1031,13 @@ FRQs: ${numFRQsToAssign}`,
                             {answerUpdateCallback}
                             bind:this={questionComponents[index]}
                             answeredString={question.answeredString}
-                            userMarkedCorrectChangeAsyncCallback={async (thisUpdatedQuestionData) => {
-                                const updatedQuestions = [];
+                            userMarkedCorrectChangeCallback={() => {
                                 questionsCorrect = 0;
                                 questionComponents.forEach((q) => {
-                                    const qData = q.getQuestion();
-                                    if (qData?.correct) {
+                                    if (q?.getQuestion?.()?.correct) {
                                         questionsCorrect++;
                                     }
-                                    updatedQuestions.push(qData);
                                 });
-                                /* cloud uses UUIDs, UUIDs have hyphen/dash */
-                                if (recordedPracticeTestId != null && ("" + recordedPracticeTestId).includes("-")) {
-                                    try {
-                                        const raw = await fetch("/api/graphql", {
-                                            method: "POST",
-                                            headers: {
-                                                "Content-Type": "application/json"
-                                            },
-                                            body: JSON.stringify({
-                                                query: `mutation updatePT($id: ID!, $questions: [QuestionInput!]!) {
-    updatePracticeTest(id: $id, input: {
-        questions: $questions
-    }) { id }
-}`,
-                                                variables: {
-                                                    id: recordedPracticeTestId,
-                                                    questions: updatedQuestions
-                                                }
-                                            })
-                                        });
-                                        const resp = await raw.json();
-                                        if (resp?.data?.updatePracticeTest?.id == null) {
-                                            console.log("Err updating manually marked question, API resp:", resp);
-                                            return false;
-                                        } else {
-                                            return true;
-                                        }
-                                    } catch (err) {
-                                        console.error("Error updating manually marked correct question:", err);
-                                        return false;
-                                    }
-                                } else if (recordedPracticeTestId != null) {
-                                    idbApiLayer.updatePracticeTest(id: recordedPracticeTestId, questions)
-                                } else {
-                                    return false;
-                                }
                             }}
                         ></FRQ>
                     </div>
@@ -1222,6 +1183,9 @@ FRQs: ${numFRQsToAssign}`,
         questions: $questions
     }) {
         id
+        questions {
+            id
+        }
     }
 }`,
                                             variables: {
@@ -1233,6 +1197,9 @@ FRQs: ${numFRQsToAssign}`,
                                     if (resp?.data?.recordPracticeTest?.id) {
                                         recordedPracticeTestId =
                                             resp.data.recordPracticeTest.id;
+                                        resp.data.recordPracticeTest.questions?.forEach?.((q, index) => {
+                                            questionComponents?.[index]?.setQuestionId?.(q?.id)
+                                        })
                                         submitted = true;
                                     } else {
                                         console.log(
