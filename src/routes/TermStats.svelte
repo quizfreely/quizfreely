@@ -13,70 +13,8 @@
     let term = $state();
     let objectUrls = [];
 
-    let topConfusionPairsUniqueArray = $state([]);
-    let topReverseConfusionPairsUniqueArray = $state([]);
-    function combineConfusionPairs() {
-        let topConfusionPairsUnique = new Map();
-        let topReverseConfusionPairsUnique = new Map();
-
-        term?.topConfusionPairs?.forEach(pair => {
-            let obj = {
-                confusedTerm: pair.confusedTerm
-            };
-            if (pair?.answeredWith == "DEF") {
-                obj.defConfusedCount = pair.confusedCount;
-            } else {
-                obj.termConfusedCount = pair.confusedCount;
-            }
-
-            topConfusionPairsUnique.set(
-                pair?.confusedTerm?.id,
-                {
-                    ...topConfusionPairsUnique.get(pair?.confusedTerm?.id),
-                    ...obj
-                }
-            )
-
-            if (pair?.confusedTerm?.termImageUrl != null) {
-                objectUrls.push(pair.confusedTerm.termImageUrl);
-            }
-            if (pair?.confusedTerm?.defImageUrl != null) {
-                objectUrls.push(pair.confusedTerm.defImageUrl);
-            }
-        })
-        topConfusionPairsUniqueArray = [...topConfusionPairsUnique.values()];
-
-        term?.topReverseConfusionPairs?.forEach(pair => {
-            let obj = {
-                term: pair.term
-            };
-            if (pair?.answeredWith == "DEF") {
-                obj.defConfusedCount = pair.confusedCount;
-            } else {
-                obj.termConfusedCount = pair.confusedCount;
-            }
-
-            topReverseConfusionPairsUnique.set(
-                pair?.term?.id,
-                {
-                    ...topReverseConfusionPairsUnique.get(pair?.term?.id),
-                    ...obj
-                }
-            )
-
-            if (pair?.term?.termImageUrl != null) {
-                objectUrls.push(pair.term.termImageUrl);
-            }
-            if (pair?.term?.defImageUrl != null) {
-                objectUrls.push(pair.term.defImageUrl);
-            }
-        })
-        topReverseConfusionPairsUniqueArray = [...topReverseConfusionPairsUnique.values()];
-    }
-
     if (!data.local) {
         term = data?.term;
-        combineConfusionPairs();
     }
 
     let chartCanvas;
@@ -96,18 +34,6 @@
                 term = await idbApiLayer.getTermById(data.localTermId, {
                     progress: true,
                     progressHistory: true,
-                    topConfusionPairs: {
-                        confusedTerm: {
-                            termImageUrl: true,
-                            defImageUrl: true
-                        }
-                    },
-                    topReverseConfusionPairs: {
-                        term: {
-                            termImageUrl: true,
-                            defImageUrl: true
-                        }
-                    },
                     termImageUrl: true,
                     defImageUrl: true
                 })
@@ -117,7 +43,6 @@
                 if (term.defImageUrl != null) {
                     objectUrls.push(term.defImageUrl);
                 }
-                combineConfusionPairs();
             }
 
             if (!data.authed && !data.local) {
@@ -128,10 +53,6 @@
                 `term` has already been populated during SSR (above, before onMount) */
                 term.progress = (await db.termProgress.where("termId").equals(term.id).toArray())?.[0];
                 term.progressHistory = await db.termProgressHistory.where("termId").equals(term.id).toArray();
-                term.topConfusionPairs = await idbApiLayer.getTopConfusionPairs(term.id)
-                term.topReverseConfusionPairs = await idbApiLayer.getTopReverseConfusionPairs(term.id)
-
-                combineConfusionPairs();
             }
 
             Chart.defaults.font.size = 16;
@@ -427,32 +348,32 @@
                     {/if}
                 </div>
             </div>
-            <p class="h4" style="margin-top: 2rem;">Frequently Confused Terms</p>
-            <p class="fg0">These terms are frequently selected incorrect answers.</p>
-            <div>
-                {#each topConfusionPairsUniqueArray as confusionPair }
-                    <div class="box">
-                        {confusionPair?.confusedTerm?.term}
-                    </div>
-                {:else}
-                    <div class="box center text fg0">
-                        (None)
-                    </div>
-                {/each}
-            </div>
-            <p class="h4" style="margin-top: 2rem;">Reverse-Confused Terms</p>
-            <p class="fg0">This term is a frequently selected incorrect answer for these terms.</p>
-            <div>
-                {#each topReverseConfusionPairsUniqueArray as confusionPair }
-                    <div class="box">
-                        {confusionPair?.term?.term}
-                    </div>
-                {:else}
-                    <div class="box center text fg0">
-                        (None)
-                    </div>
-                {/each}
-            </div>
+            <!-- <p class="h4" style="margin-top: 2rem;">Frequently Confused Terms</p> -->
+            <!-- <p class="fg0">These terms are frequently selected incorrect answers.</p> -->
+            <!-- <div> -->
+            <!--     {#each topConfusionPairsUniqueArray as confusionPair } -->
+            <!--         <div class="box"> -->
+            <!--             {confusionPair?.confusedTerm?.term} -->
+            <!--         </div> -->
+            <!--     {:else} -->
+            <!--         <div class="box center text fg0"> -->
+            <!--             (None) -->
+            <!--         </div> -->
+            <!--     {/each} -->
+            <!-- </div> -->
+            <!-- <p class="h4" style="margin-top: 2rem;">Reverse-Confused Terms</p> -->
+            <!-- <p class="fg0">This term is a frequently selected incorrect answer for these terms.</p> -->
+            <!-- <div> -->
+            <!--     {#each topReverseConfusionPairsUniqueArray as confusionPair } -->
+            <!--         <div class="box"> -->
+            <!--             {confusionPair?.term?.term} -->
+            <!--         </div> -->
+            <!--     {:else} -->
+            <!--         <div class="box center text fg0"> -->
+            <!--             (None) -->
+            <!--         </div> -->
+            <!--     {/each} -->
+            <!-- </div> -->
         {/if}
     </div>
 </div>

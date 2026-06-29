@@ -41,28 +41,6 @@ export async function load({ cookies, params}) {
             defCorrectCount
             defIncorrectCount
         }
-        topConfusionPairs {
-            confusedTerm {
-                id
-                term
-                def
-                termImageUrl
-                defImageUrl
-            }
-            answeredWith
-            confusedCount
-        }
-        topReverseConfusionPairs {
-            term {
-                id
-                term
-                def
-                termImageUrl
-                defImageUrl
-            }
-            answeredWith
-            confusedCount
-        }
     }
 }`,
                 variables: {

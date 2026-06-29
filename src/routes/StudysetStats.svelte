@@ -82,12 +82,6 @@
                 const studyset = await idbApiLayer.getStudysetById(data.localId, {
                     terms: {
                         progress: true,
-                        topConfusionPairs: {
-                            confusedTerm: true
-                        },
-                        topReverseConfusionPairs: {
-                            term: true
-                        },
                         termImageUrl: true,
                         defImageUrl: true
                     },
@@ -123,8 +117,6 @@
 
                 for (const term of terms) {
                     term.progress = (await db.termProgress.where("termId").equals(term.id).toArray())?.[0];
-                    term.topConfusionPairs = await idbApiLayer.getTopConfusionPairs(term.id)
-                    term.topReverseConfusionPairs = await idbApiLayer.getTopReverseConfusionPairs(term.id)
                 }
             }
 

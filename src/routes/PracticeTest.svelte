@@ -78,18 +78,6 @@
                 const studyset = await idbApiLayer.getStudysetById(data.localId, {
                     terms: {
                         progress: true,
-                        topConfusionPairs: {
-                            confusedTerm: {
-                                termImageUrl: true,
-                                defImageUrl: true
-                            },
-                        },
-                        topReverseConfusionPairs: {
-                            term: {
-                                termImageUrl: true,
-                                defImageUrl: true
-                            },
-                        },
                         termImageUrl: true,
                         defImageUrl: true
                     },
