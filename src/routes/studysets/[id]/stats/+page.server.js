@@ -37,24 +37,6 @@ export async function load({ cookies, params}) {
                 defCorrectCount
                 defIncorrectCount
             }
-            topConfusionPairs {
-                confusedTerm {
-                    id
-                    term
-                    def
-                }
-                answeredWith
-                confusedCount
-            }
-            topReverseConfusionPairs {
-                term {
-                    id
-                    term
-                    def
-                }
-                answeredWith
-                confusedCount
-            }
         }
         practiceTests {
             id
