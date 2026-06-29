@@ -91,22 +91,6 @@
                     if (term.defImageUrl != null) {
                         objectKeys.push(term.defImageUrl);
                     }
-                    term.topConfusionPairs.forEach(confusionPair => {
-                        if (confusionPair?.confusedTerm?.termImageUrl != null) {
-                            objectKeys.push(confusionPair.confusedTerm.termImageUrl);
-                        }
-                        if (confusionPair?.confusedTerm?.defImageUrl != null) {
-                            objectKeys.push(confusionPair.confusedTerm.defImageUrl);
-                        }
-                    });
-                    term.topReverseConfusionPairs.forEach(confusionPair => {
-                        if (confusionPair?.confusedTerm?.termImageUrl != null) {
-                            objectKeys.push(confusionPair.confusedTerm.termImageUrl);
-                        }
-                        if (confusionPair?.confusedTerm?.defImageUrl != null) {
-                            objectKeys.push(confusionPair.confusedTerm.defImageUrl);
-                        }
-                    });
                 });
                 practiceTests = studyset?.practiceTests;
             }
@@ -135,11 +119,6 @@
                         .where("termId")
                         .equals(term.id)
                         .toArray()?.[0];
-                    term.topConfusionPairs = await idbApiLayer.getTopConfusionPairs(
-                        term.id,
-                    );
-                    term.topReverseConfusionPairs =
-                        await idbApiLayer.getTopReverseConfusionPairs(term.id);
                 }
             }
         })();
@@ -339,21 +318,6 @@ FRQs: ${numFRQsToAssign}`,
             remainingCounts[questionType]--;
         }
 
-        // returns a number; higher = more priority
-        function confusionPairPriority(
-            count,
-            lastConfusedAtDate,
-            lastReviewedAt,
-        ) {
-            const decayDays = 7;
-            const msPerDay = 1000 * 60 * 60 * 24;
-            const daysSince =
-                (lastReviewedAt.getTime() - lastConfusedAtDate.getTime()) /
-                msPerDay;
-            // log1p to get diminishing returns on count; exp for recency decay
-            return Math.log1p(count) * Math.exp(-daysSince / decayDays);
-        }
-
         function addMCQ(term) {
             const pickedAnswerWith =
                 answerWith == "BOTH"
@@ -373,100 +337,6 @@ FRQs: ${numFRQsToAssign}`,
                 answerWith: pickedAnswerWith,
             };
             question.distractors = [];
-            let confusionPairDistractors = [];
-            if (term?.topConfusionPairs != null) {
-                term.topConfusionPairs.forEach((confusionPair) => {
-                    if (
-                        confusionPair.answeredWith == pickedAnswerWith &&
-                        confusionPair.confusedCount >= 2 &&
-                        term.progress != null &&
-                        confusionPair.confusedCount >
-                            0.25 *
-                                term.progress[
-                                    pickedAnswerWith.toLowerCase() +
-                                        "IncorrectCount"
-                                ]
-                    ) {
-                        confusionPairDistractors.push({
-                            ...confusionPair.confusedTerm,
-                            priority: confusionPairPriority(
-                                confusionPair.confusedCount,
-                                new Date(confusionPair.lastConfusedAt),
-                                new Date(
-                                    term?.progress?.[
-                                        pickedAnswerWith.toLowerCase() +
-                                            "LastReviewedAt"
-                                    ] ?? Date.now(),
-                                ),
-                            ),
-                        });
-                    }
-                });
-            }
-            if (term?.topReverseConfusionPairs != null) {
-                term.topReverseConfusionPairs.forEach((confusionPair) => {
-                    if (
-                        confusionPair.answeredWith != pickedAnswerWith &&
-                        confusionPair.confusedCount >= 2 &&
-                        term.progress != null &&
-                        confusionPair.confusedCount >
-                            0.25 *
-                                term.progress[
-                                    pickedAnswerWith.toLowerCase() +
-                                        "IncorrectCount"
-                                ]
-                    ) {
-                        confusionPairDistractors.push({
-                            ...confusionPair.term,
-                            priority: confusionPairPriority(
-                                confusionPair.confusedCount,
-                                new Date(confusionPair.lastConfusedAt),
-                                new Date(
-                                    term?.progress?.[
-                                        pickedAnswerWith.toLowerCase() +
-                                            "LastReviewedAt"
-                                    ] ?? Date.now(),
-                                ),
-                            ),
-                        });
-                    }
-                });
-            }
-            if (confusionPairDistractors.length > 0) {
-                /* remove duplicates by making a map and then putting it back into the same array */
-                confusionPairDistractors = [
-                    ...new Map(
-                        confusionPairDistractors.map((obj) => [obj.id, obj]),
-                    ).values(),
-                ];
-                confusionPairDistractors.sort(
-                    (a, b) => b.priority - a.priority,
-                );
-                if (
-                    confusionPairDistractors.length >= 1 &&
-                    Math.random() < 0.8
-                ) {
-                    question.distractors.push({
-                        id: confusionPairDistractors[0].id,
-                        term: confusionPairDistractors[0].term,
-                        def: confusionPairDistractors[0].def,
-                        termImageUrl: confusionPairDistractors[0].termImageUrl,
-                        defImageUrl: confusionPairDistractors[0].defImageUrl
-                    });
-                }
-                if (
-                    confusionPairDistractors.length >= 2 &&
-                    Math.random() < 0.4
-                ) {
-                    question.distractors.push({
-                        id: confusionPairDistractors[1].id,
-                        term: confusionPairDistractors[1].term,
-                        def: confusionPairDistractors[1].def,
-                        termImageUrl: confusionPairDistractors[1].termImageUrl,
-                        defImageUrl: confusionPairDistractors[1].defImageUrl
-                    });
-                }
-            }
 
             function avgDistractorAnswerLength() {
                 if (
@@ -551,69 +421,34 @@ FRQs: ${numFRQsToAssign}`,
                         : answerWith,
             };
 
-            let confusionPairTerms = [];
-            if (term.topConfusionPairs != null) {
-                term.topConfusionPairs.forEach((p) => {
-                    if (p?.confusedCount >= 2) {
-                        confusionPairTerms.push({
-                            id: p.confusedTerm.id,
-                            term: p.confusedTerm.term,
-                            def: p.confusedTerm.def,
-                            termImageUrl: p.confusedTerm.termImageUrl,
-                            defImageUrl: p.confusedTerm.defImageUrl
-                        });
-                    }
-                });
-            }
-            if (term.topReverseConfusionPairs != null) {
-                term.topReverseConfusionPairs.forEach((p) => {
-                    if (p?.confusedCount >= 2) {
-                        confusionPairTerms.push({
-                            id: p.term.id,
-                            term: p.term.term,
-                            def: p.term.def,
-                            termImageUrl: p.term.termImageUrl,
-                            defImageUrl: p.term.defImageUrl
-                        });
-                    }
-                });
-            }
-
             question.distractor = null;
-            if (confusionPairTerms?.length > 0 && Math.random() < 0.75) {
-                question.distractor =
-                    confusionPairTerms[
-                        Math.floor(Math.random() * confusionPairTerms.length)
-                    ];
-            } else {
-                let iterations = 0;
-                while (question.distractor == null && iterations <= 99) {
-                    iterations++;
-                    const randomTerm =
-                        terms[Math.floor(Math.random() * terms.length)];
-                    if (randomTerm.id != term.id) {
-                        question.distractor = {
-                            id: randomTerm.id,
-                            term: randomTerm.term,
-                            def: randomTerm.def,
-                            termImageUrl: randomTerm.termImageUrl,
-                            defImageUrl: randomTerm.defImageUrl
-                        };
-                    }
-                }
-                if (iterations > 99) {
-                    console.log(
-                        "(addTFQ) Over 99 iterations to pick random distractor term",
-                    );
-                    /* use fallback same term as distractor */
+            let iterations = 0;
+            while (question.distractor == null && iterations <= 99) {
+                iterations++;
+                const randomTerm =
+                    terms[Math.floor(Math.random() * terms.length)];
+                if (randomTerm.id != term.id) {
                     question.distractor = {
-                        id: term.id,
-                        term: term.term,
-                        def: term.def,
-                        termImageUrl: term.termImageUrl,
-                        defImageUrl: term.defImageUrl
+                        id: randomTerm.id,
+                        term: randomTerm.term,
+                        def: randomTerm.def,
+                        termImageUrl: randomTerm.termImageUrl,
+                        defImageUrl: randomTerm.defImageUrl
                     };
                 }
+            }
+            if (iterations > 99) {
+                console.log(
+                    "(addTFQ) Over 99 iterations to pick random distractor term",
+                );
+                /* use fallback same term as distractor */
+                question.distractor = {
+                    id: term.id,
+                    term: term.term,
+                    def: term.def,
+                    termImageUrl: term.termImageUrl,
+                    defImageUrl: term.defImageUrl
+                };
             }
             questions.push(question);
         }
