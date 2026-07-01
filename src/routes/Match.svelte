@@ -324,35 +324,32 @@
         </div>
         {#each history as h}
             {const hDuration = $derived((h?.durationMs ?? 0) / 1000)}
-            <div class="box" style="padding: 0.6rem 1rem;">
-                <div class="grid gridthreepartthingrow">
-                    <span class="b threepartthing-one">
-                        {hDuration?.toFixed?.(2)}s · <span class="threepartthing-two {
-                            (h?.incorrectPairIds?.length ?? 0) > 0 ? "ohno" : "yayy"
-                        }">{h?.incorrectPairIds?.length ?? 0} incorrect</span>
-                    </span>
-                    <span class="threepartthing-three"
-                        >{mounted
-                            ? fancyTimestamp.format(
-                                  h.endTimestamp,
-                              )
-                            : "..."}</span
-                    >
-                    <button class="faint" style="padding: 0.5rem 0.8rem;">
-                        <EyeIcon></EyeIcon> Details
-                    </button>
-                    <!-- <a -->
-                    <!--     href={data.authed && !data.local -->
-                    <!--         ? `/practice-tests/${h.id}` -->
-                    <!--         : `/practice-test/local?id=${h.id}`} -->
-                    <!--     class="fourpartthing-four" -->
-                    <!--     style="display: flex; align-items: center; gap: 0.4rem;" -->
-                    <!-- > -->
-                    <!--     <span>View Details</span> -->
-                    <!--     <ForwardLongArrowIcon class="no-margin-top" -->
-                    <!--     ></ForwardLongArrowIcon> -->
-                    <!-- </a> -->
-                </div>
+            <div class="box grid gridfourpartthingrow" style="">
+                <span class="b fourpartthing-one">{hDuration?.toFixed?.(2)}s</span>
+                <span class="fourpartthing-two {
+                    (h?.incorrectPairIds?.length ?? 0) > 0 ? "ohno" : "yayy"
+                }">{h?.incorrectPairIds?.length ?? 0} incorrect</span>
+                <span class="fourpartthing-three"
+                    >{mounted
+                        ? fancyTimestamp.format(
+                              h.endTimestamp,
+                          )
+                        : "..."}</span
+                >
+                <button class="fourpartthing-four faint" style="padding: 0.5rem 0.8rem;">
+                    <EyeIcon></EyeIcon> Show Details
+                </button>
+                <!-- <a -->
+                <!--     href={data.authed && !data.local -->
+                <!--         ? `/practice-tests/${h.id}` -->
+                <!--         : `/practice-test/local?id=${h.id}`} -->
+                <!--     class="fourpartthing-four" -->
+                <!--     style="display: flex; align-items: center; gap: 0.4rem;" -->
+                <!-- > -->
+                <!--     <span>View Details</span> -->
+                <!--     <ForwardLongArrowIcon class="no-margin-top" -->
+                <!--     ></ForwardLongArrowIcon> -->
+                <!-- </a> -->
             </div>
         {:else}
             <div class="box center text fg0">(None)</div>
@@ -640,20 +637,52 @@
         animation: qzfrFadeTransAnim 1s ease-in-out forwards;
     }
 
-    .gridthreepartthingrow {
+    .gridfourpartthingrow {
         display: grid;
         gap: 1rem;
-        grid-template-columns: 2fr 3fr auto;
+        grid-template-columns: 1fr 2fr 3fr auto;
         grid-template-rows: auto;
-        align-items: center;
+        grid-template-areas: "one two three four";
     }
-    .threepartthing-one,
-    .threepartthing-two {
+    .gridfourpartthingrow,
+    .box.gridfourpartthingrow {
+        padding: 0.6rem 1rem;
+    }
+    .fourpartthing-one {
+        grid-area: one;
+        align-self: center;
+    }
+    .fourpartthing-two {
+        grid-area: two;
+        align-self: center;
+    }
+    .fourpartthing-three {
+        grid-area: three;
+        align-self: center;
         justify-self: start;
     }
-    .threepartthing-four {
+    .fourpartthing-four {
+        grid-area: four;
+        align-self: center;
         justify-self: end;
     }
-    /* @media only screen and (max-width: 800px) { */
-    /* } */
+    @media only screen and (max-width: 800px) {
+        .gridfourpartthingrow {
+            grid-template-columns: 1fr 2fr 3fr;
+            grid-template-rows: auto auto;
+            grid-template-areas:
+                "one two three"
+                "four four four";
+        }
+        .gridfourpartthingrow,
+        .box.gridfourpartthingrow {
+            padding: 1rem;
+        }
+        .fourpartthing-three {
+            justify-self: end;
+        }
+        .fourpartthing-four {
+            justify-self: start;
+        }
+    }
 </style>
