@@ -8,6 +8,7 @@
     import { Confetti } from "svelte-confetti";
     import BackIcon from "$lib/icons/BackArrow.svelte";
     import EyeIcon from "$lib/icons/Eye.svelte";
+    import EyeSlashIcon from "$lib/icons/EyeSlash.svelte";
     import ExitIcon from "$lib/icons/Exit.svelte";
     import CheckmarkIcon from "$lib/icons/Checkmark.svelte";
     import GridIcon from "$lib/icons/AppsGrid.svelte";
@@ -22,6 +23,7 @@
     const RANDOM_LOOP_MAX_TRIES = 40;
     let termIds = [];
     let history = $state(data?.pastMatchActivities ?? []);
+    let bestRecord = $state(null);
 
     if (!local && (terms == null || terms.length == 0)) {
         showStartErr = true;
@@ -130,13 +132,31 @@
             })();
         }
         (async () => {
-            history = [
-                ...history,
-                ...(await db.matchActivities.where("studysetIds").equals(localId ?? cloudId).toArray())
-            ];
-            history = history.sort(
-                (a, b) => b.endTimestamp.localeCompare(a.endTimestamp)
-            );
+            try {
+                history = [
+                    ...history,
+                    ...(await db.matchActivities.where("studysetIds").equals(localId ?? cloudId).toArray())
+                ];
+                history = history.sort(
+                    (a, b) => b.endTimestamp.localeCompare(a.endTimestamp)
+                );
+            } catch (err) {
+                console.error("error getting local match history:", err);
+            }
+            if (history?.length > 0) {
+                let best = history[0];
+                history.forEach((h) => {
+                    const hIncorrect = h.incorrectPairIds.length;
+                    const bestIncorrect = best.incorrectPairIds.length;
+                    if (
+                        hIncorrect < bestIncorrect ||
+                        (hIncorrect === bestIncorrect && h.durationMs < best.durationMs)
+                    ) {
+                        best = h;
+                    }
+                });
+                bestRecord = best;
+            }
         })();
 
         return () => {
@@ -313,6 +333,19 @@
 </div>
 <div class="grid page" style="margin-top: 6rem;">
     <div class="content">
+        <p class="h4" style="margin-bottom: 0px;">
+            Current Record
+        </p>
+        <div class="flex" style="gap: 2rem; margin-top: 0.6rem;">
+            {#if bestRecord != null}
+                <span style="font-size: 2rem;">{((bestRecord?.durationMs ?? 0)/1000).toFixed(2)}s</span>
+                <span style="font-size: 2rem;" class="{
+                    bestRecord.incorrectPairIds?.length ?? 0 > 0 ? "ohno" : "yayy"
+                }">{bestRecord.incorrectPairIds?.length ?? 0} incorrect</span>
+            {:else}
+                <span style="font-size: 1.4rem;" class="fg0">(None)</span>
+            {/if}
+        </div>
         <div
             class="flex compact-gap"
             style="margin-top: 3rem; align-items: end; justify-content: space-between; flex-wrap: wrap;"
@@ -324,32 +357,33 @@
         </div>
         {#each history as h}
             {const hDuration = $derived((h?.durationMs ?? 0) / 1000)}
-            <div class="box grid gridfourpartthingrow" style="">
-                <span class="b fourpartthing-one">{hDuration?.toFixed?.(2)}s</span>
-                <span class="fourpartthing-two {
-                    (h?.incorrectPairIds?.length ?? 0) > 0 ? "ohno" : "yayy"
-                }">{h?.incorrectPairIds?.length ?? 0} incorrect</span>
-                <span class="fourpartthing-three"
-                    >{mounted
-                        ? fancyTimestamp.format(
-                              h.endTimestamp,
-                          )
-                        : "..."}</span
-                >
-                <button class="fourpartthing-four faint" style="padding: 0.5rem 0.8rem;">
-                    <EyeIcon></EyeIcon> Show Details
-                </button>
-                <!-- <a -->
-                <!--     href={data.authed && !data.local -->
-                <!--         ? `/practice-tests/${h.id}` -->
-                <!--         : `/practice-test/local?id=${h.id}`} -->
-                <!--     class="fourpartthing-four" -->
-                <!--     style="display: flex; align-items: center; gap: 0.4rem;" -->
-                <!-- > -->
-                <!--     <span>View Details</span> -->
-                <!--     <ForwardLongArrowIcon class="no-margin-top" -->
-                <!--     ></ForwardLongArrowIcon> -->
-                <!-- </a> -->
+            <div class="box outerfourpartthing">
+                <div class="grid gridfourpartthingrow">
+                    <span class="b fourpartthing-one">{hDuration?.toFixed?.(2)}s</span>
+                    <span class="fourpartthing-two {
+                        (h?.incorrectPairIds?.length ?? 0) > 0 ? "ohno" : "yayy"
+                    }">{h?.incorrectPairIds?.length ?? 0} incorrect</span>
+                    <span class="fourpartthing-three"
+                        >{mounted
+                            ? fancyTimestamp.format(
+                                  h.endTimestamp,
+                              )
+                            : "..."}</span
+                    >
+                    <button class="fourpartthing-four faint" style="padding: 0.5rem 0.8rem;" onclick={() => {
+                        h.showDetails = !h.showDetails;
+                        h.showDetailsLoading = true;
+                        if (h.incorrectPairData == null) {
+                            local
+                        }
+                    }}>
+                        {#if h.showDetails}
+                        <EyeSlashIcon></EyeSlashIcon> Hide Details
+                        {:else}
+                        <EyeIcon></EyeIcon> Show Details
+                        {/if}
+                    </button>
+                </div>
             </div>
         {:else}
             <div class="box center text fg0">(None)</div>
@@ -644,8 +678,8 @@
         grid-template-rows: auto;
         grid-template-areas: "one two three four";
     }
-    .gridfourpartthingrow,
-    .box.gridfourpartthingrow {
+    .outerfourpartthing,
+    .box.outerfourpartthing {
         padding: 0.6rem 1rem;
     }
     .fourpartthing-one {
@@ -674,15 +708,15 @@
                 "one two three"
                 "four four four";
         }
-        .gridfourpartthingrow,
-        .box.gridfourpartthingrow {
+        .outerfourpartthing,
+        .box.outerfourpartthing {
             padding: 1rem;
         }
         .fourpartthing-three {
             justify-self: end;
         }
         .fourpartthing-four {
-            justify-self: start;
+            justify-self: center;
         }
     }
 </style>
