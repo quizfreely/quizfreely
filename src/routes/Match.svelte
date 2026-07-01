@@ -18,6 +18,7 @@
     let startErrMsg = $state("");
     const PAIRS_COUNT = 6;
     const RANDOM_LOOP_MAX_TRIES = 40;
+    let termIds = [];
 
     if (!local && (terms == null || terms.length == 0)) {
         showStartErr = true;
@@ -27,6 +28,7 @@
     }
 
     function selectTerms() {
+        termIds = [];
         const indices = [];
         for (let n = 0; n < PAIRS_COUNT; n++) {
             let randomIndex = Math.floor(Math.random() * terms.length);
@@ -40,6 +42,9 @@
             }
             indices.push(randomIndex);
         }
+        indices.forEach((index) => {
+            termIds.push(terms[index]?.id);
+        })
         items = shuffleInPlace([
             ...indices.map(index => ({
                 ...terms[index],
@@ -174,11 +179,20 @@
 
         (async () => {
             if (local || !data.authed) {
-                idbApiLayer.recordMatch({
-                    durationMs: timeElapsedMs,
-                    endTimestamp: new Date().toISOString(),
-                    incorrectPairs
-                })
+                try {
+                    const res = await idbApiLayer.recordMatchActivity({
+                        durationMs: Math.floor(timeElapsedMs),
+                        termIds,
+                        incorrectPairIds: incorrectPairs
+                    });
+                    if (res?.id == null) {
+                        console.error("Err saving local match activity, res:", res);
+                        alert("Error saving match progress");
+                    }
+                } catch (err) {
+                    console.error("Error saving local match progress:", err);
+                    alert("Error saving match progress");
+                }
             } else {
                 try {
                     const raw = await fetch("/api/graphql", {
@@ -187,27 +201,28 @@
                             "Content-Type": "application/json"
                         },
                         body: JSON.stringify({
-                            query: `mutation recordMatch($durationMs: Float!, $incorrectPairs: [[ID!]!]!) {
-    recordMatch(match: {
+                            query: `mutation recordMatch($durationMs: Int!, $termIds: [ID!]! $incorrectPairIds: [[ID!]!]!) {
+    recordMatchActivity(input: {
         durationMs: $durationMs,
-        incorrectPairs: $incorrectPairs
-    }) {
-        id
-    }
+        termIds: $termIds,
+        incorrectPairIds: $incorrectPairIds
+    }) { id }
 }`,
                             variables: {
-                                durationMs: timeElapsedMs,
-                                incorrectPairs
+                                durationMs: Math.floor(timeElapsedMs),
+                                termIds,
+                                incorrectPairIds: incorrectPairs
                             }
                         })
                     });
                     const resp = await raw.json();
-                    if (resp?.data?.id != null) {
-                        // TODO: WORK IN PROGRESS
+                    if (resp?.data?.recordMatchActivity?.id == null) {
+                        console.error("Err saving cloud match activity, resp:", resp);
+                        alert("Error saving match progress");
                     }
                 } catch (err) {
-                    console.error("Error saving cloud Match progress:", err);
-                    alert("Error saving Match progress")
+                    console.error("Error saving cloud match progress:", err);
+                    alert("Error saving match progress");
                 }
             }
         })();
@@ -299,9 +314,12 @@
                 ((timeElapsedMs / PAIRS_COUNT) > 60000 ? Math.floor((timeElapsedMs/PAIRS_COUNT)/60000)+"m " : "") + ((timeElapsedMs/PAIRS_COUNT)/1000).toFixed(2)+"s"
             } average time per pair
         </p>
-        <a href={local ? `/studyset/local?id=${localId}` : `/studysets/${cloudId}`} class="button large" style="width: 100%; margin-top: 1.4rem;">
+        <!-- <a href={local ? `/studyset/local?id=${localId}` : `/studysets/${cloudId}`} class="button large" style="width: 100%; margin-top: 1.4rem;"> -->
+        <button class="large" style="width: 100%; margin-top: 1.4rem;" onclick={() => {
+            window.location.reload()
+        }}>
             <CheckmarkIcon width="1em" height="1em"></CheckmarkIcon> Done
-        </a>
+        </button>
         <button class="large alt" style="width: 100%; margin-top: 1.4rem;" onclick={() => {
             window.location.reload()
         }}><RepeatIcon width="1em" height="1em"></RepeatIcon> Play Again</button>
