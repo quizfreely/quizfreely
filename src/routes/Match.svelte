@@ -7,6 +7,7 @@
     import { slide, fade } from "svelte/transition";
     import { Confetti } from "svelte-confetti";
     import BackIcon from "$lib/icons/BackArrow.svelte";
+    import EyeIcon from "$lib/icons/Eye.svelte";
     import ExitIcon from "$lib/icons/Exit.svelte";
     import CheckmarkIcon from "$lib/icons/Checkmark.svelte";
     import GridIcon from "$lib/icons/AppsGrid.svelte";
@@ -338,7 +339,7 @@
                             : "..."}</span
                     >
                     <button class="faint" style="padding: 0.5rem 0.8rem;">
-                        Details
+                        <EyeIcon></EyeIcon> Details
                     </button>
                     <!-- <a -->
                     <!--     href={data.authed && !data.local -->
