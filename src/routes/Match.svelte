@@ -331,26 +331,26 @@
         }}><CheckmarkIcon width="1em" height="1em"></CheckmarkIcon> Start</button>
     </div>
 </div>
-<div class="grid page" style="margin-top: 6rem;">
-    <div class="content">
-        <p class="h4" style="margin-bottom: 0px;">
+<div class="grid page" style="margin-top: 8rem;">
+    <div class="content" style={bestRecord == null && (history?.length ?? 0) == 0 ? "opacity: 0.6;" : ""}>
+        <p class="h4 fg0" style="margin-bottom: 0px;">
             Current Record
         </p>
-        <div class="flex" style="gap: 2rem; margin-top: 0.6rem;">
-            {#if bestRecord != null}
-                <span style="font-size: 2rem;">{((bestRecord?.durationMs ?? 0)/1000).toFixed(2)}s</span>
-                <span style="font-size: 2rem;" class="{
+        {#if bestRecord != null}
+            <div class="box flex" style="gap: 2rem; margin-top: 0.6rem;">
+                <span style="font-size: 1.4rem;">{((bestRecord?.durationMs ?? 0)/1000).toFixed(2)}s</span>
+                <span style="font-size: 1.4rem;" class="{
                     bestRecord.incorrectPairIds?.length ?? 0 > 0 ? "ohno" : "yayy"
                 }">{bestRecord.incorrectPairIds?.length ?? 0} incorrect</span>
-            {:else}
-                <span style="font-size: 1.4rem;" class="fg0">(None)</span>
-            {/if}
-        </div>
+            </div>
+        {:else}
+            <div class="box center text fg0">(None)</div>
+        {/if}
         <div
             class="flex compact-gap"
             style="margin-top: 3rem; align-items: end; justify-content: space-between; flex-wrap: wrap;"
         >
-            <p class="h4" style="margin-bottom: 0px;">
+            <p class="h4 fg0" style="margin-bottom: 0px;">
                 Recent
             </p>
             <p class="fg0">{history?.length ?? 0} total</p>
