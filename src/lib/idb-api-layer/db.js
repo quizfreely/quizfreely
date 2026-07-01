@@ -194,8 +194,8 @@ db.version(16).stores({
                         studysetIds.add(t.studysetId);
                     return {
                         id: t.id,
-                        term: t.term || '',
-                        def: t.def || ''
+                        term: t.term || t.termSnapshot || '',
+                        def: t.def || t.defSnapshot || ''
                     };
                 };
                 if (q.mcq) {
@@ -269,5 +269,130 @@ db.version(16).stores({
             await tx.table("practiceTests").put(pt);
         }
     });
+});
+db.version(17).stores({
+    practiceTests: "++id, timestamp, *studysetIds, questionsCorrect, questionsTotal",
+    practiceTestQuestions: "++id, practiceTestId, termId, [practiceTestId+position]",
+    termProgress: "++id, termId, termFirstReviewedAt, termLastReviewedAt, " +
+        "termReviewCount, defFirstReviewedAt, defLastReviewedAt, " +
+        "defReviewCount, termCorrectCount, termIncorrectCount, defCorrectCount, defIncorrectCount",
+    termProgressHistory: null
+}).upgrade(async (tx) => {
+    await tx.table("termProgress").toCollection().modify(tp => {
+        delete tp.termLeitnerSystemBox;
+        delete tp.defLeitnerSystemBox;
+    });
+    await tx.table("practiceTests").toCollection().each(async (pt) => {
+        if (pt.questions && Array.isArray(pt.questions)) {
+            for (let i = 0; i < pt.questions.length; i++) {
+                const q = pt.questions[i];
+                let type = "mcq";
+                let qData = {};
+                let termAtp = null;
+                let correct = false;
+                let answerWith = "";
+                if (q.mcq) {
+                    type = "mcq";
+                    termAtp = q.mcq.term;
+                    correct = q.mcq.correct;
+                    answerWith = q.mcq.answerWith;
+                    qData = {
+                        distractors: (q.mcq.distractors || []).map((d) => ({
+                            id: d.id,
+                            term: d.term || d.termSnapshot || "",
+                            def: d.def || d.defSnapshot || ""
+                        })),
+                        correctChoiceIndex: q.mcq.correctChoiceIndex,
+                        answeredIndex: q.mcq.answeredIndex
+                    };
+                }
+                else if (q.tfq) {
+                    type = "tfq";
+                    termAtp = q.tfq.term;
+                    correct = q.tfq.correct;
+                    answerWith = q.tfq.answerWith;
+                    qData = {
+                        distractor: q.tfq.distractor ? {
+                            id: q.tfq.distractor.id,
+                            term: q.tfq.distractor.term || q.tfq.distractor.termSnapshot || "",
+                            def: q.tfq.distractor.def || q.tfq.distractor.defSnapshot || ""
+                        } : null,
+                        answeredBool: q.tfq.answeredBool
+                    };
+                }
+                else if (q.frq) {
+                    type = "frq";
+                    termAtp = q.frq.term;
+                    correct = q.frq.correct;
+                    answerWith = q.frq.answerWith;
+                    let userMarkedCorrect = q.frq.userMarkedCorrect;
+                    if (!correct && userMarkedCorrect) {
+                        correct = true;
+                        userMarkedCorrect = true;
+                    }
+                    qData = {
+                        answeredString: q.frq.answeredString,
+                        userMarkedCorrect: userMarkedCorrect
+                    };
+                }
+                if (termAtp) {
+                    await tx.table("practiceTestQuestions").add({
+                        practiceTestId: pt.id,
+                        termId: termAtp.id,
+                        term: termAtp.term || termAtp.termSnapshot || "",
+                        def: termAtp.def || termAtp.defSnapshot || "",
+                        type: type,
+                        position: i,
+                        correct: correct,
+                        answerWith: answerWith,
+                        data: qData
+                    });
+                }
+            }
+        }
+        delete pt.questions;
+        delete pt.questionTermIds;
+        delete pt.distractorTermIds;
+        await tx.table("practiceTests").put(pt);
+    });
+});
+db.version(18).stores({}).upgrade(async (tx) => {
+    await tx.table("practiceTestQuestions").toCollection().modify(q => {
+        if (q.termSnapshot !== undefined || q.defSnapshot !== undefined) {
+            q.term = q.termSnapshot ?? q.term ?? "";
+            q.def = q.defSnapshot ?? q.def ?? "";
+            delete q.termSnapshot;
+            delete q.defSnapshot;
+        }
+        if (q.data) {
+            if (q.data.distractors && Array.isArray(q.data.distractors)) {
+                for (const d of q.data.distractors) {
+                    if (d.termSnapshot !== undefined || d.defSnapshot !== undefined) {
+                        d.term = d.termSnapshot ?? d.term ?? "";
+                        d.def = d.defSnapshot ?? d.def ?? "";
+                        delete d.termSnapshot;
+                        delete d.defSnapshot;
+                    }
+                }
+            }
+            if (q.data.distractor) {
+                const d = q.data.distractor;
+                if (d.termSnapshot !== undefined || d.defSnapshot !== undefined) {
+                    d.term = d.termSnapshot ?? d.term ?? "";
+                    d.def = d.defSnapshot ?? d.def ?? "";
+                    delete d.termSnapshot;
+                    delete d.defSnapshot;
+                }
+            }
+        }
+    });
+});
+db.version(19).stores({
+    termConfusionPairs: null,
+    reviewEvents: "++id, termId, practiceTestQuestionId, timestamp, answeredTermId, practiceTestQuestionType, reviewActivityType"
+});
+db.version(20).stores({
+    matchActivities: "++id, *studysetIds, endTimestamp",
+    reviewEvents: "++id, termId, practiceTestQuestionId, matchActivityId, timestamp, answeredTermId, practiceTestQuestionType, reviewActivityType"
 });
 export { db };

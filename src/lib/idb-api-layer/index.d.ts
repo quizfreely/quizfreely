@@ -1,15 +1,17 @@
-import { Term, TermConfusionPair } from "./db";
+import { Term, PracticeTestQuestion, MatchActivity } from "./db";
 type StudysetResolveProps = {
     terms?: boolean | TermResolveProps;
     practiceTests?: boolean;
+    matchActivities?: boolean;
 };
 type TermResolveProps = {
     progress?: boolean;
-    progressHistory?: boolean;
-    topConfusionPairs?: boolean;
-    topReverseConfusionPairs?: boolean;
     termImageUrl?: boolean;
     defImageUrl?: boolean;
+};
+type MatchActivityResolveProps = {
+    termIds?: boolean;
+    incorrectPairIds?: boolean;
 };
 export * from "./db";
 export * from "./images";
@@ -31,10 +33,11 @@ export declare const idbApiLayer: {
     deleteTerms: (deleteTermIDs: number[]) => Promise<void>;
     deleteStudyset: (id: number) => Promise<void>;
     updateTermProgress: (termProgressArray: any) => Promise<void>;
-    getTopConfusionPairs: (termId: any, resolveProps?: any) => Promise<TermConfusionPair[]>;
-    getTopReverseConfusionPairs: (confusedTermId: any, resolveProps?: any) => Promise<TermConfusionPair[]>;
-    recordConfusionPairs: (confusionPairs: any) => Promise<boolean>;
-    recordPracticeTest: (practiceTest: any) => Promise<import("./db").PracticeTest | undefined>;
-    updatePracticeTest: (id: number, practiceTest: any) => Promise<import("./db").PracticeTest | undefined>;
+    recordPracticeTest: (practiceTest: any) => Promise<import("./db").PracticeTest | null>;
+    getPracticeTestWithQuestions: (ptId: number) => Promise<import("./db").PracticeTest | null>;
+    updatePracticeTestQuestion: (id: number, correct: boolean, userMarkedCorrect?: boolean) => Promise<PracticeTestQuestion | undefined>;
     getPracticeTestsByTermId: (termId: number | string) => Promise<import("./db").PracticeTest[]>;
+    getMatchActivityById: (id: number, resolveProps?: MatchActivityResolveProps) => Promise<MatchActivity | null>;
+    getMatchActivitiesByStudysetId: (studysetId: number | string) => Promise<MatchActivity[]>;
+    recordMatchActivity: (input: any) => Promise<MatchActivity | null>;
 };

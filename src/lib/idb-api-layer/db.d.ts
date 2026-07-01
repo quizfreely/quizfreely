@@ -14,6 +14,7 @@ interface Studyset {
     updatedAt: string;
     terms?: Term[];
     practiceTests?: PracticeTest[];
+    matchActivities?: MatchActivity[];
 }
 interface Term {
     id: number;
@@ -28,9 +29,6 @@ interface Term {
     createdAt: string;
     updatedAt: string;
     progress?: TermProgress;
-    progressHistory?: TermProgressHistory[];
-    topConfusionPairs?: TermConfusionPair[];
-    topReverseConfusionPairs?: TermConfusionPair[];
 }
 interface TermAtp {
     id: number | string;
@@ -40,14 +38,38 @@ interface TermAtp {
 interface PracticeTest {
     id: number;
     studysetIds: (number | string)[];
-    questionTermIds: (number | string)[];
-    distractorTermIds: (number | string)[];
     timestamp: string;
     questionsCorrect: number;
     questionsTotal: number;
-    questions: Question[];
+    questions?: PracticeTestQuestion[];
+}
+interface PracticeTestQuestion {
+    id: number;
+    practiceTestId: number;
+    termId: number | string;
+    term: string;
+    def: string;
+    type: "mcq" | "tfq" | "frq";
+    position: number;
+    correct: boolean;
+    answerWith: string;
+    data: MCQData | TFQData | FRQData;
+}
+interface MCQData {
+    distractors: TermAtp[];
+    correctChoiceIndex: number;
+    answeredIndex: number | null;
+}
+interface TFQData {
+    distractor?: TermAtp | null;
+    answeredBool: boolean;
+}
+interface FRQData {
+    answeredString: string;
+    userMarkedCorrect?: boolean;
 }
 interface Question {
+    id?: number;
     mcq?: MCQ;
     tfq?: TFQ;
     frq?: FRQ;
@@ -87,27 +109,29 @@ interface TermProgress {
     termLastReviewedAt?: string;
     defFirstReviewedAt?: string;
     defLastReviewedAt?: string;
-    termLeitnerSystemBox?: number;
-    defLeitnerSystemBox?: number;
 }
-interface TermProgressHistory {
+type PracticeTestQuestionType = "mcq" | "tfq" | "frq";
+type ReviewActivityType = "PRACTICE_TEST" | "MATCH";
+interface MatchActivity {
     id: number;
+    durationMs: number;
+    endTimestamp: string;
+    studysetIds: (number | string)[];
+    termIds?: (number | string)[];
+    incorrectPairIds?: (number | string)[][];
+}
+interface ReviewEvent {
+    id: number;
+    termId: number | string;
+    practiceTestQuestionId: number | null;
+    matchActivityId: number | null;
+    correct: boolean;
+    answerWith: string | null;
     timestamp: string;
-    termId: number | string;
-    termCorrectCount: number;
-    termIncorrectCount: number;
-    defCorrectCount: number;
-    defIncorrectCount: number;
-}
-interface TermConfusionPair {
-    id: number;
-    termId: number | string;
-    confusedTermId: number | string;
-    answeredWith: string;
-    confusedCount: number;
-    lastConfusedAt: string;
-    term?: Omit<Term, "topConfusionPairs" | "topReverseConfusionPairs">;
-    confusedTerm?: Omit<Term, "topConfusionPairs" | "topReverseConfusionPairs">;
+    answeredTermId: number | string | null;
+    practiceTestQuestionType: PracticeTestQuestionType | null;
+    reviewActivityType: ReviewActivityType;
+    answeredString: string | null;
 }
 interface Image {
     key: number;
@@ -117,10 +141,11 @@ declare const db: Dexie & {
     studysets: EntityTable<Studyset, "id">;
     terms: EntityTable<Term, "id">;
     practiceTests: EntityTable<PracticeTest, "id">;
+    practiceTestQuestions: EntityTable<PracticeTestQuestion, "id">;
     termProgress: EntityTable<TermProgress, "id">;
-    termProgressHistory: EntityTable<TermProgressHistory, "id">;
-    termConfusionPairs: EntityTable<TermConfusionPair, "id">;
+    reviewEvents: EntityTable<ReviewEvent, "id">;
+    matchActivities: EntityTable<MatchActivity, "id">;
     images: EntityTable<Image, "key">;
 };
-export type { Studyset, Term, TermAtp, PracticeTest, Question, MCQ, TFQ, FRQ, TermProgress, TermProgressHistory, TermConfusionPair };
+export type { Studyset, Term, TermAtp, PracticeTest, PracticeTestQuestion, MCQData, TFQData, FRQData, Question, MCQ, TFQ, FRQ, TermProgress, ReviewEvent, MatchActivity, PracticeTestQuestionType, ReviewActivityType };
 export { db };
