@@ -322,35 +322,24 @@
             <p class="fg0">{history?.length ?? 0} total</p>
         </div>
         {#each history as h}
-            <div class="box">
-                <div class="grid gridfourpartthingrow">
-                    <span
-                        class="b fourpartthing-one {Math.floor(
-                            (h.questionsCorrect /
-                                h.questionsTotal) *
-                                100,
-                        ) >= 90
-                            ? 'yay'
-                            : 'ohno'}"
-                        >{Math.floor(
-                            (h.questionsCorrect /
-                                h.questionsTotal) *
-                                100,
-                        )}%</span
-                    >
-                    <span class="fourpartthing-two"
-                        >{h.questionsCorrect}/{h.questionsTotal}</span
-                    >
-                    <span class="fourpartthing-three"
+            {const hDuration = $derived((h?.durationMs ?? 0) / 1000)}
+            <div class="box" style="padding: 0.6rem 1rem;">
+                <div class="grid gridthreepartthingrow">
+                    <span class="b threepartthing-one">
+                        {hDuration?.toFixed?.(2)}s · <span class="threepartthing-two {
+                            (h?.incorrectPairIds?.length ?? 0) > 0 ? "ohno" : "yayy"
+                        }">{h?.incorrectPairIds?.length ?? 0} incorrect</span>
+                    </span>
+                    <span class="threepartthing-three"
                         >{mounted
                             ? fancyTimestamp.format(
-                                  practiceTest.timestamp,
+                                  h.endTimestamp,
                               )
                             : "..."}</span
                     >
-                    <span>
-                            link used to be here
-                    </span>
+                    <button class="faint" style="padding: 0.5rem 0.8rem;">
+                        Details
+                    </button>
                     <!-- <a -->
                     <!--     href={data.authed && !data.local -->
                     <!--         ? `/practice-tests/${h.id}` -->
@@ -649,4 +638,21 @@
     .qzfr-fade-trans {
         animation: qzfrFadeTransAnim 1s ease-in-out forwards;
     }
+
+    .gridthreepartthingrow {
+        display: grid;
+        gap: 1rem;
+        grid-template-columns: 2fr 3fr auto;
+        grid-template-rows: auto;
+        align-items: center;
+    }
+    .threepartthing-one,
+    .threepartthing-two {
+        justify-self: start;
+    }
+    .threepartthing-four {
+        justify-self: end;
+    }
+    /* @media only screen and (max-width: 800px) { */
+    /* } */
 </style>
