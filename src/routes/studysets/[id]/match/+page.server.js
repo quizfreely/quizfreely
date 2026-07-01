@@ -31,6 +31,13 @@ export async function load({ params, cookies }) {
                             termImageUrl
                             defImageUrl
                         }
+                        matchActivities {
+                            id
+                            durationMs
+                            endTimestamp
+                            termIds
+                            incorrectPairIds
+                        }
                     }
                 }`,
                 variables: {
@@ -48,6 +55,7 @@ export async function load({ params, cookies }) {
             if (apiRes?.data?.studyset) {
                 return {
                     terms: apiRes.data.studyset.terms,
+                    pastMatchActivities: apiRes.data.studyset.matchActivities,
                     cloudId: params.id,
                     authed: authed,
                     authedUser: authedUser,

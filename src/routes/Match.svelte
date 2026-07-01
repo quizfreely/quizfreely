@@ -2,7 +2,8 @@
     import { onMount, tick, onDestroy } from "svelte";
     import { goto } from "$app/navigation";
     import { setCancelBeforeNavigate } from "$lib/cancel-before-navigate.js";
-    import { idbApiLayer } from "$lib/idb-api-layer";
+    import { idbApiLayer, db } from "$lib/idb-api-layer";
+    import { fancyTimestamp } from "$lib/fancyTimestamp";
     import { slide, fade } from "svelte/transition";
     import { Confetti } from "svelte-confetti";
     import BackIcon from "$lib/icons/BackArrow.svelte";
@@ -19,6 +20,7 @@
     const PAIRS_COUNT = 6;
     const RANDOM_LOOP_MAX_TRIES = 40;
     let termIds = [];
+    let history = $state(data?.pastMatchActivities ?? []);
 
     if (!local && (terms == null || terms.length == 0)) {
         showStartErr = true;
@@ -97,7 +99,9 @@
     let objectUrls = [];
     let timerSpan = $state(undefined);
     let timerSpanExtra = $state(undefined);
+    let mounted = $state(false);
     onMount(() => {
+        mounted = true;
         if (local) {
             (async () => {
                 const studyset = await idbApiLayer.getStudysetById(localId, {
@@ -124,6 +128,15 @@
                 selectTerms();
             })();
         }
+        (async () => {
+            history = [
+                ...history,
+                ...(await db.matchActivities.where("studysetIds").equals(localId ?? cloudId).toArray())
+            ];
+            history = history.sort(
+                (a, b) => b.endTimestamp.localeCompare(a.endTimestamp)
+            );
+        })();
 
         return () => {
             cancelAnimationFrame(timerAnimationFrame);
@@ -295,6 +308,65 @@
             timerSpanExtra.replaceChildren(timerTxtNodeExtra);
             timerAnimationFrame = requestAnimationFrame(updateTimer);
         }}><CheckmarkIcon width="1em" height="1em"></CheckmarkIcon> Start</button>
+    </div>
+</div>
+<div class="grid page" style="margin-top: 6rem;">
+    <div class="content">
+        <div
+            class="flex compact-gap"
+            style="margin-top: 3rem; align-items: end; justify-content: space-between; flex-wrap: wrap;"
+        >
+            <p class="h4" style="margin-bottom: 0px;">
+                Recent
+            </p>
+            <p class="fg0">{history?.length ?? 0} total</p>
+        </div>
+        {#each history as h}
+            <div class="box">
+                <div class="grid gridfourpartthingrow">
+                    <span
+                        class="b fourpartthing-one {Math.floor(
+                            (h.questionsCorrect /
+                                h.questionsTotal) *
+                                100,
+                        ) >= 90
+                            ? 'yay'
+                            : 'ohno'}"
+                        >{Math.floor(
+                            (h.questionsCorrect /
+                                h.questionsTotal) *
+                                100,
+                        )}%</span
+                    >
+                    <span class="fourpartthing-two"
+                        >{h.questionsCorrect}/{h.questionsTotal}</span
+                    >
+                    <span class="fourpartthing-three"
+                        >{mounted
+                            ? fancyTimestamp.format(
+                                  practiceTest.timestamp,
+                              )
+                            : "..."}</span
+                    >
+                    <span>
+                            link used to be here
+                    </span>
+                    <!-- <a -->
+                    <!--     href={data.authed && !data.local -->
+                    <!--         ? `/practice-tests/${h.id}` -->
+                    <!--         : `/practice-test/local?id=${h.id}`} -->
+                    <!--     class="fourpartthing-four" -->
+                    <!--     style="display: flex; align-items: center; gap: 0.4rem;" -->
+                    <!-- > -->
+                    <!--     <span>View Details</span> -->
+                    <!--     <ForwardLongArrowIcon class="no-margin-top" -->
+                    <!--     ></ForwardLongArrowIcon> -->
+                    <!-- </a> -->
+                </div>
+            </div>
+        {:else}
+            <div class="box center text fg0">(None)</div>
+        {/each}
     </div>
 </div>
 {:else if showDone}
