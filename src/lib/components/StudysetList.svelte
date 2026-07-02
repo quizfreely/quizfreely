@@ -38,6 +38,7 @@
     onMount(async function () {
         localStudysetList = await db.studysets
             .orderBy("updatedAt")
+            .reverse()
             .filter((studyset) => studyset.draft == false)
             .toArray();
         for (const studyset of localStudysetList) {

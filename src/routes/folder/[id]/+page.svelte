@@ -128,7 +128,7 @@
                 },
                 body: JSON.stringify({
                     query: `mutation ($id: ID!, $name: String!) {
-    renameFolder(id: $id, name: $name) {
+    updateFolder(id: $id, name: $name) {
         id
     }
 }`,
@@ -139,7 +139,7 @@
                 }),
             });
             const resp = await raw.json();
-            if (resp?.data?.renameFolder) {
+            if (resp?.data?.updateFolder) {
                 folder.name = folderRenamingName;
                 showFolderRenamingFlag = false;
                 showFolderRenamingErr = false;
