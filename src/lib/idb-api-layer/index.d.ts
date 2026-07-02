@@ -19,6 +19,7 @@ export declare const idbApiLayer: {
     getStudysetById: (id: number, resolveProps?: StudysetResolveProps) => Promise<import("./db").Studyset | null>;
     getTermsByStudysetId: (studysetId: number, resolveProps?: TermResolveProps) => Promise<Term[]>;
     getTermById: (termId: number, resolveProps?: TermResolveProps) => Promise<Term>;
+    getTermsByIds: (termIds: number[], resolveProps?: TermResolveProps) => Promise<(Term | null)[]>;
     createStudyset: ({ title, draft }: {
         title: string;
         draft: boolean;

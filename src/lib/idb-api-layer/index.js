@@ -90,6 +90,33 @@ export const idbApiLayer = {
         }
         return term;
     },
+    getTermsByIds: async function (termIds, resolveProps) {
+        const rawTerms = await db.terms.bulkGet(termIds);
+        const terms = rawTerms.map(t => t ?? null);
+        if (resolveProps?.progress ||
+            resolveProps?.termImageUrl ||
+            resolveProps?.defImageUrl) {
+            await Promise.all(terms.map(async (term) => {
+                if (term == null) return;
+                const promises = {};
+                if (resolveProps?.progress) {
+                    promises.progress = db.termProgress.where("termId").equals(term.id).toArray();
+                }
+                if (resolveProps?.termImageUrl && term.termImageKey != null) {
+                    promises.termImageUrl = idbLayerImg.getImageObjectUrl(term.termImageKey);
+                }
+                if (resolveProps?.defImageUrl && term.defImageKey != null) {
+                    promises.defImageUrl = idbLayerImg.getImageObjectUrl(term.defImageKey);
+                }
+                const results = await Promise.all(Object.entries(promises).map(async ([k, p]) => [k, await p]));
+                const resolved = Object.fromEntries(results);
+                term.progress = resolved.progress?.[0] ?? undefined;
+                term.termImageUrl = term.termImageKey == null ? null : resolved.termImageUrl;
+                term.defImageUrl = term.defImageKey == null ? null : resolved.defImageUrl;
+            }));
+        }
+        return terms;
+    },
     createStudyset: async function ({ title, draft }) {
         const rnISOString = (new Date()).toISOString();
         const newId = await db.studysets.add({
