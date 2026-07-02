@@ -219,7 +219,7 @@
                         durationMs: Math.floor(timeElapsedMs),
                         termIds,
                         incorrectPairIds: incorrectPairs
-                    });
+                    }, async () => { return cloudId ?? null; });
                     if (res?.id == null) {
                         console.error("Err saving local match activity, res:", res);
                         alert("Error saving match progress");
