@@ -259,17 +259,13 @@
     </button>
 {/snippet}
 
-<div>
+<div class="grid page">
+    <div class="content">
     {#if showErrorBox}
         <div class="box ohno" transition:slide={{ duration: 400 }}>
             <p>{errorBoxText}</p>
         </div>
     {/if}
-    <div class="flex">
-        <a href="/dashboard" class="button faint">
-            <BackIcon></BackIcon> Back
-        </a>
-    </div>
     <p class="h4" style="margin-top: 1rem;">
         <FolderIcon></FolderIcon>
         {folder?.name}
@@ -344,6 +340,7 @@
             <p class="fg0">This folder is empty</p>
         </div>
     {/if}
+    </div>
 </div>
 
 {#if showFolderRenamingFlag}
