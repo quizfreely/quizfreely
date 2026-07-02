@@ -105,7 +105,7 @@
                 so we need to map local progress to cloud terms
 
                 `terms` has already been populated during SSR (above, before onMount) */
-                practiceTests = await db.practiceTests.where("studysetId").equals(data.studysetId).toArray();
+                practiceTests = await db.practiceTests.where("studysetIds").equals(data.studysetId).toArray();
                 practiceTests?.sort(
                     /* timestamps are ISO strings in UTC,
                     so lexical/alphanumeric sorting is the same as chronological sorting
