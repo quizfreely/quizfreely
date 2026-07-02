@@ -54,8 +54,8 @@ export async function load({ cookies, params, url }) {
 
         let apiRes = await rawApiRes.json();
 
-        if (apiRes.errors) {
-            console.error(apiRes.errors);
+        if (apiRes?.data == null) {
+            console.error("Error from gql resp in folder:", apiRes);
             throw error(404, "Folder not found");
         }
 
