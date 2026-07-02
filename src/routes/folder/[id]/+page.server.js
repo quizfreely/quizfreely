@@ -25,6 +25,10 @@ export async function load({ cookies, params, url }) {
               folder(id: $id) {
                 id
                 name
+                private
+                user {
+                    id
+                }
                 studysets(first: $first, after: $after, before: $before) {
                   edges {
                     node {
@@ -53,6 +57,7 @@ export async function load({ cookies, params, url }) {
         });
 
         let apiRes = await rawApiRes.json();
+console.log(apiRes)
 
         if (apiRes?.data == null) {
             console.error("Error from gql resp in folder:", apiRes);
@@ -71,7 +76,9 @@ export async function load({ cookies, params, url }) {
             authedUser: apiRes?.data?.authedUser,
             folder: {
                 id: folder.id,
-                name: folder.name
+                name: folder.name,
+                private: folder.private,
+                user: folder.user,
             },
             studysets: studysetsConn?.edges?.map((e) => e.node) ?? [],
             pageInfo: studysetsConn?.pageInfo,

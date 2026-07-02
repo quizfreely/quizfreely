@@ -270,6 +270,7 @@
         <FolderIcon></FolderIcon>
         {folder?.name}
     </p>
+    {#if data?.authedUser?.id != null && data?.authedUser?.id == data?.folder?.user?.id}
     <div class="flex" style="align-items: center;">
         <button onclick={newStudysetButton}>
             <IconPlus />
@@ -296,13 +297,14 @@
             {/snippet}
         </Dropdown>
     </div>
+    {/if}
     {#if studysets?.length > 0}
         <div class="grid list" style="overflow-wrap: anywhere;">
             {#each studysets as studyset}
                 <StudysetLinkBox
                     {studyset}
                     linkTemplateFunc={(id) => `/studysets/${id}`}
-                    showDropdown={true}
+                    showDropdown={data.authed}
                     dropdownContent={studysetDropdown}
                 ></StudysetLinkBox>
             {/each}
