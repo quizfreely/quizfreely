@@ -15,6 +15,8 @@
     import TrashIcon from "$lib/icons/Trash.svelte";
     import CheckmarkIcon from "$lib/icons/Checkmark.svelte";
     import MoreIcon from "$lib/icons/MoreDotsVertical.svelte";
+    import IconEyeSlash from "$lib/icons/EyeSlash.svelte";
+    import IconEye from "$lib/icons/Eye.svelte";
 
     let { data } = $props();
 
@@ -31,10 +33,14 @@
     let ignoreEnterOnceRenameFolder = false;
 
     let showFolderRenamingFlag = $state(false);
+    let showFolderChangePrivateFlag = $state(false);
     let folderRenamingInput = $state(null);
     let folderRenamingName = $state("");
+    let folderNewPrivate = $state(folder.private);
     let showFolderRenamingErr = $state(false);
+    let showFolderChangePrivateErr = $state(false);
     let folderRenamingErrMsg = $state("");
+    let folderChangePrivateErrMsg = $state("");
 
     let showDeleteFolderModal = $state(false);
     let showDeleteFolderErr = $state(false);
@@ -158,6 +164,46 @@
         }
     }
 
+    async function updateFolderPrivateOnclick() {
+        try {
+            const raw = await fetch("/api/graphql", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    query: `mutation ($id: ID!, $name: String!, $private: Boolean!) {
+    updateFolder(id: $id, name: $name, private: $private) {
+        id
+    }
+}`,
+                    variables: {
+                        id: folder.id,
+                        name: folder.name,
+                        private: folderNewPrivate
+                    },
+                }),
+            });
+            const resp = await raw.json();
+            if (resp?.data?.updateFolder) {
+                folder.private = folderNewPrivate;
+                showFolderChangePrivateFlag = false;
+                showFolderChangePrivateErr = false;
+            } else {
+                console.log(
+                    "unsuccessful response when changing folder visibility: ",
+                    resp,
+                );
+                folderChangePrivateErrMsg = "Error updating folder visibility :(";
+                showFolderChangePrivateErr = true;
+            }
+        } catch (err) {
+            console.log("error updating folder visibility: ", err);
+            folderChangePrivateErrMsg = "Error updating folder visibility :(";
+            showFolderChangePrivateErr = true;
+        }
+    }
+
     function showFolderRenaming() {
         folderRenamingName = folder?.name ?? "";
         showFolderRenamingFlag = true;
@@ -166,10 +212,18 @@
 
         tick().then(() => folderRenamingInput?.focus());
     }
-
     function hideFolderRenaming() {
         showFolderRenamingFlag = false;
         showFolderRenamingErr = false;
+    }
+
+    function showFolderChangePrivate() {
+        folderNewPrivate = folder.private;
+        showFolderChangePrivateFlag = true;
+    }
+    function hideFolderChangePrivate() {
+        showFolderChangePrivateFlag = false;
+        showFolderChangePrivateErr = false;
     }
 
     function showDeleteFolderConfirmation() {
@@ -266,10 +320,28 @@
             <p>{errorBoxText}</p>
         </div>
     {/if}
-    <p class="h4" style="margin-top: 1rem;">
-        <FolderIcon></FolderIcon>
-        {folder?.name}
-    </p>
+    {#if data?.authedUser?.id != null && data?.authedUser?.id == data?.folder?.user?.id}
+    <div class="flex" style="align-items: center;">
+        <div class="flex text fg0" style="align-items: center; gap: 0.6rem;">
+            {#if folder?.private}
+                <IconEyeSlash></IconEyeSlash>
+                <span>Private Folder</span>
+            {:else}
+                <IconEye></IconEye>
+                <span>Public Folder</span>
+            {/if}
+        </div>
+        <button class="faint" onclick={showFolderChangePrivate}>
+            Change Visibility
+        </button>
+    </div>
+    {/if}
+    <div class="flex" style="align-items: center; margin-top: 1rem;">
+        <FolderIcon width="2rem" height="2rem"></FolderIcon>
+        <p class="h3" style="margin-bottom: 0px;">
+            {folder?.name}
+        </p>
+    </div>
     {#if data?.authedUser?.id != null && data?.authedUser?.id == data?.folder?.user?.id}
     <div class="flex" style="align-items: center;">
         <button onclick={newStudysetButton}>
@@ -345,6 +417,40 @@
     </div>
 </div>
 
+{#if showFolderChangePrivateFlag}
+    <div class="modal" transition:fade={{ duration: 200 }}>
+        <div class="content" style="min-width: 0px;">
+            <p>Edit Folder Visibility:</p>
+            <div class="flex">
+                <button class="button-box {folderNewPrivate ? "" : "selected"}" onclick={() => {
+                    folderNewPrivate = false;
+                }}>
+                    <CheckmarkIcon class="button-box-selected-icon"></CheckmarkIcon>
+                    Public
+                </button>
+                <button class="button-box {folderNewPrivate ? "selected" : ""}" onclick={() => {
+                    folderNewPrivate = true;
+                }}>
+                    <CheckmarkIcon class="button-box-selected-icon"></CheckmarkIcon>
+                    Private
+                </button>
+            </div>
+            <div class="flex" style="margin-top: 2rem;">
+                <button onclick={updateFolderPrivateOnclick}>
+                    Save
+                </button>
+                <button class="alt" onclick={hideFolderChangePrivate}>
+                    Cancel
+                </button>
+            </div>
+            {#if showFolderChangePrivateErr}
+                <div class="box ohno" transition:slide={{ duration: 400 }}>
+                    <p>{folderChangePrivateErrMsg}</p>
+                </div>
+            {/if}
+        </div>
+    </div>
+{/if}
 {#if showFolderRenamingFlag}
     <div class="modal" transition:fade={{ duration: 200 }}>
         <div class="content" style="min-width: 0px;">
