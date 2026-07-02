@@ -1,15 +1,12 @@
 <script>
-    import { fancyTimestamp } from "$lib/fancyTimestamp";
     import { idbApiLayer, db } from "$lib/idb-api-layer";
     import { onMount } from "svelte";
-    import { slide, fade, scale } from "svelte/transition";
-    import { sineIn, sineOut } from "svelte/easing";
+    import { slide, scale } from "svelte/transition";
     import StudysetLinkBox from "$lib/components/StudysetLinkBox.svelte";
     import MoreIcon from "$lib/icons/MoreDotsVertical.svelte";
     import LocalIcon from "$lib/icons/Local.svelte";
     import BookmarkIcon from "$lib/icons/Bookmark.svelte";
     import FolderIcon from "$lib/icons/Folder.svelte";
-    import BackIcon from "$lib/icons/BackArrow.svelte";
     import ArrowLeftIcon from "$lib/icons/ArrowLeft.svelte";
     import ArrowRightIcon from "$lib/icons/ArrowRight.svelte";
 
@@ -30,9 +27,6 @@
         showSavedDropdown = false,
         savedDropdownContent,
         topMenu,
-        folderMenu,
-        onFolderEnter,
-        onFolderExit,
     } = $props();
 
     let localStudysetList = $state([]);
@@ -60,10 +54,6 @@
     let localPage = $state(0);
     let savedPage = $state(0);
 
-    let inFolder = $state(false);
-    let currentFolder = $state(null);
-    let folderPage = $state(0);
-    let folderPageInfo = $state(null);
     let showErrorBox = $state(false);
     let errorBoxText = $state("");
 
@@ -83,20 +73,6 @@
                     pageInfo { hasNextPage hasPreviousPage startCursor endCursor }
                 }
             }`;
-        } else if (type === "folder") {
-            cursor =
-                direction === "next"
-                    ? folderPageInfo?.endCursor
-                    : folderPageInfo?.startCursor;
-            query = `query ($id: ID!, $first: Int, $after: String, $last: Int, $before: String) {
-                folder(id: $id) {
-                    studysets(first: $first, after: $after, last: $last, before: $before) {
-                        edges { node { id title private termsCount updatedAt myFolder { id name } } }
-                        pageInfo { hasNextPage hasPreviousPage startCursor endCursor }
-                    }
-                }
-            }`;
-            variables.id = currentFolder?.id;
         } else if (type === "saved") {
             cursor =
                 direction === "next"
@@ -138,11 +114,6 @@
                     data.mySavedStudysetsPageInfo = connection.pageInfo;
                     savedPage += direction === "next" ? 1 : -1;
                 }
-            } else if (type === "folder" && resp?.data?.folder?.studysets) {
-                const connection = resp.data.folder.studysets;
-                currentFolder.studysets = connection.edges.map((e) => e.node);
-                folderPageInfo = connection.pageInfo;
-                folderPage += direction === "next" ? 1 : -1;
             }
         } catch (err) {
             console.error("Error loading page:", err);
@@ -165,9 +136,6 @@
                 return data.studysetList?.length > COLLAPSE_LENGTH;
             return data.studysetListPageInfo?.hasNextPage;
         }
-        if (type === "folder") {
-            return folderPageInfo?.hasNextPage;
-        }
         if (type === "saved") {
             if (savedCurrentlyCollapsed)
                 return data.mySavedStudysets?.length > COLLAPSE_LENGTH;
@@ -188,9 +156,6 @@
             if (cloudCurrentlyCollapsed) return false;
             return data.studysetListPageInfo?.hasPreviousPage;
         }
-        if (type === "folder") {
-            return folderPageInfo?.hasPreviousPage;
-        }
         if (type === "saved") {
             if (savedCurrentlyCollapsed) return false;
             return data.mySavedStudysetsPageInfo?.hasPreviousPage;
@@ -201,174 +166,29 @@
         }
         return false;
     };
-    export async function viewFolder(id) {
-        try {
-            const respRaw = await fetch("/api/graphql", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    query: `query ($id: ID!){
-    folder(id: $id) {
-        id
-        name
-        studysets(first: 24) {
-            edges {
-                node {
-                    id
-                    title
-                    termsCount
-                    myFolder {
-                        id
-                        name
-                    }
-                }
-            }
-            pageInfo {
-                hasNextPage
-                hasPreviousPage
-                startCursor
-                endCursor
-            }
-        }
-    }
-}`,
-                    variables: {
-                        id,
-                    },
-                }),
-            });
-            const resp = await respRaw.json();
-            if (resp?.data?.folder) {
-                currentFolder = resp.data.folder;
-                // Initialize studysets list from edges
-                if (currentFolder.studysets && currentFolder.studysets.edges) {
-                    folderPageInfo = currentFolder.studysets.pageInfo;
-                    currentFolder.studysets = currentFolder.studysets.edges.map(
-                        (e) => e.node,
-                    );
-                }
-                showErrorBox = false;
-                inFolder = true;
-                folderPage = 0;
-                if (onFolderEnter) {
-                    onFolderEnter(currentFolder);
-                }
-            } else {
-                console.log(
-                    "unsucessful response while loading folder: ",
-                    resp,
-                );
-                errorBoxText = "Error loading folder :(";
-                showErrorBox = true;
-            }
-        } catch (err) {
-            console.error(err);
-            errorBoxText = "Error loading folder :(";
-            showErrorBox = true;
-        }
-    }
 
-    export function exitFolderView() {
-        inFolder = false;
-        if (onFolderExit) {
-            onFolderExit();
-        }
-    }
-
-    export function getFolderData() {
-        return inFolder ? currentFolder : null;
-    }
 </script>
 
-{#key inFolder}
+{@render topMenu?.()}
+{#if data.myFolders?.length > 0}
     <div
-        in:fade={{ duration: 120, delay: 120, easing: sineIn }}
-        out:fade={{ duration: 120, easing: sineOut }}
+        class="grid list"
+        style="overflow-wrap: anywhere; margin-bottom: 1rem;"
     >
-        {#if showErrorBox}
-            <div class="box ohno" transition:slide={{ duration: 400 }}>
-                <p>{errorBoxText}</p>
-            </div>
-        {/if}
-        {#if inFolder}
-            <div class="flex">
-                <button class="faint" onclick={exitFolderView}>
-                    <BackIcon></BackIcon> Back
-                </button>
-            </div>
-            <p class="h4" style="margin-top: 1rem;">
+        {#each data.myFolders as folder}
+            <a
+                class="button button-box"
+                style="display: flex;"
+                href="/folder/{folder.id}"
+                transition:scale={{ duration: 200 }}
+            >
                 <FolderIcon></FolderIcon>
-                {currentFolder?.name}
-            </p>
-            {@render folderMenu?.(currentFolder)}
-            {#if currentFolder?.studysets?.length > 0}
-                <div class="grid list" style="overflow-wrap: anywhere;">
-                    {#each currentFolder.studysets as studyset}
-                        <StudysetLinkBox
-                            {studyset}
-                            linkTemplateFunc={cloudLinkTemplateFunc}
-                            showDropdown={showCloudDropdown}
-                            dropdownContent={cloudDropdownContent}
-                        ></StudysetLinkBox>
-                    {/each}
-                </div>
-                {#if folderPageInfo?.hasNextPage || folderPageInfo?.hasPreviousPage}
-                    <div
-                        class={hasNextPageFunc("folder") &&
-                        hasPrevPageFunc("folder")
-                            ? "combo-buttons"
-                            : ""}
-                    >
-                        {#if hasPrevPageFunc("folder")}
-                            <button
-                                class="button alt {hasNextPageFunc('folder')
-                                    ? 'left'
-                                    : ''}"
-                                onclick={() => loadPage("folder", "prev")}
-                            >
-                                <ArrowLeftIcon></ArrowLeftIcon> Previous
-                            </button>
-                        {/if}
-                        {#if hasNextPageFunc("folder")}
-                            <button
-                                class="button alt {hasPrevPageFunc('folder')
-                                    ? 'right'
-                                    : ''}"
-                                onclick={() => loadPage("folder", "next")}
-                            >
-                                Next <ArrowRightIcon></ArrowRightIcon>
-                            </button>
-                        {/if}
-                    </div>
-                {/if}
-            {:else}
-                <div class="box">
-                    <p class="fg0">This folder is empty</p>
-                </div>
-            {/if}
-        {:else}
-            {@render topMenu?.()}
-            {#if data.myFolders?.length > 0}
-                <div
-                    class="grid list"
-                    style="overflow-wrap: anywhere; margin-bottom: 1rem;"
-                >
-                    {#each data.myFolders as folder}
-                        <button
-                            class="button-box"
-                            style="display: flex;"
-                            onclick={() => viewFolder(folder.id)}
-                            transition:scale={{ duration: 200 }}
-                        >
-                            <FolderIcon></FolderIcon>
-                            {folder.name}
-                        </button>
-                    {/each}
-                </div>
-            {/if}
-            {#if data.authed && !(hideTypeWhenCloudEmptyAndLocalExists && !(data.studysetList?.length > 0) && localStudysetList?.length > 0)}
+                {folder.name}
+            </a>
+        {/each}
+    </div>
+{/if}
+{#if data.authed && !(hideTypeWhenCloudEmptyAndLocalExists && !(data.studysetList?.length > 0) && localStudysetList?.length > 0)}
                 <div
                     class="grid list"
                     style="overflow-wrap: anywhere; {collapseCloud &&
@@ -573,6 +393,3 @@
                     </div>
                 {/if}
             {/if}
-        {/if}
-    </div>
-{/key}

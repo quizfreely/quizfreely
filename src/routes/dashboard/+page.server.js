@@ -1,6 +1,6 @@
 import { env } from '$env/dynamic/public';
 
-export async function load({ cookies, locals, url }) {
+export async function load({ cookies, locals }) {
   /*
     cookies are not permanent, they eventually expire
     resetting the expiration date on every page doesn't make sense
@@ -38,7 +38,6 @@ export async function load({ cookies, locals, url }) {
       }
     );
   }
-  const folderId = url?.searchParams?.get("folder");
   if (cookies.get("auth")) {
     try {
       let rawApiRes = await fetch(env.API_URL + "/graphql", {
@@ -89,8 +88,7 @@ export async function load({ cookies, locals, url }) {
             header: { activePage: "home" },
             settingsDateTimeFormatHours: cookies.get(
               "settingsdatetimeformathours"
-            ),
-            folderId
+            )
           }
         } else {
           return {
@@ -99,8 +97,7 @@ export async function load({ cookies, locals, url }) {
             header: { activePage: "home" },
             settingsDateTimeFormatHours: cookies.get(
               "settingsdatetimeformathours"
-            ),
-            folderId
+            )
           }
         }
       } catch (error) {
@@ -112,8 +109,7 @@ export async function load({ cookies, locals, url }) {
           header: { activePage: "home" },
           settingsDateTimeFormatHours: cookies.get(
             "settingsdatetimeformathours"
-          ),
-          folderId
+          )
         }
       }
     } catch (error) {
@@ -126,8 +122,7 @@ export async function load({ cookies, locals, url }) {
         header: { activePage: "home" },
         settingsDateTimeFormatHours: cookies.get(
           "settingsdatetimeformathours"
-        ),
-        folderId
+        )
       }
     }
   } else {
@@ -137,8 +132,7 @@ export async function load({ cookies, locals, url }) {
       header: { activePage: "home" },
       settingsDateTimeFormatHours: cookies.get(
         "settingsdatetimeformathours"
-      ),
-      folderId
+      )
     }
   }
 };

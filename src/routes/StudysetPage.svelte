@@ -153,7 +153,7 @@
                             >
                             <AngleRIcon class="text fg0"></AngleRIcon>
                             <a
-                                href="/dashboard?folder={folderId}"
+                                href="/folder/{folderId}"
                                 class="button faint"
                             >
                                 <FolderIcon></FolderIcon>
