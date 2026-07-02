@@ -757,7 +757,7 @@ FRQs: ${numFRQsToAssign}`,
                 {/if}
                 <div
                     class="flex compact-gap"
-                    style="margin-top: 3rem; align-items: end; justify-content: space-between; flex-wrap: wrap;"
+                    style="margin-top: 3rem; align-items: end; justify-content: space-between; flex-wrap: wrap; {practiceTests?.length == 0 ? "opacity: 0.6;" : ""}"
                 >
                     <p class="h4" style="margin-bottom: 0px;">
                         Completed Practice Tests
@@ -805,7 +805,7 @@ FRQs: ${numFRQsToAssign}`,
                         </div>
                     </div>
                 {:else}
-                    <div class="box center text fg0">(None)</div>
+                    <div class="box center text fg0" style="opacity: 0.6;">(None)</div>
                 {/each}
             </div>
         {/if}
@@ -1047,7 +1047,7 @@ FRQs: ${numFRQsToAssign}`,
                                 );
                                 submitted = true;
                                 pt?.questions?.forEach?.((q, index) => {
-                                    questionComponents?.[index]?.setQuestionId(q?.id);
+                                    questionComponents?.[index]?.setQuestionId?.(q?.id);
                                 });
                             }
                         }}
