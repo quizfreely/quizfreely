@@ -371,10 +371,18 @@
                             : "..."}</span
                     >
                     <button class="fourpartthing-four faint" style="padding: 0.5rem 0.8rem;" onclick={() => {
-                        h.showDetails = !h.showDetails;
+                        if (h.showDetails) {
+                            h.showDetails = false;
+                            return;
+                        }
+                        h.showDetails = true;
                         h.showDetailsLoading = true;
                         if (h.incorrectPairData == null) {
-                            local
+                            if (data.authed) {
+                                
+                            } else {
+
+}
                         }
                     }}>
                         {#if h.showDetails}
@@ -384,6 +392,16 @@
                         {/if}
                     </button>
                 </div>
+                {#if h.showDetails}
+                <div>
+                    {#if h.showDetailsLoading}
+                        <div class="flex" style="align-items: center; justify-content: center;">
+                            <div class="spinner size-1.2rem"></div>
+                            <span style="font-size: 1.2rem;">Loading</span>
+                        </div>
+                    {/if}
+                </div>
+                {/if}
             </div>
         {:else}
             <div class="box center text fg0">(None)</div>
