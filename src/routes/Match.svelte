@@ -24,6 +24,7 @@
     let termIds = [];
     let history = $state(data?.pastMatchActivities ?? []);
     let bestRecord = $state(null);
+    let loadedTermsMap = new Map();
 
     if (!local && (terms == null || terms.length == 0)) {
         showStartErr = true;
@@ -370,18 +371,114 @@
                               )
                             : "..."}</span
                     >
-                    <button class="fourpartthing-four faint" style="padding: 0.5rem 0.8rem;" onclick={() => {
+                    <button class="fourpartthing-four faint pointer-events-none-if-disabled" disabled={h?.incorrectPairIds?.length == 0} style="padding: 0.5rem 0.8rem; {
+                        h?.incorrectPairIds?.length == 0 ? "opacity: 0.6;" : ""
+                    }" onclick={() => {
                         if (h.showDetails) {
                             h.showDetails = false;
                             return;
                         }
                         h.showDetails = true;
-                        h.showDetailsLoading = true;
-                        if (h.incorrectPairData == null) {
-                            if (data.authed) {
-                                
+                        if (!h.termsLoaded) {
+                            h.showDetailsLoading = true;
+                            let cloudTermIds = [];
+                            let localTermIds = [];
+                            h.incorrectPairIds.forEach(pair => {
+                                if (pair?.[0] != null && (""+pair[0]).includes("-") && !loadedTermsMap.has(pair[0])) {
+                                    cloudTermIds.push(pair[0]);
+                                }
+                                if (pair?.[1] != null && (""+pair[1]).includes("-") && !loadedTermsMap.has(pair[1])) {
+                                    cloudTermIds.push(pair[1]);
+                                }
+                            });
+                            let cloudLoaded = false;
+                            let localLoaded = false;
+                            if (cloudTermIds.length > 0) {
+                                (async () => {
+                                    try {
+                                        const raw = await fetch("/api/graphql", {
+                                            method: "POST",
+                                            headers: {
+                                                "Content-Type": "application/json"
+                                            },
+                                            body: JSON.stringify({
+                                                query: `query termsByIds($ids: [ID!]!) {
+        terms(ids: $ids) {
+            id
+            term
+            def
+            termImageUrl
+            defImageUrl
+        }
+    }`,
+                                                variables: {
+                                                    ids: cloudTermIds
+                                                },
+                                            }),
+                                        });
+                                        const resp = await raw.json();
+                                        if (resp?.data?.terms == null) {
+                                            console.error("resp?.data?.terms is null after loading cloud terms, resp:", resp);
+                                        } else {
+                                            resp.data.terms.forEach(term => {
+                                                if (term?.id == null) {
+                                                    return;
+                                                }
+                                                loadedTermsMap.set(term.id, term);
+                                            });
+                                        }
+                                    } catch (err) {
+                                        console.error("Error loading cloud terms", err);
+                                    } finally {
+                                        cloudLoaded = true;
+                                        if (localLoaded) {
+                                            h.showDetailsLoading = false;
+                                            h.termsLoaded = true;
+                                        }
+                                    }
+                                })();
                             } else {
-
+                                cloudLoaded = true;
+                            }
+                            if (localTermIds.length > 0) {
+                                (async () => {
+                                    try {
+                                        const terms = await idbApiLayer.getTermsByIds(localTermIds, {
+                                            termImageUrl: true,
+                                            defImageUrl: true
+                                        });
+                                        if (terms == null) {
+                                            console.error("idbApiLayer.getTermsByIds returned null");
+                                        } else {
+                                            terms.forEach(term => {
+                                                if (term?.id == null) {
+                                                    return;
+                                                }
+                                                loadedTermsMap.set(term.id, term);
+                                                if (term.termImageUrl != null) {
+                                                    objectUrls.push(term.termImageUrl);
+                                                }
+                                                if (term.defImageUrl != null) {
+                                                    objectUrls.push(term.defImageUrl);
+                                                }
+                                            })
+                                        }
+                                    } catch (err) {
+                                        console.error("Error loading local terms", err);
+                                    } finally {
+                                        localLoaded = true;
+                                        if (cloudLoaded) {
+                                            h.showDetailsLoading = false;
+                                            h.termsLoaded = true;
+                                        }
+                                    }
+                                })();
+                            } else {
+                                localLoaded = true;
+                                if (cloudLoaded) {
+                                    h.showDetailsLoading = false;
+                                    h.termsLoaded = true;
+                                }
                             }
                         }
                     }}>
@@ -398,6 +495,36 @@
                         <div class="flex" style="align-items: center; justify-content: center;">
                             <div class="spinner size-1.2rem"></div>
                             <span style="font-size: 1.2rem;">Loading</span>
+                        </div>
+                    {:else}
+                        <p>Incorrect Pairs:</p>
+                        <div class="grid" style="grid-template-columns: 1fr 1fr; row-gap: 2rem; column-gap: 2rem;">
+                            {#each h.incorrectPairIds as pair}
+                                <div class="no-margin-for-p-here">
+                                    <p class="fg0" style="font-size: 0.8rem;">Term</p>
+                                    <p style="white-space: pre-wrap;">{loadedTermsMap.get(pair[0]).term}</p>
+                                    {#if loadedTermsMap.get(pair[0]).termImageUrl != null}
+                                        <img class="term-image-small" src={loadedTermsMap.get(pair[0]).termImageUrl}>
+                                    {/if}
+                                    <p class="fg0" style="font-size: 0.8rem; margin-top: 0.2rem;">Def</p>
+                                    <p style="white-space: pre-wrap;">{loadedTermsMap.get(pair[0]).def}</p>
+                                    {#if loadedTermsMap.get(pair[0]).defImageUrl != null}
+                                        <img class="term-image-small" src={loadedTermsMap.get(pair[0]).defImageUrl}>
+                                    {/if}
+                                </div>
+                                <div class="no-margin-for-p-here">
+                                    <p class="fg0" style="font-size: 0.8rem;">Term</p>
+                                    <p style="white-space: pre-wrap;">{loadedTermsMap.get(pair[1]).term}</p>
+                                    {#if loadedTermsMap.get(pair[1]).termImageUrl != null}
+                                        <img class="term-image-small" src={loadedTermsMap.get(pair[1]).termImageUrl}>
+                                    {/if}
+                                    <p class="fg0" style="font-size: 0.8rem; margin-top: 0.2rem;">Def</p>
+                                    <p style="white-space: pre-wrap;">{loadedTermsMap.get(pair[1]).def}</p>
+                                    {#if loadedTermsMap.get(pair[1]).defImageUrl != null}
+                                        <img class="term-image-small" src={loadedTermsMap.get(pair[1]).defImageUrl}>
+                                    {/if}
+                                </div>
+                            {/each}
                         </div>
                     {/if}
                 </div>
@@ -736,5 +863,17 @@
         .fourpartthing-four {
             justify-self: center;
         }
+    }
+    .pointer-events-none-if-disabled:disabled {
+        pointer-events: none;
+    }
+    .no-margin-for-p-here p {
+        margin-bottom: 0px;
+        margin-top: 0px;
+    }
+    .term-image-small {
+        max-width: 300px;
+        max-height: 200px;
+        border-radius: 0.8rem;
     }
 </style>
