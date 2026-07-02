@@ -79,7 +79,7 @@
                     : data.studysetListPageInfo?.startCursor;
             query = `query ($first: Int, $after: String, $last: Int, $before: String) {
                 myStudysets(first: $first, after: $after, last: $last, before: $before, hideFoldered: true) {
-                    edges { node { id title private termsCount updatedAt folder { id name } } }
+                    edges { node { id title private termsCount updatedAt myFolder { id name } } }
                     pageInfo { hasNextPage hasPreviousPage startCursor endCursor }
                 }
             }`;
@@ -91,7 +91,7 @@
             query = `query ($id: ID!, $first: Int, $after: String, $last: Int, $before: String) {
                 folder(id: $id) {
                     studysets(first: $first, after: $after, last: $last, before: $before) {
-                        edges { node { id title private termsCount updatedAt folder { id name } } }
+                        edges { node { id title private termsCount updatedAt myFolder { id name } } }
                         pageInfo { hasNextPage hasPreviousPage startCursor endCursor }
                     }
                 }
@@ -104,7 +104,7 @@
                     : data.mySavedStudysetsPageInfo?.startCursor;
             query = `query ($first: Int, $after: String, $last: Int, $before: String) {
                 mySavedStudysets(first: $first, after: $after, last: $last, before: $before) {
-                    edges { node { id title private termsCount updatedAt folder { id name } } }
+                    edges { node { id title private termsCount updatedAt myFolder { id name } } }
                     pageInfo { hasNextPage hasPreviousPage startCursor endCursor }
                 }
             }`;
@@ -219,7 +219,7 @@
                     id
                     title
                     termsCount
-                    folder {
+                    myFolder {
                         id
                         name
                     }

@@ -33,7 +33,7 @@ export async function load({ params, cookies }) {
                 }
                 private
                 saved
-                folder {
+                myFolder {
                     id
                     name
                 }

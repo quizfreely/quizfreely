@@ -318,7 +318,7 @@
             }}
         >
             <FolderIcon></FolderIcon>
-            {studyset?.folder != null ? "Change Folder" : "Add to Folder"}
+            {studyset?.myFolder != null ? "Change Folder" : "Add to Folder"}
         </button>
     {/snippet}
     {#snippet savedDropdownContent(studyset)}
@@ -329,7 +329,7 @@
             }}
         >
             <FolderIcon></FolderIcon>
-            {studyset?.folder != null ? "Change Folder" : "Add to Folder"}
+            {studyset?.myFolder != null ? "Change Folder" : "Add to Folder"}
         </button>
         <button
             onclick={async () => {

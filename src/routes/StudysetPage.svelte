@@ -104,8 +104,8 @@
     }
 
     let saved = $state(data?.studyset?.saved ?? false);
-    let folderId = $state(data?.studyset?.folder?.id ?? null);
-    let folderName = $state(data?.studyset?.folder?.name ?? null);
+    let folderId = $state(data?.studyset?.myFolder?.id ?? null);
+    let folderName = $state(data?.studyset?.myFolder?.name ?? null);
     let showFolderChooser = $state(false);
 </script>
 

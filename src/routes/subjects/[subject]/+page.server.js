@@ -31,7 +31,7 @@ export async function load({ params, cookies, url }) {
                 name
                 category
                 studysets(first: $first, after: $after, last: $last, before: $before) {
-                  edges { node { id title termsCount saved folder { id name } } }
+                  edges { node { id title termsCount saved myFolder { id name } } }
                   pageInfo { hasNextPage hasPreviousPage startCursor endCursor }
                 }
               }

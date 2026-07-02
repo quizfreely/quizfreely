@@ -56,11 +56,11 @@ export async function load({ cookies, locals, url }) {
             displayName
           }
           myStudysets(first: 24, hideFoldered: true) {
-            edges { node { id title private termsCount updatedAt folder { id name } } }
+            edges { node { id title private termsCount updatedAt myFolder { id name } } }
             pageInfo { hasNextPage hasPreviousPage startCursor endCursor }
           }
           mySavedStudysets(first: 24) {
-            edges { node { id title private termsCount updatedAt folder { id name } } }
+            edges { node { id title private termsCount updatedAt myFolder { id name } } }
             pageInfo { hasNextPage hasPreviousPage startCursor endCursor }
           }
           myFolders(first: 24) {
