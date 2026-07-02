@@ -264,11 +264,12 @@
 {#if showNewFolderModal}
     <div class="modal" transition:fade={{ duration: 200 }}>
         <div class="content" style="min-width: 0px;">
-            <p>Create New Folder:</p>
+            <p class="fg0">Create New Folder:</p>
             <input
                 type="text"
                 placeholder="Folder Name"
-                style="margin-top: 0.4rem;"
+                class="title-textbox"
+                style="margin-top: 0.4rem; min-width: 18rem; max-width: 90vw;"
                 bind:value={newFolderName}
                 bind:this={newFolderInput}
                 onkeyup={(e) => {
@@ -285,17 +286,19 @@
                 <button class="button-box {newFolderPrivate ? "" : "selected"}" onclick={() => {
                     newFolderPrivate = false;
                 }}>
+                    <CheckmarkIcon class="button-box-selected-icon"></CheckmarkIcon>
                     Public
                 </button>
                 <button class="button-box {newFolderPrivate ? "selected" : ""}" onclick={() => {
                     newFolderPrivate = true;
                 }}>
+                    <CheckmarkIcon class="button-box-selected-icon"></CheckmarkIcon>
                     Private
                 </button>
             </div>
-            <div class="flex">
+            <div class="flex" style="margin-top: 2rem;">
                 <button onclick={newFolderOnclick}>
-                    <CheckmarkIcon></CheckmarkIcon> Create
+                    Create
                 </button>
                 <button class="alt" onclick={hideNewFolderModal}>
                     Cancel
@@ -391,3 +394,11 @@
         }}
     ></FolderPicker>
 {/if}
+<style>
+    .title-textbox,
+    input.title-textbox,
+    .title-textbox::placeholder,
+    input.title-textbox::placeholder {
+        font-size: 1.4rem;
+    }
+</style>
