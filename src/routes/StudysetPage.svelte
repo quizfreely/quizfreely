@@ -149,8 +149,8 @@
                             class="flex compact-gap"
                             style="align-items: center;"
                         >
-                            <a href="/dashboard" class="button faint">Folders</a
-                            >
+                            <!-- <a href="/dashboard" class="button faint">Folders</a> -->
+                            <span class="fg0" style="padding: 0.6rem 1rem;">My Folders</span>
                             <AngleRIcon class="text fg0"></AngleRIcon>
                             <a
                                 href="/folder/{folderId}"
