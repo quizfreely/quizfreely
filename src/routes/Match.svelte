@@ -219,7 +219,10 @@
                         durationMs: Math.floor(timeElapsedMs),
                         termIds,
                         incorrectPairIds: incorrectPairs
-                    }, async () => { return cloudId ?? null; });
+                    // NOTE: async func param below is supposed to return cloud studyset ids by cloud term ids
+                    // in the future, we need to rewrite it to actually get the ids
+                    // right now, there's only one studyset per matching activity, so we already have the id, and just return it
+                    }, async (_) => { return cloudId ?? null; });
                     if (res?.id == null) {
                         console.error("Err saving local match activity, res:", res);
                         alert("Error saving match progress");
