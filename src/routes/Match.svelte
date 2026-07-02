@@ -382,7 +382,7 @@
                                 
                             } else {
 
-}
+                            }
                         }
                     }}>
                         {#if h.showDetails}
