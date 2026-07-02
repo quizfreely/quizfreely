@@ -136,7 +136,10 @@
             try {
                 history = [
                     ...history,
-                    ...(await db.matchActivities.where("studysetIds").equals(cloudId ?? Number(localId)).toArray())
+                    ...(await idbApiLayer.getMatchActivitiesByStudysetId(cloudId ?? Number(localId), {
+                        termIds: true,
+                        incorrectPairIds: true
+                    }))
                 ];
                 history = history.sort(
                     (a, b) => b.endTimestamp.localeCompare(a.endTimestamp)
