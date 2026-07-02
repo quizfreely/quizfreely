@@ -136,7 +136,7 @@
             try {
                 history = [
                     ...history,
-                    ...(await db.matchActivities.where("studysetIds").equals(localId ?? cloudId).toArray())
+                    ...(await db.matchActivities.where("studysetIds").equals(cloudId ?? Number(localId)).toArray())
                 ];
                 history = history.sort(
                     (a, b) => b.endTimestamp.localeCompare(a.endTimestamp)
@@ -222,7 +222,7 @@
                     // NOTE: async func param below is supposed to return cloud studyset ids by cloud term ids
                     // in the future, we need to rewrite it to actually get the ids
                     // right now, there's only one studyset per matching activity, so we already have the id, and just return it
-                    }, async (_) => { return cloudId ?? null; });
+                    }, async (_) => { return cloudId == null ? [] : [cloudId]; });
                     if (res?.id == null) {
                         console.error("Err saving local match activity, res:", res);
                         alert("Error saving match progress");
