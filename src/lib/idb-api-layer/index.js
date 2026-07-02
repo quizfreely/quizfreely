@@ -97,7 +97,8 @@ export const idbApiLayer = {
             resolveProps?.termImageUrl ||
             resolveProps?.defImageUrl) {
             await Promise.all(terms.map(async (term) => {
-                if (term == null) return;
+                if (term == null)
+                    return;
                 const promises = {};
                 if (resolveProps?.progress) {
                     promises.progress = db.termProgress.where("termId").equals(term.id).toArray();
@@ -579,19 +580,27 @@ export const idbApiLayer = {
         activities.sort((a, b) => b.endTimestamp.localeCompare(a.endTimestamp));
         return activities;
     },
-    recordMatchActivity: async function (input) {
+    recordMatchActivity: async function (input, getCloudStudysetIds) {
         return await db.transaction('rw', [db.matchActivities, db.reviewEvents, db.termProgress, db.terms], async () => {
             const rnISOString = (new Date()).toISOString();
             const termIds = input.termIds || [];
             const incorrectPairIds = input.incorrectPairIds || [];
             const durationMs = input.durationMs;
             const studysetIds = new Set();
-            // Derive studysetIds from terms (only from termIds array per backend instructions)
-            const termIdsForLookup = termIds.filter(id => typeof id === 'number');
-            if (termIdsForLookup.length > 0) {
+            // Derive studysetIds from local term IDs (numeric strings or numbers without a dash)
+            const localTermIds = termIds.filter(id => (typeof id === 'number') || (typeof id === 'string' && !id.includes('-')));
+            if (localTermIds.length > 0) {
+                const termIdsForLookup = localTermIds.map(id => Number(id));
                 const termsForLookup = await db.terms.bulkGet(termIdsForLookup);
-                termsForLookup.forEach(t => { if (t?.studysetId)
+                termsForLookup.forEach(t => { if (t?.studysetId != null)
                     studysetIds.add(t.studysetId); });
+            }
+            // Derive studysetIds from cloud term IDs (UUIDs contain a hyphen/dash)
+            const cloudTermIds = termIds.filter(id => typeof id === 'string' && id.includes('-'));
+            if (cloudTermIds.length > 0 && getCloudStudysetIds) {
+                const cloudStudysetIds = await getCloudStudysetIds(cloudTermIds);
+                cloudStudysetIds.forEach(id => { if (id != null)
+                    studysetIds.add(id); });
             }
             const termProgressMap = new Map();
             const matchActivityRecord = {
