@@ -575,9 +575,25 @@ export const idbApiLayer = {
         }
         return activity;
     },
-    getMatchActivitiesByStudysetId: async function (studysetId) {
+    getMatchActivitiesByStudysetId: async function (studysetId, resolveProps) {
         const activities = await db.matchActivities.where("studysetIds").equals(studysetId).toArray();
         activities.sort((a, b) => b.endTimestamp.localeCompare(a.endTimestamp));
+        for (const activity of activities) {
+            if (resolveProps?.termIds) {
+                const reviewEvents = await db.reviewEvents
+                    .where("matchActivityId").equals(activity.id)
+                    .and(re => re.correct === true)
+                    .toArray();
+                activity.termIds = reviewEvents.map(re => re.termId);
+            }
+            if (resolveProps?.incorrectPairIds) {
+                const reviewEvents = await db.reviewEvents
+                    .where("matchActivityId").equals(activity.id)
+                    .and(re => re.correct === false)
+                    .toArray();
+                activity.incorrectPairIds = reviewEvents.map(re => [re.termId, re.answeredTermId]);
+            }
+        }
         return activities;
     },
     recordMatchActivity: async function (input, getCloudStudysetIds) {
