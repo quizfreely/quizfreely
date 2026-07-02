@@ -19,6 +19,7 @@
     let ignoreEnterOnceNewFolder = false;
     let showNewFolderModal = $state(false);
     let newFolderName = $state("");
+    let newFolderPrivate = $state(false);
     let showErrInNewFolderModal = $state(false);
     let errInNewFolderModalMsg = $state("");
     let newFolderInput = $state(null);
@@ -26,6 +27,7 @@
         showNewFolderModal = true;
         showErrInNewFolderModal = false;
         newFolderName = "";
+        newFolderPrivate = false;
 
         /* if enter was used on the button to open the modal, prevent immideatly submitting & closing the modal with the same enter key press */
         ignoreEnterOnceNewFolder = lastKeydown == "Enter";
@@ -36,6 +38,7 @@
         showNewFolderModal = false;
         showErrInNewFolderModal = false;
         newFolderName = "";
+        newFolderPrivate = false;
     }
 
     let studysetListData = $state({
@@ -91,13 +94,14 @@
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    query: `mutation ($name: String!) {
-    createFolder(name: $name) {
+                    query: `mutation ($name: String!, $private: Boolean!) {
+    createFolder(name: $name, private: $private) {
         id
     }
 }`,
                     variables: {
                         name: newFolderName,
+                        private: newFolderPrivate
                     },
                 }),
             });
@@ -118,6 +122,7 @@
             showErrInNewFolderModal = true;
         }
         newFolderName = "";
+        newFolderPrivate = false;
     }
 
     function onKeyup(e) {
@@ -276,6 +281,18 @@
                     }
                 }}
             />
+            <div class="flex">
+                <button class="button-box {newFolderPrivate ? "" : "selected"}" onclick={() => {
+                    newFolderPrivate = false;
+                }}>
+                    Public
+                </button>
+                <button class="button-box {newFolderPrivate ? "selected" : ""}" onclick={() => {
+                    newFolderPrivate = true;
+                }}>
+                    Private
+                </button>
+            </div>
             <div class="flex">
                 <button onclick={newFolderOnclick}>
                     <CheckmarkIcon></CheckmarkIcon> Create
