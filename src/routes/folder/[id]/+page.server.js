@@ -28,6 +28,8 @@ export async function load({ cookies, params, url }) {
                 private
                 user {
                     id
+                    username
+                    displayName
                 }
                 studysets(first: $first, after: $after, before: $before) {
                   edges {
