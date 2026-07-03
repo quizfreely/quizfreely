@@ -757,7 +757,7 @@ FRQs: ${numFRQsToAssign}`,
                 {/if}
                 <div
                     class="flex compact-gap"
-                    style="margin-top: 3rem; align-items: end; justify-content: space-between; flex-wrap: wrap; {practiceTests?.length ?? 0 == 0 ? "opacity: 0.6;" : ""}"
+                    style="margin-top: 3rem; align-items: end; justify-content: space-between; flex-wrap: wrap; {(practiceTests?.length ?? 0) == 0 ? "opacity: 0.6;" : ""}"
                 >
                     <p class="h4" style="margin-bottom: 0px;">
                         Completed Practice Tests
