@@ -38,9 +38,14 @@
 
     async function updateQForManualMarkedCorrect() {
         if (questionId == null) {
+            console.error("updateQForManualMarkedCorrect: questionId is null")
             return false;
         }
-        const updatedQuestionData = getQuestion();
+        const intendedManuallyMarkedCorrect = !manuallyMarkedCorrect;
+        const intendedCorrect = intendedManuallyMarkedCorrect || (answerWith == "DEF" ?
+            term.def.trim().toLowerCase() == answer.trim().toLowerCase() :
+            term.term.trim().toLowerCase() == answer.trim().toLowerCase()
+        );
         // UUIDs have dashes/hyphens. cloud uses UUIDs, local uses sequential ids.
         if ((""+questionId).includes("-")) {
             try {
@@ -55,12 +60,13 @@
 }`,
                         variables: {
                             id: questionId,
-                            c: updatedQuestionData.correct,
-                            umc: updatedQuestionData.userMarkedCorrect
+                            c: intendedCorrect,
+                            umc: intendedManuallyMarkedCorrect
                         }
                     })
                 });
                 const resp = await raw.json();
+                console.log(resp)
                 return resp?.data?.updatePracticeTestQuestion?.id != null
             } catch (err) {
                 console.error("Error in userMarkedCorrectChangeFRQ gql req:", err)
@@ -68,7 +74,7 @@
             }
         } else {
             try {
-                const res = await idbApiLayer.updatePracticeTestQuestion(questionId, updatedQuestionData.correct, updatedQuestionData.userMarkedCorrect);
+                const res = await idbApiLayer.updatePracticeTestQuestion(questionId, intendedCorrect, intendedManuallyMarkedCorrect);
                 return res?.id != null;
             } catch (err) {
                 console.error("Error from FRQ idbApiLayer updatePracticeTestQuesetion:", err);

@@ -22,10 +22,10 @@
                 answerWith: answerWith,
                 correct: answeredBool == correctAnswerBool,
                 answeredBool: answeredBool,
-                distractor: correctAnswerBool ? null : {
-                    id: distractor.id,
-                    term: distractor.term,
-                    def: distractor.def
+                distractor: (correctAnswerBool || distractor == null) ? null : {
+                    id: distractor?.id,
+                    term: distractor?.term,
+                    def: distractor?.def
                 }
             }
         }

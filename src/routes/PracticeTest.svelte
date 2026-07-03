@@ -33,6 +33,7 @@
             correctChoiceIndex: q?.mcq?.correctChoiceIndex,
             wasCorrect: cq?.correct,
             userMarkedCorrect: q?.frq?.userMarkedCorrect,
+            id: q?.id
         };
     }
 
@@ -845,10 +846,12 @@ FRQs: ${numFRQsToAssign}`,
                             {answerUpdateCallback}
                             bind:this={questionComponents[index]}
                             answeredString={question.answeredString}
+                            questionId={question.id}
                             userMarkedCorrectChangeCallback={() => {
                                 questionsCorrect = 0;
                                 questionComponents.forEach((q) => {
-                                    if (q?.getQuestion?.()?.correct) {
+                                    const qData = q?.getQuestion?.()
+                                    if (qData?.mcq?.correct || qData?.tfq?.correct || qData?.frq?.correct) {
                                         questionsCorrect++;
                                     }
                                 });
