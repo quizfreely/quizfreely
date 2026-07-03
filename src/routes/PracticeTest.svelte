@@ -54,12 +54,7 @@
             }
 
             if (data.local && data.alreadyOver) {
-                const pt = (
-                    await db.practiceTests
-                        .where("id")
-                        .equals(data.practiceTestId)
-                        .toArray()
-                )?.[0];
+                const pt = await idbApiLayer.getPracticeTestWithQuestions(data.practiceTestId);
                 if (pt == null) {
                     alert("invalid local practice test id");
                     console.error("local practice test not found");
@@ -67,6 +62,7 @@
                     questions = pt.questions.map(
                         mapPracticeTestQuestionToQuestionComponentFormat,
                     );
+                    console.log(questions)
                     questionsCorrect = pt.questionsCorrect;
                     alreadyOverLocalPTStudysetIds = pt.studysetIds;
                 }
