@@ -8,6 +8,42 @@
 import Dexie from 'dexie';
 import { db } from "./db";
 import { idbLayerImg } from "./images";
+function toGraphQLQuestion(q) {
+    const term = { id: q.termId, term: q.term, def: q.def };
+    const result = { id: q.id };
+    if (q.type === "mcq") {
+        const data = q.data;
+        result.mcq = {
+            answerWith: q.answerWith,
+            term,
+            correct: q.correct,
+            correctChoiceIndex: data.correctChoiceIndex,
+            answeredIndex: data.answeredIndex,
+            distractors: data.distractors
+        };
+    }
+    else if (q.type === "tfq") {
+        const data = q.data;
+        result.tfq = {
+            answerWith: q.answerWith,
+            term,
+            correct: q.correct,
+            answeredBool: data.answeredBool,
+            distractor: data.distractor ?? undefined
+        };
+    }
+    else if (q.type === "frq") {
+        const data = q.data;
+        result.frq = {
+            answerWith: q.answerWith,
+            term,
+            correct: q.correct,
+            answeredString: data.answeredString,
+            userMarkedCorrect: data.userMarkedCorrect
+        };
+    }
+    return result;
+}
 function isTitleValid(newTitle) {
     return (newTitle.length > 0 &&
         newTitle.length < 9000 &&
@@ -34,9 +70,10 @@ export const idbApiLayer = {
             /* local timestamps are ISO strings in UTC, so alphanumeric/lexical sorting is the same as chronological sorting */
             studysets[0].practiceTests?.sort((a, b) => b.timestamp.localeCompare(a.timestamp));
             await Promise.all(studysets[0].practiceTests.map(async (pt) => {
-                pt.questions = await db.practiceTestQuestions
+                const rawQuestions = await db.practiceTestQuestions
                     .where("practiceTestId").equals(pt.id)
                     .sortBy("position");
+                pt.questions = rawQuestions.map(toGraphQLQuestion);
             }));
         }
         if (resolveProps?.matchActivities) {
@@ -487,9 +524,10 @@ export const idbApiLayer = {
         const pt = await db.practiceTests.get(ptId);
         if (!pt)
             return null;
-        pt.questions = await db.practiceTestQuestions
+        const rawQuestions = await db.practiceTestQuestions
             .where("practiceTestId").equals(ptId)
             .sortBy("position");
+        pt.questions = rawQuestions.map(toGraphQLQuestion);
         return pt;
     },
     updatePracticeTestQuestion: async function (id, correct, userMarkedCorrect) {
@@ -500,7 +538,7 @@ export const idbApiLayer = {
             const wasCorrect = question.correct;
             const isCorrect = correct;
             if (wasCorrect === isCorrect && question.type === "frq" && question.data.userMarkedCorrect === userMarkedCorrect) {
-                return question;
+                return toGraphQLQuestion(question);
             }
             // Update question
             const newData = { ...question.data };
@@ -544,7 +582,8 @@ export const idbApiLayer = {
                     await db.termProgress.update(existingProgress[0].id, changes);
                 }
             }
-            return await db.practiceTestQuestions.get(id);
+            const updatedQuestion = await db.practiceTestQuestions.get(id);
+            return updatedQuestion ? toGraphQLQuestion(updatedQuestion) : undefined;
         });
     },
     getPracticeTestsByTermId: async function (termId) {
@@ -558,9 +597,10 @@ export const idbApiLayer = {
         const tests = await db.practiceTests.bulkGet(Array.from(ptIds));
         const filteredTests = tests.filter((t) => t !== undefined);
         await Promise.all(filteredTests.map(async (pt) => {
-            pt.questions = await db.practiceTestQuestions
+            const rawQuestions = await db.practiceTestQuestions
                 .where("practiceTestId").equals(pt.id)
                 .sortBy("position");
+            pt.questions = rawQuestions.map(toGraphQLQuestion);
         }));
         filteredTests.sort((a, b) => b.timestamp.localeCompare(a.timestamp));
         return filteredTests;

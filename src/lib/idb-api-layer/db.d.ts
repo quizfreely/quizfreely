@@ -41,7 +41,7 @@ interface PracticeTest {
     timestamp: string;
     questionsCorrect: number;
     questionsTotal: number;
-    questions?: PracticeTestQuestion[];
+    questions?: Question[];
 }
 interface PracticeTestQuestion {
     id: number;

@@ -1,4 +1,4 @@
-import { Term, PracticeTestQuestion, MatchActivity } from "./db";
+import { Term, MatchActivity, Question } from "./db";
 type StudysetResolveProps = {
     terms?: boolean | TermResolveProps;
     practiceTests?: boolean;
@@ -36,7 +36,7 @@ export declare const idbApiLayer: {
     updateTermProgress: (termProgressArray: any) => Promise<void>;
     recordPracticeTest: (practiceTest: any, getCloudStudysetIds?: (cloudTermIds: string[]) => Promise<(number | string)[]>) => Promise<import("./db").PracticeTest | null>;
     getPracticeTestWithQuestions: (ptId: number) => Promise<import("./db").PracticeTest | null>;
-    updatePracticeTestQuestion: (id: number, correct: boolean, userMarkedCorrect?: boolean) => Promise<PracticeTestQuestion | undefined>;
+    updatePracticeTestQuestion: (id: number, correct: boolean, userMarkedCorrect?: boolean) => Promise<Question | undefined>;
     getPracticeTestsByTermId: (termId: number | string) => Promise<import("./db").PracticeTest[]>;
     getMatchActivityById: (id: number, resolveProps?: MatchActivityResolveProps) => Promise<MatchActivity | null>;
     getMatchActivitiesByStudysetId: (studysetId: number | string, resolveProps?: MatchActivityResolveProps) => Promise<MatchActivity[]>;
