@@ -465,14 +465,14 @@
                             </div>
                         </div>
                         <div class="flex" style="justify-content: center;">
-                            <a href="{
-                                data.local ?
-                                    `/studyset/local/stats/term?id=${term.id}&studysetId=${data?.localId}` :
-                                    `/studysets/${data.studysetId}/stats/terms/${term.id}`
-                            }" style="display: flex; flex-wrap: nowrap; align-items: center; gap: 0.4rem;">
-                                <StatsIcon></StatsIcon>
-                                <span style="margin-top: 0px;">View Details</span>
-                            </a>
+                            <!-- <a href="{ -->
+                            <!--     data.local ? -->
+                            <!--         `/studyset/local/stats/term?id=${term.id}&studysetId=${data?.localId}` : -->
+                            <!--         `/studysets/${data.studysetId}/stats/terms/${term.id}` -->
+                            <!-- }" style="display: flex; flex-wrap: nowrap; align-items: center; gap: 0.4rem;"> -->
+                            <!--     <StatsIcon></StatsIcon> -->
+                            <!--     <span style="margin-top: 0px;">View Details</span> -->
+                            <!-- </a> -->
                         </div>
                         {/if}
                     </div>
