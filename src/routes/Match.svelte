@@ -508,26 +508,26 @@
                             {#each h.incorrectPairIds as pair}
                                 <div class="no-margin-for-p-here">
                                     <p class="fg0" style="font-size: 0.8rem;">Term</p>
-                                    <p style="white-space: pre-wrap;">{loadedTermsMap.get(pair[0]).term}</p>
-                                    {#if loadedTermsMap.get(pair[0]).termImageUrl != null}
-                                        <img class="term-image-small" src={loadedTermsMap.get(pair[0]).termImageUrl}>
+                                    <p style="white-space: pre-wrap;">{loadedTermsMap.get(pair[0])?.term}</p>
+                                    {#if loadedTermsMap.get(pair[0])?.termImageUrl != null}
+                                        <img class="term-image-small" src={loadedTermsMap.get(pair[0])?.termImageUrl}>
                                     {/if}
                                     <p class="fg0" style="font-size: 0.8rem; margin-top: 0.2rem;">Def</p>
-                                    <p style="white-space: pre-wrap;">{loadedTermsMap.get(pair[0]).def}</p>
-                                    {#if loadedTermsMap.get(pair[0]).defImageUrl != null}
-                                        <img class="term-image-small" src={loadedTermsMap.get(pair[0]).defImageUrl}>
+                                    <p style="white-space: pre-wrap;">{loadedTermsMap.get(pair[0])?.def}</p>
+                                    {#if loadedTermsMap.get(pair[0])?.defImageUrl != null}
+                                        <img class="term-image-small" src={loadedTermsMap.get(pair[0])?.defImageUrl}>
                                     {/if}
                                 </div>
                                 <div class="no-margin-for-p-here">
                                     <p class="fg0" style="font-size: 0.8rem;">Term</p>
-                                    <p style="white-space: pre-wrap;">{loadedTermsMap.get(pair[1]).term}</p>
-                                    {#if loadedTermsMap.get(pair[1]).termImageUrl != null}
-                                        <img class="term-image-small" src={loadedTermsMap.get(pair[1]).termImageUrl}>
+                                    <p style="white-space: pre-wrap;">{loadedTermsMap.get(pair[1])?.term}</p>
+                                    {#if loadedTermsMap.get(pair[1])?.termImageUrl != null}
+                                        <img class="term-image-small" src={loadedTermsMap.get(pair[1])?.termImageUrl}>
                                     {/if}
                                     <p class="fg0" style="font-size: 0.8rem; margin-top: 0.2rem;">Def</p>
-                                    <p style="white-space: pre-wrap;">{loadedTermsMap.get(pair[1]).def}</p>
-                                    {#if loadedTermsMap.get(pair[1]).defImageUrl != null}
-                                        <img class="term-image-small" src={loadedTermsMap.get(pair[1]).defImageUrl}>
+                                    <p style="white-space: pre-wrap;">{loadedTermsMap.get(pair[1])?.def}</p>
+                                    {#if loadedTermsMap.get(pair[1])?.defImageUrl != null}
+                                        <img class="term-image-small" src={loadedTermsMap.get(pair[1])?.defImageUrl}>
                                     {/if}
                                 </div>
                             {/each}
