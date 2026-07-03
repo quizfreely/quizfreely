@@ -80,15 +80,15 @@
                 "Definition" : "Term"
             }</p>
             <p class="{
-                presentedAnswer[answerWith == "DEF" ?
+                presentedAnswer?.[answerWith == "DEF" ?
                     "def" : "term"
                 ]?.length < 20 ?
                     "h4" : ""
             }" style="white-space: pre-wrap; margin-top: 0.2rem;">{answerWith == "DEF" ?
-                presentedAnswer.def : presentedAnswer.term
+                presentedAnswer?.def : presentedAnswer?.term
             }</p>
-            {#if (answerWith == "DEF" ? presentedAnswer.defImageUrl : presentedAnswer.termImageUrl) != null}
-                <div><img src={answerWith == "DEF" ? presentedAnswer.defImageUrl : presentedAnswer.termImageUrl} class="term-image" alt="{answerWith == "DEF" ? "definition" : "term"} image"></div>
+            {#if (answerWith == "DEF" ? presentedAnswer?.defImageUrl : presentedAnswer?.termImageUrl) != null}
+                <div><img src={answerWith == "DEF" ? presentedAnswer?.defImageUrl : presentedAnswer?.termImageUrl} class="term-image" alt="{answerWith == "DEF" ? "definition" : "term"} image"></div>
             {/if}
         </div>
     </div>
