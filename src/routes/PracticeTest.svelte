@@ -1065,7 +1065,7 @@ FRQs: ${numFRQsToAssign}`,
                 <div class="content">
                     <h4>Are you sure you want to exit?</h4>
                     <p>
-                        You need to finish &amp; submit this practice test to
+                        You need to submit this practice test to
                         save your answers.
                     </p>
                     <div class="flex">
