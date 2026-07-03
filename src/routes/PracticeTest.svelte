@@ -1044,6 +1044,7 @@ FRQs: ${numFRQsToAssign}`,
                                             questions: questionDataArray,
                                         }),
                                     ),
+                                    async (_) => { return data.studysetId == null ? [] : [data.studysetId] },
                                 );
                                 submitted = true;
                                 pt?.questions?.forEach?.((q, index) => {
