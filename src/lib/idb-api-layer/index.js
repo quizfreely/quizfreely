@@ -235,7 +235,7 @@ export const idbApiLayer = {
             }
         }
     },
-    recordPracticeTest: async function (practiceTest) {
+    recordPracticeTest: async function (practiceTest, getCloudStudysetIds) {
         return await db.transaction('rw', [db.practiceTests, db.practiceTestQuestions, db.termProgress, db.terms, db.reviewEvents], async () => {
             const rnISOString = (new Date()).toISOString();
             const termProgressMap = new Map();
@@ -414,9 +414,19 @@ export const idbApiLayer = {
                 }
             }
             // Fetch studysetIds for all involved terms
-            const allTerms = await db.terms.bulkGet(Array.from(involvedTermIds));
-            allTerms.forEach(t => { if (t?.studysetId)
-                studysetIds.add(t.studysetId); });
+            const localInvolvedTermIds = Array.from(involvedTermIds).filter(id => (typeof id === 'number') || (typeof id === 'string' && !id.includes('-')));
+            if (localInvolvedTermIds.length > 0) {
+                const termIdsForLookup = localInvolvedTermIds.map(id => Number(id));
+                const termsForLookup = await db.terms.bulkGet(termIdsForLookup);
+                termsForLookup.forEach(t => { if (t?.studysetId != null)
+                    studysetIds.add(t.studysetId); });
+            }
+            const cloudInvolvedTermIds = Array.from(involvedTermIds).filter(id => typeof id === 'string' && id.includes('-'));
+            if (cloudInvolvedTermIds.length > 0 && getCloudStudysetIds) {
+                const cloudStudysetIds = await getCloudStudysetIds(cloudInvolvedTermIds);
+                cloudStudysetIds.forEach(id => { if (id != null)
+                    studysetIds.add(id); });
+            }
             for (const tp of termProgressMap.values()) {
                 const existingProgress = await db.termProgress.where("termId").equals(tp.termId).toArray();
                 if (existingProgress?.length > 0) {

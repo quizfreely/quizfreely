@@ -34,7 +34,7 @@ export declare const idbApiLayer: {
     deleteTerms: (deleteTermIDs: number[]) => Promise<void>;
     deleteStudyset: (id: number) => Promise<void>;
     updateTermProgress: (termProgressArray: any) => Promise<void>;
-    recordPracticeTest: (practiceTest: any) => Promise<import("./db").PracticeTest | null>;
+    recordPracticeTest: (practiceTest: any, getCloudStudysetIds?: (cloudTermIds: string[]) => Promise<(number | string)[]>) => Promise<import("./db").PracticeTest | null>;
     getPracticeTestWithQuestions: (ptId: number) => Promise<import("./db").PracticeTest | null>;
     updatePracticeTestQuestion: (id: number, correct: boolean, userMarkedCorrect?: boolean) => Promise<PracticeTestQuestion | undefined>;
     getPracticeTestsByTermId: (termId: number | string) => Promise<import("./db").PracticeTest[]>;
