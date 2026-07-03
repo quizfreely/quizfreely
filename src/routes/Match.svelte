@@ -556,7 +556,7 @@
             <p class="h3" style="margin-bottom: 0px;">
                 {
                     (timeElapsedMs > 60000 ? Math.floor(timeElapsedMs/60000)+"m " : "") + (timeElapsedMs/1000).toFixed(2)+"s"
-                } with <span class={incorrectPairs.length > 1 ? "ohno" : (incorrectPairs.length > 0 ? "warn" : "yay")}>
+                } with <span class={incorrectPairs.length > 0 ? "ohno" : "yay"}>
                     {incorrectPairs.length} incorrect
                 </span>
             </p>
