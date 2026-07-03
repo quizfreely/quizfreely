@@ -62,7 +62,6 @@
                     questions = pt.questions.map(
                         mapPracticeTestQuestionToQuestionComponentFormat,
                     );
-                    console.log(questions)
                     questionsCorrect = pt.questionsCorrect;
                     alreadyOverLocalPTStudysetIds = pt.studysetIds;
                 }
