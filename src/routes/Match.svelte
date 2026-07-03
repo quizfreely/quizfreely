@@ -390,11 +390,19 @@
                             let cloudTermIds = [];
                             let localTermIds = [];
                             h.incorrectPairIds.forEach(pair => {
-                                if (pair?.[0] != null && (""+pair[0]).includes("-") && !loadedTermsMap.has(pair[0])) {
-                                    cloudTermIds.push(pair[0]);
+                                if (pair?.[0] != null && !loadedTermsMap.has(pair[0])) {
+                                    if ((""+pair[0]).includes("-")) {
+                                        cloudTermIds.push(pair[0]);
+                                    } else {
+                                        localTermIds.push(pair[0]);
+                                    }
                                 }
-                                if (pair?.[1] != null && (""+pair[1]).includes("-") && !loadedTermsMap.has(pair[1])) {
-                                    cloudTermIds.push(pair[1]);
+                                if (pair?.[1] != null && !loadedTermsMap.has(pair[1])) {
+                                    if ((""+pair[1]).includes("-")) {
+                                        cloudTermIds.push(pair[1]);
+                                    } else {
+                                        localTermIds.push(pair[1]);
+                                    }
                                 }
                             });
                             let cloudLoaded = false;
