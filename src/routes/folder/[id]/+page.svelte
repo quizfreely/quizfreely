@@ -369,6 +369,10 @@
             {/snippet}
         </Dropdown>
     </div>
+    {:else}
+        <p>Created by <a href="/users/{data?.folder?.user?.id}">{
+            data?.folder?.user?.displayName
+        }</a></p>
     {/if}
     {#if studysets?.length > 0}
         <div class="grid list" style="overflow-wrap: anywhere;">
