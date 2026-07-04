@@ -75,6 +75,7 @@
         } else {
             try {
                 const res = await idbApiLayer.updatePracticeTestQuestion(questionId, intendedCorrect, intendedManuallyMarkedCorrect);
+                console.log(`called idbApiLayer.updatePracticeTestQuestion(${questionId}, ${intendedCorrect}, ${intendedManuallyMarkedCorrect}), result:`, res);
                 return res?.id != null;
             } catch (err) {
                 console.error("Error from FRQ idbApiLayer updatePracticeTestQuesetion:", err);
