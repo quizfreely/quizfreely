@@ -686,12 +686,12 @@ FRQs: ${numFRQsToAssign}`,
                                 ></CheckmarkIcon>
                                 True/False
                             </button>
-                            <button class="button-box { questionTypesEnabled.frq ?
-                                "selected" : ""
-                            }" style="display: flex; margin-top: 0.4rem;" onclick={() => questionTypesEnabled.frq = !questionTypesEnabled.frq}>
-                                <CheckmarkIcon class="button-box-selected-icon"></CheckmarkIcon>
-                                Free Response
-                            </button>
+                            <!-- <button class="button-box { questionTypesEnabled.frq ? -->
+                            <!--     "selected" : "" -->
+                            <!-- }" style="display: flex; margin-top: 0.4rem;" onclick={() => questionTypesEnabled.frq = !questionTypesEnabled.frq}> -->
+                            <!--     <CheckmarkIcon class="button-box-selected-icon"></CheckmarkIcon> -->
+                            <!--     Free Response -->
+                            <!-- </button> -->
                         </div>
                     </div>
                     <!-- <div> -->
