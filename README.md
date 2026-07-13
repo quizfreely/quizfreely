@@ -6,7 +6,7 @@ https://quizfreely.org
 
 [Codeberg](https://codeberg.org/quizfreely/quizfreely) · [GitHub](https://github.com/quizfreely/quizfreely)
 
-General developer/contributor documentation is available [here](https://quizfreely.org/docs).
+General developer/contributor documentation is available [here](https://docs.quizfreely.org).
 
 This repository, `quizfreely/quizfreely`, is Quizfreely's web app, written in JavaScript with Node.js & SvelteKit.
 

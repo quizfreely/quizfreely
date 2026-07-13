@@ -1,12 +1,16 @@
 <script>
     let { data } = $props();
+    import QuizfreelyLogo from "$lib/svg/QuizfreelyLogo.svelte";
     import HeartIcon from "$lib/icons/Heart.svelte";
     import IconCodeberg from "$lib/icons/Codeberg.svelte";
     import IconGitHub from "$lib/icons/GitHub.svelte";
+    import NoIcon from "$lib/icons/No.svelte";
+    import CheckmarkIcon from "$lib/icons/Checkmark.svelte";
+    import InfinityIcon from "$lib/icons/Infinity.svelte";
 </script>
 
 <svelte:head>
-    <title>Quizfreely: Free & Open Source Studying Tool</title>
+    <title>Quizfreely: Free Open Source Studying Tool</title>
     <meta name="description" content="Quizfreely is a free and open source learning app with flashcards, practice tests, and more tools to help you study." />
     <meta name=”robots” content="index, follow" />
     <link rel="canonical" href="https://quizfreely.org" />
@@ -15,65 +19,63 @@
 <main>
 <div class="grid intro" style="margin-bottom: 0px; padding-bottom: 0px; border:none">
     <div class="logotype">
-      <div class="logo">
-        <svg
-           viewBox="0 0 512 512"
-           version="1.1"
-           id="svg1"
-           xml:space="preserve"
-           xmlns:xlink="http://www.w3.org/1999/xlink"
-           xmlns="http://www.w3.org/2000/svg"
-           xmlns:svg="http://www.w3.org/2000/svg"><defs
-             id="defs1"><linearGradient
-               id="linearGradient1"><stop
-                 style="stop-color: var(--main-gradient-light-stop-color, #7ca4fe); stop-opacity:1;"
-                 offset="0"
-                 id="stop1" /><stop
-                 style="stop-color: var(--main-gradient-dark-stop-color, #4c5cf2); stop-opacity:1;"
-                 offset="1"
-                 id="stop2" /></linearGradient><linearGradient
-               xlink:href="#linearGradient1"
-               id="linearGradient2"
-               x1="388.59506"
-               y1="123.40449"
-               x2="123.40467"
-               y2="388.59488"
-               gradientUnits="userSpaceOnUse" /></defs><g
-             id="layer1"><path
-               id="path1"
-               style="fill:url(#linearGradient2);fill-opacity:1;stroke-width:0.976652"
-               d="M 130.98828,6 C 113.75037,6 68.482,6 68.482,6 c 0,0 0,45.267945 0,62.505859 l 4.22e-4,203.143551 v 203.14356 c 0,11.2315 6.055743,21.68114 15.822266,27.15039 9.766524,5.46926 21.778402,5.37162 31.447262,-0.39063 L 256,417.46289 396.15039,501.55273 c 9.66886,5.76225 21.68074,5.95755 31.44727,0.39063 9.76652,-5.56691 15.91992,-15.91889 15.91992,-27.15039 L 443.518,6 Z M 359.6875,95.041016 c 6.92391,-0.07611 11.74967,3.706695 16.29883,8.292964 6.11307,7.59569 6.77618,18.64249 0.7832,26.88282 L 239.62891,318.7832 c -3.80694,5.26051 -9.73129,8.52106 -16.16211,9.06836 -6.5353,0.55619 -12.87048,-1.89196 -17.40625,-6.42773 l -68.57422,-68.57422 c -8.61052,-8.61052 -8.61053,-22.72933 0,-31.33984 8.61052,-8.61052 22.72932,-8.61052 31.33984,0 L 219.06641,271.75 340.98438,104.13672 c 4.47271,-6.149988 11.58963,-9.326467 18.70312,-9.095704 z" /></g></svg>
-      </div>
-      <div>
-        <p class="h3">Quizfreely</p>
-      </div>
+        <div class="logo">
+            <QuizfreelyLogo></QuizfreelyLogo>
+        </div>
+        <div>
+            <p class="h3">Quizfreely</p>
+        </div>
     </div>
     <div class="content">
-      <h1 class="h2" style="max-width: 36rem; margin: auto">
-        A studying tool that's <span class="extra">actually free</span>
-      </h1>
-      <p style="max-width: 28rem; margin: auto; margin-top: 1rem">
-        Quizfreely is a free and open source learning app with flashcards, review/learn mode, practice tests, & more!
-      </p>
-      <div class="flex center">
-        <a href="/sign-up" class="button large">Get Started</a>
-        <a href="/explore" class="button large alt">Explore</a>
-      </div>
+        <h1 class="h2" style="max-width: 36rem; margin: auto">
+            A studying tool that's <span class="extra">actually free</span>
+        </h1>
+        <p style="max-width: 28rem; margin: auto; margin-top: 1rem">
+            Quizfreely is a free and open source learning app with flashcards, review/learn mode, practice tests, & more!
+        </p>
+        <div class="flex center">
+            <a href="/sign-up" class="button large">Get Started</a>
+            <a href="/explore" class="button large alt">Explore</a>
+        </div>
     </div>
-  </div>
+</div>
+<div class="grid page">
+    <div class="content">
+    </div>
+</div>
   <div class="wave-top extra-bg"></div>
   <div class="grid page extra">
     <div class="content">
-      <div>
-        <h2 class="h3">It's <span class="extra">actually free</span></h2>
-        <p style="max-width: 40rem;">
-            Quizfreely has unlimited practice tests for free, unlike other flashcard websites or studying apps. Quizfreely is open source and nonprofit, and there are no paid features or subscriptions.
-        </p>
+        <div class="grid list grid-list-but-different">
+            <div class="box" style="display: flex; gap: 0.4rem; align-items: center;">
+                <NoIcon></NoIcon> No Ads
+            </div>
+            <div class="box" style="display: flex; gap: 0.4rem; align-items: center;">
+                <InfinityIcon></InfinityIcon> Unlimited Free Practice Tests
+            </div>
+            <div class="box" style="display: flex; gap: 0.4rem; align-items: center;">
+                <CheckmarkIcon></CheckmarkIcon> Advanced Features
+            </div>
+            <div class="box" style="display: flex; gap: 0.4rem; align-items: center;">
+                <NoIcon></NoIcon> No Paid Subscriptions
+            </div>
+            <div class="box" style="display: flex; gap: 0.4rem; align-items: center;">
+                <CheckmarkIcon></CheckmarkIcon> Free & Open Source
+            </div>
+            <div class="box" style="display: flex; gap: 0.4rem; align-items: center;">
+                <CheckmarkIcon></CheckmarkIcon> Privacy-Friendly
+            </div>
+        </div>
+      <div style="margin-top: 4rem;">
+          <h2 class="h3">It's <span class="extra">actually free</span></h2>
+          <p style="max-width: 40rem;">
+              Quizfreely has unlimited practice tests for free, unlike other flashcard websites or studying apps. Quizfreely is open source and nonprofit, and there are no ads and no paid features or subscriptions.
+          </p>
       </div>
       <div style="margin-top: 4rem;">
         <h2 class="h3" style="max-width: 40rem;"><span class="extra">Advanced features</span> to measure &amp; improve your studying habits</h2>
         <p style="max-width: 40rem;">
-            Quizfreely records individual terms' &amp; flashcards' progress &amp; accuracy. It calculates frequently confused terms or definitions and finds which incorrect answer choices are selected the most. Also, there's cool graphs and charts and stuff.
+            Quizfreely records individual terms' &amp; flashcards' progress &amp; accuracy. It calculates frequently confused terms or definitions and finds which incorrect answer choices are selected the most. Quizfreely gives users deep, detailed, insights on their learning.
         </p>
       </div>
     </div>
@@ -97,7 +99,7 @@
       <div style="margin-top: 4rem;">
         <h2 class="h3">Fully <span class="love">open source</span></h2>
         <p style="max-width: 36rem;">
-            Quizfreely is released under the AGPL-3.0 license. Our frontend web app, backend API, <a href="https://quizfreely.org/docs" class="link-love with-underline">documentation</a>, and all of our software are all open source on Codeberg and GitHub.
+            Quizfreely is released under the AGPL-3.0 license. Our frontend web app, backend API, <a href="https://docs.quizfreely.org" class="link-love with-underline">documentation</a>, and all of our software are all open source on Codeberg and GitHub.
         </p>
         <div class="flex compact-gap">
           <a class="button large faint" href="https://codeberg.org/quizfreely">
@@ -154,3 +156,21 @@
     </div>
   </div>
 </main>
+<style>
+    .grid-list-but-different,
+    .grid.list.grid-list-but-different {
+        grid-template-columns: 1fr 1fr 1fr;
+    }
+    @media only screen and (max-width: 1400px) {
+        .grid-list-but-different,
+        .grid.list.grid-list-but-different {
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+    @media only screen and (max-width: 800px) {
+        .grid-list-but-different,
+        .grid.list.grid-list-but-different {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
