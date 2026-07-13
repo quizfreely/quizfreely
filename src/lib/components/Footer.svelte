@@ -88,7 +88,7 @@
         <a href="https://github.com/quizfreely/quizfreely"
           >Source Code (GitHub)</a
         >
-        <a href="https://quizfreely.org/docs">Documentation</a>
+        <a href="https://docs.quizfreely.org">Documentation</a>
       </div>
       <p class="fg0">Community</p>
       <div
