@@ -190,6 +190,26 @@
             </a>
           </div>
       </div>
+        <div class="grid list grid-list-but-different" style="margin-top: 4rem; margin-bottom: 0px;">
+            <div class="box" style="display: flex; gap: 0.4rem; align-items: center;">
+                <NoIcon></NoIcon> No Ads
+            </div>
+            <div class="box" style="display: flex; gap: 0.4rem; align-items: center;">
+                <InfinityIcon></InfinityIcon> Unlimited Free Practice Tests
+            </div>
+            <div class="box" style="display: flex; gap: 0.4rem; align-items: center;">
+                <CheckmarkIcon></CheckmarkIcon> Advanced Features
+            </div>
+            <div class="box" style="display: flex; gap: 0.4rem; align-items: center;">
+                <NoIcon></NoIcon> No Paid Subscriptions
+            </div>
+            <div class="box" style="display: flex; gap: 0.4rem; align-items: center;">
+                <CheckmarkIcon></CheckmarkIcon> Free & Open Source
+            </div>
+            <div class="box" style="display: flex; gap: 0.4rem; align-items: center;">
+                <CheckmarkIcon></CheckmarkIcon> Privacy-Friendly
+            </div>
+        </div>
     </div>
   </div>
   <div class="wave-bottom extra-bg"></div>

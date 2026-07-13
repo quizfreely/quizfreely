@@ -46,7 +46,6 @@
   <div class="wave-top extra-bg"></div>
   <div class="grid page extra">
     <div class="content">
-
         <div class="grid list grid-list-but-different">
             <div class="box" style="display: flex; gap: 0.4rem; align-items: center;">
                 <NoIcon></NoIcon> No Ads
