@@ -46,13 +46,13 @@
                     <td>Advertisements</td>
                     <td>
                         <div class="flex text yay" style="gap: 0.4rem; align-items: center;">
-                            <NoIcon></NoIcon>
+                            <CheckmarkIcon></CheckmarkIcon>
                             No Ads
                         </div>
                     </td>
                     <td>
                         <div class="flex text ohno" style="gap: 0.4rem; align-items: center;">
-                            <CheckmarkIcon></CheckmarkIcon>
+                            <XMarkIcon></XMarkIcon>
                             Ads
                         </div>
                     </td>
@@ -61,7 +61,7 @@
                     <td>Free Practice Tests</td>
                     <td>
                         <div class="flex text yay" style="gap: 0.4rem; align-items: center;">
-                            <InfinityIcon></InfinityIcon>
+                            <CheckmarkIcon></CheckmarkIcon>
                             Unlimited
                         </div>
                     </td>
@@ -73,7 +73,7 @@
                     </td>
                 </tr>
                 <tr>
-                    <td>Attach Images</td>
+                    <td>Flashcard Images</td>
                     <td>
                         <div class="flex text yay" style="gap: 0.4rem; align-items: center;">
                             <CheckmarkIcon></CheckmarkIcon>
@@ -88,7 +88,67 @@
                     </td>
                 </tr>
                 <tr>
+                    <td>Images on Both Sides</td>
+                    <td>
+                        <div class="flex text yay" style="gap: 0.4rem; align-items: center;">
+                            <CheckmarkIcon></CheckmarkIcon>
+                            Yes
+                        </div>
+                    </td>
+                    <td>
+                        <div class="flex text ohno" style="gap: 0.4rem; align-items: center;">
+                            <XMarkIcon></XMarkIcon>
+                            No
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Account Creation</td>
+                    <td>
+                        <div class="flex text yay" style="gap: 0.4rem; align-items: center;">
+                            <CheckmarkIcon></CheckmarkIcon>
+                            Optional
+                        </div>
+                    </td>
+                    <td>
+                        <div class="flex text ohno" style="gap: 0.4rem; align-items: center;">
+                            <XMarkIcon></XMarkIcon>
+                            Required
+                        </div>
+                    </td>
+                </tr>
+                <tr>
                     <td>User-Friendly Interface</td>
+                    <td>
+                        <div class="flex text yay" style="gap: 0.4rem; align-items: center;">
+                            <CheckmarkIcon></CheckmarkIcon>
+                            Yes
+                        </div>
+                    </td>
+                    <td>
+                        <div class="flex text yay" style="gap: 0.4rem; align-items: center;">
+                            <CheckmarkIcon></CheckmarkIcon>
+                            Yes
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Make your own Flashcards</td>
+                    <td>
+                        <div class="flex text yay" style="gap: 0.4rem; align-items: center;">
+                            <CheckmarkIcon></CheckmarkIcon>
+                            Yes
+                        </div>
+                    </td>
+                    <td>
+                        <div class="flex text yay" style="gap: 0.4rem; align-items: center;">
+                            <CheckmarkIcon></CheckmarkIcon>
+                            Yes
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Share &amp; Search Flashcards</td>
                     <td>
                         <div class="flex text yay" style="gap: 0.4rem; align-items: center;">
                             <CheckmarkIcon></CheckmarkIcon>
@@ -119,22 +179,16 @@
                 </tr>
             </tbody>
         </table>
-      <div class="grid paragraph" style="margin-top: 4rem;">
-        <div class="content">
-          <h2 class="h3">You can import Quizlet sets by pasting a link</h2>
+      <div style="margin-top: 6rem;">
+          <h2 class="h3">Quizfreely is <span class="extra">actually free</span></h2>
           <p style="max-width: 40rem;">
-              Quizfreely has unlimited practice tests for free, unlike other flashcard websites or studying apps. Quizfreely is open source and nonprofit, and there are no paid features or subscriptions.
+              Quizfreely has unlimited practice tests for free, unlike other flashcard websites or studying apps like Quizlet. Quizfreely is open source and nonprofit, and there are no paid features or subscriptions.
           </p>
-        </div>
-        <div class="image">
-            example
-        </div>
-      </div>
-      <div style="margin-top: 4rem;">
-        <h2 class="h3" style="max-width: 40rem;"><span class="extra">Advanced features</span> to measure &amp; improve your studying habits</h2>
-        <p style="max-width: 40rem;">
-            Quizfreely records individual terms' &amp; flashcards' progress &amp; accuracy. It calculates frequently confused terms or definitions and finds which incorrect answer choices are selected the most. Also, there's cool graphs and charts and stuff.
-        </p>
+          <div class="flex">
+            <a href="/sign-up" class="button large alt yayy">
+                Get Started
+            </a>
+          </div>
       </div>
     </div>
   </div>
@@ -142,33 +196,15 @@
   <div class="grid page">
     <div class="content">
       <div>
-        <h2 class="h3">You can easily import Quizlet sets</h2>
-        <p>
-            Quizfreely is a nonprofit project with <a href="https://hcb.hackclub.com/quizfreely" class="link-love with-underline">transparent finances</a>.
-            <span class="optional-line-600px">We're fiscally sponsored by <a class="link-love with-underline" href="https://the.hackfoundation.org">The Hack Foundation</a>, a <span style="white-space: nowrap;">501(c)(3)</span> nonprofit.</span>
-        </p>
-        <div class="flex">
-          <a class="button large love" href="https://hcb.hackclub.com/donations/start/quizfreely">
-            <HeartIcon></HeartIcon>
-            Donate
-          </a>
-        </div>
-      </div>
-      <div style="margin-top: 4rem;">
-        <h2 class="h3">Fully <span class="love">open source</span></h2>
+        <h2 class="h3">Quizfreely is <span class="love">open source</span></h2>
         <p style="max-width: 36rem;">
-            Quizfreely is released under the AGPL-3.0 license. Our frontend web app, backend API, <a href="https://quizfreely.org/docs" class="link-love with-underline">documentation</a>, and all of our software are all open source on Codeberg and GitHub.
+            Quizfreely is fully open source, allowing community contributions and transparency. Users can inspect the code, suggest improvements, and even self-host the platform. Quizfreely is also more respectful of user privacy and less reliant on tracking or data monetization.
         </p>
-        <div class="flex compact-gap">
-          <a class="button large faint" href="https://codeberg.org/quizfreely">
-            <IconCodeberg></IconCodeberg>
-            Codeberg
-          </a>
-          <a class="button large faint" href="https://github.com/quizfreely">
-            <IconGitHub></IconGitHub>
-            GitHub
-          </a>
-        </div>
+          <div class="flex">
+            <a href="/sign-up" class="button large alt love">
+                Get Started
+            </a>
+          </div>
       </div>
     </div>
   </div>

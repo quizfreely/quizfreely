@@ -5,10 +5,12 @@
     import IconCodeberg from "$lib/icons/Codeberg.svelte";
     import IconGitHub from "$lib/icons/GitHub.svelte";
     import NoIcon from "$lib/icons/No.svelte";
+    import CheckmarkIcon from "$lib/icons/Checkmark.svelte";
+    import InfinityIcon from "$lib/icons/Infinity.svelte";
 </script>
 
 <svelte:head>
-    <title>Quizfreely: Free & Open Source Studying Tool</title>
+    <title>Quizfreely: Free Open Source Studying Tool</title>
     <meta name="description" content="Quizfreely is a free and open source learning app with flashcards, practice tests, and more tools to help you study." />
     <meta name=”robots” content="index, follow" />
     <link rel="canonical" href="https://quizfreely.org" />
@@ -46,27 +48,35 @@
     <div class="content">
 
         <div class="grid list grid-list-but-different">
-            <div class="box"><NoIcon></NoIcon> No Ads</div>
-            <div class="box">Unlimited Free Practice Tests</div>
-            <div class="box">Free & Open Source</div>
-            <div class="box">No Paid Features</div>
-            <div class="box"></div>
+            <div class="box" style="display: flex; gap: 0.4rem; align-items: center;">
+                <NoIcon></NoIcon> No Ads
+            </div>
+            <div class="box" style="display: flex; gap: 0.4rem; align-items: center;">
+                <InfinityIcon></InfinityIcon> Unlimited Free Practice Tests
+            </div>
+            <div class="box" style="display: flex; gap: 0.4rem; align-items: center;">
+                <CheckmarkIcon></CheckmarkIcon> Advanced Features
+            </div>
+            <div class="box" style="display: flex; gap: 0.4rem; align-items: center;">
+                <NoIcon></NoIcon> No Paid Subscriptions
+            </div>
+            <div class="box" style="display: flex; gap: 0.4rem; align-items: center;">
+                <CheckmarkIcon></CheckmarkIcon> Free & Open Source
+            </div>
+            <div class="box" style="display: flex; gap: 0.4rem; align-items: center;">
+                <CheckmarkIcon></CheckmarkIcon> Privacy-Friendly
+            </div>
         </div>
-      <div class="grid paragraph">
-        <div class="content">
+      <div style="margin-top: 4rem;">
           <h2 class="h3">It's <span class="extra">actually free</span></h2>
           <p style="max-width: 40rem;">
-              Quizfreely has unlimited practice tests for free, unlike other flashcard websites or studying apps. Quizfreely is open source and nonprofit, and there are no paid features or subscriptions.
+              Quizfreely has unlimited practice tests for free, unlike other flashcard websites or studying apps. Quizfreely is open source and nonprofit, and there are no ads and no paid features or subscriptions.
           </p>
-        </div>
-        <div class="image">
-            example
-        </div>
       </div>
       <div style="margin-top: 4rem;">
         <h2 class="h3" style="max-width: 40rem;"><span class="extra">Advanced features</span> to measure &amp; improve your studying habits</h2>
         <p style="max-width: 40rem;">
-            Quizfreely records individual terms' &amp; flashcards' progress &amp; accuracy. It calculates frequently confused terms or definitions and finds which incorrect answer choices are selected the most. Also, there's cool graphs and charts and stuff.
+            Quizfreely records individual terms' &amp; flashcards' progress &amp; accuracy. It calculates frequently confused terms or definitions and finds which incorrect answer choices are selected the most. Quizfreely gives users deep, detailed, insights on their learning.
         </p>
       </div>
     </div>
