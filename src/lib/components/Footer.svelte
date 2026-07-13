@@ -46,10 +46,17 @@
         class="flex col compact-gap"
         style="width:fit-content; margin-top: 0.6rem;"
       >
-        <a href="/landing-page">Landing Page</a>
+        <a href="/about">Landing Page</a>
+        <a href="/compare/quizlet">Quizfreely vs Quizlet</a>
+      </div>
+      <p class="fg0">Resources</p>
+      <div
+        class="flex col compact-gap"
+        style="width:fit-content; margin-top: 0.6rem;"
+      >
         <a href="/privacy">Privacy Policy</a>
         <a href="/terms">Terms of Service</a>
-        <a href="https://hcb.hackclub.com/quizfreely">Transparent Finances</a>
+        <a href="https://hcb.hackclub.com/quizfreely">Transparent Finances (HCB)</a>
       </div>
     </div>
     <div>
