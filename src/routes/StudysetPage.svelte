@@ -398,13 +398,13 @@
                                 {#each terms as term}
                                     <tr>
                                         <td style="vertical-align: top; padding: 0px;">
-                                            <div style="white-space: pre-wrap; padding-left: 1rem; padding-right: 1rem; padding-top: 1rem; padding-bottom: 0px;">{term.term}</div>
+                                            <div style="white-space: pre-wrap; overflow-wrap: anywhere; padding-left: 1rem; padding-right: 1rem; padding-top: 1rem; padding-bottom: 0px;">{term.term}</div>
                                             {#if term?.termImageUrl != null}
                                                 <div><img src={term.termImageUrl} alt="term image" class="term-image"></div>
                                             {/if}
                                         </td>
                                         <td style="vertical-align: top; padding: 0px;">
-                                            <div style="white-space: pre-wrap; padding-left: 1rem; padding-right: 1rem; padding-top: 1rem; padding-bottom: 0px;">{term.def}</div>
+                                            <div style="white-space: pre-wrap; overflow-wrap: anywhere; padding-left: 1rem; padding-right: 1rem; padding-top: 1rem; padding-bottom: 0px;">{term.def}</div>
                                             {#if term?.defImageUrl != null}
                                                 <div style="padding-left: 0.6rem;"><img src={term.defImageUrl} alt="definition image" class="term-image"></div>
                                             {/if}
