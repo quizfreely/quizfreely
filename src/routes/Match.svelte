@@ -608,10 +608,19 @@
                 const slctdTxtTrmd = (selectedItem.showDef ?
                     selectedItem.def : selectedItem.term
                 ).trim();
+                const itmImgUrl = (item.showDef ?
+                    item.defImageUrl : item.termImageUrl
+                ) ?? null;
+                const slctdImgUrl = (selectedItem.showDef ?
+                    selectedItem.defImageUrl : selectedItem.termImageUrl
+                ) ?? null;
                 if (
                     itmTxtTrmd == slctdTxtTrmd &&
+                    itmImgUrl === slctdImgUrl &&
                     item.term.trim() != item.def.trim() &&
-                    selectedItem.term.trim() != selectedItem.def.trim()
+                    item.termImageUrl !== item.defImageUrl &&
+                    selectedItem.term.trim() != selectedItem.def.trim() &&
+                    selectedItem.termImageUrl !== selectedItem.defImageUrl
                 ) {
                     selectedItem.tmpWarn = true;
                     item.tmpWarn = true;
@@ -620,12 +629,21 @@
                     selectedItem = null;
                     showSameSideWarning = true;
                 } else if (
-                    (item.showDef &&
-                    item.term.trim() == slctdTxtTrmd) ||
-                    item.def.trim() == slctdTxtTrmd ||
-                    (selectedItem.showDef &&
-                    selectedItem.term.trim() == itmTxtTrmd) ||
-                    selectedItem.def.trim() == itmTxtTrmd
+                    (
+                        (item.showDef &&
+                        item.term.trim() == slctdTxtTrmd) ||
+                        item.def.trim() == slctdTxtTrmd ||
+                        (selectedItem.showDef &&
+                        selectedItem.term.trim() == itmTxtTrmd) ||
+                        selectedItem.def.trim() == itmTxtTrmd
+                    ) && (
+                        (item.showDef &&
+                        item.termImageUrl === slctdImgUrl) ||
+                        item.defImageUrl === slctdImgUrl ||
+                        (selectedItem.showDef &&
+                        selectedItem.termImageUrl === itmImgUrl) ||
+                        selectedItem.defImageUrl === itmImgUrl
+                    )
                 ) {
                     selectedItem.correct = true;
                     item.correct = true;
