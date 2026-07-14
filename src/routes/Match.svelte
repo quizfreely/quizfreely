@@ -614,8 +614,6 @@
                 const slctdImgUrl = (selectedItem.showDef ?
                     selectedItem.defImageUrl : selectedItem.termImageUrl
                 ) ?? null;
-                console.log(itmImgUrl)
-                console.log(slctdImgUrl)
                 if (
                     itmTxtTrmd == slctdTxtTrmd &&
                     itmImgUrl === slctdImgUrl &&
@@ -631,21 +629,16 @@
                     selectedItem = null;
                     showSameSideWarning = true;
                 } else if (
-                    (
-                        (item.showDef &&
-                        item.term.trim() == slctdTxtTrmd) ||
-                        item.def.trim() == slctdTxtTrmd ||
-                        (selectedItem.showDef &&
-                        selectedItem.term.trim() == itmTxtTrmd) ||
-                        selectedItem.def.trim() == itmTxtTrmd
-                    ) && (
-                        (item.showDef &&
+                    (item.showDef &&
+                        item.term.trim() == slctdTxtTrmd &&
                         item.termImageUrl === slctdImgUrl) ||
-                        item.defImageUrl === slctdImgUrl ||
-                        (selectedItem.showDef &&
+                    (item.def.trim() == slctdTxtTrmd &&
+                        item.defImageUrl === slctdImgUrl) ||
+                    (selectedItem.showDef &&
+                        selectedItem.term.trim() == itmTxtTrmd &&
                         selectedItem.termImageUrl === itmImgUrl) ||
-                        selectedItem.defImageUrl === itmImgUrl
-                    )
+                    (selectedItem.def.trim() == itmTxtTrmd &&
+                        selectedItem.defImageUrl === itmImgUrl)
                 ) {
                     selectedItem.correct = true;
                     item.correct = true;
