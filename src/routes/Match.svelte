@@ -630,15 +630,15 @@
                     showSameSideWarning = true;
                 } else if (
                     (item.showDef &&
-                    (item.term.trim() == slctdTxtTrmd &&
-                    item.termImageUrl === slctdImgUrl)) ||
+                        item.term.trim() == slctdTxtTrmd &&
+                        item.termImageUrl === slctdImgUrl) ||
                     (item.def.trim() == slctdTxtTrmd &&
-                    item.defImageUrl === slctdImgUrl) ||
+                        item.defImageUrl === slctdImgUrl) ||
                     (selectedItem.showDef &&
-                    (selectedItem.term.trim() == itmTxtTrmd &&
-                    selectedItem.termImageUrl === itmImgUrl)) ||
+                        selectedItem.term.trim() == itmTxtTrmd &&
+                        selectedItem.termImageUrl === itmImgUrl) ||
                     (selectedItem.def.trim() == itmTxtTrmd &&
-                    selectedItem.defImageUrl === itmImgUrl)
+                        selectedItem.defImageUrl === itmImgUrl)
                 ) {
                     selectedItem.correct = true;
                     item.correct = true;
