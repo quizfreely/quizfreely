@@ -614,6 +614,8 @@
                 const slctdImgUrl = (selectedItem.showDef ?
                     selectedItem.defImageUrl : selectedItem.termImageUrl
                 ) ?? null;
+                console.log(itmImgUrl)
+                console.log(slctdImgUrl)
                 if (
                     itmTxtTrmd == slctdTxtTrmd &&
                     itmImgUrl === slctdImgUrl &&
