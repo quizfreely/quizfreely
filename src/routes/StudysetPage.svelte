@@ -107,6 +107,13 @@
     let folderId = $state(data?.studyset?.myFolder?.id ?? null);
     let folderName = $state(data?.studyset?.myFolder?.name ?? null);
     let showFolderChooser = $state(false);
+
+    const MIN_WRAP_ANYWHERE_LEN = 24;
+    function hasLongUnbreakablePart(str) {
+        return str.split(/\s+/).some(
+            part => part.length >= MIN_WRAP_ANYWHERE_LEN
+        );
+    }
 </script>
 
 <svelte:head>
@@ -388,7 +395,7 @@
                         </a>
                     </div>
 
-                    <table class="outer caption box">
+                    <table class="outer caption box qzfr-terms-list">
                         <tbody>
                             <tr>
                                 <th>Term</th>
@@ -398,13 +405,13 @@
                                 {#each terms as term}
                                     <tr>
                                         <td style="vertical-align: top; padding: 0px;">
-                                            <div style="white-space: pre-wrap; padding-left: 1rem; padding-right: 1rem; padding-top: 1rem; padding-bottom: 0px;">{term.term}</div>
+                                            <div class={hasLongUnbreakablePart(term?.term ?? "") ? "overflowWrapAnywhere" : "overflowWrapBreakWord"} style="white-space: pre-wrap; padding-left: 1rem; padding-right: 1rem; padding-top: 1rem; padding-bottom: 0px;">{term.term}</div>
                                             {#if term?.termImageUrl != null}
                                                 <div><img src={term.termImageUrl} alt="term image" class="term-image"></div>
                                             {/if}
                                         </td>
                                         <td style="vertical-align: top; padding: 0px;">
-                                            <div style="white-space: pre-wrap; overflow-wrap: anywhere; padding-left: 1rem; padding-right: 1rem; padding-top: 1rem; padding-bottom: 0px;">{term.def}</div>
+                                            <div  class={hasLongUnbreakablePart(term?.def ?? "") ? "overflowWrapAnywhere" : "overflowWrapBreakWord"} style="white-space: pre-wrap; padding-left: 1rem; padding-right: 1rem; padding-top: 1rem; padding-bottom: 0px;">{term.def}</div>
                                             {#if term?.defImageUrl != null}
                                                 <div style="padding-left: 0.6rem;"><img src={term.defImageUrl} alt="definition image" class="term-image"></div>
                                             {/if}
@@ -767,5 +774,14 @@
         margin: 0px;
         padding: 0px;
         border-radius: 0.8rem;
+    }
+    .qzfr-terms-list {
+        max-width: 90vw;
+    }
+    .overflowWrapAnywhere {
+        overflow-wrap: anywhere;
+    }
+    .overflowWrapBreakWord {
+        overflow-wrap: break-word;
     }
 </style>
