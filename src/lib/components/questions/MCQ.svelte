@@ -72,7 +72,7 @@
         }
     }
     export function isAnswered() {
-        return answeredIndex >= 0;
+        return answeredIndex !== null && answeredIndex >= 0;
     }
 </script>
 <style>
