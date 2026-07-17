@@ -1,5 +1,6 @@
 {
     "$schema": "https://fundingjson.org/schema/v1.1.0.json",
+    "version": "v1.1.0",
     "entity": {
         "type": "organisation",
         "role": "owner",
@@ -46,7 +47,7 @@
             "currency": "USD",
             "frequency": "monthly",
             "channels": ["donate-link"]
-        }],
+        }]
     }
 }
 
