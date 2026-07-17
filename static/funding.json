@@ -1,0 +1,52 @@
+{
+    "$schema": "https://fundingjson.org/schema/v1.1.0.json",
+    "entity": {
+        "type": "organisation",
+        "role": "owner",
+        "name": "Quizfreely",
+        "email": "quizfreely@quizfreely.org",
+        "description": "Quizfreely is an open source project with 501(c)(3) nonprofit status that provides free digital study tools.",
+        "webpageUrl": {
+            "url": "https://quizfreely.org"
+        }
+    },
+    "projects": [{
+        "guid": "quizfreely",
+        "name": "Quizfreely",
+        "description": "Quizfreely is a free and open source studying platform that provides free digital study tools used by both students and teachers.",
+        "webpageUrl": {
+            "url": "https://quizfreely.org"
+        },
+        "repositoryUrl": {
+            "url": "https://github.com/quizfreely/quizfreely",
+            "wellKnown": "https://github.com/quizfreely/quizfreely/blob/main/.github/.well-known/funding-manifest-urls"
+        },
+        "licenses": ["spdx:AGPL-3.0-or-later"],
+        "tags": ["education"]
+    }],
+    "funding": {
+        "channels": [{
+            "guid": "donate-link",
+            "type": "payment-provider",
+            "address": "https://quizfreely.org/donate"
+        }],
+        "plans": [{
+            "guid": "donate-one-time",
+            "status": "active",
+            "name": "One-time donation",
+            "amount": 0,
+            "currency": "USD",
+            "frequency": "one-time",
+            "channels": ["donate-link"]
+        }, {
+            "guid": "donate-monthly",
+            "status": "active",
+            "name": "Monthly donation",
+            "amount": 0,
+            "currency": "USD",
+            "frequency": "monthly",
+            "channels": ["donate-link"]
+        }],
+    }
+}
+
