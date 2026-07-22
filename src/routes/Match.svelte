@@ -614,13 +614,33 @@
                 const slctdImgUrl = (selectedItem.showDef ?
                     selectedItem.defImageUrl : selectedItem.termImageUrl
                 ) ?? null;
+//                 console.log(`itmTxtTrmd: ${itmTxtTrmd}
+// slctdTxtTrmd: ${slctdTxtTrmd}
+// itmImgUrl: ${itmImgUrl}
+// slctdImgUrl: ${slctdImgUrl}
+// item: ${JSON.stringify(item, null, 4)}
+// selectedItem: ${JSON.stringify(item, null, 4)}
+//
+// itmTxtTrmd == slctdTxtTrmd ${itmTxtTrmd == slctdTxtTrmd}
+// itmImgUrl === slctdImgUrl ${itmImgUrl === slctdImgUrl}
+// (item.term.trim() != item.def.trim()
+// item.termImageUrl !== item.defImageUrl) ${
+//     (item.term.trim() != item.def.trim() ||
+//     item.termImageUrl !== item.defImageUrl)
+// }
+// (selectedItem.term.trim() != selectedItem.def.trim()
+// selectedItem.termImageUrl !== selectedItem.defImageUrl) ${
+//     (selectedItem.term.trim() != selectedItem.def.trim() ||
+//     selectedItem.termImageUrl !== selectedItem.defImageUrl)
+// }
+// `)
                 if (
                     itmTxtTrmd == slctdTxtTrmd &&
                     itmImgUrl === slctdImgUrl &&
-                    item.term.trim() != item.def.trim() &&
-                    item.termImageUrl !== item.defImageUrl &&
-                    selectedItem.term.trim() != selectedItem.def.trim() &&
-                    selectedItem.termImageUrl !== selectedItem.defImageUrl
+                    (item.term.trim() != item.def.trim() ||
+                    item.termImageUrl !== item.defImageUrl) &&
+                    (selectedItem.term.trim() != selectedItem.def.trim() ||
+                    selectedItem.termImageUrl !== selectedItem.defImageUrl)
                 ) {
                     selectedItem.tmpWarn = true;
                     item.tmpWarn = true;
