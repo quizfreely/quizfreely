@@ -9,6 +9,7 @@
     import FolderIcon from "$lib/icons/Folder.svelte";
     import ArrowLeftIcon from "$lib/icons/ArrowLeft.svelte";
     import ArrowRightIcon from "$lib/icons/ArrowRight.svelte";
+    import ClockIcon from "$lib/icons/Clock.svelte";
 
     let {
         data,
@@ -258,9 +259,9 @@
                 {/if}
             {/if}
             {#if data.authed && localStudysetList?.length > 0 && !(hideTypeWhenCloudEmptyAndLocalExists && !(data.studysetList?.length > 0) && localStudysetList?.length > 0)}
-                <p class="h4" style="margin-top: 0.6rem;">
-                    <LocalIcon></LocalIcon> Local Studysets
-                </p>
+                <div class="flex" style="align-items: center; gap: 0.6rem; margin-top: 0.6rem;">
+                    <LocalIcon width="1.2rem" height="1.2rem"></LocalIcon> <p class="h4" style="margin-bottom: 0px;">Local Studysets</p>
+                </div>
             {/if}
             <div
                 class="grid list"
@@ -328,9 +329,76 @@
                 </div>
             {/if}
             {#if data.mySavedStudysets?.length > 0}
-                <p class="h4" style="margin-top: 0.6rem;">
-                    <BookmarkIcon></BookmarkIcon> Saved Studysets
-                </p>
+                <div class="flex" style="align-items: center; gap: 0.6rem; margin-top: 0.6rem;">
+                    <BookmarkIcon width="1.2rem" height="1.2rem"></BookmarkIcon> <p class="h4" style="margin-bottom: 0px;">Saved</p>
+                </div>
+                <div
+                    class="grid list"
+                    style="overflow-wrap: anywhere; {collapseSaved &&
+                    data.mySavedStudysets?.length > COLLAPSE_LENGTH
+                        ? 'margin-bottom: 0px;'
+                        : ''}"
+                >
+                    {#each savedCurrentlyCollapsed ? data.mySavedStudysets.slice(0, COLLAPSE_LENGTH) : data.mySavedStudysets as studyset}
+                        <StudysetLinkBox
+                            {studyset}
+                            linkTemplateFunc={cloudLinkTemplateFunc}
+                            showDropdown={showSavedDropdown}
+                            dropdownContent={savedDropdownContent}
+                        ></StudysetLinkBox>
+                    {/each}
+                </div>
+                {#if (collapseSaved && data.mySavedStudysets?.length > COLLAPSE_LENGTH) || (!savedCurrentlyCollapsed && (data.mySavedStudysetsPageInfo?.hasNextPage || data.mySavedStudysetsPageInfo?.hasPreviousPage))}
+                    {#if !savedCurrentlyCollapsed && (hasNextPageFunc("saved") || hasPrevPageFunc("saved"))}
+                        <div
+                            class={hasNextPageFunc("saved") &&
+                            hasPrevPageFunc("saved")
+                                ? "combo-buttons"
+                                : ""}
+                        >
+                            {#if hasPrevPageFunc("saved")}
+                                <button
+                                    class="button alt {hasNextPageFunc('saved')
+                                        ? 'left'
+                                        : ''}"
+                                    onclick={() => loadPage("saved", "prev")}
+                                >
+                                    <ArrowLeftIcon></ArrowLeftIcon> Previous
+                                </button>
+                            {/if}
+                            {#if hasNextPageFunc("saved")}
+                                <button
+                                    class="button alt {hasPrevPageFunc('saved')
+                                        ? 'right'
+                                        : ''}"
+                                    onclick={() => loadPage("saved", "next")}
+                                >
+                                    Next <ArrowRightIcon></ArrowRightIcon>
+                                </button>
+                            {/if}
+                        </div>
+                    {/if}
+                    <div
+                        class="flex center"
+                        style="width: 100%; margin-top: 0.6rem; flex-direction: column; align-items: center; gap: 0.8rem;"
+                    >
+                        <button
+                            class="faint"
+                            onclick={() => {
+                                savedCurrentlyCollapsed =
+                                    !savedCurrentlyCollapsed;
+                                savedPage = 0;
+                            }}
+                        >
+                            {savedCurrentlyCollapsed ? "Show All" : "Collapse"}
+                        </button>
+                    </div>
+                {/if}
+            {/if}
+            {#if data.mySavedStudysets?.length > 0}
+                <div class="flex" style="align-items: center; gap: 0.6rem; margin-top: 0.6rem;">
+                    <ClockIcon width="1.2rem" height="1.2rem"></ClockIcon><p class="h4" style="margin-bottom: 0px;">Recent</p>
+                </div>
                 <div
                     class="grid list"
                     style="overflow-wrap: anywhere; {collapseSaved &&
