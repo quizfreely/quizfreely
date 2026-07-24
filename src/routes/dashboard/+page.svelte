@@ -155,9 +155,6 @@
 </svelte:head>
 
 <Noscript />
-
-                <EnterIcon></EnterIcon>
-                <ExitIcon></ExitIcon>
 <div>
     {#if !data.authed}
         <p class="fg0">

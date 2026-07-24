@@ -21,6 +21,7 @@
     import ImageIcon from "$lib/icons/Image.svelte";
     import XMarkIcon from "$lib/icons/CloseXMark.svelte";
     import PencilIcon from "$lib/icons/Pencil.svelte";
+    import IconEnter from "$lib/icons/Enter.svelte";
 
     import { flip } from "svelte/animate";
     import { scale, fade } from "svelte/transition";
@@ -1084,7 +1085,7 @@
                             showImportTermsModal = true;
                         }}
                     >
-                        <IconPlus />
+                        <IconEnter />
                         Import terms
                     </button>
                 </div>
