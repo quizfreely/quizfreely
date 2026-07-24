@@ -10,6 +10,8 @@
     import FolderIcon from "$lib/icons/Folder.svelte";
     import BookmarkIcon from "$lib/icons/Bookmark.svelte";
     import CheckmarkIcon from "$lib/icons/Checkmark.svelte";
+    import EnterIcon from "$lib/icons/Enter.svelte";
+    import ExitIcon from "$lib/icons/Exit.svelte";
 
     let { data } = $props();
     let showFolderPicker = $state(false);
@@ -153,6 +155,9 @@
 </svelte:head>
 
 <Noscript />
+
+                <EnterIcon></EnterIcon>
+                <ExitIcon></ExitIcon>
 <div>
     {#if !data.authed}
         <p class="fg0">
@@ -167,7 +172,7 @@
                 New Studyset
             </button>
             <a href="/import" class="button alt">
-                <IconPlus />
+                <EnterIcon></EnterIcon>
                 Import
             </a>
             {#if data.authed}
