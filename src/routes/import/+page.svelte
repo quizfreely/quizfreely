@@ -4,7 +4,7 @@
     import QuizevilIcon from "$lib/icons/Quizevil.svelte";
     import ScholarsomeIcon from "$lib/icons/Scholarsome.svelte";
     import PlusIcon from "$lib/icons/Plus.svelte";
-    import PencilIcon from "$lib/icons/Pencil.svelte";
+    import EnterIcon from "$lib/icons/Enter.svelte";
     let { data } = $props();
 
     async function newStudysetButtonWImport(show = true) {
@@ -65,7 +65,7 @@
         <div class="flex">
             <button class="button large button-box" onclick={() => newStudysetButtonWImport()}>
                 <div class="flex" style="align-items: center; flex-wrap: nowrap;">
-                    <PlusIcon width="2rem" height="2rem"></PlusIcon>
+                    <EnterIcon width="2rem" height="2rem"></EnterIcon>
                     <span>Import Terms</span>
                 </div>
             </button>
@@ -73,7 +73,7 @@
         <div style="margin-top: 4rem;">
             <p class="fg0">Create terms instead of importing?</p>
             <button class="button alt text fg0" style="margin-top: 0.4rem;" onclick={() => newStudysetButtonWImport(false)}>
-                <PencilIcon></PencilIcon>
+                <PlusIcon></PlusIcon>
                 New Studyset
             </button>
         </div>

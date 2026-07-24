@@ -5,7 +5,7 @@
     import { idbApiLayer } from "$lib/idb-api-layer";
     import { env } from "$env/dynamic/public";
     import LinkIcon from "$lib/icons/Link.svelte";
-    import PlusIcon from "$lib/icons/Plus.svelte";
+    import CheckmarkIcon from "$lib/icons/Checkmark.svelte";
     import GridIcon from "$lib/icons/AppsGrid.svelte"
     import QuizevilLogotype from "$lib/svg/QuizevilLogotype.svelte"
     let { data } = $props();
@@ -305,7 +305,7 @@
                     <input type="text" placeholder="https://quizlet.com/1234..." autocomplete="off" autocapitalize="off" spellcheck="false" bind:value={link} bind:this={textbox}>
                 </div>
                 <button onclick={importButton} style="{showLoading ? "opacity: 0.6;" : ""}" disabled={showLoading}>
-                    <PlusIcon></PlusIcon>
+                    <CheckmarkIcon></CheckmarkIcon>
                     {showLoading ? "Importing..." : "Import"}
                 </button>
                 <div style="min-height: 2rem;">

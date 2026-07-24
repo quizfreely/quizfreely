@@ -1358,7 +1358,7 @@
 
                                     /* hide the modal after importing */
                                     showImportTermsModal = false;
-                                }}>Import</button
+                                }}><IconCheckmark></IconCheckmark> Import</button
                             >
                             <button
                                 class="alt"

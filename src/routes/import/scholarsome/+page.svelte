@@ -4,7 +4,7 @@
     import { slide } from "svelte/transition";
     import { idbApiLayer } from "$lib/idb-api-layer";
     import LinkIcon from "$lib/icons/Link.svelte";
-    import PlusIcon from "$lib/icons/Plus.svelte";
+    import CheckmarkIcon from "$lib/icons/Checkmark.svelte";
     import GridIcon from "$lib/icons/AppsGrid.svelte"
     import ScholarsomeLogotype from "$lib/svg/ScholarsomeLogotype.svelte"
     let { data } = $props();
@@ -317,7 +317,7 @@
                     <input type="text" placeholder="https://scholarsome.com/study-set/..." autocomplete="off" autocapitalize="off" spellcheck="false" bind:value={link} bind:this={textbox}>
                 </div>
                 <button onclick={importButton} style="{showLoading ? "opacity: 0.6;" : ""}" disabled={showLoading}>
-                    <PlusIcon></PlusIcon>
+                    <CheckmarkIcon></CheckmarkIcon>
                     {showLoading ? "Importing..." : "Import"}
                 </button>
                 <div style="min-height: 2rem;">
