@@ -10,6 +10,8 @@
     import ArrowLeftIcon from "$lib/icons/ArrowLeft.svelte";
     import ArrowRightIcon from "$lib/icons/ArrowRight.svelte";
     import ClockIcon from "$lib/icons/Clock.svelte";
+    import AngleUpIcon from "$lib/icons/AngleUp.svelte";
+    import AngleDownIcon from "$lib/icons/AngleDown.svelte";
 
     let {
         data,
@@ -50,6 +52,7 @@
     });
 
     const COLLAPSE_LENGTH = 6;
+    const COLLAPSE_LENGTH_S = 3;
     const EXPANDED_PER_PAGE = 24;
 
     let cloudPage = $state(0);
@@ -253,7 +256,11 @@
                                 cloudPage = 0;
                             }}
                         >
-                            {cloudCurrentlyCollapsed ? "Show All" : "Collapse"}
+                            {#if cloudCurrentlyCollapsed}
+                                <AngleDownIcon></AngleDownIcon> Show All
+                            {:else}
+                                <AngleUpIcon></AngleUpIcon> Collapse
+                            {/if}
                         </button>
                     </div>
                 {/if}
@@ -326,7 +333,11 @@
                             localPage = 0;
                         }}
                     >
-                        {localCurrentlyCollapsed ? "Show All" : "Collapse"}
+                        {#if localCurrentlyCollapsed}
+                            <AngleDownIcon></AngleDownIcon> Show All
+                        {:else}
+                            <AngleUpIcon></AngleUpIcon> Collapse
+                        {/if}
                     </button>
                 </div>
             {/if}
@@ -337,11 +348,11 @@
                 <div
                     class="grid list"
                     style="overflow-wrap: anywhere; {collapseSaved &&
-                    data.mySavedStudysets?.length > COLLAPSE_LENGTH
+                    data.mySavedStudysets?.length > COLLAPSE_LENGTH_S
                         ? 'margin-bottom: 0px;'
                         : ''}"
                 >
-                    {#each savedCurrentlyCollapsed ? data.mySavedStudysets.slice(0, COLLAPSE_LENGTH) : data.mySavedStudysets as studyset}
+                    {#each savedCurrentlyCollapsed ? data.mySavedStudysets.slice(0, COLLAPSE_LENGTH_S) : data.mySavedStudysets as studyset}
                         <StudysetLinkBox
                             {studyset}
                             linkTemplateFunc={cloudLinkTemplateFunc}
@@ -350,7 +361,7 @@
                         ></StudysetLinkBox>
                     {/each}
                 </div>
-                {#if (collapseSaved && data.mySavedStudysets?.length > COLLAPSE_LENGTH) || (!savedCurrentlyCollapsed && (data.mySavedStudysetsPageInfo?.hasNextPage || data.mySavedStudysetsPageInfo?.hasPreviousPage))}
+                {#if (collapseSaved && data.mySavedStudysets?.length > COLLAPSE_LENGTH_S) || (!savedCurrentlyCollapsed && (data.mySavedStudysetsPageInfo?.hasNextPage || data.mySavedStudysetsPageInfo?.hasPreviousPage))}
                     {#if !savedCurrentlyCollapsed && (hasNextPageFunc("saved") || hasPrevPageFunc("saved"))}
                         <div
                             class={hasNextPageFunc("saved") &&
@@ -392,7 +403,11 @@
                                 savedPage = 0;
                             }}
                         >
-                            {savedCurrentlyCollapsed ? "Show All" : "Collapse"}
+                            {#if savedCurrentlyCollapsed}
+                                <AngleDownIcon></AngleDownIcon> Show All
+                            {:else}
+                                <AngleUpIcon></AngleUpIcon> Collapse
+                            {/if}
                         </button>
                     </div>
                 {/if}
@@ -459,7 +474,11 @@
                                 savedPage = 0;
                             }}
                         >
-                            {savedCurrentlyCollapsed ? "Show All" : "Collapse"}
+                            {#if savedCurrentlyCollapsed}
+                                <AngleDownIcon></AngleDownIcon> Show All
+                            {:else}
+                                <AngleUpIcon></AngleUpIcon> Collapse
+                            {/if}
                         </button>
                     </div>
                 {/if}
