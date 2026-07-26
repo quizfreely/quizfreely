@@ -263,6 +263,7 @@
                     <LocalIcon width="1.2rem" height="1.2rem"></LocalIcon> <p class="h4" style="margin-bottom: 0px;">Local Studysets</p>
                 </div>
             {/if}
+            {#if localStudysetList.length > 0 || !data.authed}
             <div
                 class="grid list"
                 style="overflow-wrap: anywhere; {collapseLocal &&
@@ -283,6 +284,7 @@
                     {@render localEmptyMsg()}
                 {/if}
             </div>
+            {/if}
             {#if (collapseLocal && localStudysetList?.length > COLLAPSE_LENGTH) || (!localCurrentlyCollapsed && localStudysetList?.length > EXPANDED_PER_PAGE)}
                 {#if !localCurrentlyCollapsed && (hasNextPageFunc("local") || hasPrevPageFunc("local"))}
                     <div
@@ -330,7 +332,7 @@
             {/if}
             {#if data.mySavedStudysets?.length > 0}
                 <div class="flex" style="align-items: center; gap: 0.6rem; margin-top: 0.6rem;">
-                    <BookmarkIcon width="1.2rem" height="1.2rem"></BookmarkIcon> <p class="h4" style="margin-bottom: 0px;">Saved</p>
+                    <ClockIcon width="1.2rem" height="1.2rem"></ClockIcon><p class="h4" style="margin-bottom: 0px;">Recent</p>
                 </div>
                 <div
                     class="grid list"
@@ -397,7 +399,7 @@
             {/if}
             {#if data.mySavedStudysets?.length > 0}
                 <div class="flex" style="align-items: center; gap: 0.6rem; margin-top: 0.6rem;">
-                    <ClockIcon width="1.2rem" height="1.2rem"></ClockIcon><p class="h4" style="margin-bottom: 0px;">Recent</p>
+                    <BookmarkIcon width="1.2rem" height="1.2rem"></BookmarkIcon> <p class="h4" style="margin-bottom: 0px;">Saved</p>
                 </div>
                 <div
                     class="grid list"
