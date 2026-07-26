@@ -18,8 +18,8 @@ After cloning this repository, copy `.env.example` to `.env`.
 
 Then, edit `.env`.
 - If you're running `quizfreely/api` too, make sure `API_URL` has the right port
-    - See the instructions [on Codeberg](https://codeberg.org/quizfreely/api) or [on Github](https://github.com/quizfreely/api) to set up the API
-- If you're only working on the frontend and don't want to set up the backend API, set `API_URL` to `API_URL=https://quizfreely.org/api`
+    - See instructions [on Codeberg](https://codeberg.org/quizfreely/api) or [on Github](https://github.com/quizfreely/api) to set up Quizfreely's backend API
+- If you're only working on the frontend and don't want to set up the backend API, use `API_URL=https://quizfreely.org/api`
 
 There are lots of helpful and detailed comments inside of `.env` for all the other options.
 
