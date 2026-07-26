@@ -261,6 +261,7 @@
         showCloudDropdown={true}
         {cloudDropdownContent}
         showLocalDropdown={false}
+        showRecentDropdown={false}
         showSavedDropdown={true}
         {savedDropdownContent}
         {topMenu}
