@@ -54,6 +54,75 @@ function isTitleValid(newTitle) {
         */
         !(newTitle.replace(/[\s\p{C}]+/gu, "") == ""));
 }
+async function collectRecentActivityEntries() {
+    const activityMap = new Map();
+    const practiceTests = await db.practiceTests.toArray();
+    for (const pt of practiceTests) {
+        for (const sid of pt.studysetIds) {
+            const existing = activityMap.get(sid);
+            if (!existing || pt.timestamp > existing) {
+                activityMap.set(sid, pt.timestamp);
+            }
+        }
+    }
+    const matchActivities = await db.matchActivities.toArray();
+    for (const ma of matchActivities) {
+        for (const sid of ma.studysetIds) {
+            const existing = activityMap.get(sid);
+            if (!existing || ma.endTimestamp > existing) {
+                activityMap.set(sid, ma.endTimestamp);
+            }
+        }
+    }
+    const entries = [];
+    for (const [sid, ts] of activityMap) {
+        entries.push({ studysetId: sid, activityTs: ts });
+    }
+    /* local timestamps are ISO strings in UTC, so alphanumeric/lexical sorting is the same as chronological sorting */
+    entries.sort((a, b) => {
+        const tsCmp = b.activityTs.localeCompare(a.activityTs);
+        if (tsCmp !== 0)
+            return tsCmp;
+        if (typeof a.studysetId === 'number' && typeof b.studysetId === 'number') {
+            return b.studysetId - a.studysetId;
+        }
+        return String(b.studysetId).localeCompare(String(a.studysetId));
+    });
+    return entries;
+}
+function decodeActivityCursor(cursor) {
+    try {
+        const parsed = JSON.parse(cursor);
+        if (Array.isArray(parsed) && parsed.length === 2) {
+            return { ts: parsed[0], id: parsed[1] };
+        }
+        return null;
+    }
+    catch {
+        return null;
+    }
+}
+function encodeActivityCursor(ts, id) {
+    return JSON.stringify([ts, id]);
+}
+function entryAfterCursor(entry, cursor) {
+    if (entry.activityTs !== cursor.ts) {
+        return entry.activityTs < cursor.ts;
+    }
+    if (typeof entry.studysetId === 'number' && typeof cursor.id === 'number') {
+        return entry.studysetId < cursor.id;
+    }
+    return String(entry.studysetId) < String(cursor.id);
+}
+function entryBeforeCursor(entry, cursor) {
+    if (entry.activityTs !== cursor.ts) {
+        return entry.activityTs > cursor.ts;
+    }
+    if (typeof entry.studysetId === 'number' && typeof cursor.id === 'number') {
+        return entry.studysetId > cursor.id;
+    }
+    return String(entry.studysetId) > String(cursor.id);
+}
 export * from "./db";
 export * from "./images";
 export const idbApiLayer = {
@@ -154,6 +223,52 @@ export const idbApiLayer = {
             }));
         }
         return terms;
+    },
+    getStudysetsByIds: async function (ids, resolveProps) {
+        const studysets = await db.studysets.bulkGet(ids);
+        if (resolveProps?.terms) {
+            const allTerms = await db.terms
+                .where("studysetId")
+                .anyOf(ids)
+                .toArray();
+            const termsByStudysetId = new Map();
+            for (const term of allTerms) {
+                let list = termsByStudysetId.get(term.studysetId);
+                if (!list) {
+                    list = [];
+                    termsByStudysetId.set(term.studysetId, list);
+                }
+                list.push(term);
+            }
+            const termResolveProps = resolveProps.terms === true ? undefined : resolveProps.terms;
+            for (const studyset of studysets) {
+                if (studyset == null)
+                    continue;
+                const terms = termsByStudysetId.get(studyset.id) || [];
+                terms.sort((a, b) => a.sortOrder - b.sortOrder);
+                if (termResolveProps) {
+                    await Promise.all(terms.map(async (term) => {
+                        const promises = {};
+                        if (termResolveProps.progress) {
+                            promises.progress = db.termProgress.where("termId").equals(term.id).toArray();
+                        }
+                        if (termResolveProps.termImageUrl && term.termImageKey != null) {
+                            promises.termImageUrl = idbLayerImg.getImageObjectUrl(term.termImageKey);
+                        }
+                        if (termResolveProps.defImageUrl && term.defImageKey != null) {
+                            promises.defImageUrl = idbLayerImg.getImageObjectUrl(term.defImageKey);
+                        }
+                        const results = await Promise.all(Object.entries(promises).map(async ([k, p]) => [k, await p]));
+                        const resolved = Object.fromEntries(results);
+                        term.progress = resolved.progress?.[0] ?? undefined;
+                        term.termImageUrl = term.termImageKey == null ? null : resolved.termImageUrl;
+                        term.defImageUrl = term.defImageKey == null ? null : resolved.defImageUrl;
+                    }));
+                }
+                studyset.terms = terms;
+            }
+        }
+        return studysets;
     },
     createStudyset: async function ({ title, draft }) {
         const rnISOString = (new Date()).toISOString();
@@ -537,6 +652,15 @@ export const idbApiLayer = {
                 throw new Error("Question not found");
             const wasCorrect = question.correct;
             const isCorrect = correct;
+            // FRQ overall correctness accounts for userMarkedCorrect (same logic as recordPracticeTest)
+            let wasOverallCorrect = wasCorrect;
+            let isOverallCorrect = isCorrect;
+            if (question.type === "frq") {
+                const existingUserMarkedCorrect = !!question.data.userMarkedCorrect;
+                const newUserMarkedCorrect = userMarkedCorrect !== undefined ? !!userMarkedCorrect : existingUserMarkedCorrect;
+                wasOverallCorrect = wasCorrect || existingUserMarkedCorrect;
+                isOverallCorrect = isCorrect || newUserMarkedCorrect;
+            }
             if (wasCorrect === isCorrect && question.type === "frq" && question.data.userMarkedCorrect === userMarkedCorrect) {
                 return toGraphQLQuestion(question);
             }
@@ -560,24 +684,24 @@ export const idbApiLayer = {
                 });
             }
             // Update practice test accuracy
-            if (wasCorrect !== isCorrect) {
+            if (wasOverallCorrect !== isOverallCorrect) {
                 const pt = await db.practiceTests.get(question.practiceTestId);
                 if (pt) {
                     await db.practiceTests.update(pt.id, {
-                        questionsCorrect: pt.questionsCorrect + (isCorrect ? 1 : -1)
+                        questionsCorrect: pt.questionsCorrect + (isOverallCorrect ? 1 : -1)
                     });
                 }
-                // Update term progress
+                // Update term progress (uses overall correctness, same logic as recordPracticeTest)
                 const existingProgress = await db.termProgress.where("termId").equals(question.termId).toArray();
                 if (existingProgress?.length > 0) {
                     const changes = {};
                     if (question.answerWith === "DEF") {
-                        changes.defCorrectCount = existingProgress[0].defCorrectCount + (isCorrect ? 1 : -1);
-                        changes.defIncorrectCount = existingProgress[0].defIncorrectCount + (isCorrect ? -1 : 1);
+                        changes.defCorrectCount = existingProgress[0].defCorrectCount + (isOverallCorrect ? 1 : -1);
+                        changes.defIncorrectCount = existingProgress[0].defIncorrectCount + (isOverallCorrect ? -1 : 1);
                     }
                     else {
-                        changes.termCorrectCount = existingProgress[0].termCorrectCount + (isCorrect ? 1 : -1);
-                        changes.termIncorrectCount = existingProgress[0].termIncorrectCount + (isCorrect ? -1 : 1);
+                        changes.termCorrectCount = existingProgress[0].termCorrectCount + (isOverallCorrect ? 1 : -1);
+                        changes.termIncorrectCount = existingProgress[0].termIncorrectCount + (isOverallCorrect ? -1 : 1);
                     }
                     await db.termProgress.update(existingProgress[0].id, changes);
                 }
@@ -770,5 +894,139 @@ export const idbApiLayer = {
             }
             return await this.getMatchActivityById(matchId, { termIds: true, incorrectPairIds: true });
         });
+    },
+    getRecentActivityStudysets: async function ({ first, after, last, before, skipCloudStudysets, getCloudStudysets } = {}) {
+        const entries = await collectRecentActivityEntries();
+        const isBackward = before != null;
+        const limit = isBackward
+            ? Math.min(last ?? 24, 999)
+            : Math.min(first ?? 24, 999);
+        let pageEntries;
+        let hasPrevious = false;
+        let hasNext = false;
+        if (isBackward) {
+            const beforeCursor = before ? decodeActivityCursor(before) : null;
+            if (beforeCursor) {
+                pageEntries = entries.filter(e => entryBeforeCursor(e, beforeCursor));
+            }
+            else {
+                pageEntries = [...entries];
+            }
+            pageEntries.sort((a, b) => {
+                const tsCmp = a.activityTs.localeCompare(b.activityTs);
+                if (tsCmp !== 0)
+                    return tsCmp;
+                if (typeof a.studysetId === 'number' && typeof b.studysetId === 'number') {
+                    return a.studysetId - b.studysetId;
+                }
+                return String(a.studysetId).localeCompare(String(b.studysetId));
+            });
+            pageEntries = pageEntries.slice(0, limit + 1);
+            hasPrevious = pageEntries.length > limit;
+            if (hasPrevious)
+                pageEntries.pop();
+            pageEntries.reverse();
+        }
+        else {
+            const afterCursor = after ? decodeActivityCursor(after) : null;
+            if (afterCursor) {
+                pageEntries = entries.filter(e => entryAfterCursor(e, afterCursor));
+            }
+            else {
+                pageEntries = [...entries];
+            }
+            pageEntries = pageEntries.slice(0, limit + 1);
+            hasNext = pageEntries.length > limit;
+            if (hasNext)
+                pageEntries.pop();
+        }
+        const localIds = [];
+        const cloudIds = [];
+        for (const entry of pageEntries) {
+            if (typeof entry.studysetId === 'number') {
+                localIds.push(entry.studysetId);
+            }
+            else {
+                cloudIds.push(entry.studysetId);
+            }
+        }
+        if (cloudIds.length > 0 && !getCloudStudysets && !skipCloudStudysets) {
+            throw new Error("(idbApiLayer.getRecentActivityStudysets) cloud studyset UUIDs found but no getCloudStudysets callback provided. " +
+                "Pass skipCloudStudysets: true to skip them, or provide a getCloudStudysets callback.");
+        }
+        const localStudysets = await this.getStudysetsByIds(localIds);
+        let cloudStudysets = [];
+        if (cloudIds.length > 0 && getCloudStudysets) {
+            cloudStudysets = await getCloudStudysets(cloudIds);
+        }
+        const localMap = new Map();
+        for (const s of localStudysets) {
+            if (s && !s.draft) {
+                localMap.set(s.id, s);
+            }
+        }
+        const cloudMap = new Map();
+        for (let i = 0; i < cloudIds.length; i++) {
+            const s = cloudStudysets[i];
+            if (s) {
+                cloudMap.set(cloudIds[i], s);
+            }
+        }
+        const edges = [];
+        for (const entry of pageEntries) {
+            let studyset;
+            if (typeof entry.studysetId === 'number') {
+                studyset = localMap.get(entry.studysetId);
+            }
+            else {
+                studyset = cloudMap.get(entry.studysetId);
+            }
+            if (studyset) {
+                edges.push({
+                    node: studyset,
+                    cursor: encodeActivityCursor(entry.activityTs, entry.studysetId)
+                });
+            }
+        }
+        return {
+            edges,
+            pageInfo: {
+                hasNextPage: hasNext,
+                hasPreviousPage: hasPrevious,
+                startCursor: edges.length > 0 ? edges[0].cursor : null,
+                endCursor: edges.length > 0 ? edges[edges.length - 1].cursor : null
+            }
+        };
+    },
+    getRecentActivityStudysetCount: async function ({ skipCloudStudysets, getCloudStudysets } = {}) {
+        const entries = await collectRecentActivityEntries();
+        const localIds = [];
+        const cloudIds = [];
+        for (const entry of entries) {
+            if (typeof entry.studysetId === 'number') {
+                localIds.push(entry.studysetId);
+            }
+            else {
+                cloudIds.push(entry.studysetId);
+            }
+        }
+        if (cloudIds.length > 0 && !getCloudStudysets && !skipCloudStudysets) {
+            throw new Error("(idbApiLayer.getRecentActivityStudysetCount) cloud studyset UUIDs found but no getCloudStudysets callback provided. " +
+                "Pass skipCloudStudysets: true to skip them, or provide a getCloudStudysets callback.");
+        }
+        const localStudysets = await this.getStudysetsByIds(localIds);
+        let count = 0;
+        for (const s of localStudysets) {
+            if (s && !s.draft)
+                count++;
+        }
+        if (cloudIds.length > 0 && getCloudStudysets) {
+            const cloudStudysets = await getCloudStudysets(cloudIds);
+            for (const s of cloudStudysets) {
+                if (s && !s.draft)
+                    count++;
+            }
+        }
+        return count;
     }
 };
