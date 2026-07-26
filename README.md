@@ -12,7 +12,8 @@ This repository, `quizfreely/quizfreely`, is Quizfreely's web app, written in Ja
 
 Quizfreely's backend API's repository is `quizfreely/api`. ([Codeberg](https://codeberg.org/quizfreely/api) & [GitHub](https://github.com/quizfreely/api)) It's a GraphQL API written in Go/Golang.
 
-## First-time contributor/developer setup
+
+### First-time contributor/developer setup
 
 After cloning this repository, copy `.env.example` to `.env`.
 
@@ -30,7 +31,7 @@ Install dependencies with `npm install`.
 npm install
 ```
 
-## Running the web app
+### Running the web app
 
 Use `npm run dev` to run Quizfreely's frontend.
 ```bash
