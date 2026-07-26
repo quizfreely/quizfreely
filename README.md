@@ -12,11 +12,27 @@ This repository, `quizfreely/quizfreely`, is Quizfreely's web app, written in Ja
 
 Quizfreely's backend API's repository is `quizfreely/api`. ([Codeberg](https://codeberg.org/quizfreely/api) & [GitHub](https://github.com/quizfreely/api)) It's a GraphQL API written in Go/Golang.
 
-# First-time setup
+## First-time setup for contributors/developers
 
-- Copy `.env.example` to `.env` and configure it for your use case
-- Run `npm install` (here, as in all commands below, `bun` can substitute `npm` if you prefer)
+After cloning this repository, copy `.env.example` to `.env`.
 
-# Running the project
+Then, edit `.env`.
+- If you're running `quizfreely/api` locally, update `API_URL` to the correct port
+    - See the instructions [on Codeberg](https://codeberg.org/quizfreely/api) or [on Github](https://github.com/quizfreely/api) to set up the API
+- If you're only working on the frontend and don't want to set up the backend API, set `API_URL` to `API_URL=https://quizfreely.org/api`
 
-`npm run dev` (add `--host` if you want to access it from another device in the same network, e.g. from a mobile device)
+Install dependencies with `npm install`.
+```bash
+npm install
+```
+
+## Running the project
+
+Use `npm run dev` to run Quizfreely's frontend locally.
+```bash
+npm run dev
+
+# use `--host` to access it from another device on the same network, like a mobile device
+# npm run dev -- --host
+```
+
