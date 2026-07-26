@@ -23,12 +23,15 @@
         collapseCloud = true,
         collapseLocal = true,
         collapseSaved = true,
+        collapseRecent = true,
         showCloudDropdown = false,
         cloudDropdownContent,
         showLocalDropdown = false,
         localDropdownContent,
         showSavedDropdown = false,
         savedDropdownContent,
+        showRecentDropdown = false,
+        recentDropdownContent,
         topMenu,
     } = $props();
 
@@ -37,6 +40,7 @@
     let cloudCurrentlyCollapsed = $state(true);
     let localCurrentlyCollapsed = $state(true);
     let savedCurrentlyCollapsed = $state(true);
+    let recentCurrentlyCollapsed = $state(true);
 
     onMount(async function () {
         localStudysetList = await db.studysets
@@ -58,6 +62,7 @@
     let cloudPage = $state(0);
     let localPage = $state(0);
     let savedPage = $state(0);
+    let recentPage = $state(0);
 
     let showErrorBox = $state(false);
     let errorBoxText = $state("");
@@ -89,6 +94,17 @@
                     pageInfo { hasNextPage hasPreviousPage startCursor endCursor }
                 }
             }`;
+        } else if (type === "recent") {
+            cursor =
+                direction === "next"
+                    ? data.myRecentActivityStudysetsPageInfo?.endCursor
+                    : data.myRecentActivityStudysetsPageInfo?.startCursor;
+            query = `query ($first: Int, $after: String, $last: Int, $before: String) {
+                myRecentActivityStudysets(first: $first, after: $after, last: $last, before: $before) {
+                    edges { node { id title private termsCount updatedAt myFolder { id name } } }
+                    pageInfo { hasNextPage hasPreviousPage startCursor endCursor }
+                }
+            }`;
         }
 
         if (direction === "next") {
@@ -106,8 +122,9 @@
                 body: JSON.stringify({ query, variables }),
             });
             const resp = await respRaw.json();
-            const connection =
-                resp?.data?.myStudysets ?? resp?.data?.mySavedStudysets;
+            const connection = resp?.data?.myStudysets ??
+                resp?.data?.mySavedStudysets ??
+                resp?.data?.myRecentActivityStudysets;
 
             if (connection) {
                 if (type === "cloud") {
@@ -118,6 +135,10 @@
                     data.mySavedStudysets = connection.edges.map((e) => e.node);
                     data.mySavedStudysetsPageInfo = connection.pageInfo;
                     savedPage += direction === "next" ? 1 : -1;
+                } else if (type === "recent") {
+                    data.myRecentActivityStudysets = connection.edges.map((e) => e.node);
+                    data.myRecentActivityStudysetsPageInfo = connection.pageInfo;
+                    recentPage += direction === "next" ? 1 : -1;
                 }
             }
         } catch (err) {
@@ -146,6 +167,11 @@
                 return data.mySavedStudysets?.length > COLLAPSE_LENGTH;
             return data.mySavedStudysetsPageInfo?.hasNextPage;
         }
+        if (type === "recent") {
+            if (recentCurrentlyCollapsed)
+                return data.myRecentActivityStudysets?.length > COLLAPSE_LENGTH;
+            return data.myRecentActivityStudysetsPageInfo?.hasNextPage;
+        }
         if (type === "local") {
             if (localCurrentlyCollapsed)
                 return localStudysetList?.length > COLLAPSE_LENGTH;
@@ -164,6 +190,10 @@
         if (type === "saved") {
             if (savedCurrentlyCollapsed) return false;
             return data.mySavedStudysetsPageInfo?.hasPreviousPage;
+        }
+        if (type === "recent") {
+            if (recentCurrentlyCollapsed) return false;
+            return data.myRecentActivityStudysetsPageInfo?.hasPreviousPage;
         }
         if (type === "local") {
             if (localCurrentlyCollapsed) return false;
@@ -341,50 +371,50 @@
                     </button>
                 </div>
             {/if}
-            {#if data.mySavedStudysets?.length > 0}
+            {#if data.myRecentActivityStudysets?.length > 0}
                 <div class="flex" style="align-items: center; gap: 0.6rem; margin-top: 0.6rem;">
                     <ClockIcon width="1.2rem" height="1.2rem"></ClockIcon><p class="h4" style="margin-bottom: 0px;">Recent</p>
                 </div>
                 <div
                     class="grid list"
-                    style="overflow-wrap: anywhere; {collapseSaved &&
-                    data.mySavedStudysets?.length > COLLAPSE_LENGTH_S
+                    style="overflow-wrap: anywhere; {collapseRecent &&
+                    data.myRecentActivityStudysets?.length > COLLAPSE_LENGTH_S
                         ? 'margin-bottom: 0px;'
                         : ''}"
                 >
-                    {#each savedCurrentlyCollapsed ? data.mySavedStudysets.slice(0, COLLAPSE_LENGTH_S) : data.mySavedStudysets as studyset}
+                    {#each recentCurrentlyCollapsed ? data.myRecentActivityStudysets.slice(0, COLLAPSE_LENGTH_S) : data.myRecentActivityStudysets as studyset}
                         <StudysetLinkBox
                             {studyset}
                             linkTemplateFunc={cloudLinkTemplateFunc}
-                            showDropdown={showSavedDropdown}
-                            dropdownContent={savedDropdownContent}
+                            showDropdown={showRecentDropdown}
+                            dropdownContent={recentDropdownContent}
                         ></StudysetLinkBox>
                     {/each}
                 </div>
-                {#if (collapseSaved && data.mySavedStudysets?.length > COLLAPSE_LENGTH_S) || (!savedCurrentlyCollapsed && (data.mySavedStudysetsPageInfo?.hasNextPage || data.mySavedStudysetsPageInfo?.hasPreviousPage))}
-                    {#if !savedCurrentlyCollapsed && (hasNextPageFunc("saved") || hasPrevPageFunc("saved"))}
+                {#if (collapseRecent && data.myRecentActivityStudysets?.length > COLLAPSE_LENGTH_S) || (!recentCurrentlyCollapsed && (data.myRecentActivityStudysetsPageInfo?.hasNextPage || data.myRecentActivityStudysetsPageInfo?.hasPreviousPage))}
+                    {#if !recentCurrentlyCollapsed && (hasNextPageFunc("recent") || hasPrevPageFunc("recent"))}
                         <div
-                            class={hasNextPageFunc("saved") &&
-                            hasPrevPageFunc("saved")
+                            class={hasNextPageFunc("recent") &&
+                            hasPrevPageFunc("recent")
                                 ? "combo-buttons"
                                 : ""}
                         >
-                            {#if hasPrevPageFunc("saved")}
+                            {#if hasPrevPageFunc("recent")}
                                 <button
-                                    class="button alt {hasNextPageFunc('saved')
+                                    class="button alt {hasNextPageFunc('recent')
                                         ? 'left'
                                         : ''}"
-                                    onclick={() => loadPage("saved", "prev")}
+                                    onclick={() => loadPage("recent", "prev")}
                                 >
                                     <ArrowLeftIcon></ArrowLeftIcon> Previous
                                 </button>
                             {/if}
-                            {#if hasNextPageFunc("saved")}
+                            {#if hasNextPageFunc("recent")}
                                 <button
-                                    class="button alt {hasPrevPageFunc('saved')
+                                    class="button alt {hasPrevPageFunc('recent')
                                         ? 'right'
                                         : ''}"
-                                    onclick={() => loadPage("saved", "next")}
+                                    onclick={() => loadPage("recent", "next")}
                                 >
                                     Next <ArrowRightIcon></ArrowRightIcon>
                                 </button>
@@ -398,12 +428,12 @@
                         <button
                             class="faint"
                             onclick={() => {
-                                savedCurrentlyCollapsed =
-                                    !savedCurrentlyCollapsed;
-                                savedPage = 0;
+                                recentCurrentlyCollapsed =
+                                    !recentCurrentlyCollapsed;
+                                recentPage = 0;
                             }}
                         >
-                            {#if savedCurrentlyCollapsed}
+                            {#if recentCurrentlyCollapsed}
                                 <AngleDownIcon></AngleDownIcon> Show All
                             {:else}
                                 <AngleUpIcon></AngleUpIcon> Collapse

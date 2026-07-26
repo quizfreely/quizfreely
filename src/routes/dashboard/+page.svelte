@@ -51,6 +51,8 @@
         myFoldersPageInfo: data.myFoldersPageInfo,
         mySavedStudysets: data.mySavedStudysets,
         mySavedStudysetsPageInfo: data.mySavedStudysetsPageInfo,
+        myRecentActivityStudysets: data.myRecentActivityStudysets,
+        myRecentActivityStudysetsPageInfo: data.myRecentActivityStudysetsPageInfo,
     });
 
     async function newStudysetButton(folderId) {
@@ -255,6 +257,7 @@
         collapseCloud={true}
         collapseLocal={true}
         collapseSaved={true}
+        collapseRecent={true}
         showCloudDropdown={true}
         {cloudDropdownContent}
         showLocalDropdown={false}
