@@ -12,6 +12,7 @@ This repository, `quizfreely/quizfreely`, is Quizfreely's web app, written in Ja
 
 Quizfreely's backend API's repository is `quizfreely/api`. ([Codeberg](https://codeberg.org/quizfreely/api) & [GitHub](https://github.com/quizfreely/api)) It's a GraphQL API written in Go/Golang.
 
+---
 
 ### First-time contributor/developer setup
 
