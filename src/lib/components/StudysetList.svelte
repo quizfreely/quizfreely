@@ -64,6 +64,13 @@
     let savedPage = $state(0);
     let recentPage = $state(0);
 
+    function recentLinkFunc(id) {
+        if (typeof id === 'number') {
+            return localLinkTemplateFunc(id);
+        }
+        return cloudLinkTemplateFunc(id);
+    }
+
     let showErrorBox = $state(false);
     let errorBoxText = $state("");
 
@@ -385,7 +392,7 @@
                     {#each recentCurrentlyCollapsed ? data.myRecentActivityStudysets.slice(0, COLLAPSE_LENGTH_S) : data.myRecentActivityStudysets as studyset}
                         <StudysetLinkBox
                             {studyset}
-                            linkTemplateFunc={cloudLinkTemplateFunc}
+                            linkTemplateFunc={recentLinkFunc}
                             showDropdown={showRecentDropdown}
                             dropdownContent={recentDropdownContent}
                         ></StudysetLinkBox>
