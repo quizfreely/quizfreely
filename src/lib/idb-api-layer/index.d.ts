@@ -22,6 +22,7 @@ export declare const idbApiLayer: {
     getTermsByIds: (termIds: number[], resolveProps?: TermResolveProps) => Promise<(Term | null)[]>;
     getStudysetsByIds: (ids: number[], resolveProps?: {
         terms?: boolean | TermResolveProps;
+        termsCount?: boolean;
     }) => Promise<(Studyset | undefined)[]>;
     createStudyset: ({ title, draft }: {
         title: string;

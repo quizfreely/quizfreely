@@ -246,6 +246,9 @@ export const idbApiLayer = {
                     continue;
                 const terms = termsByStudysetId.get(studyset.id) || [];
                 terms.sort((a, b) => a.sortOrder - b.sortOrder);
+                if (resolveProps.termsCount) {
+                    studyset.termsCount = terms.length;
+                }
                 if (termResolveProps) {
                     await Promise.all(terms.map(async (term) => {
                         const promises = {};
@@ -266,6 +269,21 @@ export const idbApiLayer = {
                     }));
                 }
                 studyset.terms = terms;
+            }
+        }
+        else if (resolveProps?.termsCount) {
+            const allTerms = await db.terms
+                .where("studysetId")
+                .anyOf(ids)
+                .toArray();
+            const countByStudysetId = new Map();
+            for (const term of allTerms) {
+                countByStudysetId.set(term.studysetId, (countByStudysetId.get(term.studysetId) ?? 0) + 1);
+            }
+            for (const studyset of studysets) {
+                if (studyset == null)
+                    continue;
+                studyset.termsCount = countByStudysetId.get(studyset.id) ?? 0;
             }
         }
         return studysets;
@@ -954,7 +972,7 @@ export const idbApiLayer = {
             throw new Error("(idbApiLayer.getRecentActivityStudysets) cloud studyset UUIDs found but no getCloudStudysets callback provided. " +
                 "Pass skipCloudStudysets: true to skip them, or provide a getCloudStudysets callback.");
         }
-        const localStudysets = await this.getStudysetsByIds(localIds);
+        const localStudysets = await this.getStudysetsByIds(localIds, { termsCount: true });
         let cloudStudysets = [];
         if (cloudIds.length > 0 && getCloudStudysets) {
             cloudStudysets = await getCloudStudysets(cloudIds);
@@ -963,19 +981,6 @@ export const idbApiLayer = {
         for (const s of localStudysets) {
             if (s && !s.draft) {
                 localMap.set(s.id, s);
-            }
-        }
-        if (localIds.length > 0) {
-            const allLocalTerms = await db.terms.where("studysetId").anyOf(localIds).toArray();
-            const termsCountByStudysetId = new Map();
-            for (const term of allLocalTerms) {
-                termsCountByStudysetId.set(
-                    term.studysetId,
-                    (termsCountByStudysetId.get(term.studysetId) ?? 0) + 1
-                );
-            }
-            for (const [id, s] of localMap) {
-                s.termsCount = termsCountByStudysetId.get(id) ?? 0;
             }
         }
         const cloudMap = new Map();

@@ -12,6 +12,7 @@ interface Studyset {
     draft: boolean;
     createdAt: string;
     updatedAt: string;
+    termsCount?: number;
     terms?: Term[];
     practiceTests?: PracticeTest[];
     matchActivities?: MatchActivity[];
