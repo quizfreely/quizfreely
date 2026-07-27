@@ -10,6 +10,8 @@
     import FolderIcon from "$lib/icons/Folder.svelte";
     import BookmarkIcon from "$lib/icons/Bookmark.svelte";
     import CheckmarkIcon from "$lib/icons/Checkmark.svelte";
+    import EnterIcon from "$lib/icons/Enter.svelte";
+    import ExitIcon from "$lib/icons/Exit.svelte";
 
     let { data } = $props();
     let showFolderPicker = $state(false);
@@ -49,6 +51,7 @@
         myFoldersPageInfo: data.myFoldersPageInfo,
         mySavedStudysets: data.mySavedStudysets,
         mySavedStudysetsPageInfo: data.mySavedStudysetsPageInfo,
+        myRecentActivityStudysets: data.myRecentActivityStudysets,
     });
 
     async function newStudysetButton(folderId) {
@@ -136,10 +139,44 @@
     function windowOnclick() {
         lastKeydown = null;
     }
-    onMount(() => {
+    onMount(async () => {
         window.addEventListener("keyup", onKeyup);
         window.addEventListener("keydown", onKeydown);
         window.addEventListener("click", windowOnclick);
+
+        if (!data.myRecentActivityStudysets || data.myRecentActivityStudysets.length === 0) {
+            try {
+                const result = await idbApiLayer.getRecentActivityStudysets({
+                    getCloudStudysets: async (cloudUuids) => {
+                        try {
+                            const raw = await fetch("/api/graphql", {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({
+                                    query: `query ($ids: [ID!]!) {
+                                        studysets(ids: $ids) {
+                                            id title private termsCount updatedAt
+                                            myFolder { id name }
+                                        }
+                                    }`,
+                                    variables: { ids: cloudUuids }
+                                })
+                            });
+                            const resp = await raw.json();
+                            return cloudUuids.map((_, i) => resp?.data?.studysets?.[i] ?? null);
+                        } catch {
+                            return cloudUuids.map(() => null);
+                        }
+                    }
+                });
+                if (result?.length > 0) {
+                    studysetListData.myRecentActivityStudysets = result;
+                }
+            } catch (err) {
+                console.error("Error loading recent activity studysets from local IDB:", err);
+            }
+        }
+
         return () => {
             window.removeEventListener("keyup", onKeyup);
             window.removeEventListener("keydown", onKeydown);
@@ -167,7 +204,7 @@
                 New Studyset
             </button>
             <a href="/import" class="button alt">
-                <IconPlus />
+                <EnterIcon></EnterIcon>
                 Import
             </a>
             {#if data.authed}
@@ -253,9 +290,11 @@
         collapseCloud={true}
         collapseLocal={true}
         collapseSaved={true}
+        collapseRecent={true}
         showCloudDropdown={true}
         {cloudDropdownContent}
         showLocalDropdown={false}
+        showRecentDropdown={false}
         showSavedDropdown={true}
         {savedDropdownContent}
         {topMenu}

@@ -9,6 +9,9 @@
     import FolderIcon from "$lib/icons/Folder.svelte";
     import ArrowLeftIcon from "$lib/icons/ArrowLeft.svelte";
     import ArrowRightIcon from "$lib/icons/ArrowRight.svelte";
+    import ClockIcon from "$lib/icons/Clock.svelte";
+    import AngleUpIcon from "$lib/icons/AngleUp.svelte";
+    import AngleDownIcon from "$lib/icons/AngleDown.svelte";
 
     let {
         data,
@@ -20,12 +23,15 @@
         collapseCloud = true,
         collapseLocal = true,
         collapseSaved = true,
+        collapseRecent = true,
         showCloudDropdown = false,
         cloudDropdownContent,
         showLocalDropdown = false,
         localDropdownContent,
         showSavedDropdown = false,
         savedDropdownContent,
+        showRecentDropdown = false,
+        recentDropdownContent,
         topMenu,
     } = $props();
 
@@ -34,26 +40,31 @@
     let cloudCurrentlyCollapsed = $state(true);
     let localCurrentlyCollapsed = $state(true);
     let savedCurrentlyCollapsed = $state(true);
+    let recentCurrentlyCollapsed = $state(true);
 
     onMount(async function () {
-        localStudysetList = await db.studysets
+        const draftIds = await db.studysets
             .orderBy("updatedAt")
             .reverse()
             .filter((studyset) => studyset.draft == false)
-            .toArray();
-        for (const studyset of localStudysetList) {
-            studyset.termsCount =
-                (await idbApiLayer.getTermsByStudysetId(studyset.id))?.length ??
-                0;
-        }
+            .primaryKeys();
+        localStudysetList = await idbApiLayer.getStudysetsByIds(draftIds, { termsCount: true });
     });
 
     const COLLAPSE_LENGTH = 6;
+    const COLLAPSE_LENGTH_S = 3;
     const EXPANDED_PER_PAGE = 24;
 
     let cloudPage = $state(0);
     let localPage = $state(0);
     let savedPage = $state(0);
+
+    function recentLinkFunc(id) {
+        if (typeof id === 'number') {
+            return localLinkTemplateFunc(id);
+        }
+        return cloudLinkTemplateFunc(id);
+    }
 
     let showErrorBox = $state(false);
     let errorBoxText = $state("");
@@ -102,8 +113,9 @@
                 body: JSON.stringify({ query, variables }),
             });
             const resp = await respRaw.json();
-            const connection =
-                resp?.data?.myStudysets ?? resp?.data?.mySavedStudysets;
+            const connection = resp?.data?.myStudysets ??
+                resp?.data?.mySavedStudysets ??
+                resp?.data?.myRecentActivityStudysets;
 
             if (connection) {
                 if (type === "cloud") {
@@ -142,6 +154,11 @@
                 return data.mySavedStudysets?.length > COLLAPSE_LENGTH;
             return data.mySavedStudysetsPageInfo?.hasNextPage;
         }
+        if (type === "recent") {
+            if (recentCurrentlyCollapsed)
+                return data.myRecentActivityStudysets?.length > COLLAPSE_LENGTH;
+            return false;
+        }
         if (type === "local") {
             if (localCurrentlyCollapsed)
                 return localStudysetList?.length > COLLAPSE_LENGTH;
@@ -160,6 +177,9 @@
         if (type === "saved") {
             if (savedCurrentlyCollapsed) return false;
             return data.mySavedStudysetsPageInfo?.hasPreviousPage;
+        }
+        if (type === "recent") {
+            return false;
         }
         if (type === "local") {
             if (localCurrentlyCollapsed) return false;
@@ -252,16 +272,21 @@
                                 cloudPage = 0;
                             }}
                         >
-                            {cloudCurrentlyCollapsed ? "Show All" : "Collapse"}
+                            {#if cloudCurrentlyCollapsed}
+                                <AngleDownIcon></AngleDownIcon> Show All
+                            {:else}
+                                <AngleUpIcon></AngleUpIcon> Collapse
+                            {/if}
                         </button>
                     </div>
                 {/if}
             {/if}
             {#if data.authed && localStudysetList?.length > 0 && !(hideTypeWhenCloudEmptyAndLocalExists && !(data.studysetList?.length > 0) && localStudysetList?.length > 0)}
-                <p class="h4" style="margin-top: 0.6rem;">
-                    <LocalIcon></LocalIcon> Local Studysets
-                </p>
+                <div class="flex" style="align-items: center; gap: 0.6rem; margin-top: 0.6rem;">
+                    <LocalIcon width="1.2rem" height="1.2rem"></LocalIcon> <p class="h4" style="margin-bottom: 0px;">Local Studysets</p>
+                </div>
             {/if}
+            {#if localStudysetList.length > 0 || !data.authed}
             <div
                 class="grid list"
                 style="overflow-wrap: anywhere; {collapseLocal &&
@@ -282,6 +307,7 @@
                     {@render localEmptyMsg()}
                 {/if}
             </div>
+            {/if}
             {#if (collapseLocal && localStudysetList?.length > COLLAPSE_LENGTH) || (!localCurrentlyCollapsed && localStudysetList?.length > EXPANDED_PER_PAGE)}
                 {#if !localCurrentlyCollapsed && (hasNextPageFunc("local") || hasPrevPageFunc("local"))}
                     <div
@@ -323,14 +349,59 @@
                             localPage = 0;
                         }}
                     >
-                        {localCurrentlyCollapsed ? "Show All" : "Collapse"}
+                        {#if localCurrentlyCollapsed}
+                            <AngleDownIcon></AngleDownIcon> Show All
+                        {:else}
+                            <AngleUpIcon></AngleUpIcon> Collapse
+                        {/if}
                     </button>
                 </div>
             {/if}
+            {#if data.myRecentActivityStudysets?.length > 0}
+                <div class="flex" style="align-items: center; gap: 0.6rem; margin-top: 0.6rem;">
+                    <ClockIcon width="1.2rem" height="1.2rem"></ClockIcon><p class="h4" style="margin-bottom: 0px;">Recent</p>
+                </div>
+                <div
+                    class="grid list"
+                    style="overflow-wrap: anywhere; {collapseRecent &&
+                    data.myRecentActivityStudysets?.length > COLLAPSE_LENGTH_S
+                        ? 'margin-bottom: 0px;'
+                        : ''}"
+                >
+                    {#each recentCurrentlyCollapsed ? data.myRecentActivityStudysets.slice(0, COLLAPSE_LENGTH_S) : data.myRecentActivityStudysets as studyset}
+                        <StudysetLinkBox
+                            {studyset}
+                            linkTemplateFunc={recentLinkFunc}
+                            showDropdown={showRecentDropdown}
+                            dropdownContent={recentDropdownContent}
+                        ></StudysetLinkBox>
+                    {/each}
+                </div>
+                {#if collapseRecent && data.myRecentActivityStudysets?.length > COLLAPSE_LENGTH_S}
+                    <div
+                        class="flex center"
+                        style="width: 100%; margin-top: 0.6rem; flex-direction: column; align-items: center; gap: 0.8rem;"
+                    >
+                        <button
+                            class="faint"
+                            onclick={() => {
+                                recentCurrentlyCollapsed =
+                                    !recentCurrentlyCollapsed;
+                            }}
+                        >
+                            {#if recentCurrentlyCollapsed}
+                                <AngleDownIcon></AngleDownIcon> Show All
+                            {:else}
+                                <AngleUpIcon></AngleUpIcon> Collapse
+                            {/if}
+                        </button>
+                    </div>
+                {/if}
+            {/if}
             {#if data.mySavedStudysets?.length > 0}
-                <p class="h4" style="margin-top: 0.6rem;">
-                    <BookmarkIcon></BookmarkIcon> Saved Studysets
-                </p>
+                <div class="flex" style="align-items: center; gap: 0.6rem; margin-top: 0.6rem;">
+                    <BookmarkIcon width="1.2rem" height="1.2rem"></BookmarkIcon> <p class="h4" style="margin-bottom: 0px;">Saved</p>
+                </div>
                 <div
                     class="grid list"
                     style="overflow-wrap: anywhere; {collapseSaved &&
@@ -389,7 +460,11 @@
                                 savedPage = 0;
                             }}
                         >
-                            {savedCurrentlyCollapsed ? "Show All" : "Collapse"}
+                            {#if savedCurrentlyCollapsed}
+                                <AngleDownIcon></AngleDownIcon> Show All
+                            {:else}
+                                <AngleUpIcon></AngleUpIcon> Collapse
+                            {/if}
                         </button>
                     </div>
                 {/if}

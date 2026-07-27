@@ -8,6 +8,7 @@
 import Dexie from 'dexie';
 import { db } from "./db";
 import { idbLayerImg } from "./images";
+const RECENT_ACTIVITY_LIMIT = 100;
 function toGraphQLQuestion(q) {
     const term = { id: q.termId, term: q.term, def: q.def };
     const result = { id: q.id };
@@ -53,6 +54,33 @@ function isTitleValid(newTitle) {
             notice the exclamation mark for negation
         */
         !(newTitle.replace(/[\s\p{C}]+/gu, "") == ""));
+}
+async function ensureRecentActivityLimit(studysetId, timestamp) {
+    await db.recentActivity.add({ studysetId, timestamp });
+    /* keep at most RECENT_ACTIVITY_LIMIT entries: delete the oldest duplicate per studyset,
+       then trim to the limit by removing the oldest records */
+    const all = await db.recentActivity.orderBy("id").reverse().toArray();
+    const seen = new Map();
+    const toDelete = [];
+    for (const row of all) {
+        const existing = seen.get(row.studysetId);
+        if (existing !== undefined) {
+            toDelete.push(row.id);
+        }
+        else {
+            seen.set(row.studysetId, row.id);
+        }
+    }
+    if (toDelete.length > 0) {
+        await db.recentActivity.bulkDelete(toDelete);
+    }
+    const remaining = await db.recentActivity.orderBy("id").toArray();
+    if (remaining.length > RECENT_ACTIVITY_LIMIT) {
+        const excessIds = remaining.slice(0, remaining.length - RECENT_ACTIVITY_LIMIT).map((r) => r.id);
+        if (excessIds.length > 0) {
+            await db.recentActivity.bulkDelete(excessIds);
+        }
+    }
 }
 export * from "./db";
 export * from "./images";
@@ -154,6 +182,70 @@ export const idbApiLayer = {
             }));
         }
         return terms;
+    },
+    getStudysetsByIds: async function (ids, resolveProps) {
+        const studysets = await db.studysets.bulkGet(ids);
+        if (resolveProps?.terms) {
+            const allTerms = await db.terms
+                .where("studysetId")
+                .anyOf(ids)
+                .toArray();
+            const termsByStudysetId = new Map();
+            for (const term of allTerms) {
+                let list = termsByStudysetId.get(term.studysetId);
+                if (!list) {
+                    list = [];
+                    termsByStudysetId.set(term.studysetId, list);
+                }
+                list.push(term);
+            }
+            const termResolveProps = resolveProps.terms === true ? undefined : resolveProps.terms;
+            for (const studyset of studysets) {
+                if (studyset == null)
+                    continue;
+                const terms = termsByStudysetId.get(studyset.id) || [];
+                terms.sort((a, b) => a.sortOrder - b.sortOrder);
+                if (resolveProps.termsCount) {
+                    studyset.termsCount = terms.length;
+                }
+                if (termResolveProps) {
+                    await Promise.all(terms.map(async (term) => {
+                        const promises = {};
+                        if (termResolveProps.progress) {
+                            promises.progress = db.termProgress.where("termId").equals(term.id).toArray();
+                        }
+                        if (termResolveProps.termImageUrl && term.termImageKey != null) {
+                            promises.termImageUrl = idbLayerImg.getImageObjectUrl(term.termImageKey);
+                        }
+                        if (termResolveProps.defImageUrl && term.defImageKey != null) {
+                            promises.defImageUrl = idbLayerImg.getImageObjectUrl(term.defImageKey);
+                        }
+                        const results = await Promise.all(Object.entries(promises).map(async ([k, p]) => [k, await p]));
+                        const resolved = Object.fromEntries(results);
+                        term.progress = resolved.progress?.[0] ?? undefined;
+                        term.termImageUrl = term.termImageKey == null ? null : resolved.termImageUrl;
+                        term.defImageUrl = term.defImageKey == null ? null : resolved.defImageUrl;
+                    }));
+                }
+                studyset.terms = terms;
+            }
+        }
+        else if (resolveProps?.termsCount) {
+            const allTerms = await db.terms
+                .where("studysetId")
+                .anyOf(ids)
+                .toArray();
+            const countByStudysetId = new Map();
+            for (const term of allTerms) {
+                countByStudysetId.set(term.studysetId, (countByStudysetId.get(term.studysetId) ?? 0) + 1);
+            }
+            for (const studyset of studysets) {
+                if (studyset == null)
+                    continue;
+                studyset.termsCount = countByStudysetId.get(studyset.id) ?? 0;
+            }
+        }
+        return studysets;
     },
     createStudyset: async function ({ title, draft }) {
         const rnISOString = (new Date()).toISOString();
@@ -273,7 +365,7 @@ export const idbApiLayer = {
         }
     },
     recordPracticeTest: async function (practiceTest, getCloudStudysetIds) {
-        return await db.transaction('rw', [db.practiceTests, db.practiceTestQuestions, db.termProgress, db.terms, db.reviewEvents], async () => {
+        return await db.transaction('rw', [db.practiceTests, db.practiceTestQuestions, db.termProgress, db.terms, db.reviewEvents, db.recentActivity], async () => {
             const rnISOString = (new Date()).toISOString();
             const termProgressMap = new Map();
             const studysetIds = new Set();
@@ -507,6 +599,9 @@ export const idbApiLayer = {
                 studysetIds: Array.from(studysetIds)
             };
             const ptId = await db.practiceTests.add(ptRecord);
+            for (const sid of studysetIds) {
+                await ensureRecentActivityLimit(sid, ptRecord.timestamp);
+            }
             for (const q of questionsToInsert) {
                 q.practiceTestId = ptId;
                 const reviewEventData = q.reviewEventData;
@@ -537,6 +632,15 @@ export const idbApiLayer = {
                 throw new Error("Question not found");
             const wasCorrect = question.correct;
             const isCorrect = correct;
+            // FRQ overall correctness accounts for userMarkedCorrect (same logic as recordPracticeTest)
+            let wasOverallCorrect = wasCorrect;
+            let isOverallCorrect = isCorrect;
+            if (question.type === "frq") {
+                const existingUserMarkedCorrect = !!question.data.userMarkedCorrect;
+                const newUserMarkedCorrect = userMarkedCorrect !== undefined ? !!userMarkedCorrect : existingUserMarkedCorrect;
+                wasOverallCorrect = wasCorrect || existingUserMarkedCorrect;
+                isOverallCorrect = isCorrect || newUserMarkedCorrect;
+            }
             if (wasCorrect === isCorrect && question.type === "frq" && question.data.userMarkedCorrect === userMarkedCorrect) {
                 return toGraphQLQuestion(question);
             }
@@ -560,24 +664,24 @@ export const idbApiLayer = {
                 });
             }
             // Update practice test accuracy
-            if (wasCorrect !== isCorrect) {
+            if (wasOverallCorrect !== isOverallCorrect) {
                 const pt = await db.practiceTests.get(question.practiceTestId);
                 if (pt) {
                     await db.practiceTests.update(pt.id, {
-                        questionsCorrect: pt.questionsCorrect + (isCorrect ? 1 : -1)
+                        questionsCorrect: pt.questionsCorrect + (isOverallCorrect ? 1 : -1)
                     });
                 }
-                // Update term progress
+                // Update term progress (uses overall correctness, same logic as recordPracticeTest)
                 const existingProgress = await db.termProgress.where("termId").equals(question.termId).toArray();
                 if (existingProgress?.length > 0) {
                     const changes = {};
                     if (question.answerWith === "DEF") {
-                        changes.defCorrectCount = existingProgress[0].defCorrectCount + (isCorrect ? 1 : -1);
-                        changes.defIncorrectCount = existingProgress[0].defIncorrectCount + (isCorrect ? -1 : 1);
+                        changes.defCorrectCount = existingProgress[0].defCorrectCount + (isOverallCorrect ? 1 : -1);
+                        changes.defIncorrectCount = existingProgress[0].defIncorrectCount + (isOverallCorrect ? -1 : 1);
                     }
                     else {
-                        changes.termCorrectCount = existingProgress[0].termCorrectCount + (isCorrect ? 1 : -1);
-                        changes.termIncorrectCount = existingProgress[0].termIncorrectCount + (isCorrect ? -1 : 1);
+                        changes.termCorrectCount = existingProgress[0].termCorrectCount + (isOverallCorrect ? 1 : -1);
+                        changes.termIncorrectCount = existingProgress[0].termIncorrectCount + (isOverallCorrect ? -1 : 1);
                     }
                     await db.termProgress.update(existingProgress[0].id, changes);
                 }
@@ -647,7 +751,7 @@ export const idbApiLayer = {
         return activities;
     },
     recordMatchActivity: async function (input, getCloudStudysetIds) {
-        return await db.transaction('rw', [db.matchActivities, db.reviewEvents, db.termProgress, db.terms], async () => {
+        return await db.transaction('rw', [db.matchActivities, db.reviewEvents, db.termProgress, db.terms, db.recentActivity], async () => {
             const rnISOString = (new Date()).toISOString();
             const termIds = input.termIds || [];
             const incorrectPairIds = input.incorrectPairIds || [];
@@ -675,6 +779,9 @@ export const idbApiLayer = {
                 studysetIds: Array.from(studysetIds)
             };
             const matchId = await db.matchActivities.add(matchActivityRecord);
+            for (const sid of studysetIds) {
+                await ensureRecentActivityLimit(sid, matchActivityRecord.endTimestamp);
+            }
             const reviewEventsToInsert = [];
             for (const termId of termIds) {
                 reviewEventsToInsert.push({
@@ -770,5 +877,88 @@ export const idbApiLayer = {
             }
             return await this.getMatchActivityById(matchId, { termIds: true, incorrectPairIds: true });
         });
+    },
+    getRecentActivityStudysets: async function ({ skipCloudStudysets, getCloudStudysets } = {}) {
+        const rows = await db.recentActivity
+            .orderBy("timestamp")
+            .reverse()
+            .toArray();
+        const localIds = [];
+        const cloudIds = [];
+        for (const row of rows) {
+            if (typeof row.studysetId === 'number') {
+                localIds.push(row.studysetId);
+            }
+            else {
+                cloudIds.push(row.studysetId);
+            }
+        }
+        if (cloudIds.length > 0 && !getCloudStudysets && !skipCloudStudysets) {
+            throw new Error("(idbApiLayer.getRecentActivityStudysets) cloud studyset UUIDs found but no getCloudStudysets callback provided. " +
+                "Pass skipCloudStudysets: true to skip them, or provide a getCloudStudysets callback.");
+        }
+        const localStudysets = await this.getStudysetsByIds(localIds, { termsCount: true });
+        let cloudStudysets = [];
+        if (cloudIds.length > 0 && getCloudStudysets) {
+            cloudStudysets = await getCloudStudysets(cloudIds);
+        }
+        const localMap = new Map();
+        for (const s of localStudysets) {
+            if (s && !s.draft) {
+                localMap.set(s.id, s);
+            }
+        }
+        const cloudMap = new Map();
+        for (let i = 0; i < cloudIds.length; i++) {
+            const s = cloudStudysets[i];
+            if (s) {
+                cloudMap.set(cloudIds[i], s);
+            }
+        }
+        const result = [];
+        for (const row of rows) {
+            let studyset;
+            if (typeof row.studysetId === 'number') {
+                studyset = localMap.get(row.studysetId);
+            }
+            else {
+                studyset = cloudMap.get(row.studysetId);
+            }
+            if (studyset) {
+                result.push(studyset);
+            }
+        }
+        return result;
+    },
+    getRecentActivityStudysetCount: async function ({ skipCloudStudysets, getCloudStudysets } = {}) {
+        const rows = await db.recentActivity.toArray();
+        const localIds = [];
+        const cloudIds = [];
+        for (const row of rows) {
+            if (typeof row.studysetId === 'number') {
+                localIds.push(row.studysetId);
+            }
+            else {
+                cloudIds.push(row.studysetId);
+            }
+        }
+        if (cloudIds.length > 0 && !getCloudStudysets && !skipCloudStudysets) {
+            throw new Error("(idbApiLayer.getRecentActivityStudysetCount) cloud studyset UUIDs found but no getCloudStudysets callback provided. " +
+                "Pass skipCloudStudysets: true to skip them, or provide a getCloudStudysets callback.");
+        }
+        const localStudysets = await this.getStudysetsByIds(localIds);
+        let count = 0;
+        for (const s of localStudysets) {
+            if (s && !s.draft)
+                count++;
+        }
+        if (cloudIds.length > 0 && getCloudStudysets) {
+            const cloudStudysets = await getCloudStudysets(cloudIds);
+            for (const s of cloudStudysets) {
+                if (s && !s.draft)
+                    count++;
+            }
+        }
+        return count;
     }
 };

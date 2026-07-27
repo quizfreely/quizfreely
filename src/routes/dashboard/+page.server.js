@@ -62,6 +62,9 @@ export async function load({ cookies, locals }) {
             edges { node { id title private termsCount updatedAt myFolder { id name } } }
             pageInfo { hasNextPage hasPreviousPage startCursor endCursor }
           }
+          myRecentActivityStudysets(first: 100) {
+            edges { node { id title private termsCount updatedAt myFolder { id name } } }
+          }
           myFolders(first: 24) {
             edges { node { id name } }
             pageInfo { hasNextPage hasPreviousPage startCursor endCursor }
@@ -74,6 +77,7 @@ export async function load({ cookies, locals }) {
         if (apiRes?.data?.authed) {
           const myStudysets = apiRes.data.myStudysets?.edges?.map((e) => e.node) ?? [];
           const mySavedStudysets = apiRes.data.mySavedStudysets?.edges?.map((e) => e.node) ?? [];
+          const myRecentActivityStudysets = apiRes.data.myRecentActivityStudysets?.edges?.map((e) => e.node) ?? [];
           const myFolders = apiRes.data.myFolders?.edges?.map((e) => e.node) ?? [];
           return {
             dashboardPage: "dashboard",
@@ -83,6 +87,7 @@ export async function load({ cookies, locals }) {
             studysetListPageInfo: apiRes.data.myStudysets?.pageInfo,
             mySavedStudysets,
             mySavedStudysetsPageInfo: apiRes.data.mySavedStudysets?.pageInfo,
+            myRecentActivityStudysets,
             myFolders,
             myFoldersPageInfo: apiRes.data.myFolders?.pageInfo,
             header: { activePage: "home" },
