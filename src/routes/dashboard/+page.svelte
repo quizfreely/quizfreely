@@ -52,7 +52,6 @@
         mySavedStudysets: data.mySavedStudysets,
         mySavedStudysetsPageInfo: data.mySavedStudysetsPageInfo,
         myRecentActivityStudysets: data.myRecentActivityStudysets,
-        myRecentActivityStudysetsPageInfo: data.myRecentActivityStudysetsPageInfo,
     });
 
     async function newStudysetButton(folderId) {
@@ -148,7 +147,6 @@
         if (!data.myRecentActivityStudysets || data.myRecentActivityStudysets.length === 0) {
             try {
                 const result = await idbApiLayer.getRecentActivityStudysets({
-                    first: 24,
                     getCloudStudysets: async (cloudUuids) => {
                         try {
                             const raw = await fetch("/api/graphql", {
@@ -171,9 +169,8 @@
                         }
                     }
                 });
-                if (result?.edges?.length > 0) {
-                    studysetListData.myRecentActivityStudysets = result.edges.map((e) => e.node);
-                    studysetListData.myRecentActivityStudysetsPageInfo = result.pageInfo;
+                if (result?.length > 0) {
+                    studysetListData.myRecentActivityStudysets = result;
                 }
             } catch (err) {
                 console.error("Error loading recent activity studysets from local IDB:", err);

@@ -58,7 +58,6 @@
     let cloudPage = $state(0);
     let localPage = $state(0);
     let savedPage = $state(0);
-    let recentPage = $state(0);
 
     function recentLinkFunc(id) {
         if (typeof id === 'number') {
@@ -97,17 +96,6 @@
                     pageInfo { hasNextPage hasPreviousPage startCursor endCursor }
                 }
             }`;
-        } else if (type === "recent") {
-            cursor =
-                direction === "next"
-                    ? data.myRecentActivityStudysetsPageInfo?.endCursor
-                    : data.myRecentActivityStudysetsPageInfo?.startCursor;
-            query = `query ($first: Int, $after: String, $last: Int, $before: String) {
-                myRecentActivityStudysets(first: $first, after: $after, last: $last, before: $before) {
-                    edges { node { id title private termsCount updatedAt myFolder { id name } } }
-                    pageInfo { hasNextPage hasPreviousPage startCursor endCursor }
-                }
-            }`;
         }
 
         if (direction === "next") {
@@ -138,10 +126,6 @@
                     data.mySavedStudysets = connection.edges.map((e) => e.node);
                     data.mySavedStudysetsPageInfo = connection.pageInfo;
                     savedPage += direction === "next" ? 1 : -1;
-                } else if (type === "recent") {
-                    data.myRecentActivityStudysets = connection.edges.map((e) => e.node);
-                    data.myRecentActivityStudysetsPageInfo = connection.pageInfo;
-                    recentPage += direction === "next" ? 1 : -1;
                 }
             }
         } catch (err) {
@@ -173,7 +157,7 @@
         if (type === "recent") {
             if (recentCurrentlyCollapsed)
                 return data.myRecentActivityStudysets?.length > COLLAPSE_LENGTH;
-            return data.myRecentActivityStudysetsPageInfo?.hasNextPage;
+            return false;
         }
         if (type === "local") {
             if (localCurrentlyCollapsed)
@@ -195,8 +179,7 @@
             return data.mySavedStudysetsPageInfo?.hasPreviousPage;
         }
         if (type === "recent") {
-            if (recentCurrentlyCollapsed) return false;
-            return data.myRecentActivityStudysetsPageInfo?.hasPreviousPage;
+            return false;
         }
         if (type === "local") {
             if (localCurrentlyCollapsed) return false;
@@ -394,36 +377,7 @@
                         ></StudysetLinkBox>
                     {/each}
                 </div>
-                {#if (collapseRecent && data.myRecentActivityStudysets?.length > COLLAPSE_LENGTH_S) || (!recentCurrentlyCollapsed && (data.myRecentActivityStudysetsPageInfo?.hasNextPage || data.myRecentActivityStudysetsPageInfo?.hasPreviousPage))}
-                    {#if !recentCurrentlyCollapsed && (hasNextPageFunc("recent") || hasPrevPageFunc("recent"))}
-                        <div
-                            class={hasNextPageFunc("recent") &&
-                            hasPrevPageFunc("recent")
-                                ? "combo-buttons"
-                                : ""}
-                        >
-                            {#if hasPrevPageFunc("recent")}
-                                <button
-                                    class="button alt {hasNextPageFunc('recent')
-                                        ? 'left'
-                                        : ''}"
-                                    onclick={() => loadPage("recent", "prev")}
-                                >
-                                    <ArrowLeftIcon></ArrowLeftIcon> Previous
-                                </button>
-                            {/if}
-                            {#if hasNextPageFunc("recent")}
-                                <button
-                                    class="button alt {hasPrevPageFunc('recent')
-                                        ? 'right'
-                                        : ''}"
-                                    onclick={() => loadPage("recent", "next")}
-                                >
-                                    Next <ArrowRightIcon></ArrowRightIcon>
-                                </button>
-                            {/if}
-                        </div>
-                    {/if}
+                {#if collapseRecent && data.myRecentActivityStudysets?.length > COLLAPSE_LENGTH_S}
                     <div
                         class="flex center"
                         style="width: 100%; margin-top: 0.6rem; flex-direction: column; align-items: center; gap: 0.8rem;"
@@ -433,7 +387,6 @@
                             onclick={() => {
                                 recentCurrentlyCollapsed =
                                     !recentCurrentlyCollapsed;
-                                recentPage = 0;
                             }}
                         >
                             {#if recentCurrentlyCollapsed}

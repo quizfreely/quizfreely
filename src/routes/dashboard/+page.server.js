@@ -62,9 +62,8 @@ export async function load({ cookies, locals }) {
             edges { node { id title private termsCount updatedAt myFolder { id name } } }
             pageInfo { hasNextPage hasPreviousPage startCursor endCursor }
           }
-          myRecentActivityStudysets(first: 24) {
+          myRecentActivityStudysets(first: 100) {
             edges { node { id title private termsCount updatedAt myFolder { id name } } }
-            pageInfo { hasNextPage hasPreviousPage startCursor endCursor }
           }
           myFolders(first: 24) {
             edges { node { id name } }
@@ -89,7 +88,6 @@ export async function load({ cookies, locals }) {
             mySavedStudysets,
             mySavedStudysetsPageInfo: apiRes.data.mySavedStudysets?.pageInfo,
             myRecentActivityStudysets,
-            myRecentActivityStudysetsPageInfo: apiRes.data.myRecentActivityStudysets?.pageInfo,
             myFolders,
             myFoldersPageInfo: apiRes.data.myFolders?.pageInfo,
             header: { activePage: "home" },
