@@ -395,4 +395,7 @@ db.version(20).stores({
     matchActivities: "++id, *studysetIds, endTimestamp",
     reviewEvents: "++id, termId, practiceTestQuestionId, matchActivityId, timestamp, answeredTermId, practiceTestQuestionType, reviewActivityType"
 });
+db.version(21).stores({
+    recentActivity: "++id, studysetId, timestamp"
+});
 export { db };

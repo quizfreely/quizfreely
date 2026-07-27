@@ -45,25 +45,10 @@ export declare const idbApiLayer: {
     getMatchActivityById: (id: number, resolveProps?: MatchActivityResolveProps) => Promise<MatchActivity | null>;
     getMatchActivitiesByStudysetId: (studysetId: number | string, resolveProps?: MatchActivityResolveProps) => Promise<MatchActivity[]>;
     recordMatchActivity: (input: any, getCloudStudysetIds?: (cloudTermIds: string[]) => Promise<(number | string)[]>) => Promise<MatchActivity | null>;
-    getRecentActivityStudysets: ({ first, after, last, before, skipCloudStudysets, getCloudStudysets }?: {
-        first?: number;
-        after?: string;
-        last?: number;
-        before?: string;
+    getRecentActivityStudysets: ({ skipCloudStudysets, getCloudStudysets }?: {
         skipCloudStudysets?: boolean;
         getCloudStudysets?: (uuids: string[]) => Promise<(Studyset | null)[]>;
-    }) => Promise<{
-        edges: {
-            node: Studyset;
-            cursor: string;
-        }[];
-        pageInfo: {
-            hasNextPage: boolean;
-            hasPreviousPage: boolean;
-            startCursor: string | null;
-            endCursor: string | null;
-        };
-    }>;
+    }) => Promise<Studyset[]>;
     getRecentActivityStudysetCount: ({ skipCloudStudysets, getCloudStudysets }?: {
         skipCloudStudysets?: boolean;
         getCloudStudysets?: (uuids: string[]) => Promise<(Studyset | null)[]>;

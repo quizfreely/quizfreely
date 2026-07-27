@@ -8,6 +8,7 @@
 import Dexie from 'dexie';
 import { db } from "./db";
 import { idbLayerImg } from "./images";
+const RECENT_ACTIVITY_LIMIT = 100;
 function toGraphQLQuestion(q) {
     const term = { id: q.termId, term: q.term, def: q.def };
     const result = { id: q.id };
@@ -54,74 +55,32 @@ function isTitleValid(newTitle) {
         */
         !(newTitle.replace(/[\s\p{C}]+/gu, "") == ""));
 }
-async function collectRecentActivityEntries() {
-    const activityMap = new Map();
-    const practiceTests = await db.practiceTests.toArray();
-    for (const pt of practiceTests) {
-        for (const sid of pt.studysetIds) {
-            const existing = activityMap.get(sid);
-            if (!existing || pt.timestamp > existing) {
-                activityMap.set(sid, pt.timestamp);
-            }
+async function ensureRecentActivityLimit(studysetId, timestamp) {
+    await db.recentActivity.add({ studysetId, timestamp });
+    /* keep at most RECENT_ACTIVITY_LIMIT entries: delete the oldest duplicate per studyset,
+       then trim to the limit by removing the oldest records */
+    const all = await db.recentActivity.orderBy("id").reverse().toArray();
+    const seen = new Map();
+    const toDelete = [];
+    for (const row of all) {
+        const existing = seen.get(row.studysetId);
+        if (existing !== undefined) {
+            toDelete.push(row.id);
+        }
+        else {
+            seen.set(row.studysetId, row.id);
         }
     }
-    const matchActivities = await db.matchActivities.toArray();
-    for (const ma of matchActivities) {
-        for (const sid of ma.studysetIds) {
-            const existing = activityMap.get(sid);
-            if (!existing || ma.endTimestamp > existing) {
-                activityMap.set(sid, ma.endTimestamp);
-            }
+    if (toDelete.length > 0) {
+        await db.recentActivity.bulkDelete(toDelete);
+    }
+    const remaining = await db.recentActivity.orderBy("id").toArray();
+    if (remaining.length > RECENT_ACTIVITY_LIMIT) {
+        const excessIds = remaining.slice(0, remaining.length - RECENT_ACTIVITY_LIMIT).map((r) => r.id);
+        if (excessIds.length > 0) {
+            await db.recentActivity.bulkDelete(excessIds);
         }
     }
-    const entries = [];
-    for (const [sid, ts] of activityMap) {
-        entries.push({ studysetId: sid, activityTs: ts });
-    }
-    /* local timestamps are ISO strings in UTC, so alphanumeric/lexical sorting is the same as chronological sorting */
-    entries.sort((a, b) => {
-        const tsCmp = b.activityTs.localeCompare(a.activityTs);
-        if (tsCmp !== 0)
-            return tsCmp;
-        if (typeof a.studysetId === 'number' && typeof b.studysetId === 'number') {
-            return b.studysetId - a.studysetId;
-        }
-        return String(b.studysetId).localeCompare(String(a.studysetId));
-    });
-    return entries;
-}
-function decodeActivityCursor(cursor) {
-    try {
-        const parsed = JSON.parse(cursor);
-        if (Array.isArray(parsed) && parsed.length === 2) {
-            return { ts: parsed[0], id: parsed[1] };
-        }
-        return null;
-    }
-    catch {
-        return null;
-    }
-}
-function encodeActivityCursor(ts, id) {
-    return JSON.stringify([ts, id]);
-}
-function entryAfterCursor(entry, cursor) {
-    if (entry.activityTs !== cursor.ts) {
-        return entry.activityTs < cursor.ts;
-    }
-    if (typeof entry.studysetId === 'number' && typeof cursor.id === 'number') {
-        return entry.studysetId < cursor.id;
-    }
-    return String(entry.studysetId) < String(cursor.id);
-}
-function entryBeforeCursor(entry, cursor) {
-    if (entry.activityTs !== cursor.ts) {
-        return entry.activityTs > cursor.ts;
-    }
-    if (typeof entry.studysetId === 'number' && typeof cursor.id === 'number') {
-        return entry.studysetId > cursor.id;
-    }
-    return String(entry.studysetId) > String(cursor.id);
 }
 export * from "./db";
 export * from "./images";
@@ -406,7 +365,7 @@ export const idbApiLayer = {
         }
     },
     recordPracticeTest: async function (practiceTest, getCloudStudysetIds) {
-        return await db.transaction('rw', [db.practiceTests, db.practiceTestQuestions, db.termProgress, db.terms, db.reviewEvents], async () => {
+        return await db.transaction('rw', [db.practiceTests, db.practiceTestQuestions, db.termProgress, db.terms, db.reviewEvents, db.recentActivity], async () => {
             const rnISOString = (new Date()).toISOString();
             const termProgressMap = new Map();
             const studysetIds = new Set();
@@ -640,6 +599,9 @@ export const idbApiLayer = {
                 studysetIds: Array.from(studysetIds)
             };
             const ptId = await db.practiceTests.add(ptRecord);
+            for (const sid of studysetIds) {
+                await ensureRecentActivityLimit(sid, ptRecord.timestamp);
+            }
             for (const q of questionsToInsert) {
                 q.practiceTestId = ptId;
                 const reviewEventData = q.reviewEventData;
@@ -789,7 +751,7 @@ export const idbApiLayer = {
         return activities;
     },
     recordMatchActivity: async function (input, getCloudStudysetIds) {
-        return await db.transaction('rw', [db.matchActivities, db.reviewEvents, db.termProgress, db.terms], async () => {
+        return await db.transaction('rw', [db.matchActivities, db.reviewEvents, db.termProgress, db.terms, db.recentActivity], async () => {
             const rnISOString = (new Date()).toISOString();
             const termIds = input.termIds || [];
             const incorrectPairIds = input.incorrectPairIds || [];
@@ -817,6 +779,9 @@ export const idbApiLayer = {
                 studysetIds: Array.from(studysetIds)
             };
             const matchId = await db.matchActivities.add(matchActivityRecord);
+            for (const sid of studysetIds) {
+                await ensureRecentActivityLimit(sid, matchActivityRecord.endTimestamp);
+            }
             const reviewEventsToInsert = [];
             for (const termId of termIds) {
                 reviewEventsToInsert.push({
@@ -913,59 +878,19 @@ export const idbApiLayer = {
             return await this.getMatchActivityById(matchId, { termIds: true, incorrectPairIds: true });
         });
     },
-    getRecentActivityStudysets: async function ({ first, after, last, before, skipCloudStudysets, getCloudStudysets } = {}) {
-        const entries = await collectRecentActivityEntries();
-        const isBackward = before != null;
-        const limit = isBackward
-            ? Math.min(last ?? 24, 999)
-            : Math.min(first ?? 24, 999);
-        let pageEntries;
-        let hasPrevious = false;
-        let hasNext = false;
-        if (isBackward) {
-            const beforeCursor = before ? decodeActivityCursor(before) : null;
-            if (beforeCursor) {
-                pageEntries = entries.filter(e => entryBeforeCursor(e, beforeCursor));
-            }
-            else {
-                pageEntries = [...entries];
-            }
-            pageEntries.sort((a, b) => {
-                const tsCmp = a.activityTs.localeCompare(b.activityTs);
-                if (tsCmp !== 0)
-                    return tsCmp;
-                if (typeof a.studysetId === 'number' && typeof b.studysetId === 'number') {
-                    return a.studysetId - b.studysetId;
-                }
-                return String(a.studysetId).localeCompare(String(b.studysetId));
-            });
-            pageEntries = pageEntries.slice(0, limit + 1);
-            hasPrevious = pageEntries.length > limit;
-            if (hasPrevious)
-                pageEntries.pop();
-            pageEntries.reverse();
-        }
-        else {
-            const afterCursor = after ? decodeActivityCursor(after) : null;
-            if (afterCursor) {
-                pageEntries = entries.filter(e => entryAfterCursor(e, afterCursor));
-            }
-            else {
-                pageEntries = [...entries];
-            }
-            pageEntries = pageEntries.slice(0, limit + 1);
-            hasNext = pageEntries.length > limit;
-            if (hasNext)
-                pageEntries.pop();
-        }
+    getRecentActivityStudysets: async function ({ skipCloudStudysets, getCloudStudysets } = {}) {
+        const rows = await db.recentActivity
+            .orderBy("timestamp")
+            .reverse()
+            .toArray();
         const localIds = [];
         const cloudIds = [];
-        for (const entry of pageEntries) {
-            if (typeof entry.studysetId === 'number') {
-                localIds.push(entry.studysetId);
+        for (const row of rows) {
+            if (typeof row.studysetId === 'number') {
+                localIds.push(row.studysetId);
             }
             else {
-                cloudIds.push(entry.studysetId);
+                cloudIds.push(row.studysetId);
             }
         }
         if (cloudIds.length > 0 && !getCloudStudysets && !skipCloudStudysets) {
@@ -990,42 +915,31 @@ export const idbApiLayer = {
                 cloudMap.set(cloudIds[i], s);
             }
         }
-        const edges = [];
-        for (const entry of pageEntries) {
+        const result = [];
+        for (const row of rows) {
             let studyset;
-            if (typeof entry.studysetId === 'number') {
-                studyset = localMap.get(entry.studysetId);
+            if (typeof row.studysetId === 'number') {
+                studyset = localMap.get(row.studysetId);
             }
             else {
-                studyset = cloudMap.get(entry.studysetId);
+                studyset = cloudMap.get(row.studysetId);
             }
             if (studyset) {
-                edges.push({
-                    node: studyset,
-                    cursor: encodeActivityCursor(entry.activityTs, entry.studysetId)
-                });
+                result.push(studyset);
             }
         }
-        return {
-            edges,
-            pageInfo: {
-                hasNextPage: hasNext,
-                hasPreviousPage: hasPrevious,
-                startCursor: edges.length > 0 ? edges[0].cursor : null,
-                endCursor: edges.length > 0 ? edges[edges.length - 1].cursor : null
-            }
-        };
+        return result;
     },
     getRecentActivityStudysetCount: async function ({ skipCloudStudysets, getCloudStudysets } = {}) {
-        const entries = await collectRecentActivityEntries();
+        const rows = await db.recentActivity.toArray();
         const localIds = [];
         const cloudIds = [];
-        for (const entry of entries) {
-            if (typeof entry.studysetId === 'number') {
-                localIds.push(entry.studysetId);
+        for (const row of rows) {
+            if (typeof row.studysetId === 'number') {
+                localIds.push(row.studysetId);
             }
             else {
-                cloudIds.push(entry.studysetId);
+                cloudIds.push(row.studysetId);
             }
         }
         if (cloudIds.length > 0 && !getCloudStudysets && !skipCloudStudysets) {

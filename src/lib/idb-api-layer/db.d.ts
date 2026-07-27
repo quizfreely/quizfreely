@@ -134,6 +134,11 @@ interface ReviewEvent {
     reviewActivityType: ReviewActivityType;
     answeredString: string | null;
 }
+interface RecentActivity {
+    id: number;
+    studysetId: number | string;
+    timestamp: string;
+}
 interface Image {
     key: number;
     blob: Blob;
@@ -147,6 +152,7 @@ declare const db: Dexie & {
     reviewEvents: EntityTable<ReviewEvent, "id">;
     matchActivities: EntityTable<MatchActivity, "id">;
     images: EntityTable<Image, "key">;
+    recentActivity: EntityTable<RecentActivity, "id">;
 };
-export type { Studyset, Term, TermAtp, PracticeTest, PracticeTestQuestion, MCQData, TFQData, FRQData, Question, MCQ, TFQ, FRQ, TermProgress, ReviewEvent, MatchActivity, PracticeTestQuestionType, ReviewActivityType };
+export type { Studyset, Term, TermAtp, PracticeTest, PracticeTestQuestion, MCQData, TFQData, FRQData, Question, MCQ, TFQ, FRQ, TermProgress, ReviewEvent, MatchActivity, PracticeTestQuestionType, ReviewActivityType, RecentActivity };
 export { db };
