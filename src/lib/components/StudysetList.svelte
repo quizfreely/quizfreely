@@ -43,16 +43,12 @@
     let recentCurrentlyCollapsed = $state(true);
 
     onMount(async function () {
-        localStudysetList = await db.studysets
+        const draftIds = await db.studysets
             .orderBy("updatedAt")
             .reverse()
             .filter((studyset) => studyset.draft == false)
-            .toArray();
-        for (const studyset of localStudysetList) {
-            studyset.termsCount =
-                (await idbApiLayer.getTermsByStudysetId(studyset.id))?.length ??
-                0;
-        }
+            .primaryKeys();
+        localStudysetList = await idbApiLayer.getStudysetsByIds(draftIds, { termsCount: true });
     });
 
     const COLLAPSE_LENGTH = 6;
