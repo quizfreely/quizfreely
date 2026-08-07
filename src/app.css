@@ -1,4 +1,5 @@
 @layer ehui, ehui-lc-reset, theme, base, components, utilities;
+/* "theme, base, components, utilities" are from layerchart */
 
 .lc-root-container,
 .lc-tooltip-root {
@@ -26,11 +27,17 @@
     .lc-tooltip-root * + h4,
     .lc-tooltip-root * + h5,
     .lc-tooltip-root * + h6 {
-      margin-top: 0px;
+        margin-top: unset;
     }
     
     .lc-root-container button,
     .lc-tooltip-root button {
-        all: revert;
+        background-color: unset;
+        padding: unset;
+        margin: unset;
+        margin-top: unset;
+        box-shadow: unset;
+        border: unset;
+        border-radius: unset;
     }
 }
