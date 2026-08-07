@@ -1,4 +1,4 @@
-@import 'layerchart/core.css';
+@layer ehui, ehui-lc-reset, theme, base, components, utilities;
 
 .lc-root-container,
 .lc-tooltip-root {
@@ -9,21 +9,28 @@
 	--color-surface-content: var(--fg-1);
 }
 
-.lc-root-container * + *,
-.lc-tooltip-root * + *,
-.lc-root-container * + p,
-.lc-tooltip-root * + p,
-.lc-root-container * + h1,
-.lc-tooltip-root * + h1,
-.lc-root-container * + h2,
-.lc-tooltip-root * + h2,
-.lc-root-container * + h3,
-.lc-tooltip-root * + h3,
-.lc-root-container * + h4,
-.lc-tooltip-root * + h4,
-.lc-root-container * + h5,
-.lc-tooltip-root * + h5,
-.lc-root-container * + h6,
-.lc-tooltip-root * + h6 {
-  margin-top: 0px;
+@layer ehui-lc-reset {
+    .lc-root-container * + *,
+    .lc-root-container * + p,
+    .lc-root-container * + h1,
+    .lc-root-container * + h2,
+    .lc-root-container * + h3,
+    .lc-root-container * + h4,
+    .lc-root-container * + h5,
+    .lc-root-container * + h6,
+    .lc-tooltip-root * + *,
+    .lc-tooltip-root * + p,
+    .lc-tooltip-root * + h1,
+    .lc-tooltip-root * + h2,
+    .lc-tooltip-root * + h3,
+    .lc-tooltip-root * + h4,
+    .lc-tooltip-root * + h5,
+    .lc-tooltip-root * + h6 {
+      margin-top: 0px;
+    }
+    
+    .lc-root-container button,
+    .lc-tooltip-root button {
+        all: revert;
+    }
 }
