@@ -327,6 +327,11 @@
         padding: 0px;
         border-radius: 0.8rem;
     }
+
+    .termdeftxt {
+        white-space: pre-wrap;
+        overflow-wrap: break-word;
+    }
 </style>
 <div class="grid page">
     <div class="content">
@@ -359,10 +364,10 @@
                 {#each terms as term, index}
                     {#if index < COLLAPSED_TERMS_COUNT || showAllTerms}
                     <div class="box" transition:slide={{duration: 600}}>
-                        <div class="grid" style="grid-template-rows: auto; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="grid" style="grid-template-rows: auto; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 1rem; max-width: 100%;">
                             <div>
                             <p class="fg0">Term</p>
-                            <p class="{
+                            <p class="termdeftxt {
                                 term.term.length <= 20 ?
                                     "shy-h4" : ""
                             }" style="margin-top: 0px;">{term.term}</p>
@@ -372,7 +377,7 @@
                             </div>
                             <div>
                             <p class="fg0">Definition</p>
-                            <p class="{
+                            <p class="termdeftxt {
                                 term.def.length <= 20 ?
                                     "shy-h4" : ""
                             }" style="margin-top: 0px;">{term.def}</p>
