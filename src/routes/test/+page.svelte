@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { LineChart, Chart, defaultChartPadding, Spline } from 'layerchart';
+    import { curveMonotoneX } from "d3-shape";
 
 const data = [
   {
@@ -92,7 +93,7 @@ const data = [
   },
   {
     "date": new Date('2026-07-30T04:00:00.000Z'),
-    "value": 95
+    "value": 95,
   },
   {
     "date": new Date('2026-07-31T04:00:00.000Z'),
@@ -100,56 +101,41 @@ const data = [
   },
   {
     "date": new Date('2026-08-01T04:00:00.000Z'),
-    "value": 65
+    "value": 65,
   },
   {
     "date": new Date('2026-08-02T04:00:00.000Z'),
-    "value": 87
+    "value": 87,
   },
   {
     "date": new Date('2026-08-03T04:00:00.000Z'),
-    "value": 51
+    "value": 51,
   },
-  {
-    "date": new Date('2026-08-04T04:00:00.000Z'),
-    "value": 93
-  },
-  {
-    "date": new Date('2026-08-05T04:00:00.000Z'),
-    "value": 64
-  },
-  {
-    "date": new Date('2026-08-06T04:00:00.000Z'),
-    "value": 73
-  }
+  // {
+  //   "date": new Date('2026-08-04T04:00:00.000Z'),
+  //   "value": 93
+  // },
+  // {
+  //   "date": new Date('2026-08-05T04:00:00.000Z'),
+  //   "value": 0
+  // },
+  // {
+  //   "date": new Date('2026-08-06T04:00:00.000Z'),
+  //   "value": 73
+  // }
 ]
 </script>
 
+<div class="grid page">
+    <div class="content">
+        <div class="flex center">Practice Test Scores</div>
 <LineChart {data} x="date" y="value" padding={defaultChartPadding({ right: 10 })} height={300}>
     {#snippet marks({ context })}
 		{#each context.series.visibleSeries as s (s.key)}
-			<Spline seriesKey={s.key} style="stroke-width: 2px;" />
+			<Spline seriesKey={s.key} style="stroke-width: 3px;" draw curve={curveMonotoneX} />
 		{/each}
 	{/snippet}
 </LineChart>
+    </div>
+</div>
 
-<Chart
-    {data}
-    x="date"
-    y={["value"]}
-    series={[
-        { key: "value", color: "var(--main)" }
-    ]}
-    tooltipContext={{ mode: "quadtree-x" }}
-    yBaseline={0}
-    yNice
-    legend
-	highlight={{ lines: true, points: true }}
-    height={300}
->
-    {#snippet marks({ context })}
-		{#each context.series.visibleSeries as s (s.key)}
-			<Spline seriesKey={s.key} style="stroke-width: 2px;" />
-		{/each}
-	{/snippet}
-</Chart>
