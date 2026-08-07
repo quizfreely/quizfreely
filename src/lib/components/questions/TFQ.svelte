@@ -59,7 +59,7 @@
 <div>
     <p class="fg0">True or False: That { answerWith == "DEF" ? "definition" : "term"} matches, right?</p>
     <div class="grid gridsplitthing">
-        <div>
+        <div style="max-width: 45vw;">
             <p class="fg0">{answerWith == "DEF" ?
                 "Term" : "Definition"
             }</p>
@@ -68,14 +68,14 @@
                     "term" : "def"
                 ]?.length < 20 ?
                     "h4" : ""
-            }" style="white-space: pre-wrap; margin-top: 0.2rem;">{answerWith == "DEF" ?
+            }" style="white-space: pre-wrap; overflow-wrap: break-word; margin-top: 0.2rem;">{answerWith == "DEF" ?
                 term.term : term.def
             }</p>
             {#if (answerWith == "DEF" ? term.termImageUrl : term.defImageUrl) != null}
                 <div><img src={answerWith == "DEF" ? term.termImageUrl : term.defImageUrl} class="term-image" alt="{answerWith == "DEF" ? "term" : "definition"} image"></div>
             {/if}
         </div>
-        <div>
+        <div style="max-width: 45vw;">
             <p class="fg0">{answerWith == "DEF" ?
                 "Definition" : "Term"
             }</p>
@@ -84,7 +84,7 @@
                     "def" : "term"
                 ]?.length < 20 ?
                     "h4" : ""
-            }" style="white-space: pre-wrap; margin-top: 0.2rem;">{answerWith == "DEF" ?
+            }" style="white-space: pre-wrap; overflow-wrap: break-word; margin-top: 0.2rem;">{answerWith == "DEF" ?
                 presentedAnswer?.def : presentedAnswer?.term
             }</p>
             {#if (answerWith == "DEF" ? presentedAnswer?.defImageUrl : presentedAnswer?.termImageUrl) != null}
