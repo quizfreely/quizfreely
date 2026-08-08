@@ -2,6 +2,7 @@
 	import { Axis, Bar, Chart, Highlight, Layer, Rule, Tooltip, defaultChartPadding } from 'layerchart';
 	import { scaleBand } from 'd3-scale';
 	import { cubicInOut } from 'svelte/easing';
+    import { fancyTimestamp } from "$lib/fancyTimestamp";
 
 const chartData = [
   {
