@@ -395,7 +395,7 @@
         format: (v) => `${Math.round(v*100)}%`
     },
     xAxis: {
-        tickSpacing: 150
+        tickSpacing: 100
     }
 }}>
     {#snippet marks({ context })}
