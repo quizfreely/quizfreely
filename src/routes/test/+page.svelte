@@ -82,13 +82,13 @@ chartData.map((d) => {
 			<Axis placement="left" grid rule format={(d) => Math.abs(d)} />
 			<Axis placement="bottom" rule />
 				{#each chartData as d, i}
-                    {const barWidth = $derived(Math.min(context.xScale.bandwidth?.() ?? 40, 40))}
+                    {const barWidth = $derived(Math.min(context.xScale.bandwidth?.() ?? 24, 24))}
                     <Bar
                     	data={d}
                         width={barWidth}
                     	y="correct"
                     	rounded="top"
-                    	strokeWidth={1}
+                        radius={8}
                     	style="fill: var(--yay);"
                     	motion={{ type: 'tween', duration: 400, easing: cubicInOut, delay: i * 20 }}
                     	initialY={context.yScale(0)}
@@ -98,7 +98,7 @@ chartData.map((d) => {
                         width={barWidth}
                     	y={(d) => -d.incorrect}
                     	rounded="bottom"
-                    	strokeWidth={1}
+                        radius={8}
                     	style="fill: var(--ohno);"
                     	motion={{ type: 'tween', duration: 400, easing: cubicInOut, delay: i * 20 }}
                     	initialY={context.yScale(0)}
