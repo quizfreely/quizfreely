@@ -61,7 +61,7 @@
     })
 
     let mounted = $state(false);
-    let chartData = $state([]);
+    let ptChartData = $state([]);
     onMount(() => {
         let objectUrls = [];
         (async () => {
@@ -116,13 +116,13 @@
                 }
             }
 
-            chartData = practiceTests.filter(
+            ptChartData = practiceTests.filter(
                 pt => pt.questionsTotal > 0
             ).map(pt => ({
                 date: new Date(pt.timestamp),
                 score: pt.questionsCorrect / pt.questionsTotal
-            }))
-            console.log(JSON.parse(JSON.stringify(chartData)))
+            })).reverse(); /* reverse gives us correct order for layerchart draw animation */
+            console.log(JSON.parse(JSON.stringify(ptChartData)))
         })();
         return () => {
             objectUrls.forEach(objectUrl => {
@@ -181,7 +181,7 @@
         grid-template-columns: 1fr 1fr;
         grid-template-rows: auto auto;
         grid-template-areas:
-            "practice-tests-chart practice-tests-chart"
+            "terms-chart practice-tests-chart"
             "terms practice-tests"
     }
     .grid-split-but-different .terms-chart-area {
@@ -203,10 +203,10 @@
             grid-template-columns: auto;
             grid-template-rows: auto auto auto auto;
             grid-template-areas:
-                "practice-tests-chart"
-                "practice-tests"
                 /* "terms-chart" */
-                "terms";
+                "terms"
+                "practice-tests-chart"
+                "practice-tests";
         }
     }
 
@@ -390,7 +390,7 @@
             </div>
             <div class="practice-tests-chart-area">
         <div class="flex center">Practice Test Scores</div>
-<LineChart data={chartData} x="date" y="score" yDomain={[0, 1]} padding={defaultChartPadding({ right: 10 })} height={300} style="margin-top: 0.2rem;" props={{
+<LineChart data={ptChartData} x="date" y="score" yDomain={[0, 1]} padding={defaultChartPadding({ right: 10 })} height={300} style="margin-top: 0.2rem;" props={{
     yAxis: {
         format: (v) => `${Math.round(v*100)}%`
     },
