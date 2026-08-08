@@ -55,8 +55,17 @@ const chartData = [
     "incorrect": 48
   }
 ]
+chartData.map((d) => {
+    /* create date object from iso string */
+    d.date = new Date(d.date);
+    /* set to user time zone's 00:00 so layerchart shows correct dates */
+    d.date.setHours(0, 0, 0, 0);
+    return d;
+});
 </script>
 
+<div class="grid page">
+    <div class="content">
 <Chart
 	data={chartData}
 	x="date"
@@ -100,7 +109,7 @@ const chartData = [
 
 		<Tooltip.Root pointerEvents>
 			{#snippet children({ data })}
-				<Tooltip.Header value={data.date} format="day" />
+				<Tooltip.Header value={data.date} format={(v) => fancyTimestamp.format(v)} />
 				<Tooltip.List>
 					<Tooltip.Item
 						label="correct"
@@ -117,3 +126,5 @@ const chartData = [
 		</Tooltip.Root>
 	{/snippet}
 </Chart>
+</div>
+</div>
