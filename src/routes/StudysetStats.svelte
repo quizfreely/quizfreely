@@ -390,7 +390,8 @@
             </div>
             <div class="practice-tests-chart-area">
         <div class="flex center">Practice Test Scores</div>
-<LineChart data={ptChartData} x="date" y="score" yDomain={[0, 1]} padding={defaultChartPadding({ right: 10 })} height={300} style="margin-top: 0.2rem;" props={{
+<div style="min-height: 300px;"> <!-- wrapper div to keep height while loading, to eliminate layout shift -->
+<LineChart data={ptChartData} x="date" y="score" yDomain={[0, 1]} padding={defaultChartPadding({ right: 10 })} height={300} props={{
     yAxis: {
         format: (v) => `${Math.round(v*100)}%`
     },
@@ -414,6 +415,7 @@
         </Tooltip.Root>
     {/snippet}
 </LineChart>
+</div>
             </div>
             <div class="practice-tests-area">
                 <div class="flex" style="align-items: end; justify-content: space-between;">
