@@ -177,7 +177,7 @@
     .grid-split-but-different {
         display: grid;
         gap: 2rem;
-        row-gap: 4rem;
+        row-gap: 3rem;
         grid-template-columns: 1fr 1fr;
         grid-template-rows: auto auto;
         grid-template-areas:
@@ -390,7 +390,7 @@
             </div>
             <div class="practice-tests-chart-area">
         <div class="flex center">Practice Test Scores</div>
-<LineChart data={chartData} x="date" y="score" padding={defaultChartPadding({ right: 10 })} height={300} props={{
+<LineChart data={chartData} x="date" y="score" yDomain={[0, 1]} padding={defaultChartPadding({ right: 10 })} height={300} style="margin-top: 0.2rem;" props={{
     yAxis: {
         format: (v) => `${Math.round(v*100)}%`
     },
