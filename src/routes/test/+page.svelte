@@ -1,6 +1,6 @@
 <script lang="ts">
+	import { Axis, Bar, Chart, Highlight, Layer, Rule, Tooltip, defaultChartPadding } from 'layerchart';
 	import { scaleBand } from 'd3-scale';
-	import { Axis, Bar, Chart, Highlight, Layer, Rule, Tooltip } from 'layerchart';
 	import { cubicInOut } from 'svelte/easing';
 
 const chartData = [
@@ -63,8 +63,8 @@ const chartData = [
 	xScale={scaleBand().padding(0.4)}
 	y={['correct', (d) => -d.incorrect]}
 	yNice
-	padding={{ left: 24, bottom: 20, top: 8 }}
-	tooltipContext={{ mode: 'band' }}
+	padding={defaultChartPadding({ right: 10 })}
+    tooltipContext={{ mode: 'band' }}
 	height={300}
 >
 	{#snippet children({ context })}
@@ -72,22 +72,24 @@ const chartData = [
 			<Axis placement="left" grid rule format={(d) => Math.abs(d)} />
 			<Axis placement="bottom" rule />
 				{#each chartData as d, i}
-					<Bar
-						data={d}
-						y="correct"
-						rounded="top"
-						strokeWidth={1}
-						style="fill: var(--yay);"
-						motion={{ type: 'tween', duration: 500, easing: cubicInOut, delay: i * 30 }}
-					/>
-					<Bar
-						data={d}
-						y={(d) => -d.incorrect}
-						rounded="bottom"
-						strokeWidth={1}
-						style="fill: var(--ohno);"
-						motion={{ type: 'tween', duration: 500, easing: cubicInOut, delay: i * 30 }}
-					/>
+                    <Bar
+                    	data={d}
+                    	y="correct"
+                    	rounded="top"
+                    	strokeWidth={1}
+                    	style="fill: var(--yay);"
+                    	motion={{ type: 'tween', duration: 600, easing: cubicInOut, delay: i * 40 }}
+                    	initialY={context.yScale(0)}
+                    />
+                    <Bar
+                    	data={d}
+                    	y={(d) => -d.incorrect}
+                    	rounded="bottom"
+                    	strokeWidth={1}
+                    	style="fill: var(--ohno);"
+                    	motion={{ type: 'tween', duration: 600, easing: cubicInOut, delay: i * 40 }}
+                    	initialY={context.yScale(0)}
+                    />
 				{/each}
 			<Rule y={0} />
 			<Highlight area />
