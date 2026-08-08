@@ -72,8 +72,10 @@ const chartData = [
 			<Axis placement="left" grid rule format={(d) => Math.abs(d)} />
 			<Axis placement="bottom" rule />
 				{#each chartData as d, i}
+                    {const barWidth = $derived(Math.min(context.xScale.bandwidth?.() ?? 60, 60))}
                     <Bar
                     	data={d}
+                        width={barWidth}
                     	y="correct"
                     	rounded="top"
                     	strokeWidth={1}
@@ -83,6 +85,7 @@ const chartData = [
                     />
                     <Bar
                     	data={d}
+                        width={barWidth}
                     	y={(d) => -d.incorrect}
                     	rounded="bottom"
                     	strokeWidth={1}
