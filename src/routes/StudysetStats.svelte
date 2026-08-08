@@ -1,13 +1,12 @@
 <script>
     import { onMount } from "svelte";
-    import Chart from 'chart.js/auto';
-    import 'chartjs-adapter-luxon';
     import { fancyTimestamp } from "$lib/fancyTimestamp";
     import { idbApiLayer, db } from "$lib/idb-api-layer";
     import averageAccuracy from "$lib/average-accuracy.js";
+	import { LineChart, defaultChartPadding, Spline, Tooltip } from 'layerchart';
+    import { curveMonotoneX } from "d3-shape";
     import BackIcon from "$lib/icons/BackArrow.svelte"
     import ForwardLongArrowIcon from "$lib/icons/ForwardRightArrowLong.svelte"
-    import StatsIcon from "$lib/icons/ChartGraphLine.svelte"
     import { slide } from "svelte/transition";
     let { data } = $props();
     let terms = $state(
@@ -61,12 +60,9 @@
         }
     })
 
-    let chartCanvasTerms;
-    let chartCanvas;
-
     let mounted = $state(false);
+    let chartData = $state([]);
     onMount(() => {
-        let chart;
         let objectUrls = [];
         (async () => {
             mounted = true;
@@ -120,110 +116,18 @@
                 }
             }
 
-            Chart.defaults.font.size = 16;
-            const rootStyles = getComputedStyle(document.documentElement);
-            const mainColor = rootStyles.getPropertyValue("--main").trim();
-            const fg1Color = rootStyles.getPropertyValue("--fg-1").trim();
-            const bg2Color = rootStyles.getPropertyValue("--bg-2").trim();
-            const borderColor = rootStyles.getPropertyValue("--border").trim();
-            const yayColor = rootStyles.getPropertyValue("--yay").trim();
-            const ohnoColor = rootStyles.getPropertyValue("--ohno").trim();
-            const bg3Color = rootStyles.getPropertyValue("--bg-3").trim();
-            Chart.defaults.backgroundColor = mainColor;
-            Chart.defaults.borderColor = borderColor;
-            Chart.defaults.color = fg1Color;
-            chart = new Chart(
-                chartCanvas,
-                {
-                    type: "line",
-                    data: {
-                        datasets: [
-                            ...(practiceTests?.length > 0 ? [{
-                                label: "Practice Test Scores",
-                                fill: false,
-                                tension: 0,
-                                borderColor: mainColor,
-                                backgroundColor: mainColor,
-                                pointStyle: "circle",
-                                pointRadius: 6,
-                                pointHoverRadius: 8,
-                                data: practiceTests.map(pt => ({
-                                    x: Date.parse(pt.timestamp),
-                                    y: pt.questionsCorrect / pt.questionsTotal
-                                }))
-                            }] : [])
-                        ]
-                    },
-                    options: {
-                        scales: {
-                            x: {
-                                type: "timeseries",
-                                suggestedMax: Date.now(),
-                                time: {
-                                    unit: "day",
-                                    tooltipFormat: data?.settingsDateTimeFmtHours != null ?
-                                        (data?.settingsDateTimeFmtHours == "24" ?
-                                            "dd MMM yyyy, HH:mm" :
-                                            "dd MMM yyyy, h:mm a"
-                                        ) :
-                                        undefined
-                                }
-                            },
-                            y: {
-                                suggestedMax: 1,
-                                suggestedMin: 0,
-                                ticks: {
-                                    stepSize: 0.2,
-                                    format: {
-                                        style: "percent",
-                                        minimumFractionDigits: 0,
-                                        maximumFractionDigits: 0
-                                    }
-                                }
-                            }
-                        },
-                        interaction: {
-                            intersect: false,
-                            mode: "nearest",
-                            axis: "xy"
-                        },
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            title: {
-                                display: true,
-                                text: "Practice Test Scores",
-                                font: { weight: "normal" }
-                            },
-                            tooltip: {
-                                backgroundColor: bg2Color,
-                                titleColor: fg1Color,
-                                bodyColor: fg1Color,
-                                footerColor: fg1Color,
-                                titleFont: { weight: "normal" },
-                                displayColors: false,
-                                callbacks: {
-                                    label: ctx => Math.floor(ctx.raw.y * 100) + "%"
-                                }
-                            },
-                            legend: {
-                                display: false
-                                // labels: {
-                                //     usePointStyle: true
-                                // }
-                            }
-                        }
-                    }
-                }
-            );
+            chartData = practiceTests.filter(
+                pt => pt.questionsTotal > 0
+            ).map(pt => ({
+                date: new Date(pt.timestamp),
+                score: pt.questionsCorrect / pt.questionsTotal
+            }))
+            console.log(JSON.parse(JSON.stringify(chartData)))
         })();
         return () => {
             objectUrls.forEach(objectUrl => {
                 URL.revokeObjectURL(objectUrl);
             });
-            if (chart) {
-                chart.destroy();
-            }
         }
     })
 
@@ -268,17 +172,6 @@
         .fourpartthing-four {
             justify-self: start;
         }
-    }
-    .chart-container {
-        position: relative;
-        width: 100%;
-        max-width: 100%;
-        height: 16rem;
-    }
-    
-    .chart-container canvas {
-        width: 100% !important;
-        height: 100% !important;
     }
 
     .grid-split-but-different {
@@ -496,9 +389,31 @@
                 {/if}
             </div>
             <div class="practice-tests-chart-area">
-    <div class="chart-container">
-        <canvas bind:this={chartCanvas}></canvas>
-    </div>
+        <div class="flex center">Practice Test Scores</div>
+<LineChart data={chartData} x="date" y="score" padding={defaultChartPadding({ right: 10 })} height={300} props={{
+    yAxis: {
+        format: (v) => `${Math.round(v*100)}%`
+    },
+    xAxis: {
+        tickSpacing: 150
+    }
+}}>
+    {#snippet marks({ context })}
+		{#each context.series.visibleSeries as s (s.key)}
+			<Spline seriesKey={s.key} style="stroke-width: 3px;" draw curve={curveMonotoneX} />
+		{/each}
+	{/snippet}
+    {#snippet tooltip({ context })}
+        <Tooltip.Root {context}>
+            {#snippet children({ data })}
+                <Tooltip.Header value={data.date} format={(v) => fancyTimestamp.format(v)} />
+                <Tooltip.List>
+                    <Tooltip.Item label="score" value={data.score} format={(v) => `${Math.round(v*100)}%`} />
+                </Tooltip.List>
+            {/snippet}
+        </Tooltip.Root>
+    {/snippet}
+</LineChart>
             </div>
             <div class="practice-tests-area">
                 <div class="flex" style="align-items: end; justify-content: space-between;">

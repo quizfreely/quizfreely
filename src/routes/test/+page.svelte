@@ -1,8 +1,10 @@
 <script lang="ts">
 	import { LineChart, Chart, defaultChartPadding, Spline } from 'layerchart';
     import { curveMonotoneX } from "d3-shape";
+    import { onMount } from "svelte";
 
-const data = [
+    let data = [];
+ function put() {data = [
   {
     "date": new Date('2026-07-08T04:00:00.000Z'),
     "value": 83
@@ -123,7 +125,10 @@ const data = [
   //   "date": new Date('2026-08-06T04:00:00.000Z'),
   //   "value": 73
   // }
-]
+]}
+onMount(() => {
+    setTimeout(put, 2000);
+})
 </script>
 
 <div class="grid page">
