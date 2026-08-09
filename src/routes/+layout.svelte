@@ -1,6 +1,7 @@
 <script>
 import Header from "$lib/components/Header.svelte";
 import Footer from "$lib/components/Footer.svelte";
+import "../app.css";
 import { fade } from "svelte/transition";
 import { sineIn, sineOut } from "svelte/easing";
 import NProgress from "nprogress";
@@ -10,6 +11,7 @@ import { footerState } from '$lib/components/footer.svelte.js';
 import { page } from '$app/state';
 import { getCancelBeforeNavigate } from "$lib/cancel-before-navigate.js";
 import { env } from "$env/dynamic/public";
+import { onMount } from "svelte";
 let { children, data } = $props();
 
 NProgress.configure({
@@ -55,6 +57,26 @@ afterNavigate(nav => {
             title: document.title,
             url: window.location.href
         }));
+    }
+})
+
+onMount(() => {
+    /* store timezone in cookie for use in charts
+    like reviewEventCountsByDay which is segmented by days
+    and needs the user's timezone to calculate each day's cutoff
+    correctly in the backend, which will use this tz cookie */
+    try {
+        const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        
+        if (!tz) return;
+
+        const cookieName = "tz";
+        const cookieValue = encodeURIComponent(tz);
+        const maxAge = 60 * 60 * 24 * 365; // 1 year in seconds
+
+        document.cookie = `${cookieName}=${cookieValue}; max-age=${maxAge}; path=/; SameSite=Lax; Secure`;
+    } catch (error) {
+        console.error("Failed to detect or save timezone:", error);
     }
 })
 </script>

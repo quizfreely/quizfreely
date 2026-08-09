@@ -1,15 +1,17 @@
 <script>
     import { onMount } from "svelte";
-    import Chart from 'chart.js/auto';
-    import 'chartjs-adapter-luxon';
     import { fancyTimestamp } from "$lib/fancyTimestamp";
     import { idbApiLayer, db } from "$lib/idb-api-layer";
     import averageAccuracy from "$lib/average-accuracy.js";
+	import { LineChart, Spline, Axis, Bar, Chart, Highlight, Layer, Rule, Tooltip, defaultChartPadding } from 'layerchart';
+    import { curveMonotoneX } from "d3-shape";
+	import { scaleBand } from 'd3-scale';
+	import { cubicInOut } from 'svelte/easing';
     import BackIcon from "$lib/icons/BackArrow.svelte"
     import ForwardLongArrowIcon from "$lib/icons/ForwardRightArrowLong.svelte"
-    import StatsIcon from "$lib/icons/ChartGraphLine.svelte"
     import { slide } from "svelte/transition";
     let { data } = $props();
+    const REVIEW_EVENT_STATS_DAYS = 30;
     let terms = $state(
         data?.local ?
             [] : data?.studyset?.terms
@@ -17,6 +19,10 @@
     let practiceTests = $state(
         data?.local ?
             [] : data?.studyset?.practiceTests
+    );
+    let reviewEventStats = $state(
+        data?.local ?
+            [] : data?.studyset?.reviewEventStatsByDay
     );
     let termsStats = $derived.by(() => {
         if (terms) {
@@ -61,12 +67,10 @@
         }
     })
 
-    let chartCanvasTerms;
-    let chartCanvas;
-
     let mounted = $state(false);
+    let ptChartData = $state([]);
+    let reChartData = $state([]);
     onMount(() => {
-        let chart;
         let objectUrls = [];
         (async () => {
             mounted = true;
@@ -85,7 +89,8 @@
                         termImageUrl: true,
                         defImageUrl: true
                     },
-                    practiceTests: true
+                    practiceTests: true,
+                    reviewEventStatsByDay: REVIEW_EVENT_STATS_DAYS
                 })
                 terms = studyset.terms;
                 terms.forEach(term => {
@@ -97,6 +102,7 @@
                     }
                 })
                 practiceTests = studyset?.practiceTests;
+                reviewEventStats = studyset?.reviewEventStatsByDay;
             }
 
             if (!data.authed && !data.local) {
@@ -115,115 +121,34 @@
                 );
                 practiceTests = practiceTests;
 
+                const termIds = terms.map(t => t.id);
+                reviewEventStats = await idbApiLayer.getReviewEventStatsByDay({
+                    last: REVIEW_EVENT_STATS_DAYS,
+                    termIds: termIds
+                });
+
                 for (const term of terms) {
                     term.progress = (await db.termProgress.where("termId").equals(term.id).toArray())?.[0];
                 }
             }
 
-            Chart.defaults.font.size = 16;
-            const rootStyles = getComputedStyle(document.documentElement);
-            const mainColor = rootStyles.getPropertyValue("--main").trim();
-            const fg1Color = rootStyles.getPropertyValue("--fg-1").trim();
-            const bg2Color = rootStyles.getPropertyValue("--bg-2").trim();
-            const borderColor = rootStyles.getPropertyValue("--border").trim();
-            const yayColor = rootStyles.getPropertyValue("--yay").trim();
-            const ohnoColor = rootStyles.getPropertyValue("--ohno").trim();
-            const bg3Color = rootStyles.getPropertyValue("--bg-3").trim();
-            Chart.defaults.backgroundColor = mainColor;
-            Chart.defaults.borderColor = borderColor;
-            Chart.defaults.color = fg1Color;
-            chart = new Chart(
-                chartCanvas,
-                {
-                    type: "line",
-                    data: {
-                        datasets: [
-                            ...(practiceTests?.length > 0 ? [{
-                                label: "Practice Test Scores",
-                                fill: false,
-                                tension: 0,
-                                borderColor: mainColor,
-                                backgroundColor: mainColor,
-                                pointStyle: "circle",
-                                pointRadius: 6,
-                                pointHoverRadius: 8,
-                                data: practiceTests.map(pt => ({
-                                    x: Date.parse(pt.timestamp),
-                                    y: pt.questionsCorrect / pt.questionsTotal
-                                }))
-                            }] : [])
-                        ]
-                    },
-                    options: {
-                        scales: {
-                            x: {
-                                type: "timeseries",
-                                suggestedMax: Date.now(),
-                                time: {
-                                    unit: "day",
-                                    tooltipFormat: data?.settingsDateTimeFmtHours != null ?
-                                        (data?.settingsDateTimeFmtHours == "24" ?
-                                            "dd MMM yyyy, HH:mm" :
-                                            "dd MMM yyyy, h:mm a"
-                                        ) :
-                                        undefined
-                                }
-                            },
-                            y: {
-                                suggestedMax: 1,
-                                suggestedMin: 0,
-                                ticks: {
-                                    stepSize: 0.2,
-                                    format: {
-                                        style: "percent",
-                                        minimumFractionDigits: 0,
-                                        maximumFractionDigits: 0
-                                    }
-                                }
-                            }
-                        },
-                        interaction: {
-                            intersect: false,
-                            mode: "nearest",
-                            axis: "xy"
-                        },
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            title: {
-                                display: true,
-                                text: "Practice Test Scores",
-                                font: { weight: "normal" }
-                            },
-                            tooltip: {
-                                backgroundColor: bg2Color,
-                                titleColor: fg1Color,
-                                bodyColor: fg1Color,
-                                footerColor: fg1Color,
-                                titleFont: { weight: "normal" },
-                                displayColors: false,
-                                callbacks: {
-                                    label: ctx => Math.floor(ctx.raw.y * 100) + "%"
-                                }
-                            },
-                            legend: {
-                                display: false
-                                // labels: {
-                                //     usePointStyle: true
-                                // }
-                            }
-                        }
-                    }
-                }
-            );
+            ptChartData = practiceTests.filter(
+                pt => pt.questionsTotal > 0
+            ).map(pt => ({
+                date: new Date(pt.timestamp),
+                score: pt.questionsCorrect / pt.questionsTotal
+            })).reverse(); /* reverse gives us correct order for layerchart draw animation */
+
+            reChartData = reviewEventStats.map((d) => ({
+                ...d,
+                /* create date object from iso string */
+                date: new Date(d.timestamp),
+            }));
         })();
         return () => {
             objectUrls.forEach(objectUrl => {
                 URL.revokeObjectURL(objectUrl);
             });
-            if (chart) {
-                chart.destroy();
-            }
         }
     })
 
@@ -231,6 +156,28 @@
     const COLLAPSED_TERMS_COUNT = 3;
     let showAllPracticeTests = $state(false);
     const COLLAPSED_PRACTICE_TESTS_COUNT = 3;
+
+    function fmtDateShort(d) {
+        return `${d?.getMonth?.()+1}/${d?.getDate?.()}`
+    }
+    
+    const days = [
+        "Sun", "Mon", "Tue", "Wed",
+        "Thu", "Fri", "Sat"
+    ];
+    const months = [
+        "Jan", "Feb", "Mar", "Apr",
+        "May", "Jun", "Jul", "Aug",
+        "Sep", "Oct", "Nov", "Dec"
+    ];
+    function fmtDate(d) {
+        const t = d?.getTime?.();
+        if (t == null || Number.isNaN(t)) {
+            console.error("Invalid date in fmtDate() arg");
+            return "??";
+        }
+        return `${days[d.getDay()]}, ${d.getDate()} ${months[d.getMonth()]}`
+    }
 </script>
 <style>
     .gridfourpartthingrow {
@@ -269,26 +216,15 @@
             justify-self: start;
         }
     }
-    .chart-container {
-        position: relative;
-        width: 100%;
-        max-width: 100%;
-        height: 16rem;
-    }
-    
-    .chart-container canvas {
-        width: 100% !important;
-        height: 100% !important;
-    }
 
     .grid-split-but-different {
         display: grid;
         gap: 2rem;
-        row-gap: 4rem;
+        row-gap: 3rem;
         grid-template-columns: 1fr 1fr;
         grid-template-rows: auto auto;
         grid-template-areas:
-            "practice-tests-chart practice-tests-chart"
+            "terms-chart practice-tests-chart"
             "terms practice-tests"
     }
     .grid-split-but-different .terms-chart-area {
@@ -310,10 +246,10 @@
             grid-template-columns: auto;
             grid-template-rows: auto auto auto auto;
             grid-template-areas:
+                "terms-chart"
+                "terms"
                 "practice-tests-chart"
-                "practice-tests"
-                /* "terms-chart" */
-                "terms";
+                "practice-tests";
         }
     }
 
@@ -326,6 +262,11 @@
         margin: 0px;
         padding: 0px;
         border-radius: 0.8rem;
+    }
+
+    .termdeftxt {
+        white-space: pre-wrap;
+        overflow-wrap: break-word;
     }
 </style>
 <div class="grid page">
@@ -340,8 +281,71 @@
             </a>
         </div>
 <div class="grid grid-split-but-different">
-            <!-- <div class="terms-chart-area"> -->
-            <!-- </div> -->
+            <div class="terms-chart-area">
+        <div class="flex center">Terms/Questions per Day</div>
+<div style="min-height: 300px;"> <!-- wrapper div to keep height while loading, to eliminate layout shift -->
+<Chart
+	data={reChartData}
+	x="date"
+	xScale={scaleBand().padding(0.4)}
+	y={['correct', (d) => -d.incorrect]}
+	yNice
+	padding={defaultChartPadding({ right: 10 })}
+    tooltipContext={{ mode: 'band' }}
+	height={300}
+>
+	{#snippet children({ context })}
+		<Layer>
+			<Axis placement="left" grid rule format={(d) => Math.abs(d)} />
+			<Axis placement="bottom" rule format={fmtDateShort} />
+				{#each reChartData as d, i}
+                    {const barWidth = $derived(Math.min(context.xScale.bandwidth?.() ?? 24, 24))}
+                    <Bar
+                    	data={d}
+                        width={barWidth}
+                    	y="correct"
+                    	rounded="top"
+                        radius={8}
+                    	style="fill: var(--yay);"
+                    	motion={{ type: 'tween', duration: 400, easing: cubicInOut, delay: i * 20 }}
+                    	initialY={context.yScale(0)}
+                    />
+                    <Bar
+                    	data={d}
+                        width={barWidth}
+                    	y={(d) => -d.incorrect}
+                    	rounded="bottom"
+                        radius={8}
+                    	style="fill: var(--ohno);"
+                    	motion={{ type: 'tween', duration: 400, easing: cubicInOut, delay: i * 20 }}
+                    	initialY={context.yScale(0)}
+                    />
+				{/each}
+			<Rule y={0} />
+			<Highlight area />
+		</Layer>
+
+		<Tooltip.Root>
+			{#snippet children({ data })}
+				<Tooltip.Header value={data.date} format={fmtDate} />
+				<Tooltip.List>
+					<Tooltip.Item
+						label="correct"
+						value={data.correct}
+						color="var(--yay)"
+					/>
+					<Tooltip.Item
+						label="incorrect"
+						value={data.incorrect}
+						color="var(--ohno)"
+					/>
+				</Tooltip.List>
+			{/snippet}
+		</Tooltip.Root>
+	{/snippet}
+</Chart>
+</div>
+            </div>
             <div class="terms-area">
                 <div class="flex" style="align-items: end; justify-content: space-between; flex-wrap: wrap; row-gap: 0.2rem;">
                     <p class="h4" style="margin-bottom: 0px;">Terms</p>
@@ -359,10 +363,10 @@
                 {#each terms as term, index}
                     {#if index < COLLAPSED_TERMS_COUNT || showAllTerms}
                     <div class="box" transition:slide={{duration: 600}}>
-                        <div class="grid" style="grid-template-rows: auto; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="grid" style="grid-template-rows: auto; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 1rem; max-width: 100%;">
                             <div>
                             <p class="fg0">Term</p>
-                            <p class="{
+                            <p class="termdeftxt {
                                 term.term.length <= 20 ?
                                     "shy-h4" : ""
                             }" style="margin-top: 0px;">{term.term}</p>
@@ -372,7 +376,7 @@
                             </div>
                             <div>
                             <p class="fg0">Definition</p>
-                            <p class="{
+                            <p class="termdeftxt {
                                 term.def.length <= 20 ?
                                     "shy-h4" : ""
                             }" style="margin-top: 0px;">{term.def}</p>
@@ -491,9 +495,34 @@
                 {/if}
             </div>
             <div class="practice-tests-chart-area">
-    <div class="chart-container">
-        <canvas bind:this={chartCanvas}></canvas>
-    </div>
+        <div class="flex center">Practice Test Scores</div>
+<div style="min-height: 300px;"> <!-- wrapper div to keep height while loading, to eliminate layout shift -->
+<LineChart data={ptChartData} x="date" y="score" yDomain={[0, 1]} padding={defaultChartPadding({ right: 10 })} height={300} props={{
+    yAxis: {
+        format: (v) => `${Math.round(v*100)}%`
+    },
+    xAxis: {
+        tickSpacing: 100,
+        format: fmtDateShort
+    }
+}}>
+    {#snippet marks({ context })}
+		{#each context.series.visibleSeries as s (s.key)}
+			<Spline seriesKey={s.key} style="stroke-width: 3px;" draw curve={curveMonotoneX} />
+		{/each}
+	{/snippet}
+    {#snippet tooltip({ context })}
+        <Tooltip.Root {context}>
+            {#snippet children({ data })}
+                <Tooltip.Header value={data.date} format={fmtDate} />
+                <Tooltip.List>
+                    <Tooltip.Item label="score" value={data.score} format={(v) => `${Math.round(v*100)}%`} />
+                </Tooltip.List>
+            {/snippet}
+        </Tooltip.Root>
+    {/snippet}
+</LineChart>
+</div>
             </div>
             <div class="practice-tests-area">
                 <div class="flex" style="align-items: end; justify-content: space-between;">

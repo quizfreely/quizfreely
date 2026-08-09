@@ -1,0 +1,43 @@
+@layer ehui, ehui-lc-reset, theme, base, components, utilities;
+/* "theme, base, components, utilities" are from layerchart */
+
+.lc-root-container,
+.lc-tooltip-root {
+	--color-primary: var(--main);
+	--color-surface-100: var(--bg-0);
+	--color-surface-200: var(--bg-1);
+	--color-surface-300: var(--bg-2);
+	--color-surface-content: var(--fg-1);
+}
+
+@layer ehui-lc-reset {
+    .lc-root-container * + *,
+    .lc-root-container * + p,
+    .lc-root-container * + h1,
+    .lc-root-container * + h2,
+    .lc-root-container * + h3,
+    .lc-root-container * + h4,
+    .lc-root-container * + h5,
+    .lc-root-container * + h6,
+    .lc-tooltip-root * + *,
+    .lc-tooltip-root * + p,
+    .lc-tooltip-root * + h1,
+    .lc-tooltip-root * + h2,
+    .lc-tooltip-root * + h3,
+    .lc-tooltip-root * + h4,
+    .lc-tooltip-root * + h5,
+    .lc-tooltip-root * + h6 {
+        margin-top: unset;
+    }
+    
+    .lc-root-container button,
+    .lc-tooltip-root button {
+        background-color: unset;
+        padding: unset;
+        margin: unset;
+        margin-top: unset;
+        box-shadow: unset;
+        border: unset;
+        border-radius: unset;
+    }
+}

@@ -86,7 +86,7 @@
 </style>
 <div>
     <p class="fg0">Select the matching { answerWith == "DEF" ? "definition" : "term"}</p>
-    <p class="h4" style="white-space: pre-wrap;">{ answerWith == "DEF" ?
+    <p class="h4" style="white-space: pre-wrap; overflow-wrap: break-word; max-width: 85vw;">{ answerWith == "DEF" ?
         term.term : term.def
     }</p>
     {#if (answerWith == "DEF" ? term.termImageUrl : term.defImageUrl) != null}
@@ -108,8 +108,8 @@
                 {:else}
                     <CheckmarkIcon class="button-box-selected-icon"></CheckmarkIcon>
                 {/if}
-                <div style="margin-top: 0px;">
-                <span style="white-space: pre-wrap; margin-top: 0px;">{
+                <div style="margin-top: 0px; max-width: 85vw;">
+                <span style="white-space: pre-wrap; overflow-wrap: break-word; margin-top: 0px;">{
                     answerWith == "DEF" ?
                         answer.def : answer.term
                 }</span>
