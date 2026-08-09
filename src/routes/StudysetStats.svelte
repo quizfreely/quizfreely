@@ -160,7 +160,6 @@
     function fmtDateShort(d) {
         const t = d?.getTime?.();
         if (t == null || Number.isNaN(t)) {
-            console.error("Invalid date in fmtDateShort(d) arg");
             // NOTE: return empty string if invalid
             // because this func is called with null for empty graphs
             return "";
@@ -180,7 +179,6 @@
     function fmtDate(d) {
         const t = d?.getTime?.();
         if (t == null || Number.isNaN(t)) {
-            console.error("Invalid date in fmtDate(d) arg");
             return "";
         }
         return `${days[d.getDay()]}, ${d.getDate()} ${months[d.getMonth()]}`
