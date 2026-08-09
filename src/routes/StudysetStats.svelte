@@ -3,12 +3,15 @@
     import { fancyTimestamp } from "$lib/fancyTimestamp";
     import { idbApiLayer, db } from "$lib/idb-api-layer";
     import averageAccuracy from "$lib/average-accuracy.js";
-	import { LineChart, defaultChartPadding, Spline, Tooltip } from 'layerchart';
+	import { LineChart, Spline, Axis, Bar, Chart, Highlight, Layer, Rule, Tooltip, defaultChartPadding } from 'layerchart';
     import { curveMonotoneX } from "d3-shape";
+	import { scaleBand } from 'd3-scale';
+	import { cubicInOut } from 'svelte/easing';
     import BackIcon from "$lib/icons/BackArrow.svelte"
     import ForwardLongArrowIcon from "$lib/icons/ForwardRightArrowLong.svelte"
     import { slide } from "svelte/transition";
     let { data } = $props();
+    const REVIEW_EVENT_STATS_DAYS = 30;
     let terms = $state(
         data?.local ?
             [] : data?.studyset?.terms
@@ -19,7 +22,7 @@
     );
     let reviewEventStats = $state(
         data?.local ?
-            [] : data?.studyset?.reviewEventStats
+            [] : data?.studyset?.reviewEventStatsByDay
     );
     let termsStats = $derived.by(() => {
         if (terms) {
@@ -66,6 +69,7 @@
 
     let mounted = $state(false);
     let ptChartData = $state([]);
+    let reChartData = $state([]);
     onMount(() => {
         let objectUrls = [];
         (async () => {
@@ -86,7 +90,7 @@
                         defImageUrl: true
                     },
                     practiceTests: true,
-                    reviewEventStats: 30
+                    reviewEventStatsByDay: REVIEW_EVENT_STATS_DAYS
                 })
                 terms = studyset.terms;
                 terms.forEach(term => {
@@ -98,7 +102,7 @@
                     }
                 })
                 practiceTests = studyset?.practiceTests;
-                reviewEventStats = studyset?.reviewEventStats;
+                reviewEventStats = studyset?.reviewEventStatsByDay;
             }
 
             if (!data.authed && !data.local) {
@@ -117,7 +121,11 @@
                 );
                 practiceTests = practiceTests;
 
-                // TODO: reviewEventStats for cloud studysets with local review events
+                const termIds = terms.map(t => t.id);
+                reviewEventStats = await idbApiLayer.getReviewEventStatsByDay({
+                    last: REVIEW_EVENT_STATS_DAYS,
+                    termIds: termIds
+                });
 
                 for (const term of terms) {
                     term.progress = (await db.termProgress.where("termId").equals(term.id).toArray())?.[0];
@@ -130,7 +138,17 @@
                 date: new Date(pt.timestamp),
                 score: pt.questionsCorrect / pt.questionsTotal
             })).reverse(); /* reverse gives us correct order for layerchart draw animation */
-            console.log(JSON.parse(JSON.stringify(ptChartData)))
+
+            reChartData = reviewEventStats.map((d) => {
+                /* create date object from iso string */
+                const dateObj = new Date(d.timestamp);
+                /* set to user time zone's 00:00 so layerchart shows correct dates */
+                dateObj.setHours(0, 0, 0, 0);
+                return {
+                    ...d,
+                    date: dateObj,
+                };
+            });
         })();
         return () => {
             objectUrls.forEach(objectUrl => {
@@ -211,7 +229,7 @@
             grid-template-columns: auto;
             grid-template-rows: auto auto auto auto;
             grid-template-areas:
-                /* "terms-chart" */
+                "terms-chart"
                 "terms"
                 "practice-tests-chart"
                 "practice-tests";
@@ -246,8 +264,71 @@
             </a>
         </div>
 <div class="grid grid-split-but-different">
-            <!-- <div class="terms-chart-area"> -->
-            <!-- </div> -->
+            <div class="terms-chart-area">
+        <div class="flex center">Terms/Questions per Day</div>
+<div style="min-height: 300px;"> <!-- wrapper div to keep height while loading, to eliminate layout shift -->
+<Chart
+	data={reChartData}
+	x="date"
+	xScale={scaleBand().padding(0.4)}
+	y={['correct', (d) => -d.incorrect]}
+	yNice
+	padding={defaultChartPadding({ right: 10 })}
+    tooltipContext={{ mode: 'band' }}
+	height={300}
+>
+	{#snippet children({ context })}
+		<Layer>
+			<Axis placement="left" grid rule format={(d) => Math.abs(d)} />
+			<Axis placement="bottom" rule />
+				{#each reChartData as d, i}
+                    {const barWidth = $derived(Math.min(context.xScale.bandwidth?.() ?? 24, 24))}
+                    <Bar
+                    	data={d}
+                        width={barWidth}
+                    	y="correct"
+                    	rounded="top"
+                        radius={6}
+                    	style="fill: var(--yay);"
+                    	motion={{ type: 'tween', duration: 400, easing: cubicInOut, delay: i * 20 }}
+                    	initialY={context.yScale(0)}
+                    />
+                    <Bar
+                    	data={d}
+                        width={barWidth}
+                    	y={(d) => -d.incorrect}
+                    	rounded="bottom"
+                        radius={6}
+                    	style="fill: var(--ohno);"
+                    	motion={{ type: 'tween', duration: 400, easing: cubicInOut, delay: i * 20 }}
+                    	initialY={context.yScale(0)}
+                    />
+				{/each}
+			<Rule y={0} />
+			<Highlight area />
+		</Layer>
+
+		<Tooltip.Root>
+			{#snippet children({ data })}
+				<Tooltip.Header value={data.date} format={(v) => fancyTimestamp.format(v)} />
+				<Tooltip.List>
+					<Tooltip.Item
+						label="correct"
+						value={data.correct}
+						color="var(--yay)"
+					/>
+					<Tooltip.Item
+						label="incorrect"
+						value={data.incorrect}
+						color="var(--ohno)"
+					/>
+				</Tooltip.List>
+			{/snippet}
+		</Tooltip.Root>
+	{/snippet}
+</Chart>
+</div>
+            </div>
             <div class="terms-area">
                 <div class="flex" style="align-items: end; justify-content: space-between; flex-wrap: wrap; row-gap: 0.2rem;">
                     <p class="h4" style="margin-bottom: 0px;">Terms</p>
