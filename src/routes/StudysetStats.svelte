@@ -139,16 +139,11 @@
                 score: pt.questionsCorrect / pt.questionsTotal
             })).reverse(); /* reverse gives us correct order for layerchart draw animation */
 
-            reChartData = reviewEventStats.map((d) => {
+            reChartData = reviewEventStats.map((d) => ({
+                ...d,
                 /* create date object from iso string */
-                const dateObj = new Date(d.timestamp);
-                /* set to user time zone's 00:00 so layerchart shows correct dates */
-                dateObj.setHours(0, 0, 0, 0);
-                return {
-                    ...d,
-                    date: dateObj,
-                };
-            });
+                date: new Date(d.timestamp),
+            }));
         })();
         return () => {
             objectUrls.forEach(objectUrl => {
@@ -161,6 +156,10 @@
     const COLLAPSED_TERMS_COUNT = 3;
     let showAllPracticeTests = $state(false);
     const COLLAPSED_PRACTICE_TESTS_COUNT = 3;
+
+    function fmtDateShort(d) {
+        return `${d?.getMonth?.()+1}/${d?.getDate?.()}`
+    }
 </script>
 <style>
     .gridfourpartthingrow {
@@ -280,12 +279,6 @@
 	{#snippet children({ context })}
 		<Layer>
 			<Axis placement="left" grid rule format={(d) => Math.abs(d)} />
-            {const months = [
-                "Jan", "Feb", "Mar", "Apr",
-                "May", "Jun", "Jul", "Aug",
-                "Sep", "Oct", "Nov", "Dec"
-            ]}
-            {const fmtDateShort = (d) => `${d.getDate()} ${months[d.getMonth()]}`}
 			<Axis placement="bottom" rule format={fmtDateShort} />
 				{#each reChartData as d, i}
                     {const barWidth = $derived(Math.min(context.xScale.bandwidth?.() ?? 24, 24))}
@@ -491,7 +484,8 @@
         format: (v) => `${Math.round(v*100)}%`
     },
     xAxis: {
-        tickSpacing: 100
+        tickSpacing: 100,
+        format: fmtDateShort
     }
 }}>
     {#snippet marks({ context })}
