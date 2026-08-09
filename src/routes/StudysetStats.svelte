@@ -158,7 +158,13 @@
     const COLLAPSED_PRACTICE_TESTS_COUNT = 3;
 
     function fmtDateShort(d) {
-        return `${d?.getMonth?.()+1}/${d?.getDate?.()}`
+        const t = d?.getTime?.();
+        if (t == null || Number.isNaN(t)) {
+            // NOTE: return empty string if invalid
+            // because this func is called with null for empty graphs
+            return "";
+        }
+        return `${d.getMonth()+1}/${d.getDate()}`
     }
     
     const days = [
@@ -173,8 +179,7 @@
     function fmtDate(d) {
         const t = d?.getTime?.();
         if (t == null || Number.isNaN(t)) {
-            console.error("Invalid date in fmtDate() arg");
-            return "??";
+            return "";
         }
         return `${days[d.getDay()]}, ${d.getDate()} ${months[d.getMonth()]}`
     }
