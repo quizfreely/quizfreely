@@ -280,7 +280,13 @@
 	{#snippet children({ context })}
 		<Layer>
 			<Axis placement="left" grid rule format={(d) => Math.abs(d)} />
-			<Axis placement="bottom" rule />
+            {const months = [
+                "Jan", "Feb", "Mar", "Apr",
+                "May", "Jun", "Jul", "Aug",
+                "Sep", "Oct", "Nov", "Dec"
+            ]}
+            {const fmtDateShort = (d) => `${d.getDate()} ${months[d.getMonth()]}`}
+			<Axis placement="bottom" rule format={fmtDateShort} />
 				{#each reChartData as d, i}
                     {const barWidth = $derived(Math.min(context.xScale.bandwidth?.() ?? 24, 24))}
                     <Bar
@@ -288,7 +294,7 @@
                         width={barWidth}
                     	y="correct"
                     	rounded="top"
-                        radius={6}
+                        radius={8}
                     	style="fill: var(--yay);"
                     	motion={{ type: 'tween', duration: 400, easing: cubicInOut, delay: i * 20 }}
                     	initialY={context.yScale(0)}
@@ -298,7 +304,7 @@
                         width={barWidth}
                     	y={(d) => -d.incorrect}
                     	rounded="bottom"
-                        radius={6}
+                        radius={8}
                     	style="fill: var(--ohno);"
                     	motion={{ type: 'tween', duration: 400, easing: cubicInOut, delay: i * 20 }}
                     	initialY={context.yScale(0)}
