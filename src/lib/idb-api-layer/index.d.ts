@@ -1,8 +1,9 @@
-import { Studyset, Term, MatchActivity, Question } from "./db";
+import { Studyset, Term, MatchActivity, Question, ReviewEventStats } from "./db";
 type StudysetResolveProps = {
     terms?: boolean | TermResolveProps;
     practiceTests?: boolean;
     matchActivities?: boolean;
+    reviewEventStatsByDay?: boolean | number;
 };
 type TermResolveProps = {
     progress?: boolean;
@@ -24,6 +25,7 @@ export declare const idbApiLayer: {
         terms?: boolean | TermResolveProps;
         termsCount?: boolean;
     }) => Promise<(Studyset | undefined)[]>;
+    getReviewEventStatsByDay: (studysetId: number | string, last?: number) => Promise<ReviewEventStats[]>;
     createStudyset: ({ title, draft }: {
         title: string;
         draft: boolean;
