@@ -161,6 +161,8 @@
         const t = d?.getTime?.();
         if (t == null || Number.isNaN(t)) {
             console.error("Invalid date in fmtDateShort(d) arg");
+            // NOTE: return empty string if invalid
+            // because this func is called with null for empty graphs
             return "";
         }
         return `${d.getMonth()+1}/${d.getDate()}`
