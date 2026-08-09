@@ -160,6 +160,24 @@
     function fmtDateShort(d) {
         return `${d?.getMonth?.()+1}/${d?.getDate?.()}`
     }
+    
+    const days = [
+        "Sun", "Mon", "Tue", "Wed",
+        "Thu", "Fri", "Sat"
+    ];
+    const months = [
+        "Jan", "Feb", "Mar", "Apr",
+        "May", "Jun", "Jul", "Aug",
+        "Sep", "Oct", "Nov", "Dec"
+    ];
+    function fmtDate(d) {
+        const t = d?.getTime?.();
+        if (t == null || Number.isNaN(t)) {
+            console.error("Invalid date in fmtDate() arg");
+            return "??";
+        }
+        return `${days[d.getDay()]}, ${d.getDate()} ${months[d.getMonth()]}`
+    }
 </script>
 <style>
     .gridfourpartthingrow {
@@ -309,7 +327,7 @@
 
 		<Tooltip.Root>
 			{#snippet children({ data })}
-				<Tooltip.Header value={data.date} format={(v) => fancyTimestamp.format(v)} />
+				<Tooltip.Header value={data.date} format={fmtDate} />
 				<Tooltip.List>
 					<Tooltip.Item
 						label="correct"
@@ -496,7 +514,7 @@
     {#snippet tooltip({ context })}
         <Tooltip.Root {context}>
             {#snippet children({ data })}
-                <Tooltip.Header value={data.date} format={(v) => fancyTimestamp.format(v)} />
+                <Tooltip.Header value={data.date} format={fmtDate} />
                 <Tooltip.List>
                     <Tooltip.Item label="score" value={data.score} format={(v) => `${Math.round(v*100)}%`} />
                 </Tooltip.List>
