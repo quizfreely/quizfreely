@@ -158,7 +158,12 @@
     const COLLAPSED_PRACTICE_TESTS_COUNT = 3;
 
     function fmtDateShort(d) {
-        return `${d?.getMonth?.()+1}/${d?.getDate?.()}`
+        const t = d?.getTime?.();
+        if (t == null || Number.isNaN(t)) {
+            console.error("Invalid date in fmtDateShort(d) arg");
+            return "";
+        }
+        return `${d.getMonth()+1}/${d.getDate()}`
     }
     
     const days = [
@@ -173,8 +178,8 @@
     function fmtDate(d) {
         const t = d?.getTime?.();
         if (t == null || Number.isNaN(t)) {
-            console.error("Invalid date in fmtDate() arg");
-            return "??";
+            console.error("Invalid date in fmtDate(d) arg");
+            return "";
         }
         return `${days[d.getDay()]}, ${d.getDate()} ${months[d.getMonth()]}`
     }
