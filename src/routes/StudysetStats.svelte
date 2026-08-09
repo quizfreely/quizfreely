@@ -17,6 +17,10 @@
         data?.local ?
             [] : data?.studyset?.practiceTests
     );
+    let reviewEventStats = $state(
+        data?.local ?
+            [] : data?.studyset?.reviewEventStats
+    );
     let termsStats = $derived.by(() => {
         if (terms) {
             let sum = 0;
@@ -81,7 +85,8 @@
                         termImageUrl: true,
                         defImageUrl: true
                     },
-                    practiceTests: true
+                    practiceTests: true,
+                    reviewEventStats: 30
                 })
                 terms = studyset.terms;
                 terms.forEach(term => {
@@ -93,6 +98,7 @@
                     }
                 })
                 practiceTests = studyset?.practiceTests;
+                reviewEventStats = studyset?.reviewEventStats;
             }
 
             if (!data.authed && !data.local) {
@@ -110,6 +116,8 @@
                     (a, b) => b.timestamp.localeCompare(a.timestamp)
                 );
                 practiceTests = practiceTests;
+
+                // TODO: reviewEventStats for cloud studysets with local review events
 
                 for (const term of terms) {
                     term.progress = (await db.termProgress.where("termId").equals(term.id).toArray())?.[0];

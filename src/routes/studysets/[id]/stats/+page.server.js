@@ -44,6 +44,11 @@ export async function load({ cookies, params}) {
             questionsCorrect
             questionsTotal
         }
+        reviewEventStats(last: 30) {
+            timestamp
+            correct
+            incorrect
+        }
     }
 }`,
                 variables: {
