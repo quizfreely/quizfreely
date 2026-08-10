@@ -37,19 +37,23 @@
 <main>
   <div class="grid page">
     <div class="content">
-        <!--<div class="top-menu-nav">
+        <div class="top-menu-nav">
             <a class="top-menu-link {
                 page?.data?.dashboardPage == "dashboard" ?
                     "current" : ""
             }" href="/dashboard">Dashboard</a>
             <a class="top-menu-link {
-                page?.data?.dashboardPage == "activities" ?
+                page?.data?.dashboardPage == "stats" ?
                     "current" : ""
-            }" href="/dashboard/activities">Activities &amp; Games</a>
-        </div>-->
+            }" href="/dashboard/stats">Progress &amp; Stats</a>
+            <!-- <a class="top-menu-link { -->
+            <!--     page?.data?.dashboardPage == "activities" ? -->
+            <!--         "current" : "" -->
+            <!-- }" href="/dashboard/activities">Activities &amp; Games</a> -->
+        </div>
         {#key data.dashboardTransPageKey}
             <!-- uncomment out the style too when you uncomment the meun above -->
-            <div style="/*margin-top: 1.4rem;*/" in:fade={{ duration: 120, delay: 120, easing: sineIn }} out:fade={{ duration: 120, easing: sineOut }}>
+            <div style="margin-top: 1.4rem;" in:fade={{ duration: 120, delay: 120, easing: sineIn }} out:fade={{ duration: 120, easing: sineOut }}>
                 {@render children()}
             </div>
         {/key}
