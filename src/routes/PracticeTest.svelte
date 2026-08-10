@@ -240,8 +240,8 @@ FRQs: ${numFRQsToAssign}`,
             frq: numFRQsToAssign,
         };
 
-        function pickNewRandomTerm(ogTermsArray) {
-            let termsArray = [...ogTermsArray];
+        /* NOTE: pickNewRandomTerm(array) will mutate the array, so pass a copy */
+        function pickNewRandomTerm(termsArray) {
             if (termsArray.length == 0) {
                 pickRepeatedRandomTerm();
                 return;
@@ -462,7 +462,8 @@ FRQs: ${numFRQsToAssign}`,
             });
         }
 
-        pickNewRandomTerm(terms);
+        /* NOTE: copy terms array because pickNewRandomTerm mutates the array */
+        pickNewRandomTerm([...terms]);
         showSetup = false;
         showTest = true;
         takingActualPracticeTest = true;
