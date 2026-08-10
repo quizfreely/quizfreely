@@ -373,8 +373,8 @@ FRQs: ${numFRQsToAssign}`,
             }
 
             function loopAndPick(strictSameness) {
-                MAX_ITERATIONS_STRICT = 99;
-                MAX_ITERATIONS_NOT_STRICT = 99;
+                const MAX_ITERATIONS_STRICT = 99;
+                const MAX_ITERATIONS_NOT_STRICT = 99;
                 const maxIterations = strictSameness ? MAX_ITERATIONS_STRICT : MAX_ITERATIONS_NOT_STRICT;
                 let ogDistractorsCount = 3;
                 let distractorsCount = 3;
@@ -388,7 +388,6 @@ FRQs: ${numFRQsToAssign}`,
                     const randomTerm =
                         terms[Math.floor(Math.random() * terms.length)];
 
-                    randomTermTxtTrmd = randomTerm[pickedKey].trim();
                     if (
                         isSameTermOrContent(
                             randomTerm,
