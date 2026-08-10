@@ -135,12 +135,14 @@
                 }
             }
 
-            ptChartData = practiceTests.filter(
-                pt => pt.questionsTotal > 0
-            ).map(pt => ({
-                date: new Date(pt.timestamp),
-                score: pt.questionsCorrect / pt.questionsTotal
-            })).reverse(); /* reverse gives us correct order for layerchart draw animation */
+            if (practiceTests != null) {
+                ptChartData = practiceTests.filter(
+                    pt => pt.questionsTotal > 0
+                ).map(pt => ({
+                    date: new Date(pt.timestamp),
+                    score: pt.questionsCorrect / pt.questionsTotal
+                })).reverse(); /* reverse gives us correct order for layerchart draw animation */
+            }
 
             reChartData = reviewEventStats.map((d) => ({
                 ...d,
