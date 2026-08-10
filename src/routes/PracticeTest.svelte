@@ -485,7 +485,7 @@ FRQs: ${numFRQsToAssign}`,
                     /* try again without strictSameness */
                     loopAndPick(false);
                 } else if (iterations > 99) {
-                    console.log(
+                    console.warn(
                         "(addTFQ) Over 99 iterations to pick random distractor term",
                     );
                     /* use fallback same term as distractor */
@@ -521,7 +521,7 @@ FRQs: ${numFRQsToAssign}`,
         showTest = true;
         takingActualPracticeTest = true;
 
-        console.log([...questions]);
+        // console.log([...questions]);
 
         // fetch("/dashboard/set-dashboard-state", {
         //     method: "POST",
@@ -1038,7 +1038,7 @@ FRQs: ${numFRQsToAssign}`,
                                     }
                                 }
                             });
-                            console.log(questionDataArray);
+                            // console.log(questionDataArray);
                             if (data.authed && !data.local) {
                                 try {
                                     let raw = await fetch("/api/graphql", {
