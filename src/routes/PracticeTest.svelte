@@ -321,6 +321,7 @@ FRQs: ${numFRQsToAssign}`,
                         ? "TERM"
                         : "DEF"
                     : answerWith;
+            const pickedKey = pickedAnswerWith.toLowerCase();
             let question = {
                 type: "MCQ",
                 term: {
@@ -344,57 +345,98 @@ FRQs: ${numFRQsToAssign}`,
 
                 let sum = 0;
                 question.distractors.forEach((d) => {
-                    sum += d?.[pickedAnswerWith.toLowerCase()]?.length ?? 0;
+                    sum += d?.[pickedKey]?.length ?? 0;
                 });
                 return sum / question?.distractors?.length;
             }
 
-            let ogDistractorsCount = 3;
-            let distractorsCount = 3;
-            let iterations = 0;
-            while (
-                question.distractors.length < distractorsCount &&
-                iterations <= 99
-            ) {
-                iterations++;
-
-                const randomTerm =
-                    terms[Math.floor(Math.random() * terms.length)];
-
-                if (
-                    randomTerm.id ==
-                        term.id /* if random term is correct answer */ ||
-                    question.distractors.some(
-                        /* or if it's already an answer choice */
-                        (d) => randomTerm.id == d.id,
-                    )
-                ) {
-                    /* loop again without adding this random term
-                    if this term already exists */
-                    continue;
-                }
-
-                question.distractors.push({
-                    id: randomTerm?.id,
-                    term: randomTerm?.term,
-                    def: randomTerm?.def,
-                    termImageUrl: randomTerm?.termImageUrl,
-                    defImageUrl: randomTerm?.defImageUrl
-                });
-
-                if (
-                    question.distractors.length == ogDistractorsCount &&
-                    avgDistractorAnswerLength() < 40 &&
-                    Math.random() < 0.5
-                ) {
-                    distractorsCount++;
+            function isSameTermOrContent(t1, t2, strictSameness, defKey) {
+                if (strictSameness) {
+                    /* strictSameness compares both sides
+                    to avoid duplicate or confusing answer choices */
+                    return (
+                        t1.id == t2.id ||
+                        (t1.term.trim() == t2.term.trim() &&
+                        t1.termImageUrl == t2.termImageUrl) ||
+                        (t1.def.trim() == t2.def.trim() &&
+                        t1.defImageUrl == t2.defImageUrl)
+                    );
+                } else {
+                    /* strictSameness=false only compares displayed term/def side
+                    to avoid duplicate answer choices */
+                    return (
+                        t1.id == t2.id ||
+                        (t1[defKey].trim() == t2[defKey].trim() &&
+                        t1[defKey+"ImageUrl"] == t2[defKey+"ImageUrl"])
+                    );
                 }
             }
-            if (iterations > 99) {
-                console.log(
-                    "(addMCQ) Took more than 99 iterations to pick random term that wasn't a duplicate",
-                );
+
+            function loopAndPick(strictSameness) {
+                MAX_ITERATIONS_STRICT = 99;
+                MAX_ITERATIONS_NOT_STRICT = 99;
+                const maxIterations = strictSameness ? MAX_ITERATIONS_STRICT : MAX_ITERATIONS_NOT_STRICT;
+                let ogDistractorsCount = 3;
+                let distractorsCount = 3;
+                let iterations = 0;
+                while (
+                    question.distractors.length < distractorsCount &&
+                    iterations <= maxIterations
+                ) {
+                    iterations++;
+
+                    const randomTerm =
+                        terms[Math.floor(Math.random() * terms.length)];
+
+                    randomTermTxtTrmd = randomTerm[pickedKey].trim();
+                    if (
+                        isSameTermOrContent(
+                            randomTerm,
+                            term,
+                            strictSameness,
+                            pickedKey
+                        ) ||
+                        question.distractors.some(
+                            (d) => isSameTermOrContent(
+                                randomTerm,
+                                d,
+                                strictSameness,
+                                pickedKey
+                            )
+                        )
+                    ) {
+                        /* if same id or content as answer or existing distractor
+                        then loop again without adding this random term */
+                        continue;
+                    }
+
+                    question.distractors.push({
+                        id: randomTerm?.id,
+                        term: randomTerm?.term,
+                        def: randomTerm?.def,
+                        termImageUrl: randomTerm?.termImageUrl,
+                        defImageUrl: randomTerm?.defImageUrl
+                    });
+
+                    if (
+                        question.distractors.length == ogDistractorsCount &&
+                        avgDistractorAnswerLength() < 40 &&
+                        Math.random() < 0.5
+                    ) {
+                        distractorsCount++;
+                    }
+                }
+                if (iterations > maxIterations && strictSameness) {
+                    /* try again without strictSameness */
+                    loopAndPick(false);
+                } else if (iterations > maxIterations) {
+                    /* give up after maxIterations to avoid an infinite loop */
+                    console.warn(
+                        `(addMCQ) Took more than ${maxIterations} iterations to pick random term that wasn't a duplicate`,
+                    );
+                }
             }
+            loopAndPick(true);
 
             questions.push(question);
         }
