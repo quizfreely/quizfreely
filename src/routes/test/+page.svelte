@@ -1,131 +1,126 @@
 <script lang="ts">
-	import { Axis, Bar, Chart, Highlight, Layer, Rule, Tooltip, defaultChartPadding } from 'layerchart';
-	import { scaleBand } from 'd3-scale';
-	import { cubicInOut } from 'svelte/easing';
-    import { fancyTimestamp } from "$lib/fancyTimestamp";
+	import { scaleThreshold } from 'd3-scale';
+    import { quantile } from 'd3-array';
+	import { Calendar, Chart, Layer, Rect, Tooltip } from 'layerchart';
 
-const chartData = [
+	const now = new Date();
+    const start365DaysAgo = new Date(now);
+    start365DaysAgo.setDate(now.getDate() - 365);
+    start365DaysAgo.setHours(0, 0, 0, 0);
+
+    const data = [
   {
-    "date": new Date('2026-07-28T04:00:00.000Z'),
-    "correct": 64,
-    "incorrect": 92
+    "date": new Date('2022-08-11T04:00:00.000Z'),
+    "value": 0
   },
   {
-    "date": new Date('2026-07-29T04:00:00.000Z'),
-    "correct": 74,
-    "incorrect": 49
+    "date": new Date('2026-02-16T05:00:00.000Z'),
+    "value": 88
   },
   {
-    "date": new Date('2026-07-30T04:00:00.000Z'),
-    "correct": 31,
-    "incorrect": 76
+    "date": new Date('2025-02-17T05:00:00.000Z'),
+    "value": 67
   },
   {
-    "date": new Date('2026-07-31T04:00:00.000Z'),
-    "correct": 70,
-    "incorrect": 88
+    "date": new Date('2025-02-18T05:00:00.000Z'),
+    "value": 78
   },
   {
-    "date": new Date('2026-08-01T04:00:00.000Z'),
-    "correct": 42,
-    "incorrect": 71
+    "date": new Date('2025-02-19T05:00:00.000Z'),
+    "value": 26
   },
   {
-    "date": new Date('2026-08-02T04:00:00.000Z'),
-    "correct": 95,
-    "incorrect": 26
-  },
-  {
-    "date": new Date('2026-08-03T04:00:00.000Z'),
-    "correct": 23,
-    "incorrect": 86
+    "date": new Date('2025-02-20T05:00:00.000Z'),
+    "value": 66
   },
   {
     "date": new Date('2026-08-04T04:00:00.000Z'),
-    "correct": 35,
-    "incorrect": 58
+    "value": 15
   },
   {
     "date": new Date('2026-08-05T04:00:00.000Z'),
-    "correct": 35,
-    "incorrect": 71
+    "value": 0
   },
   {
     "date": new Date('2026-08-06T04:00:00.000Z'),
-    "correct": 34,
-    "incorrect": 48
+    "value": 0
+  },
+  {
+    "date": new Date('2026-08-07T04:00:00.000Z'),
+    "value": 92
+  },
+  {
+    "date": new Date('2026-08-08T04:00:00.000Z'),
+    "value": 25
+  },
+  {
+    "date": new Date('2026-08-09T04:00:00.000Z'),
+    "value": 0
   }
 ]
-chartData.map((d) => {
-    /* create date object from iso string */
+data.forEach((d) => {
     d.date = new Date(d.date);
-    /* set to user time zone's 00:00 so layerchart shows correct dates */
     d.date.setHours(0, 0, 0, 0);
-    return d;
+    if (d?.value == 0) {
+        d.value = null;
+    } else {
+        d.value = d.value
+    }
 });
+    
+    const sortedValues = data.map(d => d.value).filter(
+        (v) => v > 0
+    ).sort((a,b) => a - b);
+    const p25 = quantile(sortedValues, 0.25) ?? 10;
+    const p50 = quantile(sortedValues, 0.5) ?? 25;
+    const p75 = quantile(sortedValues, 0.75) ?? 50
+    const domain = [p25, p50, p75];
 </script>
 
-<div class="grid page">
-    <div class="content">
 <Chart
-	data={chartData}
+	data={data}
 	x="date"
-	xScale={scaleBand().padding(0.4)}
-	y={['correct', (d) => -d.incorrect]}
-	yNice
-	padding={defaultChartPadding({ right: 10 })}
-    tooltipContext={{ mode: 'band' }}
-	height={300}
+	c="value"
+	cScale={scaleThreshold()}
+	cDomain={domain}
+	cRange={[
+		'color-mix(in srgb, var(--yay) 25%, transparent)',
+		'color-mix(in srgb, var(--yay) 50%, transparent)',
+		'color-mix(in srgb, var(--yay) 75%, transparent)',
+		'var(--yay)'
+	]}
+	padding={{ top: 20 }}
+	height={140}
 >
 	{#snippet children({ context })}
 		<Layer>
-			<Axis placement="left" grid rule format={(d) => Math.abs(d)} />
-			<Axis placement="bottom" rule />
-				{#each chartData as d, i}
-                    {const barWidth = $derived(Math.min(context.xScale.bandwidth?.() ?? 24, 24))}
-                    <Bar
-                    	data={d}
-                        width={barWidth}
-                    	y="correct"
-                    	rounded="top"
-                        radius={6}
-                    	style="fill: var(--yay);"
-                    	motion={{ type: 'tween', duration: 400, easing: cubicInOut, delay: i * 20 }}
-                    	initialY={context.yScale(0)}
-                    />
-                    <Bar
-                    	data={d}
-                        width={barWidth}
-                    	y={(d) => -d.incorrect}
-                    	rounded="bottom"
-                        radius={6}
-                    	style="fill: var(--ohno);"
-                    	motion={{ type: 'tween', duration: 400, easing: cubicInOut, delay: i * 20 }}
-                    	initialY={context.yScale(0)}
-                    />
-				{/each}
-			<Rule y={0} />
-			<Highlight area />
+			<Calendar start={start365DaysAgo} end={now}>
+				{#snippet children({ cells, cellSize })}
+					{#each cells as cell}
+						{@const padding = 1}
+						<Rect
+							x={cell.x + padding}
+							y={cell.y + padding}
+							width={cellSize[0] - padding * 2}
+							height={cellSize[1] - padding * 2}
+							rx={4}
+							fill={cell.color ?? 'var(--bg-3)'}
+							onpointermove={(e) => context.tooltip?.show(e, cell.data)}
+							onpointerleave={(e) => context.tooltip?.hide()}
+						/>
+					{/each}
+				{/snippet}
+			</Calendar>
 		</Layer>
 
 		<Tooltip.Root>
 			{#snippet children({ data })}
-				<Tooltip.Header value={data.date} format={(v) => fancyTimestamp.format(v)} />
-				<Tooltip.List>
-					<Tooltip.Item
-						label="correct"
-						value={data.correct}
-						color="var(--yay)"
-					/>
-					<Tooltip.Item
-						label="incorrect"
-						value={data.incorrect}
-						color="var(--ohno)"
-					/>
-				</Tooltip.List>
+				<Tooltip.Header value={data.date} format="day" />
+
+					<Tooltip.List>
+						<Tooltip.Item label="value" value={data.value ?? 0} format="integer" valueAlign="right" />
+					</Tooltip.List>
 			{/snippet}
 		</Tooltip.Root>
 	{/snippet}
 </Chart>
-</div>
-</div>
