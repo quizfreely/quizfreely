@@ -6,11 +6,14 @@
 	import { LineChart, Spline, Axis, Bar, Chart, Highlight, Layer, Rule, Tooltip, defaultChartPadding } from 'layerchart';
     import { curveMonotoneX } from "d3-shape";
 	import { scaleBand } from 'd3-scale';
-	import { cubicInOut } from 'svelte/easing';
+	import { backOut, cubicOut } from 'svelte/easing';
+    import { slide } from "svelte/transition";
     import BackIcon from "$lib/icons/BackArrow.svelte"
     import ForwardLongArrowIcon from "$lib/icons/ForwardRightArrowLong.svelte"
-    import { slide } from "svelte/transition";
+    import AngleUpIcon from "$lib/icons/AngleUp.svelte";
+    import AngleDownIcon from "$lib/icons/AngleDown.svelte";
     let { data } = $props();
+
     const REVIEW_EVENT_STATS_DAYS = 30;
     let terms = $state(
         data?.local ?
@@ -312,7 +315,7 @@
                     	rounded="top"
                         radius={8}
                     	style="fill: var(--yay);"
-                    	motion={{ type: 'tween', duration: 400, easing: cubicInOut, delay: i * 20 }}
+                    	motion={{ type: 'tween', duration: 400, easing: backOut, delay: i * 20 }}
                     	initialY={context.yScale(0)}
                     />
                     <Bar
@@ -322,7 +325,7 @@
                     	rounded="bottom"
                         radius={8}
                     	style="fill: var(--ohno);"
-                    	motion={{ type: 'tween', duration: 400, easing: cubicInOut, delay: i * 20 }}
+                    	motion={{ type: 'tween', duration: 400, easing: backOut, delay: i * 20 }}
                     	initialY={context.yScale(0)}
                     />
 				{/each}
@@ -488,13 +491,13 @@
                     {/if}
                 {/each}
                 {#if terms?.length > COLLAPSED_TERMS_COUNT}
-                <button class="button-box" style="width: 100%;" onclick={
+                <button class="button-box" style="width: 100%; display: flex; align-items: center;" onclick={
                     () => showAllTerms = !showAllTerms
                 }>
                     {#if showAllTerms}
-                    Collapse Terms
+                    <AngleUpIcon></AngleUpIcon> Collapse Terms
                     {:else}
-                    Show All Terms
+                    <AngleDownIcon></AngleDownIcon> Show All Terms
                     {/if}
                 </button>
                 {/if}
@@ -513,7 +516,10 @@
 }}>
     {#snippet marks({ context })}
 		{#each context.series.visibleSeries as s (s.key)}
-			<Spline seriesKey={s.key} style="stroke-width: 3px;" draw curve={curveMonotoneX} />
+			<Spline seriesKey={s.key} style="stroke-width: 3px;" draw={{
+                duration: 2000,
+                easing: cubicOut
+            }} curve={curveMonotoneX} />
 		{/each}
 	{/snippet}
     {#snippet tooltip({ context })}
@@ -565,13 +571,13 @@
                         {/if}
                     {/each}
                     {#if practiceTests?.length > COLLAPSED_PRACTICE_TESTS_COUNT}
-                    <button class="button-box" style="width: 100%;" onclick={
+                    <button class="button-box" style="width: 100%; display: flex; align-items: center;" onclick={
                         () => showAllPracticeTests = !showAllPracticeTests
                     }>
                         {#if showAllPracticeTests}
-                            Collapse Practice Tests
+                            <AngleUpIcon></AngleUpIcon> Collapse Practice Tests
                         {:else}
-                            Show All Practice Tests
+                            <AngleDownIcon></AngleDownIcon> Show All Practice Tests
                         {/if}
                     </button>
                     {/if}
