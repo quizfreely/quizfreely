@@ -21,11 +21,11 @@
     );
     let practiceTests = $state(
         data?.local ?
-            [] : data?.studyset?.practiceTests
+            [] : data?.studyset?.practiceTests ?? []
     );
     let reviewEventStats = $state(
         data?.local ?
-            [] : data?.studyset?.reviewEventStatsByDay
+            [] : data?.studyset?.reviewEventStatsByDay ?? []
     );
     let termsStats = $derived.by(() => {
         if (terms) {
@@ -59,7 +59,7 @@
         }
     })
     let practiceTestAvgScore = $derived.by(() => {
-        if (practiceTests) {
+        if (practiceTests?.length > 0) {
             let sum = 0;
             for (const practiceTest of practiceTests) {
                 sum += practiceTest.questionsCorrect / practiceTest.questionsTotal * 100
@@ -104,8 +104,8 @@
                         objectUrls.push(term.defImageUrl);
                     }
                 })
-                practiceTests = studyset?.practiceTests;
-                reviewEventStats = studyset?.reviewEventStatsByDay;
+                practiceTests = studyset?.practiceTests ?? [];
+                reviewEventStats = studyset?.reviewEventStatsByDay ?? [];
             }
 
             if (!data.authed && !data.local) {
@@ -122,7 +122,7 @@
                     so most recent is first */
                     (a, b) => b.timestamp.localeCompare(a.timestamp)
                 );
-                practiceTests = practiceTests;
+                practiceTests = practiceTests ?? [];
 
                 const termIds = terms.map(t => t.id);
                 reviewEventStats = await idbApiLayer.getReviewEventStatsByDay({
