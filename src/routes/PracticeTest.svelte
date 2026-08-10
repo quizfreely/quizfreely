@@ -314,6 +314,28 @@ FRQs: ${numFRQsToAssign}`,
             remainingCounts[questionType]--;
         }
 
+        function isSameTermOrContent(t1, t2, strictSameness, defKey) {
+            if (strictSameness) {
+                /* strictSameness compares both sides
+                to avoid duplicate or confusing answer choices */
+                return (
+                    t1.id == t2.id ||
+                    (t1.term.trim() == t2.term.trim() &&
+                    t1.termImageUrl == t2.termImageUrl) ||
+                    (t1.def.trim() == t2.def.trim() &&
+                    t1.defImageUrl == t2.defImageUrl)
+                );
+            } else {
+                /* strictSameness=false only compares displayed term/def side
+                to avoid duplicate answer choices */
+                return (
+                    t1.id == t2.id ||
+                    (t1[defKey].trim() == t2[defKey].trim() &&
+                    t1[defKey+"ImageUrl"] == t2[defKey+"ImageUrl"])
+                );
+            }
+        }
+
         function addMCQ(term) {
             const pickedAnswerWith =
                 answerWith == "BOTH"
@@ -348,28 +370,6 @@ FRQs: ${numFRQsToAssign}`,
                     sum += d?.[pickedKey]?.length ?? 0;
                 });
                 return sum / question?.distractors?.length;
-            }
-
-            function isSameTermOrContent(t1, t2, strictSameness, defKey) {
-                if (strictSameness) {
-                    /* strictSameness compares both sides
-                    to avoid duplicate or confusing answer choices */
-                    return (
-                        t1.id == t2.id ||
-                        (t1.term.trim() == t2.term.trim() &&
-                        t1.termImageUrl == t2.termImageUrl) ||
-                        (t1.def.trim() == t2.def.trim() &&
-                        t1.defImageUrl == t2.defImageUrl)
-                    );
-                } else {
-                    /* strictSameness=false only compares displayed term/def side
-                    to avoid duplicate answer choices */
-                    return (
-                        t1.id == t2.id ||
-                        (t1[defKey].trim() == t2[defKey].trim() &&
-                        t1[defKey+"ImageUrl"] == t2[defKey+"ImageUrl"])
-                    );
-                }
             }
 
             function loopAndPick(strictSameness) {
@@ -442,6 +442,12 @@ FRQs: ${numFRQsToAssign}`,
         }
 
         function addTFQ(term) {
+            const pickedAnswerWith = answerWith == "BOTH"
+                ? Math.random() < 0.5
+                    ? "TERM"
+                    : "DEF"
+                : answerWith;
+            const pickedKey = pickedAnswerWith.toLowerCase();
             let question = {
                 type: "TFQ",
                 term: {
@@ -451,43 +457,49 @@ FRQs: ${numFRQsToAssign}`,
                     termImageUrl: term.termImageUrl,
                     defImageUrl: term.defImageUrl
                 },
-                answerWith:
-                    answerWith == "BOTH"
-                        ? Math.random() < 0.5
-                            ? "TERM"
-                            : "DEF"
-                        : answerWith,
+                answerWith: pickedAnswerWith
             };
 
             question.distractor = null;
-            let iterations = 0;
-            while (question.distractor == null && iterations <= 99) {
-                iterations++;
-                const randomTerm =
-                    terms[Math.floor(Math.random() * terms.length)];
-                if (randomTerm.id != term.id) {
+            function loopAndPick(strictSameness) {
+                let iterations = 0;
+                while (question.distractor == null && iterations <= 99) {
+                    iterations++;
+                    const randomTerm =
+                        terms[Math.floor(Math.random() * terms.length)];
+                    if (!isSameTermOrContent(
+                        randomTerm,
+                        term,
+                        strictSameness,
+                        pickedKey
+                    )) {
+                        question.distractor = {
+                            id: randomTerm.id,
+                            term: randomTerm.term,
+                            def: randomTerm.def,
+                            termImageUrl: randomTerm.termImageUrl,
+                            defImageUrl: randomTerm.defImageUrl
+                        };
+                    }
+                }
+                if (iterations > 99 && strictSameness) {
+                    /* try again without strictSameness */
+                    loopAndPick(false);
+                } else if (iterations > 99) {
+                    console.log(
+                        "(addTFQ) Over 99 iterations to pick random distractor term",
+                    );
+                    /* use fallback same term as distractor */
                     question.distractor = {
-                        id: randomTerm.id,
-                        term: randomTerm.term,
-                        def: randomTerm.def,
-                        termImageUrl: randomTerm.termImageUrl,
-                        defImageUrl: randomTerm.defImageUrl
+                        id: term.id,
+                        term: term.term,
+                        def: term.def,
+                        termImageUrl: term.termImageUrl,
+                        defImageUrl: term.defImageUrl
                     };
                 }
             }
-            if (iterations > 99) {
-                console.log(
-                    "(addTFQ) Over 99 iterations to pick random distractor term",
-                );
-                /* use fallback same term as distractor */
-                question.distractor = {
-                    id: term.id,
-                    term: term.term,
-                    def: term.def,
-                    termImageUrl: term.termImageUrl,
-                    defImageUrl: term.defImageUrl
-                };
-            }
+            loopAndPick(true);
             questions.push(question);
         }
 
