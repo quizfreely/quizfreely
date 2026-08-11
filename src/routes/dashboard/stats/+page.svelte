@@ -20,18 +20,21 @@
         FALLBACK_P75
     ]);
 
+    let totalTermsReviewed = $state("");
+    let totalTermsCount = 0;
     if (data?.reviewEventStatsByDay?.length > 0) {
         chartData = data.reviewEventStatsByDay.map((obj) => {
             const d = { ...obj };
             d.date = new Date(d.timestamp);
             d.date.setHours(0, 0, 0, 0);
             d.terms = d.correct + d.incorrect;
+            totalTermsCount += d.terms;
             if (d?.terms == 0) {
                 d.terms = null;
             }
             return d;
         });
-        
+        totalTermsReviewed = totalTermsCount.toLocaleString();
         const sortedValues = data.reviewEventStatsByDay
             .map(d => d.value)
             .filter((v) => v > 0)
@@ -49,6 +52,9 @@
 
 <Noscript />
 
+<p><span style="font-size: 1.2rem;">{totalTermsReviewed}</span> terms reviewed/questions answered
+<span class="line fg0">in the last year</span></p>
+<div style="width: 100%; aspect-ratio: 31/5;">
 <Chart
 	data={chartData}
 	x="date"
@@ -62,7 +68,6 @@
 		'var(--yay)'
 	]}
 	padding={{ top: 20 }}
-	height={200}
 >
 	{#snippet children({ context })}
 		<Layer>
@@ -96,4 +101,7 @@
 		</Tooltip.Root>
 	{/snippet}
 </Chart>
+</div>
+
+e
 
