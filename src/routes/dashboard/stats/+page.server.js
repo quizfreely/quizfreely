@@ -22,6 +22,29 @@ export async function load({ cookies }) {
         correct
         incorrect
     }
+    activityHistory(last: 40) {
+        __typename
+        ... on PracticeTest {
+            id
+            timestamp
+            questionsCorrect
+            questionsTotal
+            studysets {
+                id
+                title
+            }
+        }
+        ... on MatchActivity {
+            id
+            endTimestamp
+            durationMs
+            incorrectPairIds
+            studysets {
+                id
+                title
+            }
+        }
+    }
 }`,
             })
         });

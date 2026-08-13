@@ -19,34 +19,68 @@
         FALLBACK_P50,
         FALLBACK_P75
     ]);
+    let activityHistory = $state(data.activityHistory ?? []);
 
     let totalTermsReviewed = $state("");
     let totalTermsCount = 0;
-    if (data?.reviewEventStatsByDay?.length > 0) {
-        chartData = data.reviewEventStatsByDay.map((obj) => {
-            const d = { ...obj };
-            d.date = new Date(d.timestamp);
-            d.date.setHours(0, 0, 0, 0);
-            d.terms = d.correct + d.incorrect;
-            totalTermsCount += d.terms;
-            if (d?.terms == 0) {
-                d.terms = null;
-            }
-            return d;
-        });
-        totalTermsReviewed = totalTermsCount.toLocaleString();
-        const sortedValues = data.reviewEventStatsByDay
-            .map(d => d.value)
-            .filter((v) => v > 0)
-            .sort((a,b) => a - b);
-        const p25 = quantile(sortedValues, 0.25) ?? FALLBACK_P25;
-        const p50 = quantile(sortedValues, 0.5) ?? FALLBACK_P50;
-        const p75 = quantile(sortedValues, 0.75) ?? FALLBACK_P75;
-        domain = [p25, p50, p75];
+    function calcChart() {
+        if (data?.reviewEventStatsByDay?.length > 0) {
+            chartData = data.reviewEventStatsByDay.map((obj) => {
+                const d = { ...obj };
+                d.date = new Date(d.timestamp);
+                d.date.setHours(0, 0, 0, 0);
+                d.terms = d.correct + d.incorrect;
+                totalTermsCount += d.terms;
+                if (d?.terms == 0) {
+                    d.terms = null;
+                }
+                return d;
+            });
+            totalTermsReviewed = totalTermsCount.toLocaleString();
+            const sortedValues = data.reviewEventStatsByDay
+                .map(d => d.value)
+                .filter((v) => v > 0)
+                .sort((a,b) => a - b);
+            const p25 = quantile(sortedValues, 0.25) ?? FALLBACK_P25;
+            const p50 = quantile(sortedValues, 0.5) ?? FALLBACK_P50;
+            const p75 = quantile(sortedValues, 0.75) ?? FALLBACK_P75;
+            domain = [p25, p50, p75];
+        }
+    }
+    if (data.authed) {
+        calcChart();
     }
 </script>
 <style>
 :global {
+    .qzfr-pt-box {
+        display: grid;
+        gap-column: 0.6rem;
+        gap-row: 0.2rem;
+        grid-template-rows: auto;
+        grid-template-columns: 1fr 1fr 1fr;
+    }
+    .qzfr-match-box {
+        display: grid;
+        gap-column: 0.6rem;
+        gap-row: 0.2rem;
+        grid-template-rows: auto;
+        grid-template-columns: 1fr 1fr 1fr;
+    }
+    .qzfr-eh-lc-div {
+        width: 100%;
+        aspect-ratio: 31/5;
+    }
+    @media only screen and (max-width: 1000px) {
+        .qzfr-eh-lc-div {
+            aspect-ratio: 31/6;
+        }
+    }
+    @media only screen and (max-width: 500px) {
+        .qzfr-eh-lc-div {
+            aspect-ratio: 31/7;
+        }
+    }
     .qzfr-eh-lc-chart ::selection {
         color: var(--fg-1);
         fill: var(--fg-1);
@@ -62,7 +96,7 @@
 
 <p><span style="font-size: 1.2rem;">{totalTermsReviewed}</span> terms reviewed/questions answered
 <span class="line fg0">in the last year</span></p>
-<div style="width: 100%; aspect-ratio: 31/5;">
+<div class="qzfr-eh-lc-div">
 <Chart
 	data={chartData}
 	x="date"
@@ -112,5 +146,33 @@
 </Chart>
 </div>
 
-e
+<h2 class="h4" style="margin-top: 2rem;">Recent Activities</h2>
+{#each activityHistory as item, index}
+    <!-- {JSON.stringify(item)} -->
+    {#if item?.studysets?.[0] != null && (index - 1 < 0 || activityHistory[index - 1].studysets[0].id != item.studysets[0].id)}
+        {const studyset = $derived(item.studysets[0])}
+        <div class="flex" style="align-items: center; justify-content: space-between; row-gap: 0.2rem;">
+            <span>{studyset.title}</span>
+            <a href={studyset.id.includes("-") ? `/studysets/${studyset.id}` : `/studyset/local?id=${studyset.id}`}>View Studyset</a>
+        </div>
+    {/if}
+    {#if item.__typename == "PracticeTest"}
+        <div class="box grid qzfr-pt-box">
+            <span class="fg0">Practice Test</span>
+            {const score = $derived(Math.round(item.questionsCorrect/item.questionsTotal*100))}
+            <span class={score >= 90 ? "yay" : "ohno"}>{score}%</span>
+            <span class={score >= 90 ? "yay" : "ohno"}>{item.questionsCorrect}/{item.questionsTotal}</span>
+        </div>
+    {:else if item.__typename == "MatchActivity"}
+        <div class="box grid qzfr-match-box">
+            <span class="fg0">Match</span>
+            <span>{(item.durationMs/1000).toFixed(1)}s</span>
+            <span class={item.incorrectPairIds.length > 0 ? "ohno" : "yay"}>{item.incorrectPairIds.length} incorrect</span>
+        </div>
+    {/if}
+{:else}
+    <div class="box center text fg0">
+        No activities to show
+    </div>
+{/each}
 
