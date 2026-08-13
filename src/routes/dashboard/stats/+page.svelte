@@ -53,19 +53,26 @@
 </script>
 <style>
 :global {
-    .qzfr-pt-box {
-        display: grid;
-        gap-column: 0.6rem;
-        gap-row: 0.2rem;
-        grid-template-rows: auto;
-        grid-template-columns: 1fr 1fr 1fr;
-    }
+    .qzfr-pt-box,
     .qzfr-match-box {
         display: grid;
-        gap-column: 0.6rem;
-        gap-row: 0.2rem;
+        gap: 0.4rem 0.6rem;
         grid-template-rows: auto;
         grid-template-columns: 1fr 1fr 1fr;
+        grid-template-areas: "type score count";
+        padding: 0.8rem;
+    }
+    .qzfr-pt-box .qzfrbox-type,
+    .qzfr-match-box .qzfrbox-type {
+        grid-area: type;
+    }
+    .qzfr-pt-box .qzfrbox-score,
+    .qzfr-match-box .qzfrbox-score {
+        grid-area: score;
+    }
+    .qzfr-pt-box .qzfrbox-count,
+    .qzfr-match-box .qzfrbox-count {
+        grid-area: count;
     }
     .qzfr-eh-lc-div {
         width: 100%;
@@ -79,6 +86,14 @@
     @media only screen and (max-width: 500px) {
         .qzfr-eh-lc-div {
             aspect-ratio: 31/7;
+        }
+        .qzfr-pt-box,
+        .qzfr-match-box {
+            grid-template-rows: auto auto;
+            grid-template-columns: 1fr 1fr;
+            grid-template-areas:
+                "type type"
+                "score count";
         }
     }
     .qzfr-eh-lc-chart ::selection {
@@ -94,7 +109,7 @@
 
 <Noscript />
 
-<p><span style="font-size: 1.2rem;">{totalTermsReviewed}</span> terms reviewed/questions answered
+<p><span style="font-size: 1.2rem;">{totalTermsReviewed}</span> terms/questions reviewed
 <span class="line fg0">in the last year</span></p>
 <div class="qzfr-eh-lc-div">
 <Chart
@@ -151,23 +166,23 @@
     <!-- {JSON.stringify(item)} -->
     {#if item?.studysets?.[0] != null && (index - 1 < 0 || activityHistory[index - 1].studysets[0].id != item.studysets[0].id)}
         {const studyset = $derived(item.studysets[0])}
-        <div class="flex" style="align-items: center; justify-content: space-between; row-gap: 0.2rem;">
-            <span>{studyset.title}</span>
+        <div class="flex" style="align-items: end; justify-content: space-between; row-gap: 0.2rem;">
+            <span style={studyset.title.length < 60 ? "font-size: 1.1rem;" : ""}>{studyset.title}</span>
             <a href={studyset.id.includes("-") ? `/studysets/${studyset.id}` : `/studyset/local?id=${studyset.id}`}>View Studyset</a>
         </div>
     {/if}
     {#if item.__typename == "PracticeTest"}
         <div class="box grid qzfr-pt-box">
-            <span class="fg0">Practice Test</span>
+            <span class="qzfrbox-type fg0">Practice Test</span>
             {const score = $derived(Math.round(item.questionsCorrect/item.questionsTotal*100))}
-            <span class={score >= 90 ? "yay" : "ohno"}>{score}%</span>
-            <span class={score >= 90 ? "yay" : "ohno"}>{item.questionsCorrect}/{item.questionsTotal}</span>
+            <span class="qzfrbox-score {score >= 90 ? "yay" : "ohno"}">{score}%</span>
+            <span class="qzfrbox-count {score >= 90 ? "yay" : "ohno"}">{item.questionsCorrect}/{item.questionsTotal}</span>
         </div>
     {:else if item.__typename == "MatchActivity"}
         <div class="box grid qzfr-match-box">
-            <span class="fg0">Match</span>
-            <span>{(item.durationMs/1000).toFixed(1)}s</span>
-            <span class={item.incorrectPairIds.length > 0 ? "ohno" : "yay"}>{item.incorrectPairIds.length} incorrect</span>
+            <span class="qzfrbox-type fg0">Match</span>
+            <span class="qzfrbox-score">{(item.durationMs/1000).toFixed(1)}s</span>
+            <span class="qzfrbox-count {item.incorrectPairIds.length > 0 ? "ohno" : "yay"}">{item.incorrectPairIds.length} incorrect</span>
         </div>
     {/if}
 {:else}
