@@ -45,6 +45,14 @@
         domain = [p25, p50, p75];
     }
 </script>
+<style>
+:global {
+    .qzfr-eh-lc-chart ::selection {
+        color: var(--fg-1);
+        fill: var(--fg-1);
+    }
+}
+</style>
 
 <svelte:head>
   <title>Quizfreely</title>
@@ -68,6 +76,7 @@
 		'var(--yay)'
 	]}
 	padding={{ top: 20 }}
+    class="qzfr-eh-lc-chart"
 >
 	{#snippet children({ context })}
 		<Layer>
