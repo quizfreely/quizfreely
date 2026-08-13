@@ -161,7 +161,7 @@
 </Chart>
 </div>
 
-<h2 class="h4" style="margin-top: 2rem;">Recent Activities</h2>
+<h2 class="h4" style="margin-top: 2rem; opacity: 0.9;">Recent</h2>
 {#each activityHistory as item, index}
     <!-- {JSON.stringify(item)} -->
     {#if item?.studysets?.[0] != null && (index - 1 < 0 || activityHistory[index - 1].studysets[0].id != item.studysets[0].id)}
