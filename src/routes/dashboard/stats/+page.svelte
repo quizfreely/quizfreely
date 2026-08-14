@@ -15,18 +15,15 @@
     start365DaysAgo.setDate(now.getDate() - 365);
     start365DaysAgo.setHours(0, 0, 0, 0);
 
-    const FALLBACK_P25 = 10;
-    const FALLBACK_P50 = 25;
-    const FALLBACK_P75 = 50;
     let chartData = $state([]);
     let domain = $state([
-        FALLBACK_P25,
-        FALLBACK_P50,
-        FALLBACK_P75
+        10,
+        25,
+        50
     ]);
     let activityHistory = $state(data.activityHistory ?? []);
 
-    let totalTermsReviewed = $state("");
+    let totalTermsReviewed = $state("0");
     let totalTermsCount = 0;
     function calcChart() {
         if (data?.reviewEventStatsByDay?.length > 0) {
@@ -42,14 +39,17 @@
                 return d;
             });
             totalTermsReviewed = totalTermsCount.toLocaleString();
-            const sortedValues = data.reviewEventStatsByDay
-                .map(d => d.value)
+
+            const sortedValues = chartData
+                .map(d => d.terms)
                 .filter((v) => v > 0)
-                .sort((a,b) => a - b);
-            const p25 = quantile(sortedValues, 0.25) ?? FALLBACK_P25;
-            const p50 = quantile(sortedValues, 0.5) ?? FALLBACK_P50;
-            const p75 = quantile(sortedValues, 0.75) ?? FALLBACK_P75;
-            domain = [p25, p50, p75];
+                .sort((a, b) => a - b)
+            const refMax = quantile(sortedValues, 0.95) ?? 1;
+            domain = [
+                refMax * 0.25,
+                refMax * 0.5,
+                refMax * 0.75
+            ];
         }
     }
     if (data.authed) {
