@@ -806,6 +806,118 @@ export const idbApiLayer = {
         }
         return activities;
     },
+    activityHistory: async function ({ last, getCloudStudysets }) {
+        const limit = last > 0 ? Math.floor(last) : 0;
+        if (limit === 0)
+            return [];
+        /* fetch the most recent `limit` practice tests and match activities
+           separately (both tables have an index on their timestamps) */
+        const [practiceTests, matchActivities] = await Promise.all([
+            db.practiceTests.orderBy("timestamp").reverse().limit(limit).toArray(),
+            db.matchActivities.orderBy("endTimestamp").reverse().limit(limit).toArray()
+        ]);
+        /* resolve incorrect pairs for all match activities in a single bulk
+           query instead of one query per activity */
+        const incorrectPairsByMatchId = new Map();
+        if (matchActivities.length > 0) {
+            const matchActivityIds = matchActivities.map(a => a.id);
+            const incorrectReviewEvents = await db.reviewEvents
+                .where("matchActivityId")
+                .anyOf(matchActivityIds)
+                .and(re => re.correct === false)
+                .toArray();
+            for (const re of incorrectReviewEvents) {
+                if (re.matchActivityId == null)
+                    continue;
+                let pairs = incorrectPairsByMatchId.get(re.matchActivityId);
+                if (!pairs) {
+                    pairs = [];
+                    incorrectPairsByMatchId.set(re.matchActivityId, pairs);
+                }
+                pairs.push([re.termId, re.answeredTermId]);
+            }
+        }
+        /* merge practice tests and match activities and sort by recency
+           (timestamps are ISO strings in UTC, so lexical sort == chronological) */
+        const merged = [];
+        for (const pt of practiceTests) {
+            merged.push({
+                timestamp: pt.timestamp,
+                studysetIds: pt.studysetIds,
+                result: {
+                    id: pt.id,
+                    timestamp: pt.timestamp,
+                    questionsCorrect: pt.questionsCorrect,
+                    questionsTotal: pt.questionsTotal,
+                    studysets: []
+                }
+            });
+        }
+        for (const activity of matchActivities) {
+            merged.push({
+                timestamp: activity.endTimestamp,
+                studysetIds: activity.studysetIds,
+                result: {
+                    id: activity.id,
+                    endTimestamp: activity.endTimestamp,
+                    durationMs: activity.durationMs,
+                    incorrectPairIds: incorrectPairsByMatchId.get(activity.id) ?? [],
+                    studysets: []
+                }
+            });
+        }
+        merged.sort((a, b) => b.timestamp.localeCompare(a.timestamp));
+        const selected = merged.slice(0, limit);
+        /* collect the studyset ids referenced by the selected activities */
+        const localStudysetIds = new Set();
+        const cloudStudysetIds = [];
+        for (const entry of selected) {
+            for (const id of entry.studysetIds) {
+                if (typeof id === 'number') {
+                    localStudysetIds.add(id);
+                }
+                else if (typeof id === 'string' && !cloudStudysetIds.includes(id)) {
+                    cloudStudysetIds.push(id);
+                }
+            }
+        }
+        if (cloudStudysetIds.length > 0 && !getCloudStudysets) {
+            throw new Error("(idbApiLayer.activityHistory) cloud studyset UUIDs found but no getCloudStudysets callback provided. " +
+                "Pass a getCloudStudysets callback to resolve cloud studysets.");
+        }
+        /* fetch local studysets from indexeddb in bulk */
+        const localStudysets = await db.studysets.bulkGet(Array.from(localStudysetIds));
+        const localStudysetMap = new Map();
+        for (const s of localStudysets) {
+            if (s != null)
+                localStudysetMap.set(s.id, s);
+        }
+        /* fetch cloud studysets through the bulk callback and remap them
+           positionally back to the requested ids */
+        const cloudStudysetMap = new Map();
+        if (cloudStudysetIds.length > 0 && getCloudStudysets) {
+            const cloudStudysets = await getCloudStudysets(cloudStudysetIds);
+            for (let i = 0; i < cloudStudysetIds.length; i++) {
+                const s = cloudStudysets[i];
+                if (s != null)
+                    cloudStudysetMap.set(cloudStudysetIds[i], s);
+            }
+        }
+        /* attach the resolved studysets to each activity, preserving the order
+           of the activity's studysetIds */
+        for (const entry of selected) {
+            const studysets = [];
+            for (const id of entry.studysetIds) {
+                const studyset = typeof id === 'number'
+                    ? localStudysetMap.get(id)
+                    : cloudStudysetMap.get(id);
+                if (studyset != null)
+                    studysets.push(studyset);
+            }
+            entry.result.studysets = studysets;
+        }
+        return selected.map(entry => entry.result);
+    },
     recordMatchActivity: async function (input, getCloudStudysetIds) {
         return await db.transaction('rw', [db.matchActivities, db.reviewEvents, db.termProgress, db.terms, db.recentActivity], async () => {
             const rnISOString = (new Date()).toISOString();
