@@ -259,20 +259,20 @@ export const idbApiLayer = {
         /* resolve which term ids to look up: either the caller passes them
            directly (e.g. cloud studyset terms with UUID ids), or we look them
            up from the local studyset */
-        let termIdsToLookup;
-        if (termIds != null && termIds.length > 0) {
-            termIdsToLookup = termIds;
-        }
-        else if (studysetId != null) {
-            termIdsToLookup = await db.terms.where("studysetId").equals(studysetId).primaryKeys();
-        }
-        else {
-            termIdsToLookup = [];
-        }
-        if (termIdsToLookup.length == 0) {
-            return [];
-        }
-        const reviewEvents = await db.reviewEvents.where("termId").anyOf(termIdsToLookup).toArray();
+        /* resolve which term ids to look up: either the caller passes them
+           directly (e.g. cloud studyset terms with UUID ids), or we look them
+           up from the local studyset. If neither is provided, no filtering
+           happens and we aggregate across all review events. */
+        const termIdsToLookup = termIds != null && termIds.length > 0
+            ? termIds
+            : studysetId != null
+                ? await db.terms.where("studysetId").equals(studysetId).primaryKeys()
+                : null;
+        const reviewEvents = termIdsToLookup == null
+            ? await db.reviewEvents.toArray()
+            : termIdsToLookup.length == 0
+                ? []
+                : await db.reviewEvents.where("termId").anyOf(termIdsToLookup).toArray();
         /* local day buckets: JS date object math uses the user's local timezone,
            so the day cutoff differs from UTC like the cloud API's timezone handling */
         const now = new Date();
