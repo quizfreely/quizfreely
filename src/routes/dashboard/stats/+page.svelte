@@ -274,7 +274,7 @@
     <!-- {JSON.stringify(item)} -->
     {#if item?.studysets?.[0] != null && (index - 1 < 0 || activityHistory[index - 1].studysets[0].id != item.studysets[0].id)}
         {const studyset = $derived(item.studysets[0])}
-        <div class="flex" style="align-items: end; justify-content: space-between; row-gap: 0.2rem;">
+        <div class="flex" style="align-items: end; justify-content: space-between; row-gap: 0.2rem; {index == 0 ? "" : "margin-top: 1.6rem;"}">
             <span style={studyset.title.length < 60 ? "font-size: 1.1rem;" : ""}>{studyset.title}</span>
             <a href={studyset.id.includes("-") ? `/studysets/${studyset.id}` : `/studyset/local?id=${studyset.id}`}>View Studyset</a>
         </div>
