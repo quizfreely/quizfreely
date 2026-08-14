@@ -25,9 +25,10 @@
 
     let totalTermsReviewed = $state("0");
     let totalTermsCount = 0;
-    function calcChart() {
-        if (data?.reviewEventStatsByDay?.length > 0) {
-            chartData = data.reviewEventStatsByDay.map((obj) => {
+    function calcChart(reviewEventStatsByDay) {
+        if (reviewEventStatsByDay?.length > 0) {
+            totalTermsCount = 0;
+            chartData = reviewEventStatsByDay.map((obj) => {
                 const d = { ...obj };
                 d.date = new Date(d.timestamp);
                 d.date.setHours(0, 0, 0, 0);
@@ -53,7 +54,7 @@
         }
     }
     if (data.authed) {
-        calcChart();
+        calcChart(data.reviewEventStatsByDay);
     }
 
     let recentCurrentlyCollapsed = $state(true);
@@ -94,7 +95,8 @@
             }
         }
         if (!data.authed) {
-            
+            const reviewStats = await idbApiLayer.getReviewEventStatsByDay({ last: 366 });
+            calcChart(reviewStats);
         }
     });
     function recentLinkFunc(id) {
