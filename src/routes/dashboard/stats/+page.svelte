@@ -100,6 +100,23 @@
         }
         return `/studysets/${id}`;
     }
+
+    const days = [
+        "Sun", "Mon", "Tue", "Wed",
+        "Thu", "Fri", "Sat"
+    ];
+    const months = [
+        "Jan", "Feb", "Mar", "Apr",
+        "May", "Jun", "Jul", "Aug",
+        "Sep", "Oct", "Nov", "Dec"
+    ];
+    function fmtDate(d) {
+        const t = d?.getTime?.();
+        if (t == null || Number.isNaN(t)) {
+            return "";
+        }
+        return `${days[d.getDay()]}, ${d.getDate()} ${months[d.getMonth()]}`
+    }
 </script>
 <style>
 :global {
@@ -200,7 +217,7 @@
 
 		<Tooltip.Root>
 			{#snippet children({ data })}
-				<Tooltip.Header value={data.date} format="day" />
+				<Tooltip.Header value={data.date} format={fmtDate} />
 
 					<Tooltip.List>
 						<Tooltip.Item label="terms" value={data.terms ?? 0} format="integer" valueAlign="right" />
