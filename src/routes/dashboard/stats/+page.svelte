@@ -93,6 +93,9 @@
                 console.error("Error loading recent activity studysets from local IDB:", err);
             }
         }
+        if (!data.authed) {
+            
+        }
     });
     function recentLinkFunc(id) {
         if (typeof id === 'number') {
