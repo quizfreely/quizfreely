@@ -60,32 +60,32 @@
     let recentCurrentlyCollapsed = $state(true);
     const COLLAPSE_LENGTH_S = 3;
     let myRecentActivityStudysets = $state(data.myRecentActivityStudysets?.edges?.map((e) => e.node) ?? [])
-
+    async function cloudStudysetsByIds(cloudUuids) {
+        try {
+            const raw = await fetch("/api/graphql", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    query: `query ($ids: [ID!]!) {
+                        studysets(ids: $ids) {
+                            id title private termsCount updatedAt
+                            myFolder { id name }
+                        }
+                    }`,
+                    variables: { ids: cloudUuids }
+                })
+            });
+            const resp = await raw.json();
+            return cloudUuids.map((_, i) => resp?.data?.studysets?.[i] ?? null);
+        } catch {
+            return cloudUuids.map(() => null);
+        }
+    }
     onMount(async () => {
         if (!data.myRecentActivityStudysets || data.myRecentActivityStudysets.length === 0) {
             try {
                 const result = await idbApiLayer.getRecentActivityStudysets({
-                    getCloudStudysets: async (cloudUuids) => {
-                        try {
-                            const raw = await fetch("/api/graphql", {
-                                method: "POST",
-                                headers: { "Content-Type": "application/json" },
-                                body: JSON.stringify({
-                                    query: `query ($ids: [ID!]!) {
-                                        studysets(ids: $ids) {
-                                            id title private termsCount updatedAt
-                                            myFolder { id name }
-                                        }
-                                    }`,
-                                    variables: { ids: cloudUuids }
-                                })
-                            });
-                            const resp = await raw.json();
-                            return cloudUuids.map((_, i) => resp?.data?.studysets?.[i] ?? null);
-                        } catch {
-                            return cloudUuids.map(() => null);
-                        }
-                    }
+                    getCloudStudysets: cloudStudysetsByIds
                 });
                 if (result?.length > 0) {
                     myRecentActivityStudysets = result;
@@ -97,6 +97,23 @@
         if (!data.authed) {
             const reviewStats = await idbApiLayer.getReviewEventStatsByDay({ last: 366 });
             calcChart(reviewStats);
+            const localActivityHistory = await idbApiLayer.activityHistory({
+                last: 40,
+                getCloudStudysets: cloudStudysetsByIds
+            });
+            // console.log("localActivityHistory:", localActivityHistory);
+            if (localActivityHistory == null) {
+                console.error("idbApiLayer.activityHistory returned nullish")
+            } else {
+                localActivityHistory.forEach(item => {
+                    if (item.timestamp != null) {
+                        item.__typename = "PracticeTest";
+                    } else if (item.endTimestamp != null) {
+                        item.__typename = "MatchActivity";
+                    }
+                });
+                activityHistory = localActivityHistory;
+            }
         }
     });
     function recentLinkFunc(id) {
@@ -277,11 +294,15 @@
 <p class="h4" style="font-size: 1.4rem; opacity: 0.9; margin-top: 1rem;">Recent Activities</p>
 {#each activityHistory as item, index}
     <!-- {JSON.stringify(item)} -->
-    {#if item?.studysets?.[0] != null && (index - 1 < 0 || activityHistory[index - 1].studysets[0].id != item.studysets[0].id)}
+    {#if item?.studysets?.[0] == null}
+        <div class="flex" style="align-items: end; justify-content: start;">
+            <span class="fg0" style="font-size: 1.1rem;">Deleted Studyset</span>
+        </div>
+    {:else if index - 1 < 0 || activityHistory[index - 1].studysets[0]?.id != item.studysets[0].id}
         {const studyset = $derived(item.studysets[0])}
-        <div class="flex" style="align-items: end; justify-content: space-between; row-gap: 0.2rem; {index == 0 ? "" : "margin-top: 1.6rem;"}">
+        <div class="flex" style="align-items: end; justify-content: space-between; row-gap: 0.2rem;">
             <span style={studyset.title.length < 60 ? "font-size: 1.1rem;" : ""}>{studyset.title}</span>
-            <a href={studyset.id.includes("-") ? `/studysets/${studyset.id}` : `/studyset/local?id=${studyset.id}`}>View Studyset</a>
+            <a href={studyset.id?.includes?.("-") ? `/studysets/${studyset.id}` : `/studyset/local?id=${studyset.id}`}>View Studyset</a>
         </div>
     {/if}
     {#if item.__typename == "PracticeTest"}
