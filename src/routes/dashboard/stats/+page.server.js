@@ -22,6 +22,9 @@ export async function load({ cookies }) {
         correct
         incorrect
     }
+    myRecentActivityStudysets(first: 100) {
+        edges { node { id title private termsCount updatedAt } }
+    }
     activityHistory(last: 40) {
         __typename
         ... on PracticeTest {

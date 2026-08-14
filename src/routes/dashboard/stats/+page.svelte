@@ -1,8 +1,13 @@
 <script>
-	import { scaleThreshold } from 'd3-scale';
-    import { quantile } from 'd3-array';
-	import { Calendar, Chart, Layer, Rect, Tooltip } from 'layerchart';
+	import { scaleThreshold } from "d3-scale";
+    import { quantile } from "d3-array";
+    import { onMount } from "svelte"
+    import { idbApiLayer } from "$lib/idb-api-layer/index.js";
+	import { Calendar, Chart, Layer, Rect, Tooltip } from "layerchart";
+    import StudysetLinkBox from "$lib/components/StudysetLinkBox.svelte";
     import Noscript from "$lib/components/Noscript.svelte";
+    import AngleUpIcon from "$lib/icons/AngleUp.svelte";
+    import AngleDownIcon from "$lib/icons/AngleDown.svelte";
     let { data } = $props();
 
 	const now = new Date();
@@ -49,6 +54,51 @@
     }
     if (data.authed) {
         calcChart();
+    }
+
+    let recentCurrentlyCollapsed = $state(true);
+    const COLLAPSE_LENGTH_S = 3;
+    let myRecentActivityStudysets = $state(data.myRecentActivityStudysets?.edges?.map((e) => e.node) ?? [])
+
+    onMount(async () => {
+        if (!data.myRecentActivityStudysets || data.myRecentActivityStudysets.length === 0) {
+            try {
+                const result = await idbApiLayer.getRecentActivityStudysets({
+                    getCloudStudysets: async (cloudUuids) => {
+                        try {
+                            const raw = await fetch("/api/graphql", {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({
+                                    query: `query ($ids: [ID!]!) {
+                                        studysets(ids: $ids) {
+                                            id title private termsCount updatedAt
+                                            myFolder { id name }
+                                        }
+                                    }`,
+                                    variables: { ids: cloudUuids }
+                                })
+                            });
+                            const resp = await raw.json();
+                            return cloudUuids.map((_, i) => resp?.data?.studysets?.[i] ?? null);
+                        } catch {
+                            return cloudUuids.map(() => null);
+                        }
+                    }
+                });
+                if (result?.length > 0) {
+                    myRecentActivityStudysets = result;
+                }
+            } catch (err) {
+                console.error("Error loading recent activity studysets from local IDB:", err);
+            }
+        }
+    });
+    function recentLinkFunc(id) {
+        if (typeof id === 'number') {
+            return `/studyset/local?id=${id}`;
+        }
+        return `/studysets/${id}`;
     }
 </script>
 <style>
@@ -160,8 +210,49 @@
 	{/snippet}
 </Chart>
 </div>
-
-<h2 class="h4" style="margin-top: 2rem; opacity: 0.9;">Recent</h2>
+                <p class="h4" style="font-size: 1.4rem; opacity: 0.9; margin-top: 2rem;">Recent Studysets</p>
+                {#if myRecentActivityStudysets?.length > 0}
+                <div
+                    class="grid list"
+                    style="overflow-wrap: anywhere; {
+                    myRecentActivityStudysets?.length > COLLAPSE_LENGTH_S
+                        ? 'margin-bottom: 0px;'
+                        : ''}"
+                >
+                    {#each recentCurrentlyCollapsed ? myRecentActivityStudysets.slice(0, COLLAPSE_LENGTH_S) : myRecentActivityStudysets as studyset}
+                        <StudysetLinkBox
+                            {studyset}
+                            linkTemplateFunc={recentLinkFunc}
+                            showDropdown={false}
+                        ></StudysetLinkBox>
+                    {/each}
+                </div>
+                {:else}
+                    <div class="box center text fg0">
+                        (None)
+                    </div>
+                {/if}
+                {#if myRecentActivityStudysets?.length > COLLAPSE_LENGTH_S}
+                    <div
+                        class="flex center"
+                        style="width: 100%; margin-top: 0.6rem; flex-direction: column; align-items: center; gap: 0.8rem;"
+                    >
+                        <button
+                            class="faint"
+                            onclick={() => {
+                                recentCurrentlyCollapsed =
+                                    !recentCurrentlyCollapsed;
+                            }}
+                        >
+                            {#if recentCurrentlyCollapsed}
+                                <AngleDownIcon></AngleDownIcon> Show All
+                            {:else}
+                                <AngleUpIcon></AngleUpIcon> Collapse
+                            {/if}
+                        </button>
+                    </div>
+                {/if}
+<p class="h4" style="font-size: 1.4rem; opacity: 0.9; margin-top: 1rem;">Recent Activities</p>
 {#each activityHistory as item, index}
     <!-- {JSON.stringify(item)} -->
     {#if item?.studysets?.[0] != null && (index - 1 < 0 || activityHistory[index - 1].studysets[0].id != item.studysets[0].id)}

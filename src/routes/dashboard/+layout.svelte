@@ -45,7 +45,7 @@
             <a class="top-menu-link {
                 page?.data?.dashboardPage == "stats" ?
                     "current" : ""
-            }" href="/dashboard/stats">Progress &amp; Stats</a>
+            }" href="/dashboard/stats">History &amp; Stats</a>
             <!-- <a class="top-menu-link { -->
             <!--     page?.data?.dashboardPage == "activities" ? -->
             <!--         "current" : "" -->
