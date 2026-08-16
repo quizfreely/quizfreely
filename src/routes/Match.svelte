@@ -700,7 +700,7 @@
     {#if showSameSideWarning}
         <!-- svelte-ignore a11y_click_events_have_key_events -->
         <!-- svelte-ignore a11y_no_static_element_interactions -->
-        <div class="grid qzfr-match-overlap-msg" style="justify-items: center; align-items: center;" transition:fade={{duration: 100}} onclick={dismissSameSideWarn}>
+        <div class="grid qzfr-match-overlap-msg trans-dots-before" style="justify-items: center; align-items: center;" transition:fade={{duration: 100}} onclick={dismissSameSideWarn}>
             <div class="content">
                 <div class="box warn" style="padding: 1.4rem;">
                     <span style="font-size: 1.4rem;">
@@ -716,7 +716,7 @@
     {:else if showIncorrectAlert}
         <!-- svelte-ignore a11y_click_events_have_key_events -->
         <!-- svelte-ignore a11y_no_static_element_interactions -->
-        <div class="grid qzfr-match-overlap-msg" style="justify-items: center; align-items: center;" transition:fade={{duration: 100}} onclick={dismissIncorrectAlert}>
+        <div class="grid qzfr-match-overlap-msg trans-dots-before" style="justify-items: center; align-items: center;" transition:fade={{duration: 100}} onclick={dismissIncorrectAlert}>
             <div class="content">
                 <div class="box center ohno" style="padding: 1.4rem;">
                     <span style="font-size: 1.4rem;">
@@ -806,8 +806,6 @@
         left: 0px;
         width: 100%;
         height: 100%;
-        background-color: var(--bg-0);
-        opacity: 0.8;
     }
     .qzfr-match-overlap-msg .content {
         z-index: 102;
