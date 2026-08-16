@@ -611,7 +611,8 @@ FRQs: ${numFRQsToAssign}`,
         </div>
         {#if takingActualPracticeTest}
             <div
-                style="position: sticky; top: 0px; padding: 1rem; margin-top: 0px; background: var(--bg-1);"
+                style="position: sticky; top: 0px; padding: 1rem; margin-top: 0px;"
+                class="trans-dots"
                 transition:slide={{ duration: 400 }}
             >
                 <p class="center">
@@ -628,7 +629,8 @@ FRQs: ${numFRQsToAssign}`,
         {/if}
         {#if showScore}
             <div
-                style="position: sticky; top: 0px; padding: 1rem; margin-top: 0px; background: var(--bg-1);"
+                style="position: sticky; top: 0px; padding: 1rem; margin-top: 0px;"
+                class="trans-dots"
                 transition:slide={{ duration: 400 }}
             >
                 <div class="flex" style="justify-content: space-between;">
