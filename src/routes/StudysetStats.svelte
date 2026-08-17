@@ -12,6 +12,7 @@
     import ForwardLongArrowIcon from "$lib/icons/ForwardRightArrowLong.svelte"
     import AngleUpIcon from "$lib/icons/AngleUp.svelte";
     import AngleDownIcon from "$lib/icons/AngleDown.svelte";
+    import StatsIcon from "$lib/icons/ChartGraphLine.svelte";
     let { data } = $props();
 
     const REVIEW_EVENT_STATS_DAYS = 30;
@@ -479,14 +480,14 @@
                             </div>
                         </div>
                         <div class="flex" style="justify-content: center;">
-                            <!-- <a href="{ -->
-                            <!--     data.local ? -->
-                            <!--         `/studyset/local/stats/term?id=${term.id}&studysetId=${data?.localId}` : -->
-                            <!--         `/studysets/${data.studysetId}/stats/terms/${term.id}` -->
-                            <!-- }" style="display: flex; flex-wrap: nowrap; align-items: center; gap: 0.4rem;"> -->
-                            <!--     <StatsIcon></StatsIcon> -->
-                            <!--     <span style="margin-top: 0px;">View Details</span> -->
-                            <!-- </a> -->
+                            <a href="{
+                                data.local ?
+                                    `/studyset/local/stats/term?id=${term.id}&studysetId=${data?.localId}` :
+                                    `/studysets/${data.studysetId}/stats/terms/${term.id}`
+                            }" style="display: flex; flex-wrap: nowrap; align-items: center; gap: 0.4rem;">
+                                <StatsIcon></StatsIcon>
+                                <span style="margin-top: 0px;">View Details</span>
+                            </a>
                         </div>
                         {/if}
                     </div>

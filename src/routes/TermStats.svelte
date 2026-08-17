@@ -287,30 +287,7 @@
                     </p>
                 </div>
                 <div>
-                    <p class="fg0" style="margin-top: 0px; margin-bottom: 0px;">Answering-With-Term Accuracy:</p>
-                    {#if term.progress.termCorrectCount +
-                        term.progress.termIncorrectCount > 0
-                    }
-                        <p class="shy-h4 b {
-                            term.progress.termCorrectCount / (
-                                term.progress.termCorrectCount +
-                                term.progress.termIncorrectCount
-                            ) > 0.9 ?
-                                "yay" : "ohno"
-                        }" style="margin-top: 0px;">
-                            {Math.floor(
-                                term.progress.termCorrectCount / (
-                                    term.progress.termCorrectCount +
-                                    term.progress.termIncorrectCount
-                                ) * 100
-                            )}%
-                        </p>
-                    {:else}
-                        <p class="fg0 shy-h4" style="margin-top: 0px;">N/A</p>
-                    {/if}
-                </div>
-                <div>
-                    <p class="fg0" style="margin-top: 0px; margin-bottom: 0px;">Answering-With-Definition Accuracy:</p>
+                    <p class="fg0" style="margin-top: 0px; margin-bottom: 0px;">Term-to-Def Accuracy:</p>
                     {#if term.progress.defCorrectCount +
                         term.progress.defIncorrectCount > 0
                     }
@@ -325,6 +302,29 @@
                                 term.progress.defCorrectCount / (
                                     term.progress.defCorrectCount +
                                     term.progress.defIncorrectCount
+                                ) * 100
+                            )}%
+                        </p>
+                    {:else}
+                        <p class="fg0 shy-h4" style="margin-top: 0px;">N/A</p>
+                    {/if}
+                </div>
+                <div>
+                    <p class="fg0" style="margin-top: 0px; margin-bottom: 0px;">Def-to-Term Accuracy:</p>
+                    {#if term.progress.termCorrectCount +
+                        term.progress.termIncorrectCount > 0
+                    }
+                        <p class="shy-h4 b {
+                            term.progress.termCorrectCount / (
+                                term.progress.termCorrectCount +
+                                term.progress.termIncorrectCount
+                            ) > 0.9 ?
+                                "yay" : "ohno"
+                        }" style="margin-top: 0px;">
+                            {Math.floor(
+                                term.progress.termCorrectCount / (
+                                    term.progress.termCorrectCount +
+                                    term.progress.termIncorrectCount
                                 ) * 100
                             )}%
                         </p>

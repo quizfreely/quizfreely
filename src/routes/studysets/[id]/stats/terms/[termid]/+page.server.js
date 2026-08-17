@@ -34,12 +34,10 @@ export async function load({ cookies, params}) {
             defCorrectCount
             defIncorrectCount
         }
-        progressHistory {
+        reviewEventStatsByDay(last: 30) {
             timestamp
-            termCorrectCount
-            termIncorrectCount
-            defCorrectCount
-            defIncorrectCount
+            correct
+            incorrect
         }
     }
 }`,
