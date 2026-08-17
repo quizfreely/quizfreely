@@ -185,10 +185,6 @@
                 "score count";
         }
     }
-    .qzfr-eh-lc-chart ::selection {
-        color: var(--fg-1);
-        fill: var(--fg-1);
-    }
 }
 </style>
 
@@ -214,7 +210,6 @@
 		'var(--yay)'
 	]}
 	padding={{ top: 20 }}
-    class="qzfr-eh-lc-chart"
 >
 	{#snippet children({ context })}
 		<Layer>
