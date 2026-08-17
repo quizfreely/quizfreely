@@ -321,7 +321,7 @@
     {/if}
 {:else}
     <div class="box center text fg0">
-        No activities to show
+        (None)
     </div>
 {/each}
 
