@@ -421,7 +421,7 @@
                                         term.progress.termIncorrectCount,
                                         term.progress.defCorrectCount,
                                         term.progress.defIncorrectCount
-                                    ) > 90 ?
+                                    ) >= 90 ?
                                         "yay" : "ohno"
                                 }" style="margin-top: 0px;">
                                     {averageAccuracy(
@@ -441,7 +441,7 @@
                                     term.progress.defCorrectCount / (
                                         term.progress.defCorrectCount +
                                         term.progress.defIncorrectCount
-                                    ) > 0.9 ?
+                                    ) >= 0.9 ?
                                         "yay" : "ohno"
                                 }" style="margin-top: 0px;">
                                     {Math.floor(
@@ -464,7 +464,7 @@
                                     term.progress.termCorrectCount / (
                                         term.progress.termCorrectCount +
                                         term.progress.termIncorrectCount
-                                    ) > 0.9 ?
+                                    ) >= 0.9 ?
                                         "yay" : "ohno"
                                 }" style="margin-top: 0px;">
                                     {Math.floor(
