@@ -497,14 +497,14 @@
                         }
                     }}>
                         {#if h.showDetails}
-                        <EyeSlashIcon></EyeSlashIcon> Hide Details
+                        <EyeSlashIcon></EyeSlashIcon> Hide Mistakes
                         {:else}
-                        <EyeIcon></EyeIcon> Show Details
+                        <EyeIcon></EyeIcon> View Mistakes
                         {/if}
                     </button>
                 </div>
                 {#if h.showDetails}
-                <div>
+                <div transition:slide={{duration:400}}>
                     {#if h.showDetailsLoading}
                         <div class="flex" style="align-items: center; justify-content: center;">
                             <div class="spinner size-1.2rem"></div>
