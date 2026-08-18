@@ -137,12 +137,14 @@
             }
 
             if (practiceTests != null) {
-                ptChartData = practiceTests.filter(
-                    pt => pt.questionsTotal > 0
-                ).map(pt => ({
-                    date: new Date(pt.timestamp),
-                    score: pt.questionsCorrect / pt.questionsTotal
-                })).reverse(); /* reverse gives us correct order for layerchart draw animation */
+                ptChartData = practiceTests
+                    .filter(p => p.questionsTotal > 0)
+                    .reverse() /* reverse gives us correct order for layerchart draw animation */
+                    .map( (pt, i) => ({
+                        date: new Date(pt.timestamp),
+                        score: pt.questionsCorrect / pt.questionsTotal,
+                        x: i
+                    })); 
             }
 
             reChartData = reviewEventStats.map((d) => ({
@@ -508,13 +510,14 @@
             <div class="practice-tests-chart-area">
         <div class="flex center">Practice Test Scores</div>
 <div style="min-height: 300px;"> <!-- wrapper div to keep height while loading, to eliminate layout shift -->
-<LineChart data={ptChartData} x="date" y="score" yDomain={[0, 1]} padding={defaultChartPadding({ right: 10 })} height={300} props={{
+<LineChart data={ptChartData} x="x" y="score" yDomain={[0, 1]} padding={defaultChartPadding({ right: 10 })} height={300} props={{
     yAxis: {
-        format: (v) => `${Math.round(v*100)}%`
+        format: (v) => v == 0 ? "" : `${Math.round(v*100)}%`
     },
     xAxis: {
         tickSpacing: 100,
-        format: fmtDateShort
+        ticks: (s) => s.ticks?.().filter(Number.isInteger),
+        format: (v) => fmtDateShort(ptChartData[v]?.date)
     }
 }}>
     {#snippet marks({ context })}
