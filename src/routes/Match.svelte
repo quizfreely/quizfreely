@@ -504,7 +504,7 @@
                     </button>
                 </div>
                 {#if h.showDetails}
-                <div transition:slide={{duration:400}}>
+                <div transition:slide={{duration: h.showDetailsLoading ? 0 : 400}}>
                     {#if h.showDetailsLoading}
                         <div class="flex" style="align-items: center; justify-content: center;">
                             <div class="spinner size-1.2rem"></div>
@@ -512,7 +512,7 @@
                         </div>
                     {:else}
                         <p>Incorrect Pairs:</p>
-                        <div class="grid" style="grid-template-columns: 1fr 1fr; row-gap: 2rem; column-gap: 2rem;">
+                        <div class="grid" style="grid-template-columns: 1fr 1fr; row-gap: 2rem; column-gap: 2rem;" transition:slide={{duration:400}}>
                             {#each h.incorrectPairIds as pair}
                                 <div class="no-margin-for-p-here">
                                     <p class="fg0" style="font-size: 0.8rem;">Term</p>
