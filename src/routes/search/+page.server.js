@@ -1,8 +1,7 @@
-import { env } from '$env/dynamic/public';
 import { error, redirect } from '@sveltejs/kit';
 import fetchAuthData from '$lib/fetchAuthData.server';
 
-export async function load({ cookies, url }) {
+export async function load({ url, fetch }) {
   let searchQuery = (url.searchParams.get("q") ?? "")
   if (searchQuery.replace(/\s+/g, '') == "") {
     searchQuery = "";
@@ -13,10 +12,9 @@ export async function load({ cookies, url }) {
       const PER_PAGE = 24;
       const after = url.searchParams.get("after");
       const before = url.searchParams.get("before");
-      let rawApiRes = await fetch(env.API_URL + "/graphql", {
+      let rawApiRes = await fetch("/api/graphql", {
         method: "POST",
         headers: {
-          "Authorization": "Bearer " + cookies.get("auth"),
           "Content-Type": "application/json"
         },
         body: JSON.stringify({

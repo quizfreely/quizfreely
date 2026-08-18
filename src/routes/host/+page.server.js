@@ -1,15 +1,7 @@
-import { env } from "$env/dynamic/public";
-
-export async function load({ url, cookies }) {
-    let headers = {
+export async function load({ url, fetch }) {
+    const headers = {
         "Content-Type": "application/json"
       };
-      if (cookies.get("auth")) {
-        headers = {
-          "Authorization": "Bearer " + cookies.get("auth"),
-          "Content-Type": "application/json"
-        };
-      }
     const studysetId = url.searchParams.get("studysetId");
     let localId = parseInt(url.searchParams.get("localId"));
     if (isNaN(localId)) {
@@ -18,7 +10,7 @@ export async function load({ url, cookies }) {
     let respData = {};
     if (studysetId) {
         try {
-            const raw = await fetch(env.API_URL+"/graphql", {
+            const raw = await fetch("/api/graphql", {
                 method: "POST",
                 headers: headers,
                 body: JSON.stringify({
@@ -47,7 +39,7 @@ export async function load({ url, cookies }) {
         }
     } else {
         try {
-            const raw = await fetch(env.API_URL+"/graphql", {
+            const raw = await fetch("/api/graphql", {
                 method: "POST",
                 headers: headers,
                 body: JSON.stringify({

@@ -1,12 +1,9 @@
-import { env } from "$env/dynamic/public";
-
-export async function load({ cookies, params}) {
+export async function load({ cookies, params, fetch }) {
     try {
-        const respRaw = await fetch(env.API_URL + "/graphql", {
+        const respRaw = await fetch("/api/graphql", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                "Authorization": `Bearer ${cookies.get("auth")}`
             },
             body: JSON.stringify({
                 query: `query loadPracticeTest($studysetId: ID!) {

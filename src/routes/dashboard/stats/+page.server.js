@@ -1,13 +1,10 @@
-import { env } from "$env/dynamic/public";
-
-export async function load({ cookies }) {
+export async function load({ cookies, fetch }) {
     let data;
     try {
-        const respRaw = await fetch(env.API_URL + "/graphql", {
+        const respRaw = await fetch("/api/graphql", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                "Authorization": `Bearer ${cookies.get("auth")}`
             },
             body: JSON.stringify({
                 query: `query dashboardStats {

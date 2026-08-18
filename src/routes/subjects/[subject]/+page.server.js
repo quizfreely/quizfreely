@@ -1,23 +1,15 @@
-import { env } from "$env/dynamic/public";
 import { error } from '@sveltejs/kit';
 
-export async function load({ params, cookies, url }) {
-  let headers = {
-    "Content-Type": "application/json"
-  };
-  if (cookies.get("auth")) {
-    headers = {
-      "Authorization": "Bearer " + cookies.get("auth"),
-      "Content-Type": "application/json"
-    };
-  }
+export async function load({ params, url, fetch }) {
   try {
     const PER_PAGE = 24;
     const after = url.searchParams.get("after");
     const before = url.searchParams.get("before");
-    let rawApiRes = await fetch(env.API_URL + "/graphql", {
+    let rawApiRes = await fetch("/api/graphql", {
       method: "POST",
-      headers: headers,
+      headers: {
+        "Content-Type": "application/json"
+      },
       body: JSON.stringify({
         query: `query subjectPage($id: String!, $first: Int, $after: String, $last: Int, $before: String) {
               authed

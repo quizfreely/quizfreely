@@ -1,11 +1,8 @@
-import { env } from '$env/dynamic/public';
-
-export async function load({ cookies }) {
+export async function load({ fetch }) {
     try {
-        let rawApiRes = await fetch(env.API_URL + "/graphql", {
+        let rawApiRes = await fetch("/api/graphql", {
           method: "POST",
           headers: {
-            "Authorization": "Bearer " + cookies.get("auth"),
             "Content-Type": "application/json"
           },
           body: JSON.stringify({
