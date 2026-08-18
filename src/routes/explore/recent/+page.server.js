@@ -1,6 +1,4 @@
-import { env } from '$env/dynamic/public';
-
-export async function load({ cookies, url }) {
+export async function load({ url, fetch }) {
   const PER_PAGE = 24;
   const recentlyUpdated = url.searchParams.has("updated");
   try {
@@ -12,10 +10,9 @@ export async function load({ cookies, url }) {
     const weekStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay()).toISOString();
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
 
-    let rawApiRes = await fetch(env.API_URL + "/graphql", {
+    let rawApiRes = await fetch("/api/graphql", {
       method: "POST",
       headers: {
-        "Authorization": "Bearer " + cookies.get("auth"),
         "Content-Type": "application/json"
       },
       body: JSON.stringify({

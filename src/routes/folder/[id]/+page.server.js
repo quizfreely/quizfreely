@@ -1,17 +1,15 @@
-import { env } from '$env/dynamic/public';
 import { error } from '@sveltejs/kit';
 
-export async function load({ cookies, params, url }) {
+export async function load({ params, url, fetch }) {
     const PER_PAGE = 24;
     const folderId = params.id;
     const after = url.searchParams.get("after");
     const before = url.searchParams.get("before");
 
     try {
-        let rawApiRes = await fetch(env.API_URL + "/graphql", {
+        let rawApiRes = await fetch("/api/graphql", {
             method: "POST",
             headers: {
-                "Authorization": "Bearer " + cookies.get("auth"),
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({

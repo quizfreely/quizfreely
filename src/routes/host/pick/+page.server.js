@@ -1,12 +1,8 @@
-import { env } from '$env/dynamic/public';
-
-export async function load({ cookies, locals }) {
-  if (cookies.get("auth")) {
+export async function load({ cookies, locals, fetch }) {
     try {
-    let rawApiRes = await fetch(env.API_URL + "/graphql", {
+    let rawApiRes = await fetch("/api/graphql", {
       method: "POST",
       headers: {
-        "Authorization": "Bearer " + cookies.get("auth"),
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
@@ -72,12 +68,4 @@ export async function load({ cookies, locals }) {
               )
       }
     }
-  } else {
-    return {
-      authed: false,
-              settingsDateTimeFormatHours: cookies.get(
-                "settingsdatetimeformathours"
-              )
-    }
-  }
 };

@@ -1,6 +1,4 @@
-import { env } from '$env/dynamic/public';
-
-export async function load({ cookies, locals }) {
+export async function load({ cookies, locals, fetch }) {
   /*
     cookies are not permanent, they eventually expire
     resetting the expiration date on every page doesn't make sense
@@ -40,10 +38,9 @@ export async function load({ cookies, locals }) {
   }
   if (cookies.get("auth")) {
     try {
-      let rawApiRes = await fetch(env.API_URL + "/graphql", {
+      let rawApiRes = await fetch("/api/graphql", {
         method: "POST",
         headers: {
-          "Authorization": "Bearer " + cookies.get("auth"),
           "Content-Type": "application/json"
         },
         body: JSON.stringify({

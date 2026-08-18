@@ -1,7 +1,6 @@
-import { env } from "$env/dynamic/public";
 import { error } from '@sveltejs/kit';
 
-export async function load({ params, cookies }) {
+export async function load({ params, fetch }) {
     const categoryEnum = {
         "languages": "LANG",
         "social-studies": "SOCIAL_STUDIES",
@@ -15,19 +14,12 @@ export async function load({ params, cookies }) {
         });
         return;
     }
-    let headers = {
-        "Content-Type": "application/json"
-      };
-      if (cookies.get("auth")) {
-        headers = {
-          "Authorization": "Bearer " + cookies.get("auth"),
-          "Content-Type": "application/json"
-        };
-      }
       try {
-        let rawApiRes = await fetch(env.API_URL + "/graphql", {
+        let rawApiRes = await fetch("/api/graphql", {
           method: "POST",
-          headers: headers,
+          headers: {
+            "Content-Type": "application/json"
+          },
           body: JSON.stringify({
             query: `query subjectCategory($category: SubjectCategory) {
               authed
