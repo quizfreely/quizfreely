@@ -2,8 +2,9 @@
     import { onMount } from "svelte";
     import { idbApiLayer, db } from "$lib/idb-api-layer";
     import averageAccuracy from "$lib/average-accuracy.js";
-    import Chart from 'chart.js/auto';
-    import 'chartjs-adapter-luxon';
+	import { Axis, Bar, Chart, Highlight, Layer, Rule, Tooltip, defaultChartPadding } from 'layerchart';
+	import { scaleBand } from 'd3-scale';
+	import { backOut } from 'svelte/easing';
     import { fancyTimestamp } from "$lib/fancyTimestamp";
     import BackIcon from "$lib/icons/BackArrow.svelte"
     import ForwardLongArrowIcon from "$lib/icons/ForwardRightArrowLong.svelte"
@@ -17,11 +18,10 @@
         term = data?.term;
     }
 
-    let chartCanvas;
+    let reChartData = $state([]);
 
     let mounted = $state(false);
     onMount(() => {
-        let chart;
         (async () => {
             mounted = true;
             if (data?.settingsDateTimeFmtHours == "24") {
@@ -45,6 +45,12 @@
                 }
             }
 
+            if (data.local || !data.authed) {
+                term.reviewEventStatsByDay = await idbApiLayer.getReviewEventStatsByDay({
+                    termIds: [term.id]
+                });
+            }
+
             if (!data.authed && !data.local) {
                 /* not logged in, so user data is local,
                 but studyset is a cloud studyset,
@@ -52,143 +58,41 @@
 
                 `term` has already been populated during SSR (above, before onMount) */
                 term.progress = (await db.termProgress.where("termId").equals(term.id).toArray())?.[0];
-                term.progressHistory = await db.termProgressHistory.where("termId").equals(term.id).toArray();
             }
-
-            Chart.defaults.font.size = 16;
-            const rootStyles = getComputedStyle(document.documentElement);
-            const mainColor = rootStyles.getPropertyValue("--main").trim();
-            const fg1Color = rootStyles.getPropertyValue("--fg-1").trim();
-            const bg2Color = rootStyles.getPropertyValue("--bg-2").trim();
-            const borderColor = rootStyles.getPropertyValue("--border").trim();
-            const extraColor = rootStyles.getPropertyValue("--extra").trim();
-            Chart.defaults.backgroundColor = mainColor;
-            Chart.defaults.borderColor = borderColor;
-            Chart.defaults.color = fg1Color;
-            chart = new Chart(
-                chartCanvas,
-                {
-                    type: "line",
-                    data: {
-                        datasets: [{
-                            label: "Term Accuracy",
-                            fill: false,
-                            tension: 0,
-                            borderColor: mainColor,
-                            backgroundColor: mainColor,
-                            pointStyle: "circle",
-                            pointRadius: 6,
-                            pointHoverRadius: 8,
-                            data: (() => {
-                                let data = [];
-                                term?.progressHistory?.forEach(ph => {
-                                    if (ph.termCorrectCount + ph.termIncorrectCount > 0) {
-                                        data.push({
-                                            x: Date.parse(ph.timestamp),
-                                            y: ph.termCorrectCount / (
-                                                ph.termCorrectCount +
-                                                ph.termIncorrectCount
-                                            )
-                                        })
-                                    }
-                                });
-                                return data;
-                            })()
-                        }, {
-                            label: "Definition Accuracy",
-                            fill: false,
-                            tension: 0,
-                            borderColor: extraColor,
-                            backgroundColor: extraColor,
-                            pointStyle: "circle",
-                            pointRadius: 6,
-                            pointHoverRadius: 8,
-                            data: (() => {
-                                let data = [];
-                                term?.progressHistory?.forEach(ph => {
-                                    if (ph.defCorrectCount + ph.defIncorrectCount > 0) {
-                                        data.push({
-                                            x: Date.parse(ph.timestamp),
-                                            y: ph.defCorrectCount / (
-                                                ph.defCorrectCount +
-                                                ph.defIncorrectCount
-                                            )
-                                        })
-                                    }
-                                });
-                                return data;
-                            })()
-                        }]
-                    },
-                    options: {
-                        scales: {
-                            x: {
-                                type: "timeseries",
-                                suggestedMax: Date.now(),
-                                time: {
-                                    unit: "day",
-                                    tooltipFormat: data?.settingsDateTimeFmtHours != null ?
-                                        (data?.settingsDateTimeFmtHours == "24" ?
-                                            "dd MMM yyyy, HH:mm" :
-                                            "dd MMM yyyy, h:mm a"
-                                        ) :
-                                        undefined
-                                }
-                            },
-                            y: {
-                                suggestedMax: 1,
-                                suggestedMin: 0,
-                                ticks: {
-                                    stepSize: 0.2,
-                                    format: {
-                                        style: "percent",
-                                        minimumFractionDigits: 0,
-                                        maximumFractionDigits: 0
-                                    }
-                                }
-                            }
-                        },
-                        interaction: {
-                            intersect: false,
-                            mode: "nearest",
-                            axis: "xy"
-                        },
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            tooltip: {
-                                backgroundColor: bg2Color,
-                                titleColor: fg1Color,
-                                bodyColor: fg1Color,
-                                footerColor: fg1Color,
-                                titleFont: { weight: "normal" },
-                                displayColors: false,
-                                callbacks: {
-                                    label: ctx => Math.floor(ctx.raw.y * 100) + "%"
-                                }
-                            },
-                            legend: {
-                                labels: {
-                                    boxWidth: 16,
-                                    boxHeight: 16,
-                                    useBorderRadius: true,
-                                    borderRadius: 8
-                                }
-                            }
-                        }
-                    }
-                }
-            );
         })();
         return () => {
             objectUrls.forEach(objectUrl => {
                 URL.revokeObjectURL(objectUrl);
             });
-            if (chart) {
-                chart.destroy();
-            }
         }
     })
+
+    function fmtDateShort(d) {
+        const t = d?.getTime?.();
+        if (t == null || Number.isNaN(t)) {
+            // NOTE: return empty string if invalid
+            // because this func is called with null for empty graphs
+            return "";
+        }
+        return `${d.getMonth()+1}/${d.getDate()}`
+    }
+    
+    const days = [
+        "Sun", "Mon", "Tue", "Wed",
+        "Thu", "Fri", "Sat"
+    ];
+    const months = [
+        "Jan", "Feb", "Mar", "Apr",
+        "May", "Jun", "Jul", "Aug",
+        "Sep", "Oct", "Nov", "Dec"
+    ];
+    function fmtDate(d) {
+        const t = d?.getTime?.();
+        if (t == null || Number.isNaN(t)) {
+            return "";
+        }
+        return `${days[d.getDay()]}, ${d.getDate()} ${months[d.getMonth()]}`
+    }
 </script>
 <style>
     .chart-container {
@@ -198,11 +102,6 @@
         height: 16rem;
     }
     
-    .chart-container canvas {
-        width: 100% !important;
-        height: 100% !important;
-    }
-
     .twogridthings {
         display: grid;
         gap: 1rem;
@@ -241,9 +140,68 @@
                 Back
             </a>
         </div>
-        <div class="chart-container">
-            <canvas bind:this={chartCanvas}></canvas>
-        </div>
+<div style="min-height: 300px;"> <!-- wrapper div to keep height while loading, to eliminate layout shift -->
+<Chart
+	data={reChartData}
+	x="date"
+	xScale={scaleBand().padding(0.4)}
+	y={['correct', (d) => -d.incorrect]}
+	yNice
+	padding={defaultChartPadding({ right: 10 })}
+    tooltipContext={{ mode: 'band' }}
+	height={300}
+>
+	{#snippet children({ context })}
+		<Layer>
+			<Axis placement="left" grid rule format={(d) => Math.abs(d)} />
+			<Axis placement="bottom" rule format={fmtDateShort} />
+				{#each reChartData as d, i}
+                    {const barWidth = $derived(Math.min(context.xScale.bandwidth?.() ?? 24, 24))}
+                    <Bar
+                    	data={d}
+                        width={barWidth}
+                    	y="correct"
+                    	rounded="top"
+                        radius={8}
+                    	style="fill: var(--yay);"
+                    	motion={{ type: 'tween', duration: 400, easing: backOut, delay: i * 20 }}
+                    	initialY={context.yScale(0)}
+                    />
+                    <Bar
+                    	data={d}
+                        width={barWidth}
+                    	y={(d) => -d.incorrect}
+                    	rounded="bottom"
+                        radius={8}
+                    	style="fill: var(--ohno);"
+                    	motion={{ type: 'tween', duration: 400, easing: backOut, delay: i * 20 }}
+                    	initialY={context.yScale(0)}
+                    />
+				{/each}
+			<Rule y={0} />
+			<Highlight area />
+		</Layer>
+
+		<Tooltip.Root>
+			{#snippet children({ data })}
+				<Tooltip.Header value={data.date} format={fmtDate} />
+				<Tooltip.List>
+					<Tooltip.Item
+						label="correct"
+						value={data.correct}
+						color="var(--yay)"
+					/>
+					<Tooltip.Item
+						label="incorrect"
+						value={data.incorrect}
+						color="var(--ohno)"
+					/>
+				</Tooltip.List>
+			{/snippet}
+		</Tooltip.Root>
+	{/snippet}
+</Chart>
+</div>
         <div class="grid twogridthings" style="margin-top: 2rem;">
             <div>
                 <p class="fg0">Term</p>
@@ -275,7 +233,7 @@
                             term.progress.termIncorrectCount,
                             term.progress.defCorrectCount,
                             term.progress.defIncorrectCount
-                        ) > 90 ?
+                        ) >= 90 ?
                             "yay" : "ohno"
                     }" style="margin-top: 0px;">
                         {averageAccuracy(
@@ -295,7 +253,7 @@
                             term.progress.defCorrectCount / (
                                 term.progress.defCorrectCount +
                                 term.progress.defIncorrectCount
-                            ) > 0.9 ?
+                            ) >= 0.9 ?
                                 "yay" : "ohno"
                         }" style="margin-top: 0px;">
                             {Math.floor(
@@ -318,7 +276,7 @@
                             term.progress.termCorrectCount / (
                                 term.progress.termCorrectCount +
                                 term.progress.termIncorrectCount
-                            ) > 0.9 ?
+                            ) >= 0.9 ?
                                 "yay" : "ohno"
                         }" style="margin-top: 0px;">
                             {Math.floor(
