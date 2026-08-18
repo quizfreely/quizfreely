@@ -59,6 +59,7 @@
 
             if (data.local || !data.authed) {
                 term.reviewEventStatsByDay = await idbApiLayer.getReviewEventStatsByDay({
+                    last: 30,
                     termIds: [term.id]
                 });
                 calcChart(term.reviewEventStatsByDay);
