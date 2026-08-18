@@ -813,7 +813,7 @@
 </script>
 
 <svelte:head>
-    <title>Quizfreely</title>
+    <title>Edit Studyset | Quizfreely</title>
 </svelte:head>
 
 {#snippet termImage(term, isDefSide)}

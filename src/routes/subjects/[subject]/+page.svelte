@@ -21,7 +21,13 @@
         LA: "language-arts",
     }?.[data?.subject?.category];
 </script>
-
+<svelte:head>
+    {#if data?.subject?.name}
+        <title>{data.subject.name} | Quizfreely</title>
+    {:else}
+        <title>Explore by Subject | Quizfreely</title>
+    {/if}
+</svelte:head>
 <div class="grid page">
     <div class="content">
         <div class="flex compact-gap" style="align-items: center;">

@@ -84,7 +84,7 @@
 </script>
 
 <svelte:head>
-  <title>Sign up - Quizfreely</title>
+  <title>Sign Up | Quizfreely</title>
   <meta
     name="description"
     content="Accounts on Quizfreely are optional and free! You can use Quizfreely without an account."

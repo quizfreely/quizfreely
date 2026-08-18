@@ -17,6 +17,9 @@
         }
     })
 </script>
+<svelte:head>
+    <title>Host Game | Quizfreely</title>
+</svelte:head>
 <div class="grid page">
     <div class="content">
         <h1 class="h3">Host a Review Game</h1>

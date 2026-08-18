@@ -10,7 +10,7 @@
 
 <svelte:head>
     {#if data.query}
-        <title>Search "{data.query}" - Quizfreely</title>
+        <title>Search "{data.query}" | Quizfreely</title>
         <meta name="”robots”" content="noindex" />
     {:else}
         <title>Search Quizfreely</title>

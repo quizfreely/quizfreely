@@ -587,7 +587,9 @@ FRQs: ${numFRQsToAssign}`,
     //     tres: false
     // });
 </script>
-
+<svelte:head>
+    <title>Practice Test | Quizfreely</title>
+</svelte:head>
 <div class="grid page">
     <div class="content">
         <div class="flex">

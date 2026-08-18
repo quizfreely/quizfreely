@@ -1,7 +1,13 @@
 <script>
     import { page } from "$app/state";
 </script>
-
+<svelte:head>
+    {#if page.status == 404}
+        <title>Not Found | Quizfreely</title>
+    {:else}
+        <title>Error | Quizfreely</title>
+    {/if}
+</svelte:head>
 <div class="grid page">
     <div class="content" style="padding-top: 2rem;">
         <p class="fg0" style="font-size: 1.6rem;">{page.status}</p>

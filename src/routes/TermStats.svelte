@@ -141,6 +141,9 @@
         border-radius: 0.8rem;
     }
 </style>
+<svelte:head>
+    <title>Term Stats | Quizfreely</title>
+</svelte:head>
 <div class="grid page">
     <div class="content">
         <div class="flex">

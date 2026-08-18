@@ -282,6 +282,9 @@
         overflow-wrap: break-word;
     }
 </style>
+<svelte:head>
+    <title>Studyset Stats | Quizfreely</title>
+</svelte:head>
 <div class="grid page">
     <div class="content">
         <div class="flex">

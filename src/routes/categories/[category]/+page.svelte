@@ -9,6 +9,13 @@
         LA: "Language Arts"
     }?.[data?.categoryEnum];
 </script>
+<svelte:head>
+    {#if categoryName}
+        <title>{categoryName} | Quizfreely</title>
+    {:else}
+        <title>Explore Subjects | Quizfreely</title>
+    {/if}
+</svelte:head>
 <div class="grid page">
     <div class="content">
         <div class="flex">

@@ -111,8 +111,8 @@
 
 <svelte:head>
     {#if title}
-        <title>{title} - Quizfreely</title>
-        <meta property="og:title" content="{title} - Quizfreely" />
+        <title>{title} | Quizfreely</title>
+        <meta property="og:title" content="{title} | Quizfreely" />
     {:else}
         <title>Quizfreely</title>
         <meta property="og:title" content="Quizfreely" />

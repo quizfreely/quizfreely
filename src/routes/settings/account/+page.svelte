@@ -121,6 +121,10 @@
     }
 </script>
 
+<svelte:head>
+  <title>Account Settings | Quizfreely</title>
+</svelte:head>
+
 {#if data.authed}
 <div class="box">
   {#if !isEditingDisplayName}

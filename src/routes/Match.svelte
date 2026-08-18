@@ -305,6 +305,9 @@
         }
     }
 </script>
+<svelte:head>
+    <title>Match | Quizfreely</title>
+</svelte:head>
 <div class="grid qzfr-match-head">
     <a href="{local ? `/studyset/local?id=${localId}` : `/studysets/${cloudId}`}" class="button faint" style="justify-self: start;">
         <BackIcon></BackIcon>

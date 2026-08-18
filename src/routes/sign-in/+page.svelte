@@ -68,7 +68,7 @@
 </script>
 
 <svelte:head>
-  <title>Sign in - Quizfreely</title>
+  <title>Sign In | Quizfreely</title>
   <meta
     name="description"
     content="Quizfreely is a free and open source studying tool."
