@@ -307,7 +307,7 @@
 >
 	{#snippet children({ context })}
 		<Layer>
-			<Axis placement="left" grid rule format={(d) => Math.abs(d)} />
+			<Axis placement="left" grid rule ticks={(s) => s.ticks?.().filter(Number.isInteger)} format={(d) => Math.abs(d)} />
 			<Axis placement="bottom" rule format={fmtDateShort} />
 				{#each reChartData as d, i}
                     {const barWidth = $derived(Math.min(context.xScale.bandwidth?.() ?? 24, 24))}

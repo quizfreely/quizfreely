@@ -20,6 +20,9 @@
 
     let reChartData = $state([]);
 
+    if (!data.local && data.authed) {
+        calcChart(data?.term?.reviewEventStatsByDay ?? []);
+    }
     let mounted = $state(false);
     onMount(() => {
         (async () => {
@@ -45,12 +48,6 @@
                 }
             }
 
-            if (data.local || !data.authed) {
-                term.reviewEventStatsByDay = await idbApiLayer.getReviewEventStatsByDay({
-                    termIds: [term.id]
-                });
-            }
-
             if (!data.authed && !data.local) {
                 /* not logged in, so user data is local,
                 but studyset is a cloud studyset,
@@ -59,6 +56,13 @@
                 `term` has already been populated during SSR (above, before onMount) */
                 term.progress = (await db.termProgress.where("termId").equals(term.id).toArray())?.[0];
             }
+
+            if (data.local || !data.authed) {
+                term.reviewEventStatsByDay = await idbApiLayer.getReviewEventStatsByDay({
+                    termIds: [term.id]
+                });
+                calcChart(term.reviewEventStatsByDay);
+            }
         })();
         return () => {
             objectUrls.forEach(objectUrl => {
@@ -66,6 +70,14 @@
             });
         }
     })
+
+    function calcChart(stats) {
+        reChartData = stats.map((d) => ({
+            ...d,
+            /* create date object from iso string */
+            date: new Date(d.timestamp),
+        }));
+    }
 
     function fmtDateShort(d) {
         const t = d?.getTime?.();
@@ -153,7 +165,7 @@
 >
 	{#snippet children({ context })}
 		<Layer>
-			<Axis placement="left" grid rule format={(d) => Math.abs(d)} />
+			<Axis placement="left" grid rule ticks={(s) => s.ticks?.().filter(Number.isInteger)} format={(d) => Math.abs(d)} />
 			<Axis placement="bottom" rule format={fmtDateShort} />
 				{#each reChartData as d, i}
                     {const barWidth = $derived(Math.min(context.xScale.bandwidth?.() ?? 24, 24))}
