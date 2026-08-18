@@ -9,6 +9,10 @@
 	--color-surface-300: var(--bg-2);
 	--color-surface-content: var(--fg-1);
 }
+.lc-root-container ::selection {
+    color: var(--fg-1);
+    fill: var(--fg-1);
+}
 
 @layer ehui-lc-reset {
     .lc-root-container * + *,

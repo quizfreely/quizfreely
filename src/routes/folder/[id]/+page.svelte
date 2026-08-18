@@ -297,7 +297,7 @@
 </script>
 
 <svelte:head>
-    <title>{folder?.name ?? "Folder"} - Quizfreely</title>
+    <title>{folder?.name ?? "Folder"} | Quizfreely</title>
 </svelte:head>
 
 {#snippet studysetDropdown(studyset, hideFunc)}

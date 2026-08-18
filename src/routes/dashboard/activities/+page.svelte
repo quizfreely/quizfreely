@@ -31,7 +31,7 @@
 </style>
 
 <svelte:head>
-  <title>Quizfreely</title>
+  <title>Review Games | Quizfreely</title>
 </svelte:head>
 
 <Noscript />

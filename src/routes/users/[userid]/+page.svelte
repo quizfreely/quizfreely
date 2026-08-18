@@ -9,7 +9,11 @@
 </script>
 
 <svelte:head>
-    <title>{data.user.displayName} - Quizfreely</title>
+    {#if data?.user?.displayName}
+        <title>{data.user.displayName} | Quizfreely</title>
+    {:else}
+        <title>User Profile | Quizfreely</title>
+    {/if}
     <meta name="robots" content="noindex, follow" />
 </svelte:head>
 

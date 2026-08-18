@@ -4,7 +4,7 @@
     }
 </style>
 <svelte:head>
-    <title>Quizfreely Privacy Policy</title>
+    <title>Privacy Policy | Quizfreely</title>
     <meta name="description" content="Quizfreely is a free studying app that respects your privacy." />
 </svelte:head>
 <main>

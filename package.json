@@ -1,7 +1,7 @@
 {
   "name": "quizfreely-web",
   "private": true,
-  "version": "1.5.1",
+  "version": "1.7.0",
   "author": "Ehan Ahamed",
   "license": "AGPL-3.0-or-later",
   "type": "module",
@@ -24,13 +24,11 @@
   },
   "dependencies": {
     "@floating-ui/dom": "^1.7.4",
-    "chart.js": "^4.5.0",
-    "chartjs-adapter-luxon": "^1.3.1",
+    "d3-array": "^3.2.4",
     "d3-scale": "^4.0.2",
     "d3-shape": "^3.2.0",
     "dexie": "^4.0.11",
     "layerchart": "^2.1.0",
-    "luxon": "^3.7.1",
     "nprogress": "^0.2.0",
     "prosemirror-commands": "^1.7.1",
     "prosemirror-history": "^1.4.1",

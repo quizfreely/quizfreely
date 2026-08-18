@@ -240,8 +240,8 @@ FRQs: ${numFRQsToAssign}`,
             frq: numFRQsToAssign,
         };
 
-        function pickNewRandomTerm(ogTermsArray) {
-            let termsArray = [...ogTermsArray];
+        /* NOTE: pickNewRandomTerm(array) will mutate the array, so pass a copy */
+        function pickNewRandomTerm(termsArray) {
             if (termsArray.length == 0) {
                 pickRepeatedRandomTerm();
                 return;
@@ -314,6 +314,28 @@ FRQs: ${numFRQsToAssign}`,
             remainingCounts[questionType]--;
         }
 
+        function isSameTermOrContent(t1, t2, strictSameness, defKey) {
+            if (strictSameness) {
+                /* strictSameness compares both sides
+                to avoid duplicate or confusing answer choices */
+                return (
+                    t1.id == t2.id ||
+                    (t1.term.trim() == t2.term.trim() &&
+                    t1.termImageUrl == t2.termImageUrl) ||
+                    (t1.def.trim() == t2.def.trim() &&
+                    t1.defImageUrl == t2.defImageUrl)
+                );
+            } else {
+                /* strictSameness=false only compares displayed term/def side
+                to avoid duplicate answer choices */
+                return (
+                    t1.id == t2.id ||
+                    (t1[defKey].trim() == t2[defKey].trim() &&
+                    t1[defKey+"ImageUrl"] == t2[defKey+"ImageUrl"])
+                );
+            }
+        }
+
         function addMCQ(term) {
             const pickedAnswerWith =
                 answerWith == "BOTH"
@@ -321,6 +343,7 @@ FRQs: ${numFRQsToAssign}`,
                         ? "TERM"
                         : "DEF"
                     : answerWith;
+            const pickedKey = pickedAnswerWith.toLowerCase();
             let question = {
                 type: "MCQ",
                 term: {
@@ -344,62 +367,86 @@ FRQs: ${numFRQsToAssign}`,
 
                 let sum = 0;
                 question.distractors.forEach((d) => {
-                    sum += d?.[pickedAnswerWith.toLowerCase()]?.length ?? 0;
+                    sum += d?.[pickedKey]?.length ?? 0;
                 });
                 return sum / question?.distractors?.length;
             }
 
-            let ogDistractorsCount = 3;
-            let distractorsCount = 3;
-            let iterations = 0;
-            while (
-                question.distractors.length < distractorsCount &&
-                iterations <= 99
-            ) {
-                iterations++;
-
-                const randomTerm =
-                    terms[Math.floor(Math.random() * terms.length)];
-
-                if (
-                    randomTerm.id ==
-                        term.id /* if random term is correct answer */ ||
-                    question.distractors.some(
-                        /* or if it's already an answer choice */
-                        (d) => randomTerm.id == d.id,
-                    )
+            function loopAndPick(strictSameness) {
+                const MAX_ITERATIONS_STRICT = 99;
+                const MAX_ITERATIONS_NOT_STRICT = 99;
+                const maxIterations = strictSameness ? MAX_ITERATIONS_STRICT : MAX_ITERATIONS_NOT_STRICT;
+                let ogDistractorsCount = 3;
+                let distractorsCount = 3;
+                let iterations = 0;
+                while (
+                    question.distractors.length < distractorsCount &&
+                    iterations <= maxIterations
                 ) {
-                    /* loop again without adding this random term
-                    if this term already exists */
-                    continue;
+                    iterations++;
+
+                    const randomTerm =
+                        terms[Math.floor(Math.random() * terms.length)];
+
+                    if (
+                        isSameTermOrContent(
+                            randomTerm,
+                            term,
+                            strictSameness,
+                            pickedKey
+                        ) ||
+                        question.distractors.some(
+                            (d) => isSameTermOrContent(
+                                randomTerm,
+                                d,
+                                strictSameness,
+                                pickedKey
+                            )
+                        )
+                    ) {
+                        /* if same id or content as answer or existing distractor
+                        then loop again without adding this random term */
+                        continue;
+                    }
+
+                    question.distractors.push({
+                        id: randomTerm?.id,
+                        term: randomTerm?.term,
+                        def: randomTerm?.def,
+                        termImageUrl: randomTerm?.termImageUrl,
+                        defImageUrl: randomTerm?.defImageUrl
+                    });
+
+                    if (
+                        question.distractors.length == ogDistractorsCount &&
+                        avgDistractorAnswerLength() < 40 &&
+                        Math.random() < 0.5
+                    ) {
+                        distractorsCount++;
+                    }
                 }
-
-                question.distractors.push({
-                    id: randomTerm?.id,
-                    term: randomTerm?.term,
-                    def: randomTerm?.def,
-                    termImageUrl: randomTerm?.termImageUrl,
-                    defImageUrl: randomTerm?.defImageUrl
-                });
-
-                if (
-                    question.distractors.length == ogDistractorsCount &&
-                    avgDistractorAnswerLength() < 40 &&
-                    Math.random() < 0.5
-                ) {
-                    distractorsCount++;
+                if (iterations > maxIterations && strictSameness) {
+                    /* try again without strictSameness */
+                    loopAndPick(false);
+                } else if (iterations > maxIterations) {
+                    /* give up after maxIterations to avoid an infinite loop */
+                    console.warn(
+                        `(addMCQ) Took more than ${maxIterations} iterations to pick random term that wasn't a duplicate`,
+                    );
                 }
             }
-            if (iterations > 99) {
-                console.log(
-                    "(addMCQ) Took more than 99 iterations to pick random term that wasn't a duplicate",
-                );
-            }
+            loopAndPick(true);
 
             questions.push(question);
         }
 
         function addTFQ(term) {
+            const pickedAnswerWith = answerWith == "BOTH"
+                ? Math.random() < 0.5
+                    ? "TERM"
+                    : "DEF"
+                : answerWith;
+            const pickedKey = pickedAnswerWith.toLowerCase();
             let question = {
                 type: "TFQ",
                 term: {
@@ -409,43 +456,49 @@ FRQs: ${numFRQsToAssign}`,
                     termImageUrl: term.termImageUrl,
                     defImageUrl: term.defImageUrl
                 },
-                answerWith:
-                    answerWith == "BOTH"
-                        ? Math.random() < 0.5
-                            ? "TERM"
-                            : "DEF"
-                        : answerWith,
+                answerWith: pickedAnswerWith
             };
 
             question.distractor = null;
-            let iterations = 0;
-            while (question.distractor == null && iterations <= 99) {
-                iterations++;
-                const randomTerm =
-                    terms[Math.floor(Math.random() * terms.length)];
-                if (randomTerm.id != term.id) {
+            function loopAndPick(strictSameness) {
+                let iterations = 0;
+                while (question.distractor == null && iterations <= 99) {
+                    iterations++;
+                    const randomTerm =
+                        terms[Math.floor(Math.random() * terms.length)];
+                    if (!isSameTermOrContent(
+                        randomTerm,
+                        term,
+                        strictSameness,
+                        pickedKey
+                    )) {
+                        question.distractor = {
+                            id: randomTerm.id,
+                            term: randomTerm.term,
+                            def: randomTerm.def,
+                            termImageUrl: randomTerm.termImageUrl,
+                            defImageUrl: randomTerm.defImageUrl
+                        };
+                    }
+                }
+                if (iterations > 99 && strictSameness) {
+                    /* try again without strictSameness */
+                    loopAndPick(false);
+                } else if (iterations > 99) {
+                    console.warn(
+                        "(addTFQ) Over 99 iterations to pick random distractor term",
+                    );
+                    /* use fallback same term as distractor */
                     question.distractor = {
-                        id: randomTerm.id,
-                        term: randomTerm.term,
-                        def: randomTerm.def,
-                        termImageUrl: randomTerm.termImageUrl,
-                        defImageUrl: randomTerm.defImageUrl
+                        id: term.id,
+                        term: term.term,
+                        def: term.def,
+                        termImageUrl: term.termImageUrl,
+                        defImageUrl: term.defImageUrl
                     };
                 }
             }
-            if (iterations > 99) {
-                console.log(
-                    "(addTFQ) Over 99 iterations to pick random distractor term",
-                );
-                /* use fallback same term as distractor */
-                question.distractor = {
-                    id: term.id,
-                    term: term.term,
-                    def: term.def,
-                    termImageUrl: term.termImageUrl,
-                    defImageUrl: term.defImageUrl
-                };
-            }
+            loopAndPick(true);
             questions.push(question);
         }
 
@@ -462,12 +515,13 @@ FRQs: ${numFRQsToAssign}`,
             });
         }
 
-        pickNewRandomTerm(terms);
+        /* NOTE: copy terms array because pickNewRandomTerm mutates the array */
+        pickNewRandomTerm([...terms]);
         showSetup = false;
         showTest = true;
         takingActualPracticeTest = true;
 
-        console.log([...questions]);
+        // console.log([...questions]);
 
         // fetch("/dashboard/set-dashboard-state", {
         //     method: "POST",
@@ -533,7 +587,9 @@ FRQs: ${numFRQsToAssign}`,
     //     tres: false
     // });
 </script>
-
+<svelte:head>
+    <title>Practice Test | Quizfreely</title>
+</svelte:head>
 <div class="grid page">
     <div class="content">
         <div class="flex">
@@ -557,7 +613,8 @@ FRQs: ${numFRQsToAssign}`,
         </div>
         {#if takingActualPracticeTest}
             <div
-                style="position: sticky; top: 0px; padding: 1rem; margin-top: 0px; background: var(--bg-1);"
+                style="position: sticky; top: 0px; padding: 1rem; margin-top: 0px;"
+                class="trans-dots"
                 transition:slide={{ duration: 400 }}
             >
                 <p class="center">
@@ -574,7 +631,8 @@ FRQs: ${numFRQsToAssign}`,
         {/if}
         {#if showScore}
             <div
-                style="position: sticky; top: 0px; padding: 1rem; margin-top: 0px; background: var(--bg-1);"
+                style="position: sticky; top: 0px; padding: 1rem; margin-top: 0px;"
+                class="trans-dots"
                 transition:slide={{ duration: 400 }}
             >
                 <div class="flex" style="justify-content: space-between;">
@@ -984,7 +1042,7 @@ FRQs: ${numFRQsToAssign}`,
                                     }
                                 }
                             });
-                            console.log(questionDataArray);
+                            // console.log(questionDataArray);
                             if (data.authed && !data.local) {
                                 try {
                                     let raw = await fetch("/api/graphql", {

@@ -169,6 +169,9 @@ newTermsIndex: ${newTermsIndex}`);
         return true;
     }
 </script>
+<svelte:head>
+    <title>Flashcards | Quizfreely</title>
+</svelte:head>
 <!-- {#snippet flashcardsPromptAddNew()} -->
 <!--     <p>Test Wow</p> -->
 <!--     <button>velda</button> -->

@@ -49,6 +49,9 @@
         };
     })
 </script>
+<svelte:head>
+    <title>Host Game | Quizfreely</title>
+</svelte:head>
 {#if ws && gameCode && !inGame}
     <Lobby {ws} {gameCode} hostPOV startCallback={(d) => {
         players = d.players;

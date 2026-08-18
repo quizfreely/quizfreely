@@ -14,6 +14,21 @@ type MatchActivityResolveProps = {
     termIds?: boolean;
     incorrectPairIds?: boolean;
 };
+type ActivityHistoryPracticeTest = {
+    id: number;
+    timestamp: string;
+    questionsCorrect: number;
+    questionsTotal: number;
+    studysets: Studyset[];
+};
+type ActivityHistoryMatchActivity = {
+    id: number;
+    endTimestamp: string;
+    durationMs: number;
+    incorrectPairIds: (number | string)[][];
+    studysets: Studyset[];
+};
+type ActivityHistoryEntry = ActivityHistoryPracticeTest | ActivityHistoryMatchActivity;
 export * from "./db";
 export * from "./images";
 export declare const idbApiLayer: {
@@ -50,6 +65,10 @@ export declare const idbApiLayer: {
     getPracticeTestsByTermId: (termId: number | string) => Promise<import("./db").PracticeTest[]>;
     getMatchActivityById: (id: number, resolveProps?: MatchActivityResolveProps) => Promise<MatchActivity | null>;
     getMatchActivitiesByStudysetId: (studysetId: number | string, resolveProps?: MatchActivityResolveProps) => Promise<MatchActivity[]>;
+    activityHistory: ({ last, getCloudStudysets }: {
+        last: number;
+        getCloudStudysets?: (ids: (number | string)[]) => Promise<(Studyset | null)[]>;
+    }) => Promise<ActivityHistoryEntry[]>;
     recordMatchActivity: (input: any, getCloudStudysetIds?: (cloudTermIds: string[]) => Promise<(number | string)[]>) => Promise<MatchActivity | null>;
     getRecentActivityStudysets: ({ skipCloudStudysets, getCloudStudysets }?: {
         skipCloudStudysets?: boolean;

@@ -305,6 +305,9 @@
         }
     }
 </script>
+<svelte:head>
+    <title>Match | Quizfreely</title>
+</svelte:head>
 <div class="grid qzfr-match-head">
     <a href="{local ? `/studyset/local?id=${localId}` : `/studysets/${cloudId}`}" class="button faint" style="justify-self: start;">
         <BackIcon></BackIcon>
@@ -497,14 +500,14 @@
                         }
                     }}>
                         {#if h.showDetails}
-                        <EyeSlashIcon></EyeSlashIcon> Hide Details
+                        <EyeSlashIcon></EyeSlashIcon> Hide Mistakes
                         {:else}
-                        <EyeIcon></EyeIcon> Show Details
+                        <EyeIcon></EyeIcon> View Mistakes
                         {/if}
                     </button>
                 </div>
                 {#if h.showDetails}
-                <div>
+                <div transition:slide={{duration: h.showDetailsLoading ? 0 : 400}}>
                     {#if h.showDetailsLoading}
                         <div class="flex" style="align-items: center; justify-content: center;">
                             <div class="spinner size-1.2rem"></div>
@@ -512,7 +515,7 @@
                         </div>
                     {:else}
                         <p>Incorrect Pairs:</p>
-                        <div class="grid" style="grid-template-columns: 1fr 1fr; row-gap: 2rem; column-gap: 2rem;">
+                        <div class="grid" style="grid-template-columns: 1fr 1fr; row-gap: 2rem; column-gap: 2rem;" transition:slide={{duration:400}}>
                             {#each h.incorrectPairIds as pair}
                                 <div class="no-margin-for-p-here">
                                     <p class="fg0" style="font-size: 0.8rem;">Term</p>
@@ -700,7 +703,7 @@
     {#if showSameSideWarning}
         <!-- svelte-ignore a11y_click_events_have_key_events -->
         <!-- svelte-ignore a11y_no_static_element_interactions -->
-        <div class="grid qzfr-match-overlap-msg" style="justify-items: center; align-items: center;" transition:fade={{duration: 100}} onclick={dismissSameSideWarn}>
+        <div class="grid qzfr-match-overlap-msg trans-dots-before" style="justify-items: center; align-items: center;" transition:fade={{duration: 100}} onclick={dismissSameSideWarn}>
             <div class="content">
                 <div class="box warn" style="padding: 1.4rem;">
                     <span style="font-size: 1.4rem;">
@@ -716,7 +719,7 @@
     {:else if showIncorrectAlert}
         <!-- svelte-ignore a11y_click_events_have_key_events -->
         <!-- svelte-ignore a11y_no_static_element_interactions -->
-        <div class="grid qzfr-match-overlap-msg" style="justify-items: center; align-items: center;" transition:fade={{duration: 100}} onclick={dismissIncorrectAlert}>
+        <div class="grid qzfr-match-overlap-msg trans-dots-before" style="justify-items: center; align-items: center;" transition:fade={{duration: 100}} onclick={dismissIncorrectAlert}>
             <div class="content">
                 <div class="box center ohno" style="padding: 1.4rem;">
                     <span style="font-size: 1.4rem;">
@@ -806,8 +809,6 @@
         left: 0px;
         width: 100%;
         height: 100%;
-        background-color: var(--bg-0);
-        opacity: 0.8;
     }
     .qzfr-match-overlap-msg .content {
         z-index: 102;

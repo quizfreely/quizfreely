@@ -107,7 +107,7 @@
     }
 </style>
 <svelte:head>
-    <title>Quizfreely</title>
+    <title>Join Game | Quizfreely</title>
 </svelte:head>
 {#if !inLobby && !inGame}
 <div style="display: grid; align-items: center; justify-items: center; height: 70vh;">

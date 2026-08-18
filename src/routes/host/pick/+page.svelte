@@ -4,6 +4,9 @@
 
     let { data } = $props();
 </script>
+<svelte:head>
+    <title>Host Game | Quizfreely</title>
+</svelte:head>
 <div class="grid page">
     <div class="content">
         <!-- <div class="flex"> -->

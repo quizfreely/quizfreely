@@ -18,6 +18,11 @@
     margin-top: 0px;
   }
 </style>
+
+<svelte:head>
+  <title>Settings | Quizfreely</title>
+</svelte:head>
+
 <p>Theme</p>
 <div class="a-little-different-grid-list">
   <a href="/settings/themes/auto" class="button button-box no-clickable-effect {data.theme == 'auto' ? 'selected' : ''}">

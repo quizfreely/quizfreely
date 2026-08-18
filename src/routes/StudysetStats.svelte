@@ -6,11 +6,15 @@
 	import { LineChart, Spline, Axis, Bar, Chart, Highlight, Layer, Rule, Tooltip, defaultChartPadding } from 'layerchart';
     import { curveMonotoneX } from "d3-shape";
 	import { scaleBand } from 'd3-scale';
-	import { cubicInOut } from 'svelte/easing';
+	import { backOut, cubicOut } from 'svelte/easing';
+    import { slide } from "svelte/transition";
     import BackIcon from "$lib/icons/BackArrow.svelte"
     import ForwardLongArrowIcon from "$lib/icons/ForwardRightArrowLong.svelte"
-    import { slide } from "svelte/transition";
+    import AngleUpIcon from "$lib/icons/AngleUp.svelte";
+    import AngleDownIcon from "$lib/icons/AngleDown.svelte";
+    import StatsIcon from "$lib/icons/ChartGraphLine.svelte";
     let { data } = $props();
+
     const REVIEW_EVENT_STATS_DAYS = 30;
     let terms = $state(
         data?.local ?
@@ -18,11 +22,11 @@
     );
     let practiceTests = $state(
         data?.local ?
-            [] : data?.studyset?.practiceTests
+            [] : data?.studyset?.practiceTests ?? []
     );
     let reviewEventStats = $state(
         data?.local ?
-            [] : data?.studyset?.reviewEventStatsByDay
+            [] : data?.studyset?.reviewEventStatsByDay ?? []
     );
     let termsStats = $derived.by(() => {
         if (terms) {
@@ -56,7 +60,7 @@
         }
     })
     let practiceTestAvgScore = $derived.by(() => {
-        if (practiceTests) {
+        if (practiceTests?.length > 0) {
             let sum = 0;
             for (const practiceTest of practiceTests) {
                 sum += practiceTest.questionsCorrect / practiceTest.questionsTotal * 100
@@ -101,8 +105,8 @@
                         objectUrls.push(term.defImageUrl);
                     }
                 })
-                practiceTests = studyset?.practiceTests;
-                reviewEventStats = studyset?.reviewEventStatsByDay;
+                practiceTests = studyset?.practiceTests ?? [];
+                reviewEventStats = studyset?.reviewEventStatsByDay ?? [];
             }
 
             if (!data.authed && !data.local) {
@@ -119,7 +123,7 @@
                     so most recent is first */
                     (a, b) => b.timestamp.localeCompare(a.timestamp)
                 );
-                practiceTests = practiceTests;
+                practiceTests = practiceTests ?? [];
 
                 const termIds = terms.map(t => t.id);
                 reviewEventStats = await idbApiLayer.getReviewEventStatsByDay({
@@ -132,12 +136,16 @@
                 }
             }
 
-            ptChartData = practiceTests.filter(
-                pt => pt.questionsTotal > 0
-            ).map(pt => ({
-                date: new Date(pt.timestamp),
-                score: pt.questionsCorrect / pt.questionsTotal
-            })).reverse(); /* reverse gives us correct order for layerchart draw animation */
+            if (practiceTests != null) {
+                ptChartData = practiceTests
+                    .filter(p => p.questionsTotal > 0)
+                    .reverse() /* reverse gives us correct order for layerchart draw animation */
+                    .map( (pt, i) => ({
+                        date: new Date(pt.timestamp),
+                        score: pt.questionsCorrect / pt.questionsTotal,
+                        x: i
+                    })); 
+            }
 
             reChartData = reviewEventStats.map((d) => ({
                 ...d,
@@ -274,6 +282,9 @@
         overflow-wrap: break-word;
     }
 </style>
+<svelte:head>
+    <title>Studyset Stats | Quizfreely</title>
+</svelte:head>
 <div class="grid page">
     <div class="content">
         <div class="flex">
@@ -301,7 +312,7 @@
 >
 	{#snippet children({ context })}
 		<Layer>
-			<Axis placement="left" grid rule format={(d) => Math.abs(d)} />
+			<Axis placement="left" grid rule ticks={(s) => s.ticks?.().filter(Number.isInteger)} format={(d) => Math.abs(d)} />
 			<Axis placement="bottom" rule format={fmtDateShort} />
 				{#each reChartData as d, i}
                     {const barWidth = $derived(Math.min(context.xScale.bandwidth?.() ?? 24, 24))}
@@ -312,7 +323,7 @@
                     	rounded="top"
                         radius={8}
                     	style="fill: var(--yay);"
-                    	motion={{ type: 'tween', duration: 400, easing: cubicInOut, delay: i * 20 }}
+                    	motion={{ type: 'tween', duration: 400, easing: backOut, delay: i * 20 }}
                     	initialY={context.yScale(0)}
                     />
                     <Bar
@@ -322,7 +333,7 @@
                     	rounded="bottom"
                         radius={8}
                     	style="fill: var(--ohno);"
-                    	motion={{ type: 'tween', duration: 400, easing: cubicInOut, delay: i * 20 }}
+                    	motion={{ type: 'tween', duration: 400, easing: backOut, delay: i * 20 }}
                     	initialY={context.yScale(0)}
                     />
 				{/each}
@@ -415,7 +426,7 @@
                                         term.progress.termIncorrectCount,
                                         term.progress.defCorrectCount,
                                         term.progress.defIncorrectCount
-                                    ) > 90 ?
+                                    ) >= 90 ?
                                         "yay" : "ohno"
                                 }" style="margin-top: 0px;">
                                     {averageAccuracy(
@@ -427,30 +438,7 @@
                                 </p>
                             </div>
                             <div>
-                                <p class="fg0" style="margin-top: 0px; margin-bottom: 0px;">Term Accuracy:</p>
-                                {#if term.progress.termCorrectCount +
-                                    term.progress.termIncorrectCount > 0
-                                }
-                                <p class="shy-h4 b {
-                                    term.progress.termCorrectCount / (
-                                        term.progress.termCorrectCount +
-                                        term.progress.termIncorrectCount
-                                    ) > 0.9 ?
-                                        "yay" : "ohno"
-                                }" style="margin-top: 0px;">
-                                    {Math.floor(
-                                        term.progress.termCorrectCount / (
-                                            term.progress.termCorrectCount +
-                                            term.progress.termIncorrectCount
-                                        ) * 100
-                                    )}%
-                                </p>
-                                {:else}
-                                <p class="fg0 shy-h4" style="margin-top: 0px;">N/A</p>
-                                {/if}
-                            </div>
-                            <div>
-                                <p class="fg0" style="margin-top: 0px; margin-bottom: 0px;">Definition Accuracy:</p>
+                                <p class="fg0" style="margin-top: 0px; margin-bottom: 0px;">Term-to-Def:</p>
                                 {#if term.progress.defCorrectCount +
                                     term.progress.defIncorrectCount > 0
                                 }
@@ -458,7 +446,7 @@
                                     term.progress.defCorrectCount / (
                                         term.progress.defCorrectCount +
                                         term.progress.defIncorrectCount
-                                    ) > 0.9 ?
+                                    ) >= 0.9 ?
                                         "yay" : "ohno"
                                 }" style="margin-top: 0px;">
                                     {Math.floor(
@@ -472,29 +460,52 @@
                                 <p class="fg0 shy-h4" style="margin-top: 0px;">N/A</p>
                                 {/if}
                             </div>
+                            <div>
+                                <p class="fg0" style="margin-top: 0px; margin-bottom: 0px;">Def-to-Term:</p>
+                                {#if term.progress.termCorrectCount +
+                                    term.progress.termIncorrectCount > 0
+                                }
+                                <p class="shy-h4 b {
+                                    term.progress.termCorrectCount / (
+                                        term.progress.termCorrectCount +
+                                        term.progress.termIncorrectCount
+                                    ) >= 0.9 ?
+                                        "yay" : "ohno"
+                                }" style="margin-top: 0px;">
+                                    {Math.floor(
+                                        term.progress.termCorrectCount / (
+                                            term.progress.termCorrectCount +
+                                            term.progress.termIncorrectCount
+                                        ) * 100
+                                    )}%
+                                </p>
+                                {:else}
+                                <p class="fg0 shy-h4" style="margin-top: 0px;">N/A</p>
+                                {/if}
+                            </div>
                         </div>
                         <div class="flex" style="justify-content: center;">
-                            <!-- <a href="{ -->
-                            <!--     data.local ? -->
-                            <!--         `/studyset/local/stats/term?id=${term.id}&studysetId=${data?.localId}` : -->
-                            <!--         `/studysets/${data.studysetId}/stats/terms/${term.id}` -->
-                            <!-- }" style="display: flex; flex-wrap: nowrap; align-items: center; gap: 0.4rem;"> -->
-                            <!--     <StatsIcon></StatsIcon> -->
-                            <!--     <span style="margin-top: 0px;">View Details</span> -->
-                            <!-- </a> -->
+                            <a href="{
+                                data.local ?
+                                    `/studyset/local/stats/term?id=${term.id}&studysetId=${data?.localId}` :
+                                    `/studysets/${data.studysetId}/stats/terms/${term.id}`
+                            }" style="display: flex; flex-wrap: nowrap; align-items: center; gap: 0.4rem;">
+                                <StatsIcon></StatsIcon>
+                                <span style="margin-top: 0px;">View Details</span>
+                            </a>
                         </div>
                         {/if}
                     </div>
                     {/if}
                 {/each}
                 {#if terms?.length > COLLAPSED_TERMS_COUNT}
-                <button class="button-box" style="width: 100%;" onclick={
+                <button class="button-box" style="width: 100%; display: flex; align-items: center;" onclick={
                     () => showAllTerms = !showAllTerms
                 }>
                     {#if showAllTerms}
-                    Collapse Terms
+                    <AngleUpIcon></AngleUpIcon> Collapse Terms
                     {:else}
-                    Show All Terms
+                    <AngleDownIcon></AngleDownIcon> Show All Terms
                     {/if}
                 </button>
                 {/if}
@@ -502,18 +513,22 @@
             <div class="practice-tests-chart-area">
         <div class="flex center">Practice Test Scores</div>
 <div style="min-height: 300px;"> <!-- wrapper div to keep height while loading, to eliminate layout shift -->
-<LineChart data={ptChartData} x="date" y="score" yDomain={[0, 1]} padding={defaultChartPadding({ right: 10 })} height={300} props={{
+<LineChart data={ptChartData} x="x" y="score" yDomain={[0, 1]} padding={defaultChartPadding({ right: 10 })} height={300} props={{
     yAxis: {
-        format: (v) => `${Math.round(v*100)}%`
+        format: (v) => v == 0 ? "" : `${Math.round(v*100)}%`
     },
     xAxis: {
         tickSpacing: 100,
-        format: fmtDateShort
+        ticks: (s) => s.ticks?.().filter(Number.isInteger),
+        format: (v) => fmtDateShort(ptChartData[v]?.date)
     }
 }}>
     {#snippet marks({ context })}
 		{#each context.series.visibleSeries as s (s.key)}
-			<Spline seriesKey={s.key} style="stroke-width: 3px;" draw curve={curveMonotoneX} />
+			<Spline seriesKey={s.key} style="stroke-width: 3px;" draw={{
+                duration: 2000,
+                easing: cubicOut
+            }} curve={curveMonotoneX} />
 		{/each}
 	{/snippet}
     {#snippet tooltip({ context })}
@@ -565,13 +580,13 @@
                         {/if}
                     {/each}
                     {#if practiceTests?.length > COLLAPSED_PRACTICE_TESTS_COUNT}
-                    <button class="button-box" style="width: 100%;" onclick={
+                    <button class="button-box" style="width: 100%; display: flex; align-items: center;" onclick={
                         () => showAllPracticeTests = !showAllPracticeTests
                     }>
                         {#if showAllPracticeTests}
-                            Collapse Practice Tests
+                            <AngleUpIcon></AngleUpIcon> Collapse Practice Tests
                         {:else}
-                            Show All Practice Tests
+                            <AngleDownIcon></AngleDownIcon> Show All Practice Tests
                         {/if}
                     </button>
                     {/if}

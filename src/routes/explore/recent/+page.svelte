@@ -22,7 +22,7 @@
 </script>
 
 <svelte:head>
-    <title>Explore & Search - Quizfreely</title>
+    <title>Recent Studysets | Quizfreely</title>
     <meta
         name="description"
         content="Quizfreely is a free and open source learning app with flashcards, practice tests, and more tools to help you study."

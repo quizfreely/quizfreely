@@ -4,7 +4,7 @@
     }
 </style>
 <svelte:head>
-    <title>Quizfreely Terms of Service</title>
+    <title>Terms of Service | Quizfreely</title>
 </svelte:head>
 <main>
     <div class="grid page">
