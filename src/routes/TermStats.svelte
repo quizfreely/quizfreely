@@ -20,8 +20,8 @@
 
     let reChartData = $state([]);
 
-    if (!data.local && data.authed) {
-        calcChart(data?.term?.reviewEventStatsByDay ?? []);
+    if (data?.term?.reviewEventStatsByDay?.length != null && data.term.reviewEventStatsByDay.length >= 0) {
+        calcChart(data.term.reviewEventStatsByDay);
     }
     let mounted = $state(false);
     onMount(() => {
