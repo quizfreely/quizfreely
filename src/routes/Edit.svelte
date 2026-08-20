@@ -1119,12 +1119,12 @@
 
             {#if isDraft && !data.authed}
                 <p class="text fg0" style="margin-top: 2rem;">
-                    This studyset will be local & private.
+                    This studyset will be local &amp; private.
                     <span class="optional-line"><a href="/sign-in">Sign in</a> or <a href="/sign-up">create an account</a> to post public studysets.</span>
                 </p>
             {:else if !data.authed}
                 <p class="text fg0" style="margin-top: 2rem;">
-                    This studyset is local & private.
+                    This studyset is local &amp; private.
                     <span class="optional-line"><a href="/sign-in">Sign in</a> or <a href="/sign-up">create an account</a> to post public studysets.</span>
                 </p>
             {/if}
@@ -1134,7 +1134,7 @@
                     <div class="content">
                         <div class="grid import-terms-split">
                             <div>
-                                <p>Between term & definition</p>
+                                <p>Between term &amp; definition</p>
                                 <div
                                     class="flex compact-gap nowrap"
                                     style="flex-direction: column; align-items: start; align-content: start;"

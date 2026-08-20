@@ -204,7 +204,7 @@
                 <NoIcon></NoIcon> No Paid Subscriptions
             </div>
             <div class="box" style="display: flex; gap: 0.4rem; align-items: center;">
-                <CheckmarkIcon></CheckmarkIcon> Free & Open Source
+                <CheckmarkIcon></CheckmarkIcon> Free &amp; Open Source
             </div>
             <div class="box" style="display: flex; gap: 0.4rem; align-items: center;">
                 <CheckmarkIcon></CheckmarkIcon> Privacy-Friendly

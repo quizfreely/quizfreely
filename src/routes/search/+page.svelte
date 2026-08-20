@@ -43,7 +43,7 @@
                     >
                         {#if data.pageInfo?.hasPreviousPage}
                             <a
-                                href="/search?q={data.query}&before={data
+                                href="/search?q={data.query}&amp;before={data
                                     .pageInfo.startCursor}"
                                 class="button alt {data.pageInfo?.hasNextPage
                                     ? 'left'
@@ -54,7 +54,7 @@
                         {/if}
                         {#if data.pageInfo?.hasNextPage}
                             <a
-                                href="/search?q={data.query}&after={data
+                                href="/search?q={data.query}&amp;after={data
                                     .pageInfo.endCursor}"
                                 class="button alt {data.pageInfo
                                     ?.hasPreviousPage

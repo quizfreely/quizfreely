@@ -38,7 +38,7 @@
     <p>Light</p>
   </a>
 </div>
-<p>Date & Time</p>
+<p>Date &amp; Time</p>
 <div>
   <div class="flex">
     <a href="/settings/date-time-format?clear=true" class="button button-box {

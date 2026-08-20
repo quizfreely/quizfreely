@@ -189,7 +189,7 @@
 </style>
 
 <svelte:head>
-  <title>History & Stats | Quizfreely</title>
+  <title>History &amp; Stats | Quizfreely</title>
 </svelte:head>
 
 <Noscript />
