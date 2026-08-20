@@ -14,6 +14,8 @@
     import { setCancelBeforeNavigate } from "$lib/cancel-before-navigate.js";
     import { fancyTimestamp } from "$lib/fancyTimestamp";
     import { Confetti } from "svelte-confetti";
+	import { backOut, cubicInOut } from 'svelte/easing';
+	import { Arc, Chart, Group, Layer, LinearGradient, Text } from 'layerchart';
     let { data } = $props();
     let terms = $state();
     let practiceTests = $state([]);
@@ -590,6 +592,43 @@ FRQs: ${numFRQsToAssign}`,
 <svelte:head>
     <title>Practice Test | Quizfreely</title>
 </svelte:head>
+{#snippet scoreSection()}
+    <div style="min-height: 100px;">
+    <Chart height={100}>
+    	<Layer center>
+    		<Group y={16}>
+                        {const arcScore = $derived(Math.round(
+                            ((questionsCorrect || 0) / (questions?.length || 1)) * 100
+                        ))}
+    					<Arc
+    						value={arcScore}
+    						range={[-120, 120]}
+    						outerRadius={76}
+    						innerRadius={60}
+    						cornerRadius={10}
+    						motion={{ type: "tween", duration: 400, delay: 100, easing: cubicInOut }}
+    						fill={arcScore >= 90 ? "var(--yay)" : (
+                                arcScore >= 80 ? "var(--warn)" : "var(--ohno)"
+                            )}
+    						track={{ fill: 'var(--border)' }}
+    					>
+    						{#snippet children({ value })}
+    							<Text
+    								value={Math.round(value) + '%'}
+    								textAnchor="middle"
+    								verticalAnchor="middle"
+    						        fill={arcScore >= 90 ? "var(--yay)" : (
+                                        arcScore >= 80 ? "var(--warn)" : "var(--ohno)"
+                                    )}
+                                    style="font-size: 28px; font-weight: bold; font-variant-numeric: tabular-nums;"
+    							/>
+    						{/snippet}
+    					</Arc>
+    		</Group>
+    	</Layer>
+    </Chart>
+    </div>
+{/snippet}
 <div class="grid page">
     <div class="content">
         <div class="flex">
@@ -613,7 +652,7 @@ FRQs: ${numFRQsToAssign}`,
         </div>
         {#if takingActualPracticeTest}
             <div
-                style="position: sticky; top: 0px; padding: 1rem; margin-top: 0px;"
+                style="position: sticky; top: 0px; z-index: 99; padding: 1rem; margin-top: 0px;"
                 class="trans-dots"
                 transition:slide={{ duration: 400 }}
             >
@@ -631,7 +670,7 @@ FRQs: ${numFRQsToAssign}`,
         {/if}
         {#if showScore}
             <div
-                style="position: sticky; top: 0px; padding: 1rem; margin-top: 0px;"
+                style="position: sticky; top: 0px; z-index: 99; padding: 1rem; margin-top: 0px;"
                 class="trans-dots"
                 transition:slide={{ duration: 400 }}
             >
@@ -647,12 +686,15 @@ FRQs: ${numFRQsToAssign}`,
                     <span>{questionsCorrect}/{questions.length} Correct</span>
                 </div>
             </div>
+            <div style="margin-bottom: 3rem;">
+                {@render scoreSection()}
+            </div>
         {/if}
         {#if showSetup}
             <div transition:slide={{ duration: 400 }}>
                 <div class="flex" style="align-items: center; margin-bottom: 1rem;">
                     <PracticeTestIcon width="2.2rem" height="2.2rem"></PracticeTestIcon>
-                    <h1 class="h3" style="margin-bottom: 0px;">Practice Test</h1>
+                    <h1 id="practice-test" class="h3" style="margin-bottom: 0px;">Practice Test</h1>
                 </div>
                 <p>
                     There {terms?.length == 1 ? "is" : "are"}
@@ -922,6 +964,31 @@ FRQs: ${numFRQsToAssign}`,
                 <div class="flex" transition:slide={{ duration: 400 }}>
                     <p class="yay"><CheckmarkIcon></CheckmarkIcon> Submitted</p>
                 </div>
+                {#if questions?.length > 4}
+                    <div style="margin-top: 2rem;">
+                        {@render scoreSection()}
+                    </div>
+                    <div class="flex center" style="margin-top: 2rem;">
+                        {const idkWhatsGoingOnStudysetLink = (cloudLinkFunc, localLinkFunc) => data.alreadyOver
+                            ? data.local
+                                ? alreadyOverLocalPTStudysetIds?.length > 0 && ("" + alreadyOverLocalPTStudysetIds[0]).includes("-")
+                                    ? cloudLinkFunc(alreadyOverLocalPTStudysetIds[0])
+                                    : localLinkFunc(alreadyOverLocalPTStudysetIds[0])
+                                : cloudLinkFunc(data.studysetId ?? data.studysetIds?.[0])
+                            : data.local
+                                ? localLinkFunc(data.localId)
+                                : cloudLinkFunc(data.studysetId ?? data.studysetIds?.[0]);
+                        }
+                        <a href={idkWhatsGoingOnStudysetLink(
+                            (id) => `/studysets/${id}/stats`,
+                            (id) => `/studyset/local/stats?id=${id}`
+                        )} class="button alt text fg1">Updated Progress &amp; Stats</a>
+                        <button onclick={() => window.location.href = idkWhatsGoingOnStudysetLink(
+                            (id) => `/studysets/${id}/practice-test#top`,
+                            (id) => `/studyset/local/practice-test?id=${id}#top`
+                        )} class="alt text fg1">Practice Tests Page</button>
+                    </div>
+                {/if}
             {:else}
                 <div class="flex" transition:slide={{ duration: 400 }}>
                     <button

@@ -84,7 +84,7 @@
             <span style="font-size: 1.2rem;">Uploading</span>
         </div>
     {:else}
-    <span>Drag & Drop Here or Select {multiple ? "Files" : "File"}</span>
+    <span>Drag &amp; Drop Here or Select {multiple ? "Files" : "File"}</span>
     <label class="button">
         Select {multiple ? "File" : "File"}
         <input type="file" {accept} {multiple} class="invisible" bind:this={fileInput} onchange={e => {

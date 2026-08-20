@@ -5,7 +5,6 @@
     import UserIcon from "$lib/icons/User.svelte";
 
     let { data } = $props();
-    console.log(data);
 </script>
 
 <svelte:head>

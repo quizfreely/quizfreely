@@ -46,6 +46,6 @@
         <a href="/host/play?{data.studysetId != null ?
             `studysetId=${data.studysetId}` :
             `localId=${data.studysetId}`
-        }&t={parseInt(mins) || DEFAULT_MINS}" class="button"><CheckmarkIcon></CheckmarkIcon> Start</a>
+        }&amp;t={parseInt(mins) || DEFAULT_MINS}" class="button"><CheckmarkIcon></CheckmarkIcon> Start</a>
     </div>
 </div>
