@@ -253,7 +253,7 @@
                     )}
                     <p class="shy-h4 b {
                         avgAccH >= 90 ?
-                            "yay" : (avgAccH >= 80 > "warn" : "ohno")
+                            "yay" : (avgAccH >= 80 ? "warn" : "ohno")
                     }" style="margin-top: 0px;">
                         {avgAccH}%
                     </p>
