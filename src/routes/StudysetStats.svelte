@@ -369,7 +369,7 @@
                         {#if terms?.length > 0 && termsStats != null && !isNaN(termsStats.avgAccuracy)}
                         <span class={
                             termsStats?.avgAccuracy >= 90 ?
-                                "yay" : "ohno"
+                                "yay" : (termsStats?.avgAccuracy >= 80 ? "warn" : "ohno")
                         }>{termsStats?.avgAccuracy}% average accuracy</span>
                         {/if}
                         <span class="fg0">{termsStats?.unreviewedCount ?? 0} new/unreviewed</span>
@@ -420,21 +420,19 @@
                         <div class="flex" style="margin-top: 0.6rem;">
                             <div>
                                 <p class="fg0" style="margin-top: 0px; margin-bottom: 0px;">Average Accuracy:</p>
-                                <p class="shy-h4 b {
+                                {const avgAccTsTerm = $derived(
                                     averageAccuracy(
                                         term.progress.termCorrectCount,
                                         term.progress.termIncorrectCount,
                                         term.progress.defCorrectCount,
-                                        term.progress.defIncorrectCount
-                                    ) >= 90 ?
-                                        "yay" : "ohno"
+                                        term.progress.defIncorrectCount,
+                                    ),
+                                )}
+                                <p class="shy-h4 b {
+                                     avgAccTsTerm >= 90 ?
+                                        "yay" : (avgAccTsTerm >= 80 ? "warn" : "ohno")
                                 }" style="margin-top: 0px;">
-                                    {averageAccuracy(
-                                        term.progress.termCorrectCount,
-                                        term.progress.termIncorrectCount,
-                                        term.progress.defCorrectCount,
-                                        term.progress.defIncorrectCount
-                                    )}%
+                                    {avgAccTsTerm}%
                                 </p>
                             </div>
                             <div>
@@ -442,19 +440,19 @@
                                 {#if term.progress.defCorrectCount +
                                     term.progress.defIncorrectCount > 0
                                 }
+                                    {const ttdAccTsTerm = $derived(
+                                        Math.floor(
+                                            term.progress.defCorrectCount / (
+                                                term.progress.defCorrectCount +
+                                                term.progress.defIncorrectCount
+                                            ) * 100,
+                                        ),
+                                    )}
                                 <p class="shy-h4 b {
-                                    term.progress.defCorrectCount / (
-                                        term.progress.defCorrectCount +
-                                        term.progress.defIncorrectCount
-                                    ) >= 0.9 ?
-                                        "yay" : "ohno"
+                                    ttdAccTsTerm >= 90 ?
+                                        "yay" : (ttdAccTsTerm >= 80 ? "warn" : "ohno")
                                 }" style="margin-top: 0px;">
-                                    {Math.floor(
-                                        term.progress.defCorrectCount / (
-                                            term.progress.defCorrectCount +
-                                            term.progress.defIncorrectCount
-                                        ) * 100
-                                    )}%
+                                    {ttdAccTsTerm}%
                                 </p>
                                 {:else}
                                 <p class="fg0 shy-h4" style="margin-top: 0px;">N/A</p>
@@ -465,19 +463,19 @@
                                 {#if term.progress.termCorrectCount +
                                     term.progress.termIncorrectCount > 0
                                 }
+                                    {const dttAccTsTerm = $derived(
+                                        Math.floor(
+                                            term.progress.termCorrectCount / (
+                                                term.progress.termCorrectCount +
+                                                term.progress.termIncorrectCount
+                                            ) * 100,
+                                        ),
+                                    )}
                                 <p class="shy-h4 b {
-                                    term.progress.termCorrectCount / (
-                                        term.progress.termCorrectCount +
-                                        term.progress.termIncorrectCount
-                                    ) >= 0.9 ?
-                                        "yay" : "ohno"
+                                    dttAccTsTerm >= 90 ?
+                                        "yay" : (dttAccTsTerm >= 80 ? "warn" : "ohno")
                                 }" style="margin-top: 0px;">
-                                    {Math.floor(
-                                        term.progress.termCorrectCount / (
-                                            term.progress.termCorrectCount +
-                                            term.progress.termIncorrectCount
-                                        ) * 100
-                                    )}%
+                                    {dttAccTsTerm}%
                                 </p>
                                 {:else}
                                 <p class="fg0 shy-h4" style="margin-top: 0px;">N/A</p>
@@ -550,7 +548,7 @@
                     <div class="flex">
                         {#if practiceTests?.length > 0 && practiceTestAvgScore != -1}
                             <span class={practiceTestAvgScore >= 90 ?
-                                "yay" : "ohno"
+                                "yay" : (practiceTestAvgScore >= 80 ? "warn" : "ohno")
                             }>{practiceTestAvgScore}% average score</span>
                         {/if}
                         <span class="fg0">{practiceTests?.length ?? 0} total</span>
@@ -561,10 +559,13 @@
                         {#if index < COLLAPSED_PRACTICE_TESTS_COUNT || showAllPracticeTests}
                         <div class="box" transition:slide={{duration: 600}}>
                             <div class="grid gridfourpartthingrow">
+                                {const tsPtScore = $derived(
+                                    Math.floor((practiceTest.questionsCorrect / practiceTest.questionsTotal) * 100)
+                                )}
                                 <span class="b fourpartthing-one {
-                                    Math.floor((practiceTest.questionsCorrect / practiceTest.questionsTotal) * 100) >= 90 ?
-                                        "yay" : "ohno"
-                                }">{Math.floor((practiceTest.questionsCorrect / practiceTest.questionsTotal) * 100)}%</span>
+                                    tsPtScore >= 90 ?
+                                        "yay" : (tsPtScore >= 80 ? "warn" : "ohno")
+                                }">{tsPtScore}%</span>
                                 <span class="fourpartthing-two">{practiceTest.questionsCorrect}/{practiceTest.questionsTotal}</span>
                                 <span class="fourpartthing-three">{mounted ? fancyTimestamp.format(practiceTest.timestamp) : "..."}</span>
                                 <a href="{

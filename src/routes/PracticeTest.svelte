@@ -675,14 +675,14 @@ FRQs: ${numFRQsToAssign}`,
                 transition:slide={{ duration: 400 }}
             >
                 <div class="flex" style="justify-content: space-between;">
-                    <span
-                        class="b {questionsCorrect / questions.length >= 0.9
+                    {const score = $derived(Math.round(
+                        (questionsCorrect / questions.length) * 100,
+                    ))}
+                    <span class="b {
+                        score >= 90
                             ? 'yay'
-                            : 'ohno'}"
-                        >{Math.round(
-                            (questionsCorrect / questions.length) * 100,
-                        )}%</span
-                    >
+                            : (score >= 80 ? 'warn' : 'ohno')
+                    }">{score}%</span>
                     <span>{questionsCorrect}/{questions.length} Correct</span>
                 </div>
             </div>
@@ -863,19 +863,18 @@ FRQs: ${numFRQsToAssign}`,
                 {#each practiceTests as practiceTest}
                     <div class="box">
                         <div class="grid gridfourpartthingrow">
+                            {const ptScore = $derived(
+                                Math.floor(
+                                    (practiceTest.questionsCorrect /
+                                    practiceTest.questionsTotal) *
+                                    100,
+                                ),
+                            )}
                             <span
-                                class="b fourpartthing-one {Math.floor(
-                                    (practiceTest.questionsCorrect /
-                                        practiceTest.questionsTotal) *
-                                        100,
-                                ) >= 90
+                                class="b fourpartthing-one {ptScore >= 90
                                     ? 'yay'
-                                    : 'ohno'}"
-                                >{Math.floor(
-                                    (practiceTest.questionsCorrect /
-                                        practiceTest.questionsTotal) *
-                                        100,
-                                )}%</span
+                                    : (ptScore >= 80 ? 'warn' : 'ohno')}"
+                                >{ptScore}%</span
                             >
                             <span class="fourpartthing-two"
                                 >{practiceTest.questionsCorrect}/{practiceTest.questionsTotal}</span

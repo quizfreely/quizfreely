@@ -243,21 +243,19 @@
             <div class="flex">
                 <div>
                     <p class="fg0" style="margin-top: 0px; margin-bottom: 0px;">Average Accuracy:</p>
-                    <p class="shy-h4 b {
+                    {const avgAccH = $derived(
                         averageAccuracy(
                             term.progress.termCorrectCount,
                             term.progress.termIncorrectCount,
                             term.progress.defCorrectCount,
-                            term.progress.defIncorrectCount
-                        ) >= 90 ?
-                            "yay" : "ohno"
+                            term.progress.defIncorrectCount,
+                        ),
+                    )}
+                    <p class="shy-h4 b {
+                        avgAccH >= 90 ?
+                            "yay" : (avgAccH >= 80 > "warn" : "ohno")
                     }" style="margin-top: 0px;">
-                        {averageAccuracy(
-                            term.progress.termCorrectCount,
-                            term.progress.termIncorrectCount,
-                            term.progress.defCorrectCount,
-                            term.progress.defIncorrectCount
-                        )}%
+                        {avgAccH}%
                     </p>
                 </div>
                 <div>
@@ -265,19 +263,19 @@
                     {#if term.progress.defCorrectCount +
                         term.progress.defIncorrectCount > 0
                     }
-                        <p class="shy-h4 b {
-                            term.progress.defCorrectCount / (
-                                term.progress.defCorrectCount +
-                                term.progress.defIncorrectCount
-                            ) >= 0.9 ?
-                                "yay" : "ohno"
-                        }" style="margin-top: 0px;">
-                            {Math.floor(
+                        {const ttdAccH = $derived(
+                            Math.floor(
                                 term.progress.defCorrectCount / (
                                     term.progress.defCorrectCount +
                                     term.progress.defIncorrectCount
-                                ) * 100
-                            )}%
+                                ) * 100,
+                            ),
+                        )}
+                        <p class="shy-h4 b {
+                            ttdAccH >= 90 ?
+                                "yay" : (ttdAccH >= 80 ? "warn" : "ohno")
+                        }" style="margin-top: 0px;">
+                            {ttdAccH}%
                         </p>
                     {:else}
                         <p class="fg0 shy-h4" style="margin-top: 0px;">N/A</p>
@@ -288,19 +286,19 @@
                     {#if term.progress.termCorrectCount +
                         term.progress.termIncorrectCount > 0
                     }
-                        <p class="shy-h4 b {
-                            term.progress.termCorrectCount / (
-                                term.progress.termCorrectCount +
-                                term.progress.termIncorrectCount
-                            ) >= 0.9 ?
-                                "yay" : "ohno"
-                        }" style="margin-top: 0px;">
-                            {Math.floor(
+                        {const dttAccH = $derived(
+                            Math.floor(
                                 term.progress.termCorrectCount / (
                                     term.progress.termCorrectCount +
                                     term.progress.termIncorrectCount
-                                ) * 100
-                            )}%
+                                ) * 100,
+                            ),
+                        )}
+                        <p class="shy-h4 b {
+                            dttAccH >= 90 ?
+                                "yay" : (dttAccH >= 80 ? "warn" : "ohno")
+                        }" style="margin-top: 0px;">
+                            {dttAccH}%
                         </p>
                     {:else}
                         <p class="fg0 shy-h4" style="margin-top: 0px;">N/A</p>
