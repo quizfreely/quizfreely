@@ -304,8 +304,8 @@
         <div class="box grid qzfr-pt-box">
             <span class="qzfrbox-type fg0">Practice Test</span>
             {const score = $derived(Math.round(item.questionsCorrect/item.questionsTotal*100))}
-            <span class="qzfrbox-score {score >= 90 ? "yay" : "ohno"}">{score}%</span>
-            <span class="qzfrbox-count {score >= 90 ? "yay" : "ohno"}">{item.questionsCorrect}/{item.questionsTotal}</span>
+            <span class="qzfrbox-score {score >= 90 ? "yay" : (score >= 80 ? "warn" : "ohno")}">{score}%</span>
+            <span class="qzfrbox-count {score >= 90 ? "yay" : (score >= 80 ? "warn" : "ohno")}">{item.questionsCorrect}/{item.questionsTotal}</span>
         </div>
     {:else if item.__typename == "MatchActivity"}
         <div class="box grid qzfr-match-box">
