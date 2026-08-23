@@ -964,29 +964,9 @@ FRQs: ${numFRQsToAssign}`,
                 <div class="flex" transition:slide={{ duration: 400 }}>
                     <p class="yay"><CheckmarkIcon></CheckmarkIcon> Submitted</p>
                 </div>
-                {#if questions?.length > 4}
+                {#if !data.alreadyOver}
                     <div style="margin-top: 2rem;">
                         {@render scoreSection()}
-                    </div>
-                    <div class="flex center" style="margin-top: 2rem;">
-                        {const idkWhatsGoingOnStudysetLink = (cloudLinkFunc, localLinkFunc) => data.alreadyOver
-                            ? data.local
-                                ? alreadyOverLocalPTStudysetIds?.length > 0 && ("" + alreadyOverLocalPTStudysetIds[0]).includes("-")
-                                    ? cloudLinkFunc(alreadyOverLocalPTStudysetIds[0])
-                                    : localLinkFunc(alreadyOverLocalPTStudysetIds[0])
-                                : cloudLinkFunc(data.studysetId ?? data.studysetIds?.[0])
-                            : data.local
-                                ? localLinkFunc(data.localId)
-                                : cloudLinkFunc(data.studysetId ?? data.studysetIds?.[0]);
-                        }
-                        <a href={idkWhatsGoingOnStudysetLink(
-                            (id) => `/studysets/${id}/stats`,
-                            (id) => `/studyset/local/stats?id=${id}`
-                        )} class="button alt text fg1">Updated Progress &amp; Stats</a>
-                        <button onclick={() => window.location.href = idkWhatsGoingOnStudysetLink(
-                            (id) => `/studysets/${id}/practice-test#top`,
-                            (id) => `/studyset/local/practice-test?id=${id}#top`
-                        )} class="alt text fg1">Practice Tests Page</button>
                     </div>
                 {/if}
             {:else}
