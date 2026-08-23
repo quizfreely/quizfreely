@@ -26,32 +26,49 @@
     let totalTermsReviewed = $state("0");
     let totalTermsCount = 0;
     function calcChart(reviewEventStatsByDay) {
-        if (reviewEventStatsByDay?.length > 0) {
-            totalTermsCount = 0;
-            chartData = reviewEventStatsByDay.map((obj) => {
-                const d = { ...obj };
-                d.date = new Date(d.timestamp);
-                d.date.setHours(0, 0, 0, 0);
-                d.terms = d.correct + d.incorrect;
-                totalTermsCount += d.terms;
-                if (d?.terms == 0) {
-                    d.terms = null;
-                }
-                return d;
-            });
-            totalTermsReviewed = totalTermsCount.toLocaleString();
-
-            const sortedValues = chartData
-                .map(d => d.terms)
-                .filter((v) => v > 0)
-                .sort((a, b) => a - b)
-            const refMax = quantile(sortedValues, 0.95) ?? 1;
-            domain = [
-                refMax * 0.25,
-                refMax * 0.5,
-                refMax * 0.75
-            ];
+        if (reviewEventStatsByDay == null || reviewEventStatsByDay?.length == 0) {
+            return;
         }
+        totalTermsCount = 0;
+        const statsByDate = new Map();
+        chartData.forEach((d) => {
+            statsByDate.set(d.date.getTime(), { ...d });
+        });
+        reviewEventStatsByDay.forEach((obj) => {
+            const date = new Date(obj.timestamp);
+            date.setHours(0, 0, 0, 0);
+            const existing = statsByDate.get(date.getTime());
+            if (existing) {
+                existing.correct += obj.correct;
+                existing.incorrect += obj.incorrect;
+            } else {
+                statsByDate.set(date.getTime(), {
+                    ...obj,
+                    date
+                });
+            }
+        });
+        chartData = Array.from(statsByDate.values()).map((obj) => {
+            const d = { ...obj };
+            d.terms = d.correct + d.incorrect;
+            totalTermsCount += d.terms;
+            if (d?.terms == 0) {
+                d.terms = null;
+            }
+            return d;
+        });
+        totalTermsReviewed = totalTermsCount.toLocaleString();
+
+        const sortedValues = chartData
+            .map(d => d.terms)
+            .filter((v) => v > 0)
+            .sort((a, b) => a - b)
+        const refMax = quantile(sortedValues, 0.95) ?? 1;
+        domain = [
+            refMax * 0.25,
+            refMax * 0.5,
+            refMax * 0.75
+        ];
     }
     if (data.authed) {
         calcChart(data.reviewEventStatsByDay);
@@ -94,26 +111,31 @@
                 console.error("Error loading recent activity studysets from local IDB:", err);
             }
         }
-        if (!data.authed) {
-            const reviewStats = await idbApiLayer.getReviewEventStatsByDay({ last: 366 });
-            calcChart(reviewStats);
-            const localActivityHistory = await idbApiLayer.activityHistory({
-                last: 40,
-                getCloudStudysets: cloudStudysetsByIds
+        const reviewStats = await idbApiLayer.getReviewEventStatsByDay({ last: 366 });
+        calcChart(reviewStats);
+        const localActivityHistory = await idbApiLayer.activityHistory({
+            last: 40,
+            getCloudStudysets: cloudStudysetsByIds
+        });
+        // console.log("localActivityHistory:", localActivityHistory);
+        if (localActivityHistory == null) {
+            console.error("idbApiLayer.activityHistory returned nullish")
+        } else {
+            localActivityHistory.forEach(item => {
+                if (item.timestamp != null) {
+                    item.__typename = "PracticeTest";
+                } else if (item.endTimestamp != null) {
+                    item.__typename = "MatchActivity";
+                }
             });
-            // console.log("localActivityHistory:", localActivityHistory);
-            if (localActivityHistory == null) {
-                console.error("idbApiLayer.activityHistory returned nullish")
-            } else {
-                localActivityHistory.forEach(item => {
-                    if (item.timestamp != null) {
-                        item.__typename = "PracticeTest";
-                    } else if (item.endTimestamp != null) {
-                        item.__typename = "MatchActivity";
-                    }
-                });
-                activityHistory = localActivityHistory;
-            }
+            activityHistory = [
+                ...activityHistory,
+                ...localActivityHistory
+            ].sort((a, b) =>
+                (b.timestamp ?? b.endTimestamp ?? "").localeCompare(
+                    a.timestamp ?? a.endTimestamp ?? ""
+                )
+            );
         }
     });
     function recentLinkFunc(id) {
