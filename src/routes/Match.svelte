@@ -766,7 +766,7 @@
 {#if showDone && showPerfect}
     <!-- fullscreen confetti if 100% accuracy -->
     <div
-        style="position: fixed; top: -50px; left 0px; margin: 0px; padding: 0px; height: 100vh; width: 100vw; display: flex; justify-content: center; overflow: hidden; pointer-events: none;"
+        style="position: fixed; top: -50px; left: 0px; z-index: 800; margin: 0px; padding: 0px; height: 100vh; width: 100vw; display: flex; justify-content: center; overflow: hidden; pointer-events: none;"
     >
         <Confetti
             x={[-5, 5]}
