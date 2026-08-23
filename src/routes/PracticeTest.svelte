@@ -686,9 +686,11 @@ FRQs: ${numFRQsToAssign}`,
                     <span>{questionsCorrect}/{questions.length} Correct</span>
                 </div>
             </div>
+            {#if data.alreadyOver}
             <div style="margin-bottom: 3rem;">
                 {@render scoreSection()}
             </div>
+            {/if}
         {/if}
         {#if showSetup}
             <div transition:slide={{ duration: 400 }}>
@@ -1197,7 +1199,7 @@ FRQs: ${numFRQsToAssign}`,
 {#if !data?.alreadyOver && showScore && questionsCorrect / questions.length == 1}
     <!-- fullscreen confetti if 100% -->
     <div
-        style="position: fixed; top: -50px; left 0px; margin: 0px; padding: 0px; height: 100vh; width: 100vw; display: flex; justify-content: center; overflow: hidden; pointer-events: none;"
+        style="position: fixed; top: -50px; left: 0px; z-index: 800; margin: 0px; padding: 0px; height: 100vh; width: 100vw; display: flex; justify-content: center; overflow: hidden; pointer-events: none;"
     >
         <Confetti
             x={[-5, 5]}
