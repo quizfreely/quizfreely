@@ -1,4 +1,4 @@
-import fetchAuthData from "$lib/fetchAuthData.server"
+import fetchAuthData from "$lib/fetchAuthData.js"
 
 export async function load({ locals, fetch }) {
     return {

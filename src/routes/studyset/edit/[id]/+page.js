@@ -1,4 +1,4 @@
-import fetchAuthData from '$lib/fetchAuthData.server'
+import fetchAuthData from '$lib/fetchAuthData.js'
 
 export async function load({ fetch, params, url }) {
     let userResult = await fetchAuthData({ fetch })
