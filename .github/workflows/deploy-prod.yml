@@ -51,7 +51,7 @@ jobs:
       - uses: actions/setup-node@v6
         if: ${{ inputs.update_web == true }}
         with:
-          node-version: 24
+          node-version: 22
       - name: Get Version Number (web)
         if: ${{ inputs.update_web == true }}
         run: |
