@@ -1,5 +1,4 @@
 import { redirect } from "@sveltejs/kit";
-import { load as dashboardLoad } from "./dashboard/+page.server";
 import { load as landingPageLoad } from "./about/+page.server";
 
 export async function load({ fetch }) {
