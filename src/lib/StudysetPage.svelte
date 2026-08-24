@@ -6,7 +6,7 @@
     import { fade, slide } from "svelte/transition";
     let { data } = $props();
 
-    import Flashcards from "../lib/components/Flashcards.svelte";
+    import Flashcards from "$lib/components/Flashcards.svelte";
     import Dropdown from "$lib/components/Dropdown.svelte";
     import FolderPicker from "$lib/components/FolderPicker.svelte";
 

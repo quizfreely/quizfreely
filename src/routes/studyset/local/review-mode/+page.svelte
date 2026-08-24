@@ -1,5 +1,5 @@
 <script>
-    import ReviewMode from "../../../ReviewMode.svelte"
+    import ReviewMode from "$lib/ReviewMode.svelte"
     let { data } = $props();
 </script>
 

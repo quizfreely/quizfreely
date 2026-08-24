@@ -1,5 +1,5 @@
 <script>
-    import StudysetStats from "../../../StudysetStats.svelte"
+    import StudysetStats from "$lib/StudysetStats.svelte"
     let { data } = $props();
 </script>
 

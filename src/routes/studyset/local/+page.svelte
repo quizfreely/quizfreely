@@ -1,5 +1,5 @@
 <script>
-    import StudysetPage from "../../StudysetPage.svelte";
+    import StudysetPage from "$lib/StudysetPage.svelte";
     let { data } = $props();
 </script>
 
