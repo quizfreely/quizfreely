@@ -1,11 +1,29 @@
 <script>
-    // import { onMount } from "svelte";
+    import { onMount } from "svelte";
+    import IconCheckmark from "$lib/icons/Checkmark.svelte";
     let { data } = $props();
 
-    import IconCheckmark from "$lib/icons/Checkmark.svelte";
+    let fmtHours = $state(null);
+    onMount(function () {
+        try {
+            const getFmtHours = window.localStorage.getItem("quizfreely:fmt_hours");
+            if (getFmtHours == "24" || getFmtHours == "12") {
+                fmtHours = getFmtHours;
+            }
+        } catch (err) {
+            console.log("No localStorage? 😭 Err:", err);
+        }
+    })
 
-    // onMount(function () {
-    // })
+    /* quizfreely:fmt_hours (value) is "24", "12", or "AUTO" */
+    function setFmtHours(value) {
+        try {
+            window.localStorage.setItem("quizfreely:fmt_hours", value);
+            fmtHours = value;
+        } catch (err) {
+            console.log("setFmtHours localStorage ERR:", err);
+        }
+    }
 </script>
 <style>
   .a-little-different-grid-list {
@@ -41,30 +59,23 @@
 <p>Date &amp; Time</p>
 <div>
   <div class="flex">
-    <a href="/settings/date-time-format?clear=true" class="button button-box {
-        data?.dateTimeFormatHours != "24" &&
-        data?.dateTimeFormatHours != "12" ?
-            "selected" :
-            ""
+    <button onclick={() => setFmtHours("AUTO")} class="button-box {
+        (fmtHours != "24" && fmtHours != "12") ? "selected" : ""
     }">
         <IconCheckmark class="button-box-selected-icon" />
         Auto
-    </a>
-    <a href="/settings/date-time-format?h=24" class="button button-box {
-        data?.dateTimeFormatHours == "24" ?
-            "selected" :
-            ""
+    </button>
+    <button onclick={() => setFmtHours("24")} class="button-box {
+        fmtHours == "24" ? "selected" : ""
     }">
       <IconCheckmark class="button-box-selected-icon" />
       24 Hour
-    </a>
-    <a href="/settings/date-time-format?h=12" class="button button-box {
-        data?.dateTimeFormatHours == "12" ?
-            "selected" :
-            ""
+    </button>
+    <button onclick={() => setFmtHours("12")} class="button-box {
+        fmtHours == "12" ? "selected" : ""
     }">
       <IconCheckmark class="button-box-selected-icon" />
       12 Hour (AM/PM)
-    </a>
+    </button>
   </div>
 </div>
