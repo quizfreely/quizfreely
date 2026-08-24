@@ -28,47 +28,48 @@ export function init() {
     }
 }
 
-export function handle({ event, resolve }) {
+export async function handle({ event, resolve }) {
     let theme = "auto";
     let themeCookie = event.cookies.get("theme");
     if (themeCookie !== undefined && themesList.includes(themeCookie)) {
         theme = themeCookie;
     }
     event.locals.theme = theme;
-    return resolve(event, {
+    let replacedTheme = false;
+    let replacedUmami = false;
+    return await resolve(event, {
         transformPageChunk: function ({ html }) {
-            /* run `replace` exactly twice for theme:
-            once for %theme% in html's class attribute,
-            and again for %theme% in the css href
-            see web/src/app.html for details
-            
-            we run it a fixed number of times
-            and do NOT use replaceAll
-            because there might be pages
-            where %theme% is literally in rendered html
-            that we do NOT want to replace,
-            for example documentation might have `%theme%` */
-            let result = html.replace(
-                "%theme%", theme
-            ).replace(
-                "%theme%", theme
-            );
-            /* run `replace` (NOT replaceAll) for umami
-            & turn script tag into comment if disabled */
-            if (env.ENABLE_UMAMI == "true") {
+            let result = html;
+            if (!replacedTheme && result.includes("%theme%")) {
+                /* run `replace` exactly once for theme.
+                we do NOT use replaceAll
+                because there might be pages
+                where %theme% is literally in rendered html
+                that we do NOT want to replace */
                 result = result.replace(
-                    "%enable_umami%", ""
-                ).replace(
-                    "%umami_site_id%", env.UMAMI_SITE_ID
-                ).replace(
-                    "%enable_umami_end%", ""
+                    "%theme%", theme
                 );
-            } else {
-                result = result.replace(
-                    "%enable_umami%", "<!--"
-                ).replace(
-                    "%enable_umami_end%", "-->"
-                );
+                replacedTheme = true;
+            }
+            if (!replacedUmami && result.includes("%enable_umami%")) {
+                /* run `replace` (NOT replaceAll) for umami
+                & turn script tag into comment if disabled */
+                if (env.ENABLE_UMAMI == "true") {
+                    result = result.replace(
+                        "%enable_umami%", ""
+                    ).replace(
+                        "%umami_site_id%", env.UMAMI_SITE_ID
+                    ).replace(
+                        "%enable_umami_end%", ""
+                    );
+                } else {
+                    result = result.replace(
+                        "%enable_umami%", "<!--"
+                    ).replace(
+                        "%enable_umami_end%", "-->"
+                    );
+                }
+                replacedUmami = true;
             }
             return result;
         }
