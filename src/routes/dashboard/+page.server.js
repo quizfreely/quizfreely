@@ -11,7 +11,7 @@ export async function load({ cookies, locals, fetch }) {
       /* 30 days * 24h * 60m * 60s = 2592000 sec for 30 days */
       maxAge: 2592000,
       path: "/",
-      httpOnly: true,
+      httpOnly: false,
       /* when secure is true,
       browsers only send the cookie through https,
       on localhost, browsers send it even if localhost isn't using https */
@@ -20,23 +20,18 @@ export async function load({ cookies, locals, fetch }) {
     }
   );
   if (cookies.get("settingsdatetimeformathours")) {
-    cookies.set(
+    /* remove old cookie no longer used for settings (fmtHour) (fancyTimestamp) */
+    cookies.delete(
       "settingsdatetimeformathours",
-      cookies.get("settingsdatetimeformathours"),
       {
-        /* 30 days * 24h * 60m * 60s = 2592000 sec for 30 days */
         maxAge: 2592000,
         path: "/",
         httpOnly: true,
-        /* when secure is true,
-        browsers only send the cookie through https,
-        on localhost, browsers send it even if localhost isn't using https */
         secure: true,
         sameSite: "lax"
       }
     );
   }
-  if (cookies.get("auth")) {
     try {
       let rawApiRes = await fetch("/api/graphql", {
         method: "POST",
@@ -88,18 +83,12 @@ export async function load({ cookies, locals, fetch }) {
             myFolders,
             myFoldersPageInfo: apiRes.data.myFolders?.pageInfo,
             header: { activePage: "home" },
-            settingsDateTimeFormatHours: cookies.get(
-              "settingsdatetimeformathours"
-            )
           }
         } else {
           return {
             dashboardPage: "dashboard",
             authed: false,
             header: { activePage: "home" },
-            settingsDateTimeFormatHours: cookies.get(
-              "settingsdatetimeformathours"
-            )
           }
         }
       } catch (error) {
@@ -109,9 +98,6 @@ export async function load({ cookies, locals, fetch }) {
           dashboardPage: "dashboard",
           authed: false,
           header: { activePage: "home" },
-          settingsDateTimeFormatHours: cookies.get(
-            "settingsdatetimeformathours"
-          )
         }
       }
     } catch (error) {
@@ -122,19 +108,6 @@ export async function load({ cookies, locals, fetch }) {
         dashboardPage: "dashboard",
         authed: false,
         header: { activePage: "home" },
-        settingsDateTimeFormatHours: cookies.get(
-          "settingsdatetimeformathours"
-        )
       }
     }
-  } else {
-    return {
-      dashboardPage: "dashboard",
-      authed: false,
-      header: { activePage: "home" },
-      settingsDateTimeFormatHours: cookies.get(
-        "settingsdatetimeformathours"
-      )
-    }
-  }
 };

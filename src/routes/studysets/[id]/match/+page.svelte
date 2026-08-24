@@ -1,5 +1,5 @@
 <script>
-    import Match from "../../../Match.svelte";
+    import Match from "$lib/Match.svelte";
 
     let { data } = $props();
 </script>

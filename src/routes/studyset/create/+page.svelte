@@ -1,5 +1,5 @@
 <script>
-    import Edit from "../../Edit.svelte";
+    import Edit from "$lib/Edit.svelte";
     let { data } = $props();
 </script>
 

@@ -1,0 +1,1259 @@
+<script>
+    import { onMount } from "svelte";
+    import { idbApiLayer, db } from "$lib/idb-api-layer";
+    import BackIcon from "$lib/icons/BackArrow.svelte";
+    import ForwardLongArrowIcon from "$lib/icons/ForwardRightArrowLong.svelte";
+    import ExitIcon from "$lib/icons/Exit.svelte";
+    import CheckmarkIcon from "$lib/icons/Checkmark.svelte";
+    import PracticeTestIcon from "$lib/icons/PracticeTestChecklist.svelte";
+    import MCQ from "$lib/components/questions/MCQ.svelte";
+    import FRQ from "$lib/components/questions/FRQ.svelte";
+    import TFQ from "$lib/components/questions/TFQ.svelte";
+    import { slide, fade } from "svelte/transition";
+    import { goto } from "$app/navigation";
+    import { setCancelBeforeNavigate } from "$lib/cancel-before-navigate.js";
+    import { fancyTimestamp } from "$lib/fancyTimestamp";
+    import { Confetti } from "svelte-confetti";
+	import { backOut, cubicInOut } from 'svelte/easing';
+	import { Arc, Chart, Group, Layer, LinearGradient, Text } from 'layerchart';
+    let { data } = $props();
+    let terms = $state();
+    let practiceTests = $state([]);
+
+    // maps questions from practice test data to objs with props for question components
+    function mapPracticeTestQuestionToQuestionComponentFormat(q) {
+        const cq = q?.mcq ?? q?.tfq ?? q?.frq;
+        return {
+            type: q?.mcq != null ? "MCQ" : (q?.tfq != null ? "TFQ" : (q?.frq != null ? "FRQ" : "UNKNOWN")),
+            term: cq?.term,
+            answerWith: cq?.answerWith,
+            answeredIndex: q?.mcq?.answeredIndex,
+            answeredBool: q?.tfq?.answeredBool,
+            answeredString: q?.frq?.answeredString,
+            distractors: q?.mcq?.distractors,
+            distractor: q?.tfq?.distractor,
+            correctChoiceIndex: q?.mcq?.correctChoiceIndex,
+            wasCorrect: cq?.correct,
+            userMarkedCorrect: q?.frq?.userMarkedCorrect,
+            id: q?.id
+        };
+    }
+
+    if (!data.local && !data.alreadyOver) {
+        // console.log(data.studyset)
+        terms = data?.studyset?.terms;
+        practiceTests = data?.studyset?.practiceTests;
+    }
+    let alreadyOverLocalPTStudysetIds = $state([]);
+    let fancyTimestampReady = $state(false);
+    onMount(() => {
+        let objectKeys = [];
+        (async () => {
+            try {
+                const fmtHours = window.localStorage.getItem("quizfreely:fmt_hours");
+                if (fmtHours == "24") {
+                    fancyTimestamp.hours = 24;
+                } else if (fmtHours == "12") {
+                    fancyTimestamp.hours = 12;
+                }
+            } catch (err) {
+                console.log("No localStorage? 😭 Err:", err);
+            }
+            fancyTimestampReady = true;
+        })();
+        (async () => {
+
+            if (data.local && data.alreadyOver) {
+                const pt = await idbApiLayer.getPracticeTestWithQuestions(data.practiceTestId);
+                if (pt == null) {
+                    alert("invalid local practice test id");
+                    console.error("local practice test not found");
+                } else {
+                    questions = pt.questions.map(
+                        mapPracticeTestQuestionToQuestionComponentFormat,
+                    );
+                    questionsCorrect = pt.questionsCorrect;
+                    alreadyOverLocalPTStudysetIds = pt.studysetIds;
+                }
+            }
+
+            if (data.local && !data.alreadyOver) {
+                /* studyset is local, so regardless of wheater the user is logged in or not,
+                we load the studyset and progress locally */
+                const studyset = await idbApiLayer.getStudysetById(data.localId, {
+                    terms: {
+                        progress: true,
+                        termImageUrl: true,
+                        defImageUrl: true
+                    },
+                    practiceTests: true,
+                });
+                terms = studyset.terms;
+                terms.forEach(term => {
+                    if (term.termImageUrl != null) {
+                        objectKeys.push(term.termImageUrl);
+                    }
+                    if (term.defImageUrl != null) {
+                        objectKeys.push(term.defImageUrl);
+                    }
+                });
+                practiceTests = studyset?.practiceTests;
+            }
+
+            if (!data.authed && !data.local && !data.alreadyOver) {
+                /* not logged in, so user data is local,
+                but studyset is a cloud studyset,
+                so we need to map local progress to cloud terms
+
+                `terms` has already been populated during SSR (above, before onMount) */
+                practiceTests = await db.practiceTests
+                    .where("studysetIds")
+                    .equals(data.studysetId)
+                    .toArray();
+                practiceTests?.sort(
+                    /* timestamps are ISO strings in UTC,
+                    so lexical/alphanumeric sorting is the same as chronological sorting
+                    also you see we're comparing `b` to `a`, so its descending,
+                    so most recent is first */
+                    (a, b) => b.timestamp.localeCompare(a.timestamp),
+                );
+                practiceTests = practiceTests;
+
+                for (const term of terms) {
+                    term.progress = await db.termProgress
+                        .where("termId")
+                        .equals(term.id)
+                        .toArray()?.[0];
+                }
+            }
+        })();
+        return () => {
+            objectKeys.forEach(objectKey => {
+                URL.revokeObjectURL(objectKey);
+            });
+            setCancelBeforeNavigate(undefined);
+        }
+    });
+
+    let answerWith = $state("DEF"); // "TERM", "DEF", or "BOTH"
+    let questionTypesEnabled = $state({
+        mcq: true,
+        tfq: false,
+        frq: false,
+    });
+
+    let questionsCountEntered = $state();
+
+    let defaultQuestionsCount = $derived(
+        terms?.length < 30 ? terms.length : 20
+    );
+
+    function shuffleArray(ogArray) {
+        let arr = [...ogArray];
+        for (let index = arr.length - 1; index > 0; index--) {
+            const randomIndex = Math.floor(Math.random() * (index + 1));
+            [arr[index], arr[randomIndex]] = [arr[randomIndex], arr[index]];
+        }
+        return arr;
+    }
+
+    let showSetup = $state(!data?.alreadyOver);
+    let questions = $state(
+        data?.practiceTest?.questions?.map(
+            mapPracticeTestQuestionToQuestionComponentFormat,
+        ) ?? [],
+    );
+    let questionComponents = $state([]);
+    function setupStart() {
+        showInputErr = false
+        if (terms == null || terms.length < 1) {
+            console.log("Terms array: ", terms);
+            inputErrMsg = "Sorry, there's not enough terms to take a practice test with";
+            showInputErr = true;
+            return;
+        }
+
+        let questionsCount = defaultQuestionsCount;
+        if (!isNaN(parseInt(questionsCountEntered))) {
+            console.log("questionsCountEntered: " + questionsCountEntered)
+            questionsCount = parseInt(questionsCountEntered);
+        } else if (questionsCountEntered != null && questionsCountEntered.trim().length > 0) {
+            inputErrMsg = "Invalid questions count. Please enter a number";
+            showInputErr = true;
+            return;
+        }
+
+        if (questionsCount == 0) {
+            inputErrMsg = "Invalid questions count. You can't have 0 questions";
+            showInputErr = true;
+            return;
+        }
+        if (questionsCount < 0) {
+            inputErrMsg = "Invalid questions count. You can't have a negative number of questions 😭";
+            showInputErr = true;
+            return;
+        }
+
+        let questionTypesEnabledArray = [];
+        Object.entries(questionTypesEnabled).forEach(
+            ([questionType, enabled]) => {
+                if (enabled) {
+                    questionTypesEnabledArray.push(questionType);
+                }
+            },
+        );
+        if (questionTypesEnabledArray.length == 0) {
+            inputErrMsg = "Select 1 or more question types to enable";
+            showInputErr = true;
+            return;
+        }
+
+        let numMCQsToAssign = 0;
+        let numTFQsToAssign = 0;
+        let numFRQsToAssign = 0;
+        let unassignedQuestionsCount = questionsCount;
+
+        let unassignedQuestionTypesCount = questionTypesEnabledArray.length;
+
+        if (questionTypesEnabled.frq) {
+            numFRQsToAssign = Math.floor(
+                unassignedQuestionsCount / unassignedQuestionTypesCount,
+            );
+            unassignedQuestionsCount -= numFRQsToAssign;
+
+            unassignedQuestionTypesCount--;
+        }
+        if (questionTypesEnabled.tfq) {
+            numTFQsToAssign = Math.floor(
+                unassignedQuestionsCount / unassignedQuestionTypesCount,
+            );
+            unassignedQuestionsCount -= numTFQsToAssign;
+
+            unassignedQuestionTypesCount--;
+        }
+        if (questionTypesEnabled.mcq) {
+            numMCQsToAssign = unassignedQuestionsCount;
+            unassignedQuestionsCount = 0;
+            unassignedQuestionTypesCount--;
+        }
+        console.log(
+            `Total: ${questionsCount},
+MCQs: ${numMCQsToAssign},
+True/False: ${numTFQsToAssign},
+FRQs: ${numFRQsToAssign}`,
+        );
+
+        let remainingCounts = {
+            mcq: numMCQsToAssign,
+            tfq: numTFQsToAssign,
+            frq: numFRQsToAssign,
+        };
+
+        /* NOTE: pickNewRandomTerm(array) will mutate the array, so pass a copy */
+        function pickNewRandomTerm(termsArray) {
+            if (termsArray.length == 0) {
+                pickRepeatedRandomTerm();
+                return;
+            }
+            if (questions.length >= questionsCount) {
+                return;
+            }
+            const random = Math.floor(Math.random() * termsArray.length);
+
+            pickQuestionType(termsArray[random], remainingCounts);
+
+            termsArray.splice(random, 1);
+            pickNewRandomTerm(termsArray);
+        }
+
+        function pickRepeatedRandomTerm() {
+            if (questions.length >= questionsCount) {
+                return;
+            }
+
+            const random = Math.floor(Math.random() * terms.length);
+            let questionsWSameTerm = questions.filter(
+                (q) => q.termId == terms[random].id,
+            );
+            let unusedQuestionTypes = [...questionTypesEnabledArray];
+            questionsWSameTerm.forEach((q) => {
+                const index = unusedQuestionTypes.indexOf(q.questionType);
+                if (index > -1) {
+                    unusedQuestionTypes.splice(index, 1);
+                }
+            });
+            if (unusedQuestionTypes.length > 0) {
+                pickQuestionType(terms[random], remainingCounts);
+            } else {
+                pickQuestionType(terms[random], remainingCounts);
+            }
+
+            pickRepeatedRandomTerm();
+        }
+
+        function pickQuestionType(term, remainingCounts) {
+            const availableTypes = Object.entries(remainingCounts)
+                .filter(([type, count]) => count > 0)
+                .map(([type]) => type);
+
+            if (availableTypes.length === 0) return;
+
+            let questionType;
+            if (availableTypes.length === 1) {
+                questionType = availableTypes[0];
+            } else {
+                questionType =
+                    availableTypes[
+                        Math.floor(Math.random() * availableTypes.length)
+                    ];
+            }
+
+            switch (questionType) {
+                case "mcq":
+                    addMCQ(term);
+                    break;
+                case "tfq":
+                    addTFQ(term);
+                    break;
+                case "frq":
+                    addFRQ(term);
+                    break;
+            }
+
+            remainingCounts[questionType]--;
+        }
+
+        function isSameTermOrContent(t1, t2, strictSameness, defKey) {
+            if (strictSameness) {
+                /* strictSameness compares both sides
+                to avoid duplicate or confusing answer choices */
+                return (
+                    t1.id == t2.id ||
+                    (t1.term.trim() == t2.term.trim() &&
+                    t1.termImageUrl == t2.termImageUrl) ||
+                    (t1.def.trim() == t2.def.trim() &&
+                    t1.defImageUrl == t2.defImageUrl)
+                );
+            } else {
+                /* strictSameness=false only compares displayed term/def side
+                to avoid duplicate answer choices */
+                return (
+                    t1.id == t2.id ||
+                    (t1[defKey].trim() == t2[defKey].trim() &&
+                    t1[defKey+"ImageUrl"] == t2[defKey+"ImageUrl"])
+                );
+            }
+        }
+
+        function addMCQ(term) {
+            const pickedAnswerWith =
+                answerWith == "BOTH"
+                    ? Math.random() < 0.5
+                        ? "TERM"
+                        : "DEF"
+                    : answerWith;
+            const pickedKey = pickedAnswerWith.toLowerCase();
+            let question = {
+                type: "MCQ",
+                term: {
+                    id: term.id,
+                    term: term.term,
+                    def: term.def,
+                    termImageUrl: term.termImageUrl,
+                    defImageUrl: term.defImageUrl
+                },
+                answerWith: pickedAnswerWith,
+            };
+            question.distractors = [];
+
+            function avgDistractorAnswerLength() {
+                if (
+                    question?.distractors == null ||
+                    question?.distractors?.length == 0
+                ) {
+                    return 0;
+                }
+
+                let sum = 0;
+                question.distractors.forEach((d) => {
+                    sum += d?.[pickedKey]?.length ?? 0;
+                });
+                return sum / question?.distractors?.length;
+            }
+
+            function loopAndPick(strictSameness) {
+                const MAX_ITERATIONS_STRICT = 99;
+                const MAX_ITERATIONS_NOT_STRICT = 99;
+                const maxIterations = strictSameness ? MAX_ITERATIONS_STRICT : MAX_ITERATIONS_NOT_STRICT;
+                let ogDistractorsCount = 3;
+                let distractorsCount = 3;
+                let iterations = 0;
+                while (
+                    question.distractors.length < distractorsCount &&
+                    iterations <= maxIterations
+                ) {
+                    iterations++;
+
+                    const randomTerm =
+                        terms[Math.floor(Math.random() * terms.length)];
+
+                    if (
+                        isSameTermOrContent(
+                            randomTerm,
+                            term,
+                            strictSameness,
+                            pickedKey
+                        ) ||
+                        question.distractors.some(
+                            (d) => isSameTermOrContent(
+                                randomTerm,
+                                d,
+                                strictSameness,
+                                pickedKey
+                            )
+                        )
+                    ) {
+                        /* if same id or content as answer or existing distractor
+                        then loop again without adding this random term */
+                        continue;
+                    }
+
+                    question.distractors.push({
+                        id: randomTerm?.id,
+                        term: randomTerm?.term,
+                        def: randomTerm?.def,
+                        termImageUrl: randomTerm?.termImageUrl,
+                        defImageUrl: randomTerm?.defImageUrl
+                    });
+
+                    if (
+                        question.distractors.length == ogDistractorsCount &&
+                        avgDistractorAnswerLength() < 40 &&
+                        Math.random() < 0.5
+                    ) {
+                        distractorsCount++;
+                    }
+                }
+                if (iterations > maxIterations && strictSameness) {
+                    /* try again without strictSameness */
+                    loopAndPick(false);
+                } else if (iterations > maxIterations) {
+                    /* give up after maxIterations to avoid an infinite loop */
+                    console.warn(
+                        `(addMCQ) Took more than ${maxIterations} iterations to pick random term that wasn't a duplicate`,
+                    );
+                }
+            }
+            loopAndPick(true);
+
+            questions.push(question);
+        }
+
+        function addTFQ(term) {
+            const pickedAnswerWith = answerWith == "BOTH"
+                ? Math.random() < 0.5
+                    ? "TERM"
+                    : "DEF"
+                : answerWith;
+            const pickedKey = pickedAnswerWith.toLowerCase();
+            let question = {
+                type: "TFQ",
+                term: {
+                    id: term.id,
+                    term: term.term,
+                    def: term.def,
+                    termImageUrl: term.termImageUrl,
+                    defImageUrl: term.defImageUrl
+                },
+                answerWith: pickedAnswerWith
+            };
+
+            question.distractor = null;
+            function loopAndPick(strictSameness) {
+                let iterations = 0;
+                while (question.distractor == null && iterations <= 99) {
+                    iterations++;
+                    const randomTerm =
+                        terms[Math.floor(Math.random() * terms.length)];
+                    if (!isSameTermOrContent(
+                        randomTerm,
+                        term,
+                        strictSameness,
+                        pickedKey
+                    )) {
+                        question.distractor = {
+                            id: randomTerm.id,
+                            term: randomTerm.term,
+                            def: randomTerm.def,
+                            termImageUrl: randomTerm.termImageUrl,
+                            defImageUrl: randomTerm.defImageUrl
+                        };
+                    }
+                }
+                if (iterations > 99 && strictSameness) {
+                    /* try again without strictSameness */
+                    loopAndPick(false);
+                } else if (iterations > 99) {
+                    console.warn(
+                        "(addTFQ) Over 99 iterations to pick random distractor term",
+                    );
+                    /* use fallback same term as distractor */
+                    question.distractor = {
+                        id: term.id,
+                        term: term.term,
+                        def: term.def,
+                        termImageUrl: term.termImageUrl,
+                        defImageUrl: term.defImageUrl
+                    };
+                }
+            }
+            loopAndPick(true);
+            questions.push(question);
+        }
+
+        function addFRQ(term) {
+            questions.push({
+                type: "FRQ",
+                term: term,
+                answerWith:
+                    answerWith == "BOTH"
+                        ? Math.random() < 0.5
+                            ? "TERM"
+                            : "DEF"
+                        : answerWith,
+            });
+        }
+
+        /* NOTE: copy terms array because pickNewRandomTerm mutates the array */
+        pickNewRandomTerm([...terms]);
+        showSetup = false;
+        showTest = true;
+        takingActualPracticeTest = true;
+
+        // console.log([...questions]);
+
+        // fetch("/dashboard/set-dashboard-state", {
+        //     method: "POST",
+        //     credentials: "include"
+        // });
+    }
+
+    var showExitConfirmationModal = $state(false);
+    var showTest = $state(data.alreadyOver);
+    var takingActualPracticeTest = $state(false);
+    var bypassExitConfirmation = false;
+    let navigatingToURL = $state("");
+    setCancelBeforeNavigate((navigation) => {
+        /* NOTE: ALWAYS CLEAN UP WITH setCancelBeforeNavigate(undefined) IN ONMOUNT'S CLEANUP FUNC */
+        if (
+            takingActualPracticeTest &&
+            questionsAnswered > 0 &&
+            !bypassExitConfirmation
+        ) {
+            navigatingToURL = navigation?.to?.url;
+            if (navigation.type !== "leave") {
+                /* when navigation.type is NOT "leave",
+                it's controlled by SvelteKit, so we can
+                show our js confirmation modal */
+                showExitConfirmationModal = true;
+            }
+
+            /* if navigation.type is "leave",
+            then its controlled by the browser &
+            the browser shows it's own native modal
+            when we use `.cancel()` */
+            navigation.cancel();
+            return true;
+        } else {
+            return false;
+        }
+    });
+
+    let questionsViewOnly = $state(data?.alreadyOver);
+    let questionsShowAccuracy = $state(data?.alreadyOver);
+    let questionsAnswered = $state(0);
+    function answerUpdateCallback() {
+        questionsAnswered = 0;
+        questionComponents.forEach((q) => {
+            if (q.isAnswered()) {
+                questionsAnswered++;
+            }
+        });
+    }
+
+    let showScore = $state(data?.alreadyOver);
+    let questionsCorrect = $state(data?.practiceTest?.questionsCorrect ?? 0);
+
+    let submitted = $state(data?.alreadyOver);
+    let submitting = false;
+
+    let showInputErr = $state(false);
+    let inputErrMsg = $state("");
+
+    // let spelling = $state({
+    //     uno: false,
+    //     dos: false,
+    //     tres: false
+    // });
+</script>
+<svelte:head>
+    <title>Practice Test | Quizfreely</title>
+</svelte:head>
+{#snippet scoreSection()}
+    <div style="min-height: 100px;">
+    <Chart height={100}>
+    	<Layer center>
+    		<Group y={16}>
+                        {const arcScore = $derived(Math.round(
+                            ((questionsCorrect || 0) / (questions?.length || 1)) * 100
+                        ))}
+    					<Arc
+    						value={arcScore}
+    						range={[-120, 120]}
+    						outerRadius={76}
+    						innerRadius={60}
+    						cornerRadius={10}
+    						motion={{ type: "tween", duration: 400, delay: 100, easing: cubicInOut }}
+    						fill={arcScore >= 90 ? "var(--yay)" : (
+                                arcScore >= 80 ? "var(--warn)" : "var(--ohno)"
+                            )}
+    						track={{ fill: 'var(--border)' }}
+    					>
+    						{#snippet children({ value })}
+    							<Text
+    								value={Math.round(value) + '%'}
+    								textAnchor="middle"
+    								verticalAnchor="middle"
+    						        fill={arcScore >= 90 ? "var(--yay)" : (
+                                        arcScore >= 80 ? "var(--warn)" : "var(--ohno)"
+                                    )}
+                                    style="font-size: 28px; font-weight: bold; font-variant-numeric: tabular-nums;"
+    							/>
+    						{/snippet}
+    					</Arc>
+    		</Group>
+    	</Layer>
+    </Chart>
+    </div>
+{/snippet}
+<div class="grid page">
+    <div class="content">
+        <div class="flex">
+            <a
+                class="button faint"
+                href={data.alreadyOver
+                    ? data.local /* when alreadyOver is true, data.local means practice test is local,
+                but the studyset might be a cloud studyset */
+                        ? alreadyOverLocalPTStudysetIds?.length > 0 && ("" + alreadyOverLocalPTStudysetIds[0]).includes("-")
+                            ? /* uuids have dashes/hyphens */
+                              `/studysets/${alreadyOverLocalPTStudysetIds[0]}`
+                            : `/studyset/local?id=${alreadyOverLocalPTStudysetIds[0]}`
+                        : `/studysets/${data.studysetId ?? data.studysetIds?.[0]}`
+                    : /* if the practice test is a cloud pt, then the studyset is always a cloud studyset,
+                    but a local practice test can be for a local OR cloud studyset */
+                      data.local
+                      ? `/studyset/local?id=${data.localId}`
+                      : `/studysets/${data.studysetId ?? data.studysetIds?.[0]}`}
+                ><BackIcon></BackIcon> Back</a
+            >
+        </div>
+        {#if takingActualPracticeTest}
+            <div
+                style="position: sticky; top: 0px; z-index: 99; padding: 1rem; margin-top: 0px;"
+                class="trans-dots"
+                transition:slide={{ duration: 400 }}
+            >
+                <p class="center">
+                    {questionsAnswered}/{questions.length} Answered
+                </p>
+                <div class="progress-bar yay thin" style="margin-top: 0.4rem;">
+                    <div
+                        style="width: {Math.floor(
+                            (questionsAnswered / questions.length) * 100,
+                        )}%"
+                    ></div>
+                </div>
+            </div>
+        {/if}
+        {#if showScore}
+            <div
+                style="position: sticky; top: 0px; z-index: 99; padding: 1rem; margin-top: 0px;"
+                class="trans-dots"
+                transition:slide={{ duration: 400 }}
+            >
+                <div class="flex" style="justify-content: space-between;">
+                    {const score = $derived(Math.round(
+                        (questionsCorrect / questions.length) * 100,
+                    ))}
+                    <span class="b {
+                        score >= 90
+                            ? 'yay'
+                            : (score >= 80 ? 'warn' : 'ohno')
+                    }">{score}%</span>
+                    <span>{questionsCorrect}/{questions.length} Correct</span>
+                </div>
+            </div>
+            {#if data.alreadyOver}
+            <div style="margin-bottom: 3rem;">
+                {@render scoreSection()}
+            </div>
+            {/if}
+        {/if}
+        {#if showSetup}
+            <div transition:slide={{ duration: 400 }}>
+                <div class="flex" style="align-items: center; margin-bottom: 1rem;">
+                    <PracticeTestIcon width="2.2rem" height="2.2rem"></PracticeTestIcon>
+                    <h1 id="practice-test" class="h3" style="margin-bottom: 0px;">Practice Test</h1>
+                </div>
+                <p>
+                    There {terms?.length == 1 ? "is" : "are"}
+                    {terms?.length ?? "?"}
+                    {terms?.length == 1 ? "term" : "terms"} in this studyset
+                </p>
+                <div class="flex" style="gap: 4rem; margin-top: 1rem;">
+                    <div>
+                        <p style="margin-top: 0px;">Questions:</p>
+                        <div style="margin-top: 0.4rem;">
+                            <input
+                                type="text"
+                                inputmode="numeric"
+                                pattern="[0-9]*"
+                                placeholder={defaultQuestionsCount}
+                                style="max-width: 4rem;"
+                                bind:value={questionsCountEntered}
+                            />
+                        </div>
+                    </div>
+                    <div>
+                        <p style="margin-top: 0px;">Answer with:</p>
+                        <div class="flex" style="margin-top: 0.6rem;">
+                            <button
+                                class="button-box {answerWith == 'DEF'
+                                    ? 'selected'
+                                    : ''}"
+                                style="display: flex;"
+                                onclick={() => (answerWith = "DEF")}
+                            >
+                                <CheckmarkIcon class="button-box-selected-icon"
+                                ></CheckmarkIcon>
+                                Definition
+                            </button>
+                            <button
+                                class="button-box {answerWith == 'TERM'
+                                    ? 'selected'
+                                    : ''}"
+                                style="display: flex;"
+                                onclick={() => (answerWith = "TERM")}
+                            >
+                                <CheckmarkIcon class="button-box-selected-icon"
+                                ></CheckmarkIcon>
+                                Term
+                            </button>
+                            <button
+                                class="button-box {answerWith == 'BOTH'
+                                    ? 'selected'
+                                    : ''}"
+                                style="display: flex;"
+                                onclick={() => (answerWith = "BOTH")}
+                            >
+                                <CheckmarkIcon class="button-box-selected-icon"
+                                ></CheckmarkIcon>
+                                Both
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex" style="gap: 4rem; margin-top: 2rem;">
+                    <div>
+                        <p style="margin-top: 0px;">Question types:</p>
+                        <div
+                            style="display: grid; grid-template-columns: auto; justify-content: start; margin-top: 0.6rem;"
+                        >
+                            <button
+                                class="button-box {questionTypesEnabled.mcq
+                                    ? 'selected'
+                                    : ''}"
+                                style="display: flex;"
+                                onclick={() =>
+                                    (questionTypesEnabled.mcq =
+                                        !questionTypesEnabled.mcq)}
+                            >
+                                <CheckmarkIcon class="button-box-selected-icon"
+                                ></CheckmarkIcon>
+                                Multiple Choice
+                            </button>
+                            <button
+                                class="button-box {questionTypesEnabled.tfq
+                                    ? 'selected'
+                                    : ''}"
+                                style="display: flex; margin-top: 0.4rem;"
+                                onclick={() =>
+                                    (questionTypesEnabled.tfq =
+                                        !questionTypesEnabled.tfq)}
+                            >
+                                <CheckmarkIcon class="button-box-selected-icon"
+                                ></CheckmarkIcon>
+                                True/False
+                            </button>
+                            <!-- <button class="button-box { questionTypesEnabled.frq ? -->
+                            <!--     "selected" : "" -->
+                            <!-- }" style="display: flex; margin-top: 0.4rem;" onclick={() => questionTypesEnabled.frq = !questionTypesEnabled.frq}> -->
+                            <!--     <CheckmarkIcon class="button-box-selected-icon"></CheckmarkIcon> -->
+                            <!--     Free Response -->
+                            <!-- </button> -->
+                        </div>
+                    </div>
+                    <!-- <div> -->
+                        <!-- <p style="margin-top: 0px;">Test Spelling?</p> -->
+                        <!-- <div -->
+                        <!--     style="display: grid; grid-template-columns: auto; justify-content: start; margin-top: 0.6rem;" -->
+                        <!-- > -->
+                            <!-- <button -->
+                            <!--     class="button-box {spelling.typos -->
+                            <!--         ? 'selected' -->
+                            <!--         : ''}" -->
+                            <!--     style="display: flex;" -->
+                            <!--     onclick={() => -->
+                            <!--         (spelling.typos = -->
+                            <!--             !spelling.typos)} -->
+                            <!-- > -->
+                            <!--     <CheckmarkIcon class="button-box-selected-icon" -->
+                            <!--     ></CheckmarkIcon> -->
+                            <!--     Spelling -->
+                            <!-- </button> -->
+                            <!-- <button -->
+                            <!--     class="button-box {spelling.accents -->
+                            <!--         ? 'selected' -->
+                            <!--         : ''}" -->
+                            <!--     style="display: flex; margin-top: 0.4rem;" -->
+                            <!--     onclick={() => -->
+                            <!--         (spelling.accents = -->
+                            <!--             !spelling.accents)} -->
+                            <!-- > -->
+                            <!--     <CheckmarkIcon class="button-box-selected-icon" -->
+                            <!--     ></CheckmarkIcon> -->
+                            <!--     Accent Marks -->
+                            <!-- </button> -->
+                            <!-- <button -->
+                            <!--     class="button-box {spelling.tres -->
+                            <!--         ? 'selected' -->
+                            <!--         : ''}" -->
+                            <!--     style="display: flex; margin-top: 0.4rem;" -->
+                            <!--     onclick={() => -->
+                            <!--         (spelling.tres = -->
+                            <!--             !spelling.tres)} -->
+                            <!-- > -->
+                            <!--     <CheckmarkIcon class="button-box-selected-icon" -->
+                            <!--     ></CheckmarkIcon> -->
+                            <!--     Punctuation -->
+                            <!-- </button> -->
+                        <!-- </div> -->
+                    <!-- </div> -->
+                </div>
+                <div class="flex" style="margin-top: 1rem;">
+                    <button onclick={setupStart}
+                        ><CheckmarkIcon></CheckmarkIcon> Start</button
+                    >
+                </div>
+                {#if showInputErr}
+                    <div class="box ohno" transition:slide>
+                        {inputErrMsg}
+                    </div>
+                {/if}
+                <div
+                    class="flex compact-gap"
+                    style="margin-top: 3rem; align-items: end; justify-content: space-between; flex-wrap: wrap; {(practiceTests?.length ?? 0) == 0 ? "opacity: 0.6;" : ""}"
+                >
+                    <p class="h4" style="margin-bottom: 0px;">
+                        Completed Practice Tests
+                    </p>
+                    <p class="fg0">{practiceTests?.length ?? 0} total</p>
+                </div>
+                {#each practiceTests as practiceTest}
+                    <div class="box">
+                        <div class="grid gridfourpartthingrow">
+                            {const ptScore = $derived(
+                                Math.floor(
+                                    (practiceTest.questionsCorrect /
+                                    practiceTest.questionsTotal) *
+                                    100,
+                                ),
+                            )}
+                            <span
+                                class="b fourpartthing-one {ptScore >= 90
+                                    ? 'yay'
+                                    : (ptScore >= 80 ? 'warn' : 'ohno')}"
+                                >{ptScore}%</span
+                            >
+                            <span class="fourpartthing-two"
+                                >{practiceTest.questionsCorrect}/{practiceTest.questionsTotal}</span
+                            >
+                            <span class="fourpartthing-three"
+                                >{fancyTimestampReady
+                                    ? fancyTimestamp.format(
+                                          practiceTest.timestamp,
+                                      )
+                                    : "..."}</span
+                            >
+                            <a
+                                href={data.authed && !data.local
+                                    ? `/practice-tests/${practiceTest.id}`
+                                    : `/practice-test/local?id=${practiceTest.id}`}
+                                class="fourpartthing-four"
+                                style="display: flex; align-items: center; gap: 0.4rem;"
+                            >
+                                <span>View Details</span>
+                                <ForwardLongArrowIcon class="no-margin-top"
+                                ></ForwardLongArrowIcon>
+                            </a>
+                        </div>
+                    </div>
+                {:else}
+                    <div class="box center text fg0" style="opacity: 0.6;">(None)</div>
+                {/each}
+            </div>
+        {/if}
+        {#if showTest}
+            {#each questions as question, index}
+                {#if question.type == "MCQ"}
+                    <div class="box">
+                        <MCQ
+                            term={question.term}
+                            answerWith={question.answerWith}
+                            distractors={question.distractors}
+                            viewOnly={questionsViewOnly}
+                            showAccuracy={questionsShowAccuracy}
+                            {answerUpdateCallback}
+                            bind:this={questionComponents[index]}
+                            answeredIndex={question.answeredIndex}
+                            correctChoiceIndex={question.correctChoiceIndex}
+                        ></MCQ>
+                    </div>
+                {:else if question.type == "TFQ"}
+                    <div class="box">
+                        <TFQ
+                            term={question.term}
+                            answerWith={question.answerWith}
+                            distractor={question.distractor}
+                            viewOnly={questionsViewOnly}
+                            showAccuracy={questionsShowAccuracy}
+                            {answerUpdateCallback}
+                            bind:this={questionComponents[index]}
+                            answeredBool={question.answeredBool}
+                            wasCorrect={question.wasCorrect}
+                        ></TFQ>
+                    </div>
+                {:else if question.type == "FRQ"}
+                    <div class="box">
+                        <FRQ
+                            term={question.term}
+                            answerWith={question.answerWith}
+                            viewOnly={questionsViewOnly}
+                            showAccuracy={questionsShowAccuracy}
+                            {index}
+                            {answerUpdateCallback}
+                            bind:this={questionComponents[index]}
+                            answeredString={question.answeredString}
+                            questionId={question.id}
+                            userMarkedCorrectChangeCallback={() => {
+                                questionsCorrect = 0;
+                                questionComponents.forEach((q) => {
+                                    const qData = q?.getQuestion?.()
+                                    if (qData?.mcq?.correct || qData?.tfq?.correct || qData?.frq?.correct) {
+                                        questionsCorrect++;
+                                    }
+                                });
+                            }}
+                        ></FRQ>
+                    </div>
+                {/if}
+            {/each}
+            {#if submitted}
+                <div class="flex" transition:slide={{ duration: 400 }}>
+                    <p class="yay"><CheckmarkIcon></CheckmarkIcon> Submitted</p>
+                </div>
+                {#if !data.alreadyOver}
+                    <div style="margin-top: 2rem;">
+                        {@render scoreSection()}
+                    </div>
+                {/if}
+            {:else}
+                <div class="flex" transition:slide={{ duration: 400 }}>
+                    <button
+                        class="yay"
+                        onclick={async () => {
+                            if (submitting) {
+                                return;
+                            }
+                            submitting = true;
+                            setTimeout(() => {
+                                submitting = false;
+                            }, 2000);
+
+                            questionsViewOnly = true;
+                            questionsShowAccuracy = true;
+                            takingActualPracticeTest = false;
+                            showScore = true;
+                            let questionDataArray = [];
+                            questionsCorrect = 0;
+                            let termProgressToUpdate = new Map();
+                            questionComponents.forEach((questionComponent) => {
+                                const questionData =
+                                    questionComponent.getQuestion();
+                                questionDataArray.push(questionData);
+
+                                const thisTermId = questionData.mcq?.term?.id ??
+                                    questionData.tfq?.term?.id ??
+                                    questionData.frq?.term?.id;
+                                if (thisTermId == null) {
+                                    console.error(
+                                        "term id from question is null(ish)! this might happen if new question types aren't fully implemented",
+                                    );
+                                }
+                                const thisAnswerWith = questionData.mcq?.answerWith ??
+                                    questionData.tfq?.answerWith ??
+                                    questionData.frq?.answerWith;
+                                let termCorrectIncrease = 0;
+                                let termIncorrectIncrease = 0;
+                                let defCorrectIncrease = 0;
+                                let defIncorrectIncrease = 0;
+                                if (
+                                    questionData?.mcq?.correct ||
+                                    questionData?.tfq?.correct ||
+                                    questionData?.frq?.correct
+                                ) {
+                                    questionsCorrect++;
+
+                                    if (thisAnswerWith == "DEF") {
+                                        defCorrectIncrease = 1;
+                                    } else {
+                                        termCorrectIncrease = 1;
+                                    }
+                                } else {
+                                    if (thisAnswerWith == "DEF") {
+                                        defIncorrectIncrease = 1;
+                                    } else {
+                                        termIncorrectIncrease = 1;
+                                    }
+                                }
+
+                                if (thisTermId != null) {
+                                    let existingToUpdate =
+                                        termProgressToUpdate.get(thisTermId);
+                                    if (existingToUpdate == null) {
+                                        termProgressToUpdate.set(thisTermId, {
+                                            termId: thisTermId,
+                                            ...(thisAnswerWith == "DEF"
+                                                ? {
+                                                      defReviewedAt:
+                                                          new Date().toISOString(),
+                                                  }
+                                                : {
+                                                      termReviewedAt:
+                                                          new Date().toISOString(),
+                                                  }),
+                                            termCorrectIncrease,
+                                            termIncorrectIncrease,
+                                            defCorrectIncrease,
+                                            defIncorrectIncrease,
+                                            ...(termIncorrectIncrease > 0
+                                                ? { termLeitnerSystemBox: 1 }
+                                                : {}),
+                                            ...(defIncorrectIncrease > 0
+                                                ? { defLeitnerSystemBox: 1 }
+                                                : {}),
+                                        });
+                                    } else {
+                                        termProgressToUpdate.set(thisTermId, {
+                                            ...existingToUpdate,
+                                            ...(thisAnswerWith == "DEF"
+                                                ? {
+                                                      defReviewedAt:
+                                                          new Date().toISOString(),
+                                                  }
+                                                : {
+                                                      termReviewedAt:
+                                                          new Date().toISOString(),
+                                                  }),
+                                            termCorrectIncrease:
+                                                existingToUpdate.termCorrectIncrease ??
+                                                0 + termCorrectIncrease,
+                                            termIncorrectIncrease:
+                                                existingToUpdate.termIncorrectIncrease ??
+                                                0 + termIncorrectIncrease,
+                                            defCorrectIncrease:
+                                                existingToUpdate.defCorrectIncrease ??
+                                                0 + defCorrectIncrease,
+                                            defIncorrectIncrease:
+                                                existingToUpdate.defIncorrectIncrease ??
+                                                0 + defIncorrectIncrease,
+                                            ...(termIncorrectIncrease > 0
+                                                ? { termLeitnerSystemBox: 1 }
+                                                : {}),
+                                            ...(defIncorrectIncrease > 0
+                                                ? { defLeitnerSystemBox: 1 }
+                                                : {}),
+                                        });
+                                    }
+                                }
+                            });
+                            // console.log(questionDataArray);
+                            if (data.authed && !data.local) {
+                                try {
+                                    let raw = await fetch("/api/graphql", {
+                                        method: "POST",
+                                        headers: {
+                                            "Content-Type": "application/json",
+                                        },
+                                        body: JSON.stringify({
+                                            query: `mutation recordPracticeTest(
+    $questions: [QuestionInput!]!
+) {
+    recordPracticeTest(input: {
+        questions: $questions
+    }) {
+        id
+        questions {
+            id
+        }
+    }
+}`,
+                                            variables: {
+                                                questions: questionDataArray,
+                                            },
+                                        }),
+                                    });
+                                    let resp = await raw.json();
+                                    if (resp?.data?.recordPracticeTest?.id) {
+                                        resp.data.recordPracticeTest.questions?.forEach?.((q, index) => {
+                                            questionComponents?.[index]?.setQuestionId?.(q?.id)
+                                        })
+                                        submitted = true;
+                                    } else {
+                                        console.log(
+                                            "(submit button) no id in response: ",
+                                            resp,
+                                        );
+                                        alert(
+                                            "idk theres some kind of problem while saving sorry i guess",
+                                        );
+                                    }
+                                } catch (err) {
+                                    console.error(
+                                        "(submit button) Error recording cloud practice test: ",
+                                        err,
+                                    );
+                                    alert(
+                                        "idk it kinda couldn't save, check ur internet connection mabye?",
+                                    );
+                                }
+                            } else {
+                                const pt = await idbApiLayer.recordPracticeTest(
+                                    JSON.parse(
+                                        JSON.stringify({
+                                            timestamp: new Date().toISOString(),
+                                            questions: questionDataArray,
+                                        }),
+                                    ),
+                                    async (_) => { return data.studysetId == null ? [] : [data.studysetId] },
+                                );
+                                submitted = true;
+                                pt?.questions?.forEach?.((q, index) => {
+                                    questionComponents?.[index]?.setQuestionId?.(q?.id);
+                                });
+                            }
+                        }}
+                    >
+                        <CheckmarkIcon></CheckmarkIcon>
+                        Submit
+                    </button>
+                </div>
+            {/if}
+        {/if}
+        <!-- <p style="white-space: pre-wrap">{JSON.stringify(terms, null, 4)}</p> -->
+        {#if showExitConfirmationModal}
+            <div class="modal" transition:fade={{ duration: 200 }}>
+                <div class="content">
+                    <h4>Are you sure you want to exit?</h4>
+                    <p>
+                        You need to submit this practice test to
+                        save your answers.
+                    </p>
+                    <div class="flex">
+                        <button
+                            class="alt"
+                            onclick={function () {
+                                showExitConfirmationModal = false;
+                            }}>Continue Practicing</button
+                        >
+                        <button
+                            class="button ohno alt"
+                            data-sveltekit-preload-data="false"
+                            onclick={function () {
+                                bypassExitConfirmation = true;
+                                goto(navigatingToURL);
+                            }}
+                        >
+                            <ExitIcon />
+                            Exit
+                        </button>
+                    </div>
+                </div>
+            </div>
+        {/if}
+    </div>
+</div>
+{#if !data?.alreadyOver && showScore && questionsCorrect / questions.length == 1}
+    <!-- fullscreen confetti if 100% -->
+    <div
+        style="position: fixed; top: -50px; left: 0px; z-index: 800; margin: 0px; padding: 0px; height: 100vh; width: 100vw; display: flex; justify-content: center; overflow: hidden; pointer-events: none;"
+    >
+        <Confetti
+            x={[-5, 5]}
+            y={[0, 0.1]}
+            delay={[0, 6000]}
+            duration={4000}
+            amount="1000"
+            fallDistance="200vh"
+        />
+    </div>
+{/if}
+
+<style>
+    .gridfourpartthingrow {
+        display: grid;
+        gap: 1rem;
+        grid-template-columns: 1fr 1fr 2fr auto;
+        grid-template-rows: 1fr;
+        grid-template-areas: "one two three four";
+    }
+    .fourpartthing-one {
+        grid-area: one;
+    }
+    .fourpartthing-two {
+        grid-area: two;
+    }
+    .fourpartthing-three {
+        grid-area: three;
+        justify-self: start;
+    }
+    .fourpartthing-four {
+        grid-area: four;
+        justify-self: end;
+    }
+    @media only screen and (max-width: 800px) {
+        .gridfourpartthingrow {
+            grid-template-columns: 1fr 1fr 2fr;
+            grid-template-rows: auto auto;
+            grid-template-areas:
+                "one two three"
+                "four four four";
+        }
+        .fourpartthing-three {
+            justify-self: end;
+        }
+        .fourpartthing-four {
+            justify-self: start;
+        }
+    }
+</style>

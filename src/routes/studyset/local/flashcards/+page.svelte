@@ -1,5 +1,5 @@
 <script>
-    import FlashcardsPage from "../../../FlashcardsPage.svelte";
+    import FlashcardsPage from "$lib/FlashcardsPage.svelte";
 
     let { data } = $props();
 </script>

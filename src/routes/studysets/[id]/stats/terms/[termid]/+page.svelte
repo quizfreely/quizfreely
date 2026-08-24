@@ -1,5 +1,5 @@
 <script>
-    import TermStats from "../../../../../TermStats.svelte"
+    import TermStats from "$lib/TermStats.svelte"
     let { data } = $props();
 </script>
 

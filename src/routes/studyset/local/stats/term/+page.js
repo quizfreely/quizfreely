@@ -1,0 +1,13 @@
+import fetchAuthData from "$lib/fetchAuthData.js";
+
+export async function load({ fetch, url }) {
+    let localTermId = parseInt(url.searchParams.get("id"));
+    let localStudysetId = parseInt(url.searchParams.get("studysetId"));
+    let userResult = await fetchAuthData({ fetch });
+    return {
+      localTermId: localTermId,
+      localStudysetId: localStudysetId,
+      authed: userResult.authed,
+      authedUser: userResult?.authedUser,
+    }
+}

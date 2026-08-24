@@ -1,13 +1,12 @@
 import { redirect } from "@sveltejs/kit";
-import { load as dashboardLoad } from "./dashboard/+page.server";
-import { load as landingPageLoad } from "./about/+page.server";
+import { load as landingPageLoad } from "./about/+page.js";
 
-export async function load({ cookies, locals }) {
+export async function load({ cookies, fetch }) {
     if (cookies.get("dashboard") == "true" || cookies.get("auth") !== undefined) {
         redirect(307, "/dashboard");
     } else {
         return {
-            ...await landingPageLoad({ cookies }),
+            ...await landingPageLoad({ fetch }),
             dashboard: false
         }
     }
