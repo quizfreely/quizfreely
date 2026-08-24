@@ -24,6 +24,21 @@
             console.log("setFmtHours localStorage ERR:", err);
         }
     }
+    
+    let theme = $state(data.theme);
+    function setTheme(newTheme) {
+        try {
+            const cookieName = "theme";
+            const cookieValue = encodeURIComponent(newTheme);
+            const maxAge = 60 * 60 * 24 * 365; // 1 year in seconds
+            document.cookie = `${cookieName}=${cookieValue}; max-age=${maxAge}; path=/; SameSite=Lax; Secure`;
+            document.documentElement.classList.remove("theme-dark", "theme-light");
+            document.documentElement.classList.add(`theme-${newTheme}`);
+            theme = newTheme;
+        } catch (error) {
+            console.error("Failed to save theme cookie; err:", error);
+        }
+    }
 </script>
 <style>
   .a-little-different-grid-list {
@@ -32,7 +47,7 @@
     grid-template-columns: 1fr 1fr 1fr;
     gap: 1rem;
   }
-  .a-little-different-grid-list > a {
+  .a-little-different-grid-list > button {
     margin-top: 0px;
   }
 </style>
@@ -43,18 +58,18 @@
 
 <p>Theme</p>
 <div class="a-little-different-grid-list">
-  <a href="/settings/themes/auto" class="button button-box no-clickable-effect {data.theme == 'auto' ? 'selected' : ''}">
+  <button onclick={() => setTheme("auto")} class="button-box no-clickable-effect {theme == 'auto' ? 'selected' : ''}">
     <img src="/immutable/img/theme-preview-auto.png" style="width:100%;border-radius:0.8rem" alt="Auto Dark/Light Theme Preview">
     <p>Auto</p>
-  </a>
-  <a href="/settings/themes/dark" class="button button-box no-clickable-effect {data.theme == 'dark' ? 'selected' : ''}">
+  </button>
+  <button onclick={() => setTheme("dark")} class="button-box no-clickable-effect {theme == 'dark' ? 'selected' : ''}">
     <img src="/immutable/img/theme-preview-dark.png" style="width:100%;border-radius:0.8rem" alt="Dark Theme Preview">
     <p>Dark</p>
-  </a>
-  <a href="/settings/themes/light" class="button button-box no-clickable-effect {data.theme == 'light' ? 'selected' : ''}">
+  </button>
+  <button onclick={() => setTheme("light")} class="button-box no-clickable-effect {theme == 'light' ? 'selected' : ''}">
     <img src="/immutable/img/theme-preview-light.png" style="width:100%;border-radius:0.8rem" alt="Light Theme Preview">
     <p>Light</p>
-  </a>
+  </button>
 </div>
 <p>Date &amp; Time</p>
 <div>

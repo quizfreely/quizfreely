@@ -1,6 +1,6 @@
 import fetchAuthData from "$lib/fetchAuthData.js";
 
-export async function load({ cookies, fetch, url }) {
+export async function load({ fetch, url }) {
     let localTermId = parseInt(url.searchParams.get("id"));
     let localStudysetId = parseInt(url.searchParams.get("studysetId"));
     let userResult = await fetchAuthData({ fetch });
@@ -9,8 +9,5 @@ export async function load({ cookies, fetch, url }) {
       localStudysetId: localStudysetId,
       authed: userResult.authed,
       authedUser: userResult?.authedUser,
-      settingsDateTimeFmtHours: cookies.get(
-        "settingsdatetimeformathours"
-      )
     }
 }

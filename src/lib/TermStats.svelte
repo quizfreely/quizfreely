@@ -23,16 +23,22 @@
     if (data?.term?.reviewEventStatsByDay?.length != null && data.term.reviewEventStatsByDay.length >= 0) {
         calcChart(data.term.reviewEventStatsByDay);
     }
-    let mounted = $state(false);
+    let fancyTimestampReady = $state(false);
     onMount(() => {
         (async () => {
-            mounted = true;
-            if (data?.settingsDateTimeFmtHours == "24") {
-                fancyTimestamp.hours = 24;
-            } else if (data?.settingsDateTimeFmtHours == "12") {
-                fancyTimestamp.hours = 12;
+            try {
+                const fmtHours = window.localStorage.getItem("quizfreely:fmt_hours");
+                if (fmtHours == "24") {
+                    fancyTimestamp.hours = 24;
+                } else if (fmtHours == "12") {
+                    fancyTimestamp.hours = 12;
+                }
+            } catch (err) {
+                console.log("No localStorage? 😭 Err:", err);
             }
-
+            fancyTimestampReady = true;
+        })();
+        (async () => {
             if (data.local) {
                 term = await idbApiLayer.getTermById(data.localTermId, {
                     progress: true,
@@ -309,7 +315,7 @@
                 <div>
                     <p class="fg0">Last Reviewed</p>
                     {#if term?.progress?.termLastReviewedAt || term?.progress?.defLastReviewedAt}
-                        <p class="shy-h4" style="margin-top: 0px;">{mounted ? (
+                        <p class="shy-h4" style="margin-top: 0px;">{fancyTimestampReady ? (
                             fancyTimestamp.format(
                                 Math.max(
                                     Date.parse(term?.progress?.termLastReviewedAt) || 0,

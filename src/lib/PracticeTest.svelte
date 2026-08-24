@@ -45,16 +45,23 @@
         practiceTests = data?.studyset?.practiceTests;
     }
     let alreadyOverLocalPTStudysetIds = $state([]);
-    let mounted = $state(false);
+    let fancyTimestampReady = $state(false);
     onMount(() => {
         let objectKeys = [];
         (async () => {
-            mounted = true;
-            if (data?.settingsDateTimeFmtHours == "24") {
-                fancyTimestamp.hours = 24;
-            } else if (data?.settingsDateTimeFmtHours == "12") {
-                fancyTimestamp.hours = 12;
+            try {
+                const fmtHours = window.localStorage.getItem("quizfreely:fmt_hours");
+                if (fmtHours == "24") {
+                    fancyTimestamp.hours = 24;
+                } else if (fmtHours == "12") {
+                    fancyTimestamp.hours = 12;
+                }
+            } catch (err) {
+                console.log("No localStorage? 😭 Err:", err);
             }
+            fancyTimestampReady = true;
+        })();
+        (async () => {
 
             if (data.local && data.alreadyOver) {
                 const pt = await idbApiLayer.getPracticeTestWithQuestions(data.practiceTestId);
@@ -882,7 +889,7 @@ FRQs: ${numFRQsToAssign}`,
                                 >{practiceTest.questionsCorrect}/{practiceTest.questionsTotal}</span
                             >
                             <span class="fourpartthing-three"
-                                >{mounted
+                                >{fancyTimestampReady
                                     ? fancyTimestamp.format(
                                           practiceTest.timestamp,
                                       )

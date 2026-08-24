@@ -71,19 +71,25 @@
         }
     })
 
-    let mounted = $state(false);
+    let fancyTimestampReady = $state(false);
     let ptChartData = $state([]);
     let reChartData = $state([]);
     onMount(() => {
         let objectUrls = [];
         (async () => {
-            mounted = true;
-            if (data?.settingsDateTimeFmtHours == "24") {
-                fancyTimestamp.hours = 24;
-            } else if (data?.settingsDateTimeFmtHours == "12") {
-                fancyTimestamp.hours = 12;
+            try {
+                const fmtHours = window.localStorage.getItem("quizfreely:fmt_hours");
+                if (fmtHours == "24") {
+                    fancyTimestamp.hours = 24;
+                } else if (fmtHours == "12") {
+                    fancyTimestamp.hours = 12;
+                }
+            } catch (err) {
+                console.log("No localStorage? 😭 Err:", err);
             }
-
+            fancyTimestampReady = true;
+        })();
+        (async () => {
             if (data.local) {
                 /* studyset is local, so regardless of wheater the user is logged in or not,
                 we load the studyset and progress locally */
@@ -567,7 +573,7 @@
                                         "yay" : (tsPtScore >= 80 ? "warn" : "ohno")
                                 }">{tsPtScore}%</span>
                                 <span class="fourpartthing-two">{practiceTest.questionsCorrect}/{practiceTest.questionsTotal}</span>
-                                <span class="fourpartthing-three">{mounted ? fancyTimestamp.format(practiceTest.timestamp) : "..."}</span>
+                                <span class="fourpartthing-three">{fancyTimestampReady ? fancyTimestamp.format(practiceTest.timestamp) : "..."}</span>
                                 <a href="{
                                     data.authed && !data.local ?
                                         `/practice-tests/${practiceTest.id}` :

@@ -1,4 +1,4 @@
-export async function load({ cookies, fetch }) {
+export async function load({ fetch }) {
     let data;
     try {
         const respRaw = await fetch("/api/graphql", {
@@ -52,19 +52,11 @@ export async function load({ cookies, fetch }) {
         if (resp?.data == null || resp?.errors != null) {
             console.log("Error in dashboard/stats load func api request. Response: ", resp);
         }
-        data = {
-            ...resp?.data,
-            settingsDateTimeFmtHours: cookies.get(
-              "settingsdatetimeformathours"
-            )
-        }
+        data = resp?.data;
     } catch (err) {
         console.error("Error in dashboard/stats load func: ", err);
         data = {
           authed: false,
-          settingsDateTimeFmtHours: cookies.get(
-            "settingsdatetimeformathours"
-          )
         }
     }
 

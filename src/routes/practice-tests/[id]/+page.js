@@ -1,4 +1,4 @@
-export async function load({cookies, params, fetch }) {
+export async function load({ params, fetch }) {
     try {
         const respRaw = await fetch("/api/graphql", {
             method: "POST",
@@ -81,18 +81,12 @@ console.log(JSON.stringify(resp, null, 4));
             studysetIds: resp?.data?.practiceTest?.studysetIds,
             authed: resp?.data?.authed,
             authedUser: resp?.data?.authedUser,
-            settingsDateTimeFmtHours: cookies.get(
-              "settingsdatetimeformathours"
-            )
         }
     } catch (err) {
         console.error("Error in cloud practice test (viewing) load func: ", err);
         return {
           practiceTestId: params.id,
           authed: false,
-          settingsDateTimeFmtHours: cookies.get(
-            "settingsdatetimeformathours"
-          )
         }
     }
 }

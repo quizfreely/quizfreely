@@ -1,4 +1,4 @@
-export async function load({ cookies, params, fetch }) {
+export async function load({ params, fetch }) {
     try {
         const respRaw = await fetch("/api/graphql", {
             method: "POST",
@@ -62,18 +62,12 @@ export async function load({ cookies, params, fetch }) {
             studyset: resp?.data?.studyset,
             authed: resp?.data?.authed,
             authedUser: resp?.data?.authedUser,
-            settingsDateTimeFmtHours: cookies.get(
-              "settingsdatetimeformathours"
-            )
         }
     } catch (err) {
         console.error("Error in cloud studyset stats load func: ", err);
         return {
           studysetId: params.id,
           authed: false,
-          settingsDateTimeFmtHours: cookies.get(
-            "settingsdatetimeformathours"
-          )
         }
     }
 }

@@ -103,9 +103,21 @@
     let objectUrls = [];
     let timerSpan = $state(undefined);
     let timerSpanExtra = $state(undefined);
-    let mounted = $state(false);
+    let fancyTimestampReady = $state(false);
     onMount(() => {
-        mounted = true;
+        (async () => {
+            try {
+                const fmtHours = window.localStorage.getItem("quizfreely:fmt_hours");
+                if (fmtHours == "24") {
+                    fancyTimestamp.hours = 24;
+                } else if (fmtHours == "12") {
+                    fancyTimestamp.hours = 12;
+                }
+            } catch (err) {
+                console.log("No localStorage? 😭 Err:", err);
+            }
+            fancyTimestampReady = true;
+        })();
         if (local) {
             (async () => {
                 const studyset = await idbApiLayer.getStudysetById(localId, {
@@ -374,7 +386,7 @@
                         (h?.incorrectPairIds?.length ?? 0) > 0 ? "ohno" : "yayy"
                     }">{h?.incorrectPairIds?.length ?? 0} incorrect</span>
                     <span class="fourpartthing-three"
-                        >{mounted
+                        >{fancyTimestampReady
                             ? fancyTimestamp.format(
                                   h.endTimestamp,
                               )

@@ -1,4 +1,4 @@
-export async function load({ cookies, locals, fetch }) {
+export async function load({ fetch }) {
     try {
     let rawApiRes = await fetch("/api/graphql", {
       method: "POST",
@@ -40,32 +40,20 @@ export async function load({ cookies, locals, fetch }) {
               studysetList,
               myFolders,
               mySavedStudysets,
-              settingsDateTimeFormatHours: cookies.get(
-                "settingsdatetimeformathours"
-              )
             }
         } else {
           return {
             authed: false,
-              settingsDateTimeFormatHours: cookies.get(
-                "settingsdatetimeformathours"
-              )
           }
         }
       } catch (error) {
         return {
           authed: false,
-              settingsDateTimeFormatHours: cookies.get(
-                "settingsdatetimeformathours"
-              )
         }
       }
     } catch (error) {
       return {
         authed: false,
-              settingsDateTimeFormatHours: cookies.get(
-                "settingsdatetimeformathours"
-              )
       }
     }
 };
