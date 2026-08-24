@@ -52,14 +52,14 @@ export async function load({ fetch }) {
         }
       // }
     } catch (err) {
-      console.error("Error in about/+page.server.js: ", err);
+      console.error("Error in about/+page.js: ", err);
       return {
         // featuredRows: false,
       header: { activePage: "home" }
       }
     };
   } catch (err) {
-    console.error("Error in about/+page.server.js: ", err);
+    console.error("Error in about/+page.js: ", err);
     return {
       // featuredRows: false,
       header: { activePage: "home" }

@@ -64,13 +64,13 @@ export async function load({ url, fetch }) {
           authedUser: authedUser
         }
       } else {
-        console.log("Error in search +page.server.js, api res: ", apiRes)
+        console.log("Error in search +page.js, api res: ", apiRes)
         error(500, {
           message: "looks like this is broken, idk why though :("
         })
       }
     } catch (err) {
-      console.error("Error in search +page.server.js: ", err);
+      console.error("Error in search +page.js: ", err);
       error(500, {
         message: "something went wrong, idk"
       }
