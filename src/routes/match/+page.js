@@ -6,7 +6,7 @@ export async function load({ fetch, url }) {
     let data;
     try {
         let variables;
-        let query = `query studysetMatch($id: ID!) {
+        let query = `{
             authed
             authedUser {
                 id
