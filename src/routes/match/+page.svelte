@@ -148,10 +148,13 @@
             try {
                 history = [
                     ...history,
-                    ...(await idbApiLayer.getMatchActivitiesByStudysetId(cloudId ?? Number(localId), {
-                        termIds: true,
-                        incorrectPairIds: true
-                    }))
+                    ...(await idbApiLayer.getMatchActivitiesByStudysetIds(
+                        [...cloudIds, ...localIds],
+                        {
+                            termIds: true,
+                            incorrectPairIds: true
+                        },
+                    ))
                 ];
                 history = history.sort(
                     (a, b) => b.endTimestamp.localeCompare(a.endTimestamp)
