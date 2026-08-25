@@ -39,10 +39,13 @@
         };
     }
 
-    if (!data.local && !data.alreadyOver) {
+    if (!data.alreadyOver && data.cloudIds?.length > 0) {
         // console.log(data.studyset)
-        terms = data?.studyset?.terms;
-        practiceTests = data?.studyset?.practiceTests;
+        terms = data.studysets?.flatMap?.(s => s.terms)?.filter?.(t => t != null);
+        practiceTests = data.studyset?.flatMap?.(s => s.practiceTests)?.filter?.(p => p != null) ?? [];
+        practiceTests.sort(
+            (a, b) => b.timestamp.localeCompare(a.timestamp),
+        );
     }
     let alreadyOverLocalPTStudysetIds = $state([]);
     let fancyTimestampReady = $state(false);
@@ -77,10 +80,10 @@
                 }
             }
 
-            if (data.local && !data.alreadyOver) {
-                /* studyset is local, so regardless of wheater the user is logged in or not,
-                we load the studyset and progress locally */
-                const studyset = await idbApiLayer.getStudysetById(data.localId, {
+            if (data.localIds?.length > 0 && !data.alreadyOver) {
+                /* (at least some) studysets are local, so regardless of wheater the user is logged in or not,
+                we load studyset(s) and progress locally */
+                const studysets = await idbApiLayer.getStudysetsByIds(data.localIds, {
                     terms: {
                         progress: true,
                         termImageUrl: true,
@@ -88,8 +91,8 @@
                     },
                     practiceTests: true,
                 });
-                terms = studyset.terms;
-                terms.forEach(term => {
+                const localTerms = studysets?.flatMap?.(s => s.terms)?.filter?.(t => t != null) ?? [];
+                localTerms.forEach(term => {
                     if (term.termImageUrl != null) {
                         objectKeys.push(term.termImageUrl);
                     }
@@ -97,18 +100,28 @@
                         objectKeys.push(term.defImageUrl);
                     }
                 });
-                practiceTests = studyset?.practiceTests;
+                terms = [
+                    ...(terms ?? []),
+                    ...localTerms,
+                ];
+                practiceTests = [
+                    ...(practiceTests ?? []),
+                    ...(studyset?.practiceTests ?? [])
+                ];
+                practiceTests.sort(
+                    (a, b) => b.timestamp.localeCompare(a.timestamp),
+                );
             }
 
-            if (!data.authed && !data.local && !data.alreadyOver) {
+            if (!data.authed && data.cloudIds?.length > 0 && !data.alreadyOver) {
                 /* not logged in, so user data is local,
-                but studyset is a cloud studyset,
+                but studyset(s) include at least one cloud studyset,
                 so we need to map local progress to cloud terms
 
                 `terms` has already been populated during SSR (above, before onMount) */
                 practiceTests = await db.practiceTests
                     .where("studysetIds")
-                    .equals(data.studysetId)
+                    .anyOf(data.cloudIds)
                     .toArray();
                 practiceTests?.sort(
                     /* timestamps are ISO strings in UTC,
@@ -639,22 +652,32 @@ FRQs: ${numFRQsToAssign}`,
 <div class="grid page">
     <div class="content">
         <div class="flex">
+            {const figureOutLink = ({ cloudIds, localIds }) => (
+                cloudIds.length + localIds.length > 1 ?
+                    `/combine?${[
+                        ...cloudIds.map((id) => `studyset=${id}`),
+                        ...localIds.map((id) => `localStudyset=${id}`),
+                    ].join("&")}` :
+                    cloudIds.length == 1 ?
+                        `/studysets/${cloudIds[0]}` :
+                        localIds.length == 1 ?
+                            `/studyset/local?id=${localIds[0]}` : ""
+            )}
             <a
                 class="button faint"
-                href={data.alreadyOver
-                    ? data.local /* when alreadyOver is true, data.local means practice test is local,
-                but the studyset might be a cloud studyset */
-                        ? alreadyOverLocalPTStudysetIds?.length > 0 && ("" + alreadyOverLocalPTStudysetIds[0]).includes("-")
-                            ? /* uuids have dashes/hyphens */
-                              `/studysets/${alreadyOverLocalPTStudysetIds[0]}`
-                            : `/studyset/local?id=${alreadyOverLocalPTStudysetIds[0]}`
-                        : `/studysets/${data.studysetId ?? data.studysetIds?.[0]}`
-                    : /* if the practice test is a cloud pt, then the studyset is always a cloud studyset,
-                    but a local practice test can be for a local OR cloud studyset */
-                      data.local
-                      ? `/studyset/local?id=${data.localId}`
-                      : `/studysets/${data.studysetId ?? data.studysetIds?.[0]}`}
-                ><BackIcon></BackIcon> Back</a
+                href={data.alreadyOver ?
+                    (data.local ?
+                        /* when alreadyOver is true, data.local means practice test is local,
+                        but the studyset(s) might be (a) cloud studyset(s) */
+                        figureOutLink({
+                            cloudIds: alreadyOverLocalPTStudysetIds?.filter?.(id => (""+id).includes("-")) ?? [],
+                            localIds: alreadyOverLocalPTStudysetIds?.filter?.(id => !(""+id).includes("-")) ?? [],
+                        }) :
+                        /* if data.alreadyOver is true, but data.local is false, the studysets must ALL be cloud
+                        (cloud studysets might have local PTs, but cloud PTs ALWAYS are for cloud studysets) */
+                        figureOutLink({ cloudIds: data.studysetIds, localIds: [] })
+                    ) : figureOutLink({ data.cloudIDs, data.localIds })
+                }><BackIcon></BackIcon> Back</a
             >
         </div>
         {#if takingActualPracticeTest}
@@ -1098,7 +1121,7 @@ FRQs: ${numFRQsToAssign}`,
                                 }
                             });
                             // console.log(questionDataArray);
-                            if (data.authed && !data.local) {
+                            if (data.authed && data.localIds?.length == 0) {
                                 try {
                                     let raw = await fetch("/api/graphql", {
                                         method: "POST",
@@ -1155,7 +1178,7 @@ FRQs: ${numFRQsToAssign}`,
                                             questions: questionDataArray,
                                         }),
                                     ),
-                                    async (_) => { return data.studysetId == null ? [] : [data.studysetId] },
+                                    async (_) => (data.cloudIds ?? []),
                                 );
                                 submitted = true;
                                 pt?.questions?.forEach?.((q, index) => {
