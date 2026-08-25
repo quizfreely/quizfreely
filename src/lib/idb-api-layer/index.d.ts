@@ -64,6 +64,7 @@ export declare const idbApiLayer: {
     updatePracticeTestQuestion: (id: number, correct: boolean, userMarkedCorrect?: boolean) => Promise<Question | undefined>;
     getPracticeTestsByTermId: (termId: number | string) => Promise<import("./db").PracticeTest[]>;
     getMatchActivityById: (id: number, resolveProps?: MatchActivityResolveProps) => Promise<MatchActivity | null>;
+    getMatchActivitiesByStudysetIds: (studysetIds: (number | string)[], resolveProps?: MatchActivityResolveProps) => Promise<MatchActivity[]>;
     getMatchActivitiesByStudysetId: (studysetId: number | string, resolveProps?: MatchActivityResolveProps) => Promise<MatchActivity[]>;
     activityHistory: ({ last, getCloudStudysets }: {
         last: number;

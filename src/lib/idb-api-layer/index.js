@@ -783,8 +783,8 @@ export const idbApiLayer = {
         }
         return activity;
     },
-    getMatchActivitiesByStudysetId: async function (studysetId, resolveProps) {
-        const activities = await db.matchActivities.where("studysetIds").equals(studysetId).toArray();
+    getMatchActivitiesByStudysetIds: async function (studysetIds, resolveProps) {
+        const activities = await db.matchActivities.where("studysetIds").anyOf(studysetIds).toArray();
         activities.sort((a, b) => b.endTimestamp.localeCompare(a.endTimestamp));
         for (const activity of activities) {
             if (resolveProps?.termIds) {
@@ -803,6 +803,9 @@ export const idbApiLayer = {
             }
         }
         return activities;
+    },
+    getMatchActivitiesByStudysetId: async function (studysetId, resolveProps) {
+        return this.getMatchActivitiesByStudysetIds([studysetId], resolveProps);
     },
     activityHistory: async function ({ last, getCloudStudysets }) {
         const limit = last > 0 ? Math.floor(last) : 0;
