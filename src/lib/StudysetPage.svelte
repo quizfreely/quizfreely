@@ -343,7 +343,7 @@
                     {/if}
                 </div>
             {#snippet flashcardsCaptionEnd()}
-                <a href="{data.local ? `/studyset/local/flashcards?id=${data.localId}` : `/studysets/${data.studyset.id}/flashcards`}" class="button faint" aria-label="Fullscreen Flashcards">
+                <a href="{data.local ? `/flashcards?localStudyset=${data.localId}` : `/flashcards?studyset=${data.studyset.id}`}" class="button faint" aria-label="Fullscreen Flashcards">
                     <FullscreenIcon></FullscreenIcon>
                 </a>
             {/snippet}
@@ -354,8 +354,8 @@
                         <!--     id="flashcards-maximize" -->
                         <!--     class="button alt" -->
                         <!--     href="{data.local ? -->
-                        <!--         `/studyset/local/flashcards?id=${data.localId}` : -->
-                        <!--         `/studysets/${data.studyset.id}/flashcards` -->
+                        <!--         `/flashcards?localStudyset=${data.localId}` : -->
+                        <!--         `/flashcards?studyset=${data.studyset.id}` -->
                         <!--     }" -->
                         <!-- > -->
                         <!--     <IconFlashcards /> -->
