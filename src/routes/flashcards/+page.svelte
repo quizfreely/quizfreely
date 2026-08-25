@@ -6,12 +6,12 @@
     import BackArrow from "$lib/icons/BackArrow.svelte";
     import Checkmark from "$lib/icons/Checkmark.svelte";
 
-    let { data, local, localId, cloudId } = $props();
-    let allTerms = $state(data?.terms ?? []);
+    let { data } = $props();
+    let allTerms = $state(data?.studysets?.flatMap?.(s => s.terms) ?? []);
     let term = $state(null);
     let terms = [];
     let termsIndex = -1;
-    let newTerms = data?.terms ?? [];
+    let newTerms = [...allTerms];
     let newTermsIndex = -1;
     let sessionTerms = [];
     let sessionTermsIndex = -1;
@@ -20,79 +20,83 @@
 
     let showPrompt = $state(false);
 
-    let preview = $state(null);
-    const TIMEUNITFORMAT = ['s', 'm', 'h', 'd', ' months', ' years'];
-    const fsrsStates = ["NEW", "LEARNING", "REVIEW", "RELEARNING"];
-    const fsrsRatings = ["MANUAL", "HARD", "GOOD", "EASY"];
-    function fsrsNextAfterHandler({card, log}) {
-        return {
-            card: {
-                ...card,
-                due: card.due.toISOString(),
-                last_review: card?.last_review?.toISOString() ?? null,
-                state: fsrsCards[card.state]
-            },
-            log: {
-                ...log,
-                due: log.due.toISOString(),
-                rating: fsrsRatings[log.rating],
-                review: log.review.toISOString(),
-                state: fsrsStates[log.state]
-            }
-        };
-    }
-
-    function prepareTermsByCards() {
-        terms = allTerms.filter(term => {
-            if (local) {
-                if (term.termImageUrl != null) {
-                    objectUrls.push(term.termImageUrl);
-                }
-                if (term.defImageUrl != null) {
-                    objectUrls.push(term.defImageUrl);
-                }
-            }
-
-            let isNew = false;
-            if (term.fsrsCard == null) {
-                term.fsrsCard = createEmptyCard();
-                isNew = true;
-            } else {
-                term.fsrsCard = TypeConvert.card(term.fsrsCard);
-                if (term.fsrsCard.state == State.New) {
-                    isNew = true;
-                }
-            }
-
-            if (isNew) {
-                newTerms.push(term);
-            }
-            return !isNew;
-        });
-        terms.sort((a, b) => a.fsrsCard.due - b.fsrsCard.due);
-        if (terms.length > 0) {
-            term = terms[0];
-            termsIndex = 0;
-        } else {
-            term = newTerms[0];
-            newTermsIndex = 0;
-        }
-    }
-
-    const scheduler = fsrs();
+    // let preview = $state(null);
+    // const TIMEUNITFORMAT = ['s', 'm', 'h', 'd', ' months', ' years'];
+    // const fsrsStates = ["NEW", "LEARNING", "REVIEW", "RELEARNING"];
+    // const fsrsRatings = ["MANUAL", "HARD", "GOOD", "EASY"];
+    // function fsrsNextAfterHandler({card, log}) {
+    //     return {
+    //         card: {
+    //             ...card,
+    //             due: card.due.toISOString(),
+    //             last_review: card?.last_review?.toISOString() ?? null,
+    //             state: fsrsCards[card.state]
+    //         },
+    //         log: {
+    //             ...log,
+    //             due: log.due.toISOString(),
+    //             rating: fsrsRatings[log.rating],
+    //             review: log.review.toISOString(),
+    //             state: fsrsStates[log.state]
+    //         }
+    //     };
+    // }
+    //
+    // function prepareTermsByCards() {
+    //     terms = allTerms.filter(term => {
+    //
+    //         let isNew = false;
+    //         if (term.fsrsCard == null) {
+    //             term.fsrsCard = createEmptyCard();
+    //             isNew = true;
+    //         } else {
+    //             term.fsrsCard = TypeConvert.card(term.fsrsCard);
+    //             if (term.fsrsCard.state == State.New) {
+    //                 isNew = true;
+    //             }
+    //         }
+    //
+    //         if (isNew) {
+    //             newTerms.push(term);
+    //         }
+    //         return !isNew;
+    //     });
+    //     terms.sort((a, b) => a.fsrsCard.due - b.fsrsCard.due);
+    //     if (terms.length > 0) {
+    //         term = terms[0];
+    //         termsIndex = 0;
+    //     } else {
+    //         term = newTerms[0];
+    //         newTermsIndex = 0;
+    //     }
+    // }
+    //
+    // const scheduler = fsrs();
 
     onMount(() => {
-        if (local) {
+        if (data.localIds.length > 0) {
             (async () => {
-                allTerms = await idbApiLayer.getTermsByStudysetId(localId, {
-                    termImageUrl: true,
-                    defImageUrl: true
+                const allStudysets = await idbApiLayer.getStudysetsByIds(data.localIds, {
+                    terms: {
+                        termImageUrl: true,
+                        defImageUrl: true,
+                    },
+                });
+                allTerms = allStudysets.flatMap(s => s.terms);
+                allTerms.forEach(t => {
+                    if (t.termImageUrl != null) {
+                        objectUrls.push(t.termImageUrl);
+                    }
+                    if (t.defImageUrl != null) {
+                        objectUrls.push(t.defImageUrl);
+                    }
                 });
                 // prepareTermsByCards();
             })();
-        } else {
-            // prepareTermsByCards();
         }
+        // } else {
+        //     prepareTermsByCards();
+        // }
 
         // const card = createEmptyCard();
         // console.log(card)
@@ -108,9 +112,7 @@
 
         /* return cleanup func to revoke image object urls for local terms */
         return () => {
-            if (local) {
-                objectUrls.forEach(objectUrl => URL.revokeObjectURL(objectUrl));
-            }
+            objectUrls.forEach(objectUrl => URL.revokeObjectURL(objectUrl));
         };
     });
 
@@ -179,11 +181,17 @@ newTermsIndex: ${newTermsIndex}`);
 <div class="grid page">
     <div class="content">
         <div class="flex" style="margin-bottom: 1rem;">
-            {#if local}
-                <a href="/studyset/local?id={localId}" class="button faint"><BackArrow /> Back</a>
-            {:else}
-                <a href="/studysets/{cloudId}" class="button faint"><BackArrow /> Back</a>
-            {/if}
+            <a href={
+                /* data.cloudIds.length+data.localIds.length is always > 0 because of +page.js */
+                data.cloudIds.length + data.localIds.length > 1 ?
+                    `/combine?${[
+                        ...data.cloudIds.map((id) => `studyset=${id}`),
+                        ...data.localIds.map((id) => `localStudyset=${id}`),
+                    ].join("&")}` :
+                    data.cloudIds.length == 1 ?
+                        `/studysets/${data.cloudIds[0]}` :
+                        `/studyset/local?id=${data.localIds[0]}`
+            } class="button faint"><BackArrow /> Back</a>
         </div>
         {#if terms}
             <Flashcards
