@@ -168,7 +168,7 @@
                             {#if showPrompt}
                                 {@render prompt?.()}
                             {:else}
-                                <div style="white-space:pre-wrap">{(termsList ? terms?.[index] : term)?.term ?? "term"}</div>
+                                <div style="white-space:pre-wrap">{(termsList ? terms?.[index] : term)?.term}</div>
                                 {#if (termsList ? terms?.[index] : term)?.termImageUrl != null}
                                     <div><img src={(termsList ? terms[index] : term).termImageUrl} alt="term" class="flashcard-term-image"></div>
                                 {/if}
@@ -180,7 +180,7 @@
                     >
                         <div>
                             {#if !showPrompt}
-                                <div style="white-space:pre-wrap">{(termsList ? terms?.[index] : term)?.def ?? "definition"}</div>
+                                <div style="white-space:pre-wrap">{(termsList ? terms?.[index] : term)?.def}</div>
                                 {#if (termsList ? terms?.[index] : term)?.defImageUrl != null}
                                     <div><img src={(termsList ? terms[index] : term).defImageUrl} alt="definition" class="flashcard-term-image"></div>
                                 {/if}
