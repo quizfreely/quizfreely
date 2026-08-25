@@ -1,76 +1,95 @@
 import { error } from '@sveltejs/kit';
 
-export async function load({ params, fetch }) {
+export async function load({ fetch, url }) {
+    const cloudIds = url.searchParams.getAll("studyset");
+    const localIds = url.searchParams.getAll("localStudyset").map(Number).filter((n) => !Number.isNaN(n));
+    let data;
     try {
+        let variables;
+        let query = `query studysetMatch($id: ID!) {
+            authed
+            authedUser {
+                id
+                username
+                displayName
+            }
+        }`;
+        if (cloudIds.length > 0) {
+            query = `query studysetMatch($cloudIds: [ID!]!) {
+                authed
+                authedUser {
+                    id
+                    username
+                    displayName
+                }
+                studysets(ids: $cloudIds) {
+                    terms {
+                        id
+                        term
+                        def
+                        termImageUrl
+                        defImageUrl
+                    }
+                    matchActivities {
+                        id
+                        durationMs
+                        endTimestamp
+                        termIds
+                        incorrectPairIds
+                    }
+                }
+            }`;
+            variables = {
+                cloudIds,
+            };
+        }
         let rawApiRes = await fetch("/api/graphql", {
             method: "POST",
             headers: {
-        "Content-Type": "application/json"
-    },
+                "Content-Type": "application/json"
+            },
             body: JSON.stringify({
-                query: `query studysetMatch($id: ID!) {
-                    authed
-                    authedUser {
-                        id
-                        username
-                        displayName
-                    }
-                    studyset(id: $id) {
-                        terms {
-                            id
-                            term
-                            def
-                            termImageUrl
-                            defImageUrl
-                        }
-                        matchActivities {
-                            id
-                            durationMs
-                            endTimestamp
-                            termIds
-                            incorrectPairIds
-                        }
-                    }
-                }`,
-                variables: {
-                    id: params.id
-                }
+                query,
+                variables,
             })
         });
         let apiRes = await rawApiRes.json();
         let authed = false;
-            let authedUser;
-            if (apiRes?.data?.authed) {
-                authed = apiRes.data.authed;
-                authedUser = apiRes.data?.authedUser;
-            }
-            if (apiRes?.data?.studyset) {
-                return {
-                    terms: apiRes.data.studyset.terms,
-                    pastMatchActivities: apiRes.data.studyset.matchActivities,
-                    cloudId: params.id,
-                    authed: authed,
-                    authedUser: authedUser,
-                    header: {
-                        hideHeader: true
-                    }
-                };
-            } else {
-                console.error(
-                    "API Error in match page load func: ",
-                    apiRes
-                );
-                error(404, {
-                    message: "Not Found"
-                })
-            }
+        let authedUser;
+        if (apiRes?.data?.authed) {
+            authed = apiRes.data.authed;
+            authedUser = apiRes.data?.authedUser;
+        }
+        if (apiRes?.data) {
+            data = {
+                studysets: apiRes.data.studysets,
+                authed: authed,
+                authedUser: authedUser,
+            };
+        } else {
+            console.error(
+                "API Error in match page load func: ",
+                apiRes,
+            );
+            error(404, {
+                message: "Not Found",
+            });
+        }
     } catch (err) {
         console.error(
             "Error in match page load func: ",
-            err
+            err,
         );
         error(404, {
-            message: "Not Found"
-        })
+            message: "Not Found",
+        });
     }
+    return {
+        ...data,
+        cloudIds,
+        localIds,
+        header: {
+            hideHeader: true
+        }
+    };
 }
