@@ -50,7 +50,8 @@
   .a-little-different-grid-list > button {
     margin-top: 0px;
   }
-  .button-box img {
+  .theme-button img { /* `.theme-button > picture > img` behind the scenes */
+    margin-top: 0px;
     width: 100%;
     height: auto;
   }
@@ -62,15 +63,15 @@
 
 <p>Theme</p>
 <div class="a-little-different-grid-list">
-  <button onclick={() => setTheme("auto")} class="button-box no-clickable-effect {theme == 'auto' ? 'selected' : ''}">
+  <button onclick={() => setTheme("auto")} class="button-box no-clickable-effect theme-button {theme == 'auto' ? 'selected' : ''}">
     <enhanced:img src="./img/theme-preview-auto.png" style="border-radius:0.8rem" alt="Auto Dark/Light Theme Preview" />
     <p>Auto</p>
   </button>
-  <button onclick={() => setTheme("dark")} class="button-box no-clickable-effect {theme == 'dark' ? 'selected' : ''}">
+  <button onclick={() => setTheme("dark")} class="button-box no-clickable-effect theme-button {theme == 'dark' ? 'selected' : ''}">
     <enhanced:img src="./img/theme-preview-dark.png" style="border-radius:0.8rem" alt="Dark Theme Preview" />
     <p>Dark</p>
   </button>
-  <button onclick={() => setTheme("light")} class="button-box no-clickable-effect {theme == 'light' ? 'selected' : ''}">
+  <button onclick={() => setTheme("light")} class="button-box no-clickable-effect theme-button {theme == 'light' ? 'selected' : ''}">
     <enhanced:img src="./img/theme-preview-light.png" style="border-radius:0.8rem" alt="Light Theme Preview" />
     <p>Light</p>
   </button>
