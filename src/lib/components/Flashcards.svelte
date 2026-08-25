@@ -206,7 +206,7 @@
         </div>
     </div>
     <div class="caption centerThree">
-        <p>{index + 1}<span class="fg0">/{terms?.length ?? "?"}</span></p>
+        <p>{index + 1}<span class="fg0">/{terms?.length ?? "1"}</span></p>
         <div class="flex justifyselfcenter compact-gap">
             <button
                 class="faint"
