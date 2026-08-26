@@ -11,12 +11,14 @@
     import TFQ from "$lib/components/questions/TFQ.svelte";
     import { slide, fade } from "svelte/transition";
     import { goto } from "$app/navigation";
-    import { setCancelBeforeNavigate } from "$lib/cancel-before-navigate.js";
+    import { page } from "$app/state";
+    import { setCancelBeforeNavigate, getCancelBeforeNavigate } from "$lib/cancel-before-navigate.js";
     import { fancyTimestamp } from "$lib/fancyTimestamp";
     import { Confetti } from "svelte-confetti";
 	import { backOut, cubicInOut } from 'svelte/easing';
 	import { Arc, Chart, Group, Layer, LinearGradient, Text } from 'layerchart';
     let { data } = $props();
+    let r = $derived(Number(page.url.searchParams.get("r") ?? 0));
     let terms = $state();
     let practiceTests = $state([]);
 
@@ -146,7 +148,11 @@
             objectKeys.forEach(objectKey => {
                 URL.revokeObjectURL(objectKey);
             });
-            setCancelBeforeNavigate(undefined);
+            if (getCancelBeforeNavigate() == cancelBeforeNavigate) {
+                /* cleanup only if this page's instance of the function is the one that's being overwritten, because sometimes onMount's cleanup runs AFTER the next pages onmount, and if the next page is this page, then we'd be overwriting the new function
+                luckily, the same function from another instance of this page will not be equal to it, so we can compare it and only overwrite it with undefined if it has not already been overwritten */
+                setCancelBeforeNavigate(undefined);
+            }
         }
     });
 
@@ -558,7 +564,9 @@ FRQs: ${numFRQsToAssign}`,
     var takingActualPracticeTest = $state(false);
     var bypassExitConfirmation = false;
     let navigatingToURL = $state("");
-    setCancelBeforeNavigate((navigation) => {
+    console.log("bypassExitConfirmation:", bypassExitConfirmation);
+    function cancelBeforeNavigate(navigation) {
+        console.log("bypassExitConfirmation inside cancelBeforeNavigate:", bypassExitConfirmation);
         /* NOTE: ALWAYS CLEAN UP WITH setCancelBeforeNavigate(undefined) IN ONMOUNT'S CLEANUP FUNC */
         if (
             takingActualPracticeTest &&
@@ -582,7 +590,8 @@ FRQs: ${numFRQsToAssign}`,
         } else {
             return false;
         }
-    });
+    }
+    setCancelBeforeNavigate(cancelBeforeNavigate);
 
     let questionsViewOnly = $state(data?.alreadyOver);
     let questionsShowAccuracy = $state(data?.alreadyOver);
@@ -654,7 +663,7 @@ FRQs: ${numFRQsToAssign}`,
 <div class="grid page">
     <div class="content">
         <div class="flex">
-            {const figureOutLink = ({ cloudIds, localIds }) => (
+            {const studysetPageLink = ({ cloudIds, localIds }) => (
                 cloudIds.length + localIds.length > 1 ?
                     `/combine?${[
                         ...cloudIds.map((id) => `studyset=${id}`),
@@ -665,6 +674,13 @@ FRQs: ${numFRQsToAssign}`,
                         localIds.length == 1 ?
                             `/studyset/local?id=${localIds[0]}` : ""
             )}
+            {const ptPageLink = ({ cloudIds, localIds }) => (
+                `/practice-test?r=${r+1}&${[
+                    ...cloudIds.map((id) => `studyset=${id}`),
+                    ...localIds.map((id) => `localStudyset=${id}`),
+                ].join("&")}`
+            )}
+            {const figureOutLink = (o) => (showTest ? ptPageLink(o) : studysetPageLink(o))}
             <a
                 class="button faint"
                 href={data.alreadyOver ?

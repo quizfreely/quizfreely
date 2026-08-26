@@ -29,3 +29,15 @@ export function getCancelBeforeNavigate() {
     return cancelBeforeNavigateFunc;
 }
 
+/**
+ * Clear cancelBeforeNav function for clean up
+ * Pass same function instance as parameter from setCancelBeforeNavigate call
+ *
+ * @param {((nav: BeforeNavigate) => boolean | undefined) | undefined} func
+ * @returns {void}
+ */
+export function cleanUpCancelBeforeNavigate(func) {
+    if (cancelBeforeNavigateFunc == func) {
+        cancelBeforeNavigateFunc = undefined;
+    }
+}

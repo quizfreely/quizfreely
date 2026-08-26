@@ -112,7 +112,7 @@
                 terms.push(...localTerms);
                 practiceTests.push(
                     ...(studysets?.flatMap?.(s => s.practiceTests)
-                        ?.filter?.(pt => pt != null) ?? [],
+                        ?.filter?.(pt => pt != null) ?? []
                     ),
                 );
                 practiceTests.sort(
@@ -120,7 +120,7 @@
                 );
                 reviewEventStats.push(
                     ...(studysets?.flatMap?.(s => s.reviewEventStatsByDay)
-                        ?.filter?.(re => re != null) ?? [],
+                        ?.filter?.(re => re != null) ?? []
                     ),
                 );
             }
