@@ -12,7 +12,7 @@
     import { slide, fade } from "svelte/transition";
     import { goto } from "$app/navigation";
     import { page } from "$app/state";
-    import { setCancelBeforeNavigate, getCancelBeforeNavigate } from "$lib/cancel-before-navigate.js";
+    import { setCancelBeforeNavigate, cleanUpCancelBeforeNavigate } from "$lib/cancel-before-navigate.js";
     import { fancyTimestamp } from "$lib/fancyTimestamp";
     import { Confetti } from "svelte-confetti";
 	import { backOut, cubicInOut } from 'svelte/easing';
@@ -148,11 +148,7 @@
             objectKeys.forEach(objectKey => {
                 URL.revokeObjectURL(objectKey);
             });
-            if (getCancelBeforeNavigate() == cancelBeforeNavigate) {
-                /* cleanup only if this page's instance of the function is the one that's being overwritten, because sometimes onMount's cleanup runs AFTER the next pages onmount, and if the next page is this page, then we'd be overwriting the new function
-                luckily, the same function from another instance of this page will not be equal to it, so we can compare it and only overwrite it with undefined if it has not already been overwritten */
-                setCancelBeforeNavigate(undefined);
-            }
+            cleanUpCancelBeforeNavigate(cancelBeforeNavigate);
         }
     });
 
@@ -564,10 +560,8 @@ FRQs: ${numFRQsToAssign}`,
     var takingActualPracticeTest = $state(false);
     var bypassExitConfirmation = false;
     let navigatingToURL = $state("");
-    console.log("bypassExitConfirmation:", bypassExitConfirmation);
     function cancelBeforeNavigate(navigation) {
-        console.log("bypassExitConfirmation inside cancelBeforeNavigate:", bypassExitConfirmation);
-        /* NOTE: ALWAYS CLEAN UP WITH setCancelBeforeNavigate(undefined) IN ONMOUNT'S CLEANUP FUNC */
+        /* NOTE: ALWAYS CLEAN UP WITH cleanUpCancelBeforeNavigate() IN ONMOUNT'S CLEANUP FUNC */
         if (
             takingActualPracticeTest &&
             questionsAnswered > 0 &&
