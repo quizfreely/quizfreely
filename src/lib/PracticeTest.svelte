@@ -148,7 +148,7 @@
             objectKeys.forEach(objectKey => {
                 URL.revokeObjectURL(objectKey);
             });
-            cleanUpCancelBeforeNavigate(cancelBeforeNavigate);
+            cleanUpCancelBeforeNavigate(cancelBeforeNav);
         }
     });
 
@@ -560,8 +560,8 @@ FRQs: ${numFRQsToAssign}`,
     var takingActualPracticeTest = $state(false);
     var bypassExitConfirmation = false;
     let navigatingToURL = $state("");
-    function cancelBeforeNavigate(navigation) {
-        /* NOTE: ALWAYS CLEAN UP WITH cleanUpCancelBeforeNavigate() IN ONMOUNT'S CLEANUP FUNC */
+    function cancelBeforeNav(navigation) {
+        /* NOTE: ALWAYS CLEAN UP WITH cleanUpCancelBeforeNavigate(cancelBeforeNav) IN ONMOUNT'S CLEANUP FUNC */
         if (
             takingActualPracticeTest &&
             questionsAnswered > 0 &&
@@ -585,7 +585,7 @@ FRQs: ${numFRQsToAssign}`,
             return false;
         }
     }
-    setCancelBeforeNavigate(cancelBeforeNavigate);
+    setCancelBeforeNavigate(cancelBeforeNav);
 
     let questionsViewOnly = $state(data?.alreadyOver);
     let questionsShowAccuracy = $state(data?.alreadyOver);

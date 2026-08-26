@@ -4,7 +4,7 @@
     import { env } from '$env/dynamic/public';
     import { idbApiLayer, idbLayerImg } from "$lib/idb-api-layer";
     import { goto } from "$app/navigation";
-    import { setCancelBeforeNavigate } from "$lib/cancel-before-navigate.js";
+    import { setCancelBeforeNavigate, cleanUpCancelBeforeNavigate } from "$lib/cancel-before-navigate.js";
     let { data } = $props();
     import Dropdown from "$lib/components/Dropdown.svelte";
     import SubjectPicker from "$lib/components/SubjectPicker.svelte";
@@ -643,7 +643,7 @@
             objectUrls.forEach(objectUrl => {
                 URL.revokeObjectURL(objectUrl);
             });
-            setCancelBeforeNavigate(undefined);
+            cleanUpCancelBeforeNavigate(cancelBeforeNav);
         };
     });
 
@@ -781,8 +781,8 @@
     let importTermsRowDelimiterRadioSelect = $state("newline");
 
     let navigatingToURL = $state("");
-    setCancelBeforeNavigate((navigation) => {
-        /* NOTE: ALWAYS CLEAN UP WITH setCancelBeforeNavigate(undefined) IN ONMOUNT'S CLEANUP FUNC */
+    function cancelBeforeNav(navigation) {
+        /* NOTE: ALWAYS CLEAN UP WITH cleanUpCancelBeforeNavigate(cancelBeforeNav) IN ONMOUNT'S CLEANUP FUNC */
         if (unsavedChanges && !bypassUnsavedChangesConfirmation) {
             navigatingToURL = navigation?.to?.url;
             if (navigation.type !== "leave") {
@@ -800,7 +800,8 @@
         } else {
             return false;
         }
-    });
+    }
+    setCancelBeforeNavigate(cancelBeforeNav);
 
     function showTermAddImageLoading() {
         termAddImageLoading = true;

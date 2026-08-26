@@ -1,7 +1,7 @@
 <script>
     import { onMount, tick, onDestroy } from "svelte";
     import { goto } from "$app/navigation";
-    import { setCancelBeforeNavigate } from "$lib/cancel-before-navigate.js";
+    import { setCancelBeforeNavigate, cleanUpCancelBeforeNavigate } from "$lib/cancel-before-navigate.js";
     import { idbApiLayer, db } from "$lib/idb-api-layer";
     import { fancyTimestamp } from "$lib/fancyTimestamp";
     import { slide, fade } from "svelte/transition";
@@ -183,7 +183,7 @@
             objectUrls.forEach(objectUrl => {
                 URL.revokeObjectURL(objectUrl)
             });
-            setCancelBeforeNavigate(undefined);
+            cleanUpCancelBeforeNavigate(cancelBeforeNav);
         }
     })
 
@@ -191,8 +191,8 @@
     var showTest = $state(data.alreadyOver);
     var bypassExitConfirmation = false;
     let navigatingToURL = $state("");
-    setCancelBeforeNavigate((navigation) => {
-        /* NOTE: ALWAYS CLEAN UP WITH setCancelBeforeNavigate(undefined) IN ONMOUNT'S CLEANUP FUNC */
+    function cancelBeforeNav(navigation) {
+        /* NOTE: ALWAYS CLEAN UP WITH cleanUpCancelBeforeNavigate(cancelBeforeNav) IN ONMOUNT'S CLEANUP FUNC */
         if (
             inProgress &&
             !bypassExitConfirmation
@@ -214,7 +214,8 @@
         } else {
             return false;
         }
-    });
+    }
+    setCancelBeforeNavigate(cancelBeforeNav);
 
     let timeElapsedMs = $state(0);
     let showDone = $state(false);

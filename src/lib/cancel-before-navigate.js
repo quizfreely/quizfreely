@@ -10,7 +10,9 @@ let cancelBeforeNavigateFunc = undefined;
 
 /**
  * Set func to call before root layout's BeforeNavigate logic
- * return `true` if navigation.cancel() is called to stop the root layout's beforeNavigate
+ * return `true` from callback func if navigation.cancel() is called to stop the root layout's beforeNavigate
+ *
+ * ALWAYS run cleanUpCancelBeforeNavigate to clean up (usually in onMount's cleanup func)
  *
  * @param {((nav: BeforeNavigate) => boolean | undefined) | undefined} cancelBeforeNavigate - Func called before layout BeforeNavigate logic
  * @returns {void}
