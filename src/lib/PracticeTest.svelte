@@ -42,9 +42,8 @@
     }
 
     if (!data.alreadyOver && data.cloudIds?.length > 0) {
-        // console.log(data.studyset)
         terms = data.studysets?.flatMap?.(s => s.terms)?.filter?.(t => t != null);
-        practiceTests = data.studyset?.flatMap?.(s => s.practiceTests)?.filter?.(p => p != null) ?? [];
+        practiceTests = data.studysets?.flatMap?.(s => s.practiceTests)?.filter?.(p => p != null) ?? [];
         practiceTests.sort(
             (a, b) => b.timestamp.localeCompare(a.timestamp),
         );
@@ -738,7 +737,7 @@ FRQs: ${numFRQsToAssign}`,
             <div transition:slide={{ duration: 400 }}>
                 <div class="flex" style="align-items: center; margin-bottom: 1rem;">
                     <PracticeTestIcon width="2.2rem" height="2.2rem"></PracticeTestIcon>
-                    <h1 id="practice-test" class="h3" style="margin-bottom: 0px;">Practice Test</h1>
+                    <h1 class="h3" style="margin-bottom: 0px;">Practice Test</h1>
                 </div>
                 <p>
                     There {terms?.length == 1 ? "is" : "are"}
