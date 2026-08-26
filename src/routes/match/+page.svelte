@@ -128,35 +128,35 @@
                 });
                 if (studysets == null || studysets.length == 0) {
                     showStartErr = true;
-                    startErrMsg = "Error loading studyset";
+                    startErrMsg = "Error loading local studyset";
                     return;
                 }
-                terms = studysets.flatMap(s => s.terms).filter(t => t != null);
+                const localTerms = studysets.flatMap(s => s.terms).filter(t => t != null);
+                localTerms.forEach(term => {
+                    objectUrls.push(term.termImageUrl);
+                    objectUrls.push(term.defImageUrl);
+                })
+                terms.push(...localTerms);
                 if (terms.length == 0) {
                     showStartErr = true;
                     startErrMsg = "There are 0 terms in this studyset?";
                     return;
                 }
-                terms.forEach(term => {
-                    objectUrls.push(term.termImageUrl);
-                    objectUrls.push(term.defImageUrl);
-                })
                 selectTerms();
             })();
         }
         (async () => {
             try {
-                history = [
-                    ...history,
-                    ...(await idbApiLayer.getMatchActivitiesByStudysetIds(
+                history.push(
+                    ...((await idbApiLayer.getMatchActivitiesByStudysetIds(
                         [...data.cloudIds, ...data.localIds],
                         {
                             termIds: true,
                             incorrectPairIds: true
                         },
-                    ))
-                ].filter(h => h != null);
-                history = history.sort(
+                    ))?.filter?.(h => h != null) ?? [])
+                );
+                history.sort(
                     (a, b) => b.endTimestamp.localeCompare(a.endTimestamp)
                 );
             } catch (err) {

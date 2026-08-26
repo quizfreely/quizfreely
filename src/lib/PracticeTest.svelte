@@ -104,10 +104,11 @@
                     ...(terms ?? []),
                     ...localTerms,
                 ];
-                practiceTests = [
-                    ...(practiceTests ?? []),
-                    ...(studyset?.practiceTests ?? [])
-                ];
+                practiceTests.push(
+                    ...(studysets?.flatMap?.(s => s.practiceTests)
+                        ?.filter?.(pt => pt != null) ?? []
+                    ),
+                );
                 practiceTests.sort(
                     (a, b) => b.timestamp.localeCompare(a.timestamp),
                 );
@@ -119,24 +120,25 @@
                 so we need to map local progress to cloud terms
 
                 `terms` has already been populated during SSR (above, before onMount) */
-                practiceTests = await db.practiceTests
+                practiceTests.push(...(await db.practiceTests
                     .where("studysetIds")
                     .anyOf(data.cloudIds)
-                    .toArray();
-                practiceTests?.sort(
+                    .toArray() ?? []));
+                practiceTests.sort(
                     /* timestamps are ISO strings in UTC,
                     so lexical/alphanumeric sorting is the same as chronological sorting
                     also you see we're comparing `b` to `a`, so its descending,
                     so most recent is first */
                     (a, b) => b.timestamp.localeCompare(a.timestamp),
                 );
-                practiceTests = practiceTests;
 
                 for (const term of terms) {
-                    term.progress = await db.termProgress
-                        .where("termId")
-                        .equals(term.id)
-                        .toArray()?.[0];
+                    if (term.progress == null) {
+                        term.progress = await db.termProgress
+                            .where("termId")
+                            .equals(term.id)
+                            .toArray()?.[0];
+                    }
                 }
             }
         })();
@@ -676,7 +678,7 @@ FRQs: ${numFRQsToAssign}`,
                         /* if data.alreadyOver is true, but data.local is false, the studysets must ALL be cloud
                         (cloud studysets might have local PTs, but cloud PTs ALWAYS are for cloud studysets) */
                         figureOutLink({ cloudIds: data.studysetIds, localIds: [] })
-                    ) : figureOutLink({ data.cloudIDs, data.localIds })
+                    ) : figureOutLink({ cloudIds: data.cloudIds, localIds: data.localIds })
                 }><BackIcon></BackIcon> Back</a
             >
         </div>
