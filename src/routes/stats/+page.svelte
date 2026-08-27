@@ -305,9 +305,16 @@
 <div class="grid page">
     <div class="content">
         <div class="flex">
-            <a class="button faint" href={data.local ?
-                `/studyset/local?id=${data.localId}` :
-                `/studysets/${data.studysetId}`
+            <a class="button faint" href={
+                data.cloudIds.length + data.localIds.length > 1 ?
+                    `/combine?${[
+                        ...data.cloudIds.map((id) => `studyset=${id}`),
+                        ...data.localIds.map((id) => `localStudyset=${id}`),
+                    ].join("&")}` :
+                    data.cloudIds.length == 1 ?
+                        `/studysets/${data.cloudIds[0]}` :
+                        data.localIds.length == 1 ?
+                            `/studyset/local?id=${data.localIds[0]}` : ""
             }>
                 <BackIcon></BackIcon>
                 Back
@@ -500,11 +507,17 @@
                             </div>
                         </div>
                         <div class="flex" style="justify-content: center;">
-                            <a href="{
-                                data.local ?
-                                    `/studyset/local/stats/term?id=${term.id}&studysetId=${data?.localId}` :
-                                    `/studysets/${data.studysetId}/stats/terms/${term.id}`
-                            }" style="display: flex; flex-wrap: nowrap; align-items: center; gap: 0.4rem;">
+                            <a href={
+                                /*
+                                 *  NOTE: href="abc{def}" is NOT always the same as href={`abc${def}`}
+                                 *  ampersands (`&`) MUST be escaped as `&amp;` in href="" (double quotes) (HTML syntax)
+                                 *  do NOT escape ampersands in href={} (curly brackets) (JS syntax)
+                                 */
+                                `/term-stats?${term.id?.includes?.("-") ? "term" : "localTerm"}=${term.id}&${[
+                                    ...cloudIds.map((id) => `studyset=${id}`),
+                                    ...localIds.map((id) => `localStudyset=${id}`),
+                                ].join("&")}`
+                            } style="display: flex; flex-wrap: nowrap; align-items: center; gap: 0.4rem;">
                                 <StatsIcon></StatsIcon>
                                 <span style="margin-top: 0px;">View Details</span>
                             </a>
