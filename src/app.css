@@ -45,3 +45,31 @@
         border-radius: unset;
     }
 }
+
+.love.alt.qzfr-love-alt,
+button.love.alt.qzfr-love-alt,
+.button.love.alt.qzfr-love-alt {
+    background-color: color-mix(in srgb, color-mix(in srgb, var(--love) 10%, var(--bg-2)) 70%, transparent);
+}
+.love.alt.qzfr-love-alt:hover,
+button.love.alt.qzfr-love-alt:hover,
+.button.love.alt.qzfr-love-alt:hover,
+.love.alt.qzfr-love-alt:focus,
+button.love.alt.qzfr-love-alt:focus,
+.button.love.alt.qzfr-love-alt:focus {
+    background-color: color-mix(in srgb, color-mix(in srgb, var(--love-alt) 12%, var(--bg-3ish)) 80%, transparent);
+}
+
+.love.faint.qzfr-love-faint,
+button.love.faint.qzfr-love-faint,
+.button.love.faint.qzfr-love-faint {
+    background-color: color-mix(in srgb, color-mix(in srgb, var(--love) 10%, var(--bg-2)) 60%, transparent);
+}
+.love.faint.qzfr-love-faint:hover,
+button.love.faint.qzfr-love-faint:hover,
+.button.love.faint.qzfr-love-faint:hover,
+.love.faint.qzfr-love-faint:focus,
+button.love.faint.qzfr-love-faint:focus,
+.button.love.faint.qzfr-love-faint:focus {
+    background-color: color-mix(in srgb, color-mix(in srgb, var(--love-alt) 12%, var(--bg-3ish)) 70%, transparent);
+}

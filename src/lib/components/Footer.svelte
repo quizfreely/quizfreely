@@ -30,7 +30,7 @@
     </a>
     <a
       href="https://hcb.hackclub.com/donations/start/quizfreely"
-      class="button faint love"
+      class="button faint love qzfr-love-faint"
       style="margin-left: 0.2rem;"
     >
       <HeartIcon></HeartIcon> Donate
