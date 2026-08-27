@@ -1,11 +1,24 @@
+import { error } from '@sveltejs/kit';
+
 export async function load({ fetch, url }) {
     const cloudTermId = url.searchParams.get("term");
     let localTermId = url.searchParams.get("term");
-    if (localTermId != null && !isNaN(localTermId)) {
-        localTermId = Number(localTermId);
+    localTermId = (localTermId != null && !isNaN(localTermId)) ?
+        Number(localTermId) : undefined;
+    if (cloudTermId == null && localTermId == null) {
+        error(404, {
+            message: "Not Found"
+        });
+        return;
     }
     const cloudStudysetIds = url.searchParams.getAll("studyset");
     const localStudysetIds = url.searchParams.getAll("localStudyset").map(Number).filter((n) => !Number.isNaN(n));
+    if (cloudStudysetIds.length + localStudysetIds.length == 0) {
+        error(404, {
+            message: "Not Found"
+        });
+        return;
+    }
     let data;
     try {
         let variables;
