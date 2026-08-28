@@ -62,7 +62,7 @@ export async function load({ fetch, url }) {
                         questionsCorrect
                         questionsTotal
                     }
-                    reviewEventStatsByDay(last: 30) {
+                    reviewEventStatsByDay(lastDaysTotal: 30) {
                         timestamp
                         correct
                         incorrect

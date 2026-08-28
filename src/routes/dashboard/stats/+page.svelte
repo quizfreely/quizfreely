@@ -111,10 +111,10 @@
                 console.error("Error loading recent activity studysets from local IDB:", err);
             }
         }
-        const reviewStats = await idbApiLayer.getReviewEventStatsByDay({ last: 366 });
+        const reviewStats = await idbApiLayer.getReviewEventStatsByDay({ lastDaysBack: 365 });
         calcChart(reviewStats);
         const localActivityHistory = await idbApiLayer.activityHistory({
-            last: 40,
+            last: 60,
             getCloudStudysets: cloudStudysetsByIds
         });
         // console.log("localActivityHistory:", localActivityHistory);
@@ -217,7 +217,7 @@
 <Noscript />
 
 <p><span style="font-size: 1.2rem;">{totalTermsReviewed}</span> terms/questions reviewed
-<span class="line fg0">in the last year</span></p>
+<span class="line fg0">last 365 days</span></p>
 <div class="qzfr-eh-lc-div">
 <Chart
 	data={chartData}

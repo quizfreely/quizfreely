@@ -14,7 +14,7 @@ export async function load({ fetch }) {
         username
         displayName
     }
-    reviewEventStatsByDay(last: 366) {
+    reviewEventStatsByDay(lastDaysBack: 365) {
         timestamp
         correct
         incorrect

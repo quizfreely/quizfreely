@@ -64,7 +64,7 @@ export async function load({ fetch, url }) {
                         defCorrectCount
                         defIncorrectCount
                     }
-                    reviewEventStatsByDay(last: 30) {
+                    reviewEventStatsByDay(lastDaysTotal: 30) {
                         timestamp
                         correct
                         incorrect
