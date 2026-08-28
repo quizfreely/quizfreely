@@ -155,15 +155,11 @@
     <div class="content">
         <div class="flex">
             <a class="button faint" href={
-                data.cloudStudysetIds.length + data.localStudysetIds.length > 1 ?
-                    `/combine?${[
-                        ...data.cloudStudysetIds.map((id) => `studyset=${id}`),
-                        ...data.localStudysetIds.map((id) => `localStudyset=${id}`),
-                    ].join("&")}` :
-                    data.cloudStudysetIds.length == 1 ?
-                        `/studysets/${data.cloudStudysetIds[0]}` :
-                        data.localStudysetIds.length == 1 ?
-                            `/studyset/local?id=${data.localStudysetIds[0]}` : ""
+                /* NOTE: href={``} lets us avoid escaping ampersands (`&`), href="" does not */
+                `/stats?${[
+                    ...data.cloudStudysetIds.map((id) => `studyset=${id}`),
+                    ...data.localStudysetIds.map((id) => `localStudyset=${id}`),
+                ].join("&")}`
             }>
                 <BackIcon></BackIcon>
                 Back
