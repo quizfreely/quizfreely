@@ -17,7 +17,6 @@
     import { Confetti } from "svelte-confetti";
 	import { backOut, cubicInOut } from 'svelte/easing';
 	import { Arc, Chart, Group, Layer, LinearGradient, Text } from 'layerchart';
-    import { removeDuplicatesByProp } from "$lib/rm-duplicates-by-prop.js";
     let { data } = $props();
     let r = $derived(Number(page.url.searchParams.get("r") ?? 0));
     let terms = $state();
