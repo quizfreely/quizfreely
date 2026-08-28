@@ -12,6 +12,7 @@
     import CheckmarkIcon from "$lib/icons/Checkmark.svelte";
     import EnterIcon from "$lib/icons/Enter.svelte";
     import ExitIcon from "$lib/icons/Exit.svelte";
+    import GridIcon from "$lib/icons/AppsGrid.svelte";
 
     let { data } = $props();
     let showFolderPicker = $state(false);
@@ -198,22 +199,32 @@
         </p>
     {/if}
     {#snippet topMenu()}
-        <div class="flex">
-            <button onclick={() => newStudysetButton()}>
-                <IconPlus />
-                New Studyset
-            </button>
-            <a href="/import" class="button alt">
-                <EnterIcon></EnterIcon>
-                Import
-            </a>
-            {#if data.authed}
-                <button class="alt" onclick={() => openNewFolderModal()}>
-                    <FolderIcon></FolderIcon>
-                    New Folder
+        <div class="flex" style="justify-content: space-between;">
+            <div class="flex">
+                <button onclick={() => newStudysetButton()}>
+                    <IconPlus />
+                    New Studyset
                 </button>
-            {/if}
+                <a href="/import" class="button alt">
+                    <EnterIcon></EnterIcon>
+                    Import
+                </a>
+            </div>
+            <button onclick={() => alert("test")} class="alt">
+                <GridIcon></GridIcon>
+                Select Multiple
+            </button>
         </div>
+    {/snippet}
+    {#snippet newFolderButton()}
+        <button
+            class="faint"
+            style="display: flex; border-radius: 0.8rem;"
+            onclick={() => openNewFolderModal()}
+        >
+            <IconPlus></IconPlus>
+            New Folder
+        </button>
     {/snippet}
     {#snippet emptyMsg()}
         <div class="box flex center-h center-v">
@@ -298,6 +309,8 @@
         showSavedDropdown={true}
         {savedDropdownContent}
         {topMenu}
+        showFolderEndButton={data.authed}
+        folderEndButton={newFolderButton}
     ></StudysetList>
 </div>
 {#if showNewFolderModal}

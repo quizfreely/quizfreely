@@ -33,6 +33,8 @@
         showRecentDropdown = false,
         recentDropdownContent,
         topMenu,
+        showFolderEndButton = false,
+        folderEndButton,
     } = $props();
 
     let localStudysetList = $state([]);
@@ -207,6 +209,9 @@
                 {folder.name}
             </a>
         {/each}
+        {#if showFolderEndButton}
+            {@render folderEndButton?.()}
+        {/if}
     </div>
 {/if}
 {#if data.authed && !(hideTypeWhenCloudEmptyAndLocalExists && !(data.studysetList?.length > 0) && localStudysetList?.length > 0)}
