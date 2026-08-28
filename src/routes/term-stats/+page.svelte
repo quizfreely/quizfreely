@@ -54,7 +54,7 @@
                 }
             }
 
-            if (!data.authed && !data.local) {
+            if (!data.authed && data.cloudTermId != null) {
                 /* not logged in, so user data is local,
                 but studyset is a cloud studyset,
                 so we need to map local progress to cloud terms
@@ -63,7 +63,7 @@
                 term.progress = (await db.termProgress.where("termId").equals(term.id).toArray())?.[0];
             }
 
-            if (data.local || !data.authed) {
+            if (data.localTermId != null || !data.authed) {
                 term.reviewEventStatsByDay = await idbApiLayer.getReviewEventStatsByDay({
                     last: 30,
                     termIds: [term.id]
@@ -154,9 +154,16 @@
 <div class="grid page">
     <div class="content">
         <div class="flex">
-            <a class="button faint" href={data.local ?
-                `/studyset/local/stats?id=${data.localStudysetId}` :
-                `/studysets/${data.studysetId}/stats`
+            <a class="button faint" href={
+                data.cloudIds.length + data.localIds.length > 1 ?
+                    `/combine?${[
+                        ...data.cloudIds.map((id) => `studyset=${id}`),
+                        ...data.localIds.map((id) => `localStudyset=${id}`),
+                    ].join("&")}` :
+                    data.cloudIds.length == 1 ?
+                        `/studysets/${data.cloudIds[0]}` :
+                        data.localIds.length == 1 ?
+                            `/studyset/local?id=${data.localIds[0]}` : ""
             }>
                 <BackIcon></BackIcon>
                 Back

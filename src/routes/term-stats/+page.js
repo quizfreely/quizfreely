@@ -5,7 +5,9 @@ export async function load({ fetch, url }) {
     let localTermId = url.searchParams.get("term");
     localTermId = (localTermId == null || localTermId == "" || isNaN(localTermId)) ?
         undefined : Number(localTermId);
-    if (cloudTermId == null && localTermId == null) {
+    if ((cloudTermId == null && localTermId == null) || (
+        cloudTermId != null && localTermId != null
+    )) {
         error(404, {
             message: "Not Found"
         });
