@@ -2,7 +2,7 @@
 import Header from "$lib/components/Header.svelte";
 import Footer from "$lib/components/Footer.svelte";
 import "../app.css";
-import { fade } from "svelte/transition";
+import { fade, slide } from "svelte/transition";
 import { sineIn, sineOut } from "svelte/easing";
 import NProgress from "nprogress";
 import "$lib/nprogress/modified-nprogress.css";
@@ -87,7 +87,16 @@ onMount(() => {
 {#if !page?.data?.header?.hideHeader}
 <Header />
 {/if}
-e {studysetSelection.cloudIds.size}
+{const totalStudysetsSelectedCount = $derived(studysetSelection.cloudIds.size + studysetSelection.localIds.size)}
+{#if totalStudysetsSelectedCount > 0}
+<div class="grid page" transition:slide={{duration:400}}>
+    <div class="content">
+        <div class="box">
+            {totalStudysetsSelectedCount} Studysets Selected
+        </div>
+    </div>
+</div>
+{/if}
 {#key data.transPageKey}
 <div in:fade={{ duration: 120, delay: 120, easing: sineIn }} out:fade={{ duration: 120, easing: sineOut }}>
     <div style="min-height: 70vh">
