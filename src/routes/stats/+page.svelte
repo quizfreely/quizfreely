@@ -17,13 +17,13 @@
 
     const REVIEW_EVENT_STATS_DAYS = 30;
     let terms = $state(
-        data?.studysets?.flatMap?.(s => s.terms) ?? []
+        data?.studysets?.flatMap?.(s => s.terms)?.filter?.(t => t != null) ?? []
     );
     let practiceTests = $state(
-        data?.studysets?.flatMap?.(s => s.practiceTests) ?? []
+        data?.studysets?.flatMap?.(s => s.practiceTests)?.filter?.(pt => pt != null) ?? []
     );
     let reviewEventStats = $state(
-        data?.studysets?.flatMap?.(s => s.reviewEventStatsByDay) ?? []
+        data?.studysets?.flatMap?.(s => s.reviewEventStatsByDay)?.filter?.(d => d != null) ?? []
     );
     let termsStats = $derived.by(() => {
         if (terms) {
@@ -144,7 +144,7 @@
                 reviewEventStats.push(...(await idbApiLayer.getReviewEventStatsByDay({
                     last: REVIEW_EVENT_STATS_DAYS,
                     termIds: termIds,
-                }) ?? []));
+                })?.filter?.(d => d != null) ?? []));
 
                 for (const term of terms) {
                     if (term.progress == null) {
@@ -514,8 +514,8 @@
                                  *  do NOT escape ampersands in href={} (curly brackets) (JS syntax)
                                  */
                                 `/term-stats?${term.id?.includes?.("-") ? "term" : "localTerm"}=${term.id}&${[
-                                    ...cloudIds.map((id) => `studyset=${id}`),
-                                    ...localIds.map((id) => `localStudyset=${id}`),
+                                    ...data.cloudIds.map((id) => `studyset=${id}`),
+                                    ...data.localIds.map((id) => `localStudyset=${id}`),
                                 ].join("&")}`
                             } style="display: flex; flex-wrap: nowrap; align-items: center; gap: 0.4rem;">
                                 <StatsIcon></StatsIcon>

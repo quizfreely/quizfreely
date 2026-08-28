@@ -20,7 +20,7 @@
 
     let reChartData = $state([]);
 
-    if (data?.term?.reviewEventStatsByDay?.length != null && data.term.reviewEventStatsByDay.length >= 0) {
+    if (data?.term?.reviewEventStatsByDay != null && data.term.reviewEventStatsByDay.length >= 0) {
         calcChart(data.term.reviewEventStatsByDay);
     }
     let fancyTimestampReady = $state(false);
@@ -67,7 +67,7 @@
                 term.reviewEventStatsByDay = await idbApiLayer.getReviewEventStatsByDay({
                     last: 30,
                     termIds: [term.id]
-                });
+                })?.filter?.(d => d != null);
                 calcChart(term.reviewEventStatsByDay);
             }
         })();
@@ -155,15 +155,15 @@
     <div class="content">
         <div class="flex">
             <a class="button faint" href={
-                data.cloudIds.length + data.localIds.length > 1 ?
+                data.cloudStudysetIds.length + data.localStudysetIds.length > 1 ?
                     `/combine?${[
-                        ...data.cloudIds.map((id) => `studyset=${id}`),
-                        ...data.localIds.map((id) => `localStudyset=${id}`),
+                        ...data.cloudStudysetIds.map((id) => `studyset=${id}`),
+                        ...data.localStudysetIds.map((id) => `localStudyset=${id}`),
                     ].join("&")}` :
-                    data.cloudIds.length == 1 ?
-                        `/studysets/${data.cloudIds[0]}` :
-                        data.localIds.length == 1 ?
-                            `/studyset/local?id=${data.localIds[0]}` : ""
+                    data.cloudStudysetIds.length == 1 ?
+                        `/studysets/${data.cloudStudysetIds[0]}` :
+                        data.localStudysetIds.length == 1 ?
+                            `/studyset/local?id=${data.localStudysetIds[0]}` : ""
             }>
                 <BackIcon></BackIcon>
                 Back
