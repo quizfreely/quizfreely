@@ -3,6 +3,7 @@
     import { slide, fade } from "svelte/transition";
     import { goto } from "$app/navigation";
     import { idbApiLayer } from "$lib/idb-api-layer/index.js";
+    import { studysetSelection } from "$lib/studyset-selection.svelte.js";
     import Noscript from "$lib/components/Noscript.svelte";
     import StudysetList from "$lib/components/StudysetList.svelte";
     import FolderPicker from "$lib/components/FolderPicker.svelte";
@@ -319,7 +320,25 @@
         folderEndButton={newFolderButton}
         allStudysetsAsButton={selectingMultiple}
         allStudysetsButtonOnClick={(e, studyset) => {
-            studyset.selected = !studyset.selected;
+            if (studyset.selected) {
+                studyset.selected = false;
+                studysetSelection.deselect(
+                    studyset.id?.includes("-") ? {
+                        cloudId: studyset.id,
+                    } : {
+                        localId: studyset.id,
+                    },
+                );
+            } else {
+                studyset.selected = true;
+                studysetSelection.select(
+                    studyset.id?.includes("-") ? {
+                        cloudId: studyset.id,
+                    } : {
+                        localId: studyset.id,
+                    },
+                );
+            }
         }}
     ></StudysetList>
 </div>

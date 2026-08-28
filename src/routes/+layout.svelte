@@ -12,6 +12,7 @@ import { page } from '$app/state';
 import { getCancelBeforeNavigate } from "$lib/cancel-before-navigate.js";
 import { env } from "$env/dynamic/public";
 import { onMount } from "svelte";
+import { studysetSelection } from "$lib/studyset-selection.svelte.js";
 let { children, data } = $props();
 
 NProgress.configure({
@@ -78,12 +79,15 @@ onMount(() => {
     } catch (error) {
         console.error("Failed to detect or save timezone:", error);
     }
+
+    studysetSelection.readSessionStorage();
 })
 </script>
 
 {#if !page?.data?.header?.hideHeader}
 <Header />
 {/if}
+e {studysetSelection.cloudIds.size}
 {#key data.transPageKey}
 <div in:fade={{ duration: 120, delay: 120, easing: sineIn }} out:fade={{ duration: 120, easing: sineOut }}>
     <div style="min-height: 70vh">
