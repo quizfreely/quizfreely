@@ -2,7 +2,16 @@ import { error } from '@sveltejs/kit';
 
 export async function load({ fetch, url }) {
     const cloudIds = url.searchParams.getAll("studyset");
-    const localIds = url.searchParams.getAll("localStudyset").map(Number).filter((n) => !Number.isNaN(n));
+    const localIds = url.searchParams.getAll("localStudyset").map(
+        id => (id == "" || isNaN(id)) ?
+            undefined : Number(id)
+    ).filter(n => n != null);
+    if (cloudIds.length + localIds.length == 0) {
+        error(404, {
+            message: "Not Found"
+        });
+        return;
+    }
     let data;
     try {
         let variables;

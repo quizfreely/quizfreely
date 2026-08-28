@@ -3,8 +3,8 @@ import { error } from '@sveltejs/kit';
 export async function load({ fetch, url }) {
     const cloudTermId = url.searchParams.get("term");
     let localTermId = url.searchParams.get("term");
-    localTermId = (localTermId != null && !isNaN(localTermId)) ?
-        Number(localTermId) : undefined;
+    localTermId = (localTermId == null || localTermId == "" || isNaN(localTermId)) ?
+        undefined : Number(localTermId);
     if (cloudTermId == null && localTermId == null) {
         error(404, {
             message: "Not Found"
@@ -12,7 +12,10 @@ export async function load({ fetch, url }) {
         return;
     }
     const cloudStudysetIds = url.searchParams.getAll("studyset");
-    const localStudysetIds = url.searchParams.getAll("localStudyset").map(Number).filter((n) => !Number.isNaN(n));
+    const localStudysetIds = url.searchParams.getAll("localStudyset").map(
+        id => (id == "" || isNaN(id)) ?
+            undefined : Number(id)
+    ).filter(n => n != null);
     if (cloudStudysetIds.length + localStudysetIds.length == 0) {
         error(404, {
             message: "Not Found"
