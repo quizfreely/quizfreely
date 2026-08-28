@@ -17,7 +17,7 @@
         <p class="h6 fg0" style="margin-top: 0px; margin-bottom: 0px;">{studyset.termsCount ?? 0} {studyset.termsCount == 1 ? "Term" : "Terms"}</p>
     {/snippet}
     {#if button}
-    <button onclick={(e) => buttonOnClick(e, studyset)} class="button-box" style="display: flex; gap: 0.4rem; flex-direction: column; text-align: start; align-items: start; align-content: start; justify-content: space-between; height: 100%; width: 100%; {studyset.selected ? "border: 0.2rem solid var(--main);" : ""}">
+    <button onclick={(e) => buttonOnClick(e, studyset)} class="button-box {studyset.selected ? "text main" : ""}" style="display: flex; gap: 0.4rem; flex-direction: column; text-align: start; align-items: start; align-content: start; justify-content: space-between; height: 100%; width: 100%; {studyset.selected ? "border: 0.2rem solid var(--main);" : ""}">
         {@render inner()}
     </button>
     {:else}

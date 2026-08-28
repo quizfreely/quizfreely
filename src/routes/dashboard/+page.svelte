@@ -211,7 +211,7 @@
                     Import
                 </a>
             </div>
-            <button onclick={() => selectingMultiple = !selectingMultiple} class="alt">
+            <button onclick={() => selectingMultiple = !selectingMultiple} class="alt {selectingMultiple ? "ohno" : ""}">
                 {#if selectingMultiple}
                     <GridIcon></GridIcon>
                     Stop Selecting
@@ -318,7 +318,9 @@
         showFolderEndButton={data.authed}
         folderEndButton={newFolderButton}
         allStudysetsAsButton={selectingMultiple}
-        allStudysetsButtonOnClick={(e, studyset) => studyset.selected = true}
+        allStudysetsButtonOnClick={(e, studyset) => {
+            studyset.selected = !studyset.selected;
+        }}
     ></StudysetList>
 </div>
 {#if showNewFolderModal}
