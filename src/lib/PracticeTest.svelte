@@ -17,6 +17,7 @@
     import { Confetti } from "svelte-confetti";
 	import { backOut, cubicInOut } from 'svelte/easing';
 	import { Arc, Chart, Group, Layer, LinearGradient, Text } from 'layerchart';
+    import { removeDuplicatesByProp } from "$lib/rm-duplicates-by-prop.js";
     let { data } = $props();
     let r = $derived(Number(page.url.searchParams.get("r") ?? 0));
     let terms = $state();
@@ -42,11 +43,35 @@
     }
 
     if (!data.alreadyOver && data.cloudIds?.length > 0) {
-        terms = data.studysets?.flatMap?.(s => s.terms)?.filter?.(t => t != null);
-        practiceTests = data.studysets?.flatMap?.(s => s.practiceTests)?.filter?.(p => p != null) ?? [];
-        practiceTests.sort(
-            (a, b) => b.timestamp.localeCompare(a.timestamp),
-        );
+        if (data.studysets != null) {
+            const newTerms = [];
+            const newPTs = [];
+            const ptSet = new Set();
+            for (const studyset of data.studysets) {
+                if (studyset == null) continue;
+                if (studyset.terms) {
+                    for (const term of studyset.terms) {
+                        if (term == null) continue;
+                        newTerms.push(term);
+                    }
+                }
+                if (studyset.practiceTests == null) continue;
+                for (const pt of studyset.practiceTests) {
+                    if (pt?.id == null || ptSet.has(pt.id)) continue;
+                    /* the same practice test might appear in multiple studysets,
+                    so use a set to remove duplicates */
+                    ptSet.add(pt.id); 
+                    newPTs.push(pt);
+                }
+            }
+            /* use a local array, and push all of them at once at the end
+            to avoid pushing multiple times to reactive variables in the loop */
+            terms = newTerms;
+            practiceTests.push(...newPTs);
+            practiceTests.sort(
+                (a, b) => b.timestamp.localeCompare(a.timestamp),
+            );
+        }
     }
     let alreadyOverLocalPTStudysetIds = $state([]);
     let fancyTimestampReady = $state(false);
@@ -84,7 +109,7 @@
             if (data.localIds?.length > 0 && !data.alreadyOver) {
                 /* (at least some) studysets are local, so regardless of wheater the user is logged in or not,
                 we load studyset(s) and progress locally */
-                const studysets = await idbApiLayer.getStudysetsByIds(data.localIds, {
+                const localStudysets = await idbApiLayer.getStudysetsByIds(data.localIds, {
                     terms: {
                         progress: true,
                         termImageUrl: true,
@@ -92,27 +117,43 @@
                     },
                     practiceTests: true,
                 });
-                const localTerms = studysets?.flatMap?.(s => s.terms)?.filter?.(t => t != null) ?? [];
-                localTerms.forEach(term => {
-                    if (term.termImageUrl != null) {
-                        objectKeys.push(term.termImageUrl);
+                if (localStudysets != null) {
+                    const newTerms = [];
+                    const newPTs = [];
+                    const ptSet = new Set();
+                    for (const s of localStudysets) {
+                        if (s == null) continue;
+                        if (s.terms != null) {
+                            for (const t of s.terms) {
+                                if (t == null) continue;
+                                newTerms.push(t);
+                                if (t.termImageUrl != null) {
+                                    objectKeys.push(t.termImageUrl);
+                                }
+                                if (t.defImageUrl != null) {
+                                    objectKeys.push(t.defImageUrl);
+                                }
+                            }
+                        }
+                        if (s.practiceTests != null) {
+                            for (const pt of s.practiceTests) {
+                                if (pt?.id == null || ptSet.has(pt.id)) {
+                                    continue;
+                                }
+                                ptSet.add(pt.id); 
+                                newPTs.push(pt);
+                            }
+                        }
                     }
-                    if (term.defImageUrl != null) {
-                        objectKeys.push(term.defImageUrl);
-                    }
-                });
-                terms = [
-                    ...(terms ?? []),
-                    ...localTerms,
-                ];
-                practiceTests.push(
-                    ...(studysets?.flatMap?.(s => s.practiceTests)
-                        ?.filter?.(pt => pt != null) ?? []
-                    ),
-                );
-                practiceTests.sort(
-                    (a, b) => b.timestamp.localeCompare(a.timestamp),
-                );
+                    terms = [
+                        ...(terms ?? []),
+                        ...newTerms,
+                    ];
+                    practiceTests.push(...newPTs);
+                    practiceTests.sort(
+                        (a, b) => b.timestamp.localeCompare(a.timestamp),
+                    );
+                }
             }
 
             if (!data.authed && data.cloudIds?.length > 0 && !data.alreadyOver) {
