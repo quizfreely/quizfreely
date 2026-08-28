@@ -742,7 +742,8 @@ FRQs: ${numFRQsToAssign}`,
                 <p>
                     There {terms?.length == 1 ? "is" : "are"}
                     {terms?.length ?? "?"}
-                    {terms?.length == 1 ? "term" : "terms"} in this studyset
+                    {const studysetsCount = $derived(data.cloudIds?.length + data.localIds?.length)}
+                    {terms?.length == 1 ? "term" : "terms"} in {studysetsCount > 1 ? `these ${studysetsCount} studysets` : "this studyset"}
                 </p>
                 <div class="flex" style="gap: 4rem; margin-top: 1rem;">
                     <div>
