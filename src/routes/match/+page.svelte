@@ -15,7 +15,7 @@
     import RepeatIcon from "$lib/icons/Repeat.svelte";
 
     let { data } = $props();
-    let terms = data?.studysets?.flatMap?.(s => s.terms).filter(t => t != null);
+    let terms = [];
     let items = $state([]);
     let showStartErr = $state(false);
     let startErrMsg = $state("");
@@ -56,9 +56,6 @@
 
     if (data.localIds.length == 0) {
         selectTerms();
-    } else if (terms == null || terms.length == 0) {
-        showStartErr = true;
-        startErrMsg = "There aren't enough terms in this studyset!";
     }
 
     function selectTerms() {
@@ -175,18 +172,28 @@
         }
         (async () => {
             try {
-                history.push(
-                    ...((await idbApiLayer.getMatchActivitiesByStudysetIds(
-                        [...data.cloudIds, ...data.localIds],
-                        {
-                            termIds: true,
-                            incorrectPairIds: true
-                        },
-                    ))?.filter?.(h => h != null) ?? [])
+                const newLocalHistory = await idbApiLayer.getMatchActivitiesByStudysetIds(
+                    [...data.cloudIds, ...data.localIds],
+                    {
+                        termIds: true,
+                        incorrectPairIds: true
+                    },
                 );
-                history.sort(
-                    (a, b) => b.endTimestamp.localeCompare(a.endTimestamp)
-                );
+                if (newLocalHistory != null) {
+                    const newHistory = [];
+                    const historySet = new Set();
+                    for (const h of newLocalHistory) {
+                        if (h?.id == null || historySet.has(h.id)) {
+                            continue;
+                        }
+                        historySet.add(h.id);
+                        newHistory.push(h);
+                    }
+                    history.push(...newHistory);
+                    history.sort(
+                        (a, b) => b.endTimestamp.localeCompare(a.endTimestamp)
+                    );
+                }
             } catch (err) {
                 console.error("error getting local match history:", err);
             }
