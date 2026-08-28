@@ -16,15 +16,48 @@
     let { data } = $props();
 
     const REVIEW_EVENT_STATS_DAYS = 30;
-    let terms = $state(
-        data?.studysets?.flatMap?.(s => s.terms)?.filter?.(t => t != null) ?? []
-    );
-    let practiceTests = $state(
-        data?.studysets?.flatMap?.(s => s.practiceTests)?.filter?.(pt => pt != null) ?? []
-    );
-    let reviewEventStats = $state(
-        data?.studysets?.flatMap?.(s => s.reviewEventStatsByDay)?.filter?.(d => d != null) ?? []
-    );
+    let terms = $state([]);
+    let practiceTests = $state([]);
+    let reviewEventStats = $state([]);
+    if (data?.studysets != null) {
+        const newTerms = [];
+        const newPTs = [];
+        const newREs = [];
+        // use a Set to remove duplicates
+        // because one PT can be under multiple studysets
+        const ptSet = new Set();
+        for (const s of data.studysets) {
+            if (s == null) continue;
+            if (s.terms != null) {
+                for (const t of s.terms) {
+                    if (t == null) continue;
+                    newTerms.push(t);
+                }
+            }
+            if (s.practiceTests != null) {
+                for (const pt of s.practiceTests) {
+                    if (pt?.id == null || ptSet.has(pt.id)) continue;
+                    ptSet.add(pt.id);
+                    newPTs.push(pt);
+                }
+            }
+            if (s.reviewEventStatsByDay != null) {
+                for (const re of s.reviewEventStatsByDay) {
+                    if (re == null) continue;
+                    // duplicate RE timestamps are merged later in onMount
+                    newREs.push(re);
+                }
+            }
+        }
+        // NOTE: local arrays, so 1 reactive update at the end
+        // instead of multiple reactive updates each loop
+        terms.push(...newTerms);
+        practiceTests.push(...newPTs);
+        practiceTests.sort(
+            (a, b) => b.timestamp.localeCompare(a.timestamp),
+        );
+        reviewEventStats.push(...newREs);
+    }
     let termsStats = $derived.by(() => {
         if (terms) {
             let sum = 0;
@@ -90,7 +123,7 @@
             if (data.localIds.length > 0) {
                 /* at least one studyset is local, so regardless of wheater the user is logged in or not,
                 we load those studysets and progress locally */
-                const studysets = await idbApiLayer.getStudysetsByIds(data.localIds, {
+                const localStudysets = await idbApiLayer.getStudysetsByIds(data.localIds, {
                     terms: {
                         progress: true,
                         termImageUrl: true,
@@ -99,30 +132,52 @@
                     practiceTests: true,
                     reviewEventStatsByDay: REVIEW_EVENT_STATS_DAYS
                 })
-                const localTerms = studysets?.flatMap?.(s => s.terms)
-                    ?.filter?.(t => t != null) ?? [];
-                localTerms.forEach(term => {
-                    if (term.termImageUrl != null) {
-                        objectUrls.push(term.termImageUrl);
+                if (localStudysets != null) {
+                    const newTerms = [];
+                    const newPTs = [];
+                    const newREs = [];
+                    // use a Set to remove duplicates
+                    // because one PT can be under multiple studysets
+                    const ptSet = new Set();
+                    for (const s of localStudysets) {
+                        if (s == null) continue;
+                        if (s.terms != null) {
+                            for (const t of s.terms) {
+                                if (t == null) continue;
+                                newTerms.push(t);
+                                // track local term images for cleanup
+                                if (term.termImageUrl != null) {
+                                    objectUrls.push(term.termImageUrl);
+                                }
+                                if (term.defImageUrl != null) {
+                                    objectUrls.push(term.defImageUrl);
+                                }
+                            }
+                        }
+                        if (s.practiceTests != null) {
+                            for (const pt of s.practiceTests) {
+                                if (pt?.id == null || ptSet.has(pt.id)) continue;
+                                ptSet.add(pt.id);
+                                newPTs.push(pt);
+                            }
+                        }
+                        if (s.reviewEventStatsByDay != null) {
+                            for (const re of s.reviewEventStatsByDay) {
+                                if (re == null) continue;
+                                // duplicate RE timestamps are merged later in onMount
+                                newREs.push(re);
+                            }
+                        }
                     }
-                    if (term.defImageUrl != null) {
-                        objectUrls.push(term.defImageUrl);
-                    }
-                });
-                terms.push(...localTerms);
-                practiceTests.push(
-                    ...(studysets?.flatMap?.(s => s.practiceTests)
-                        ?.filter?.(pt => pt != null) ?? []
-                    ),
-                );
-                practiceTests.sort(
-                    (a, b) => b.timestamp.localeCompare(a.timestamp),
-                );
-                reviewEventStats.push(
-                    ...(studysets?.flatMap?.(s => s.reviewEventStatsByDay)
-                        ?.filter?.(re => re != null) ?? []
-                    ),
-                );
+                    // NOTE: local arrays, so 1 reactive update at the end
+                    // instead of multiple reactive updates each loop
+                    terms.push(...newTerms);
+                    practiceTests.push(...newPTs);
+                    practiceTests.sort(
+                        (a, b) => b.timestamp.localeCompare(a.timestamp),
+                    );
+                    reviewEventStats.push(...newREs);
+                }
             }
 
             if (!data.authed && data.cloudIds.length > 0) {
@@ -163,12 +218,20 @@
                         x: i
                     })); 
             }
-
-            reChartData = reviewEventStats.map((d) => ({
-                ...d,
-                /* create date object from iso string */
-                date: new Date(d.timestamp),
-            }));
+            const reByDate = new Map();
+            for (const d of reviewEventStats) {
+                const existing = reByDate.get(d.timestamp);
+                if (existing) {
+                    existing.correct += d.correct;
+                    existing.incorrect += d.incorrect;
+                } else {
+                    reByDate.set(d.timestamp, {
+                        ...d,
+                        date: new Date(d.timestamp),
+                    });
+                }
+            }
+            reChartData = [...reByDate.values()];
         })();
         return () => {
             objectUrls.forEach(objectUrl => {
