@@ -36,7 +36,7 @@
         <div class="text fg0">
             studyset{data.dailyCount === 1 ? "" : "s"}
             {data.recentlyUpdated ? "updated" : "created"}
-            <span class="line">today</span>
+            <span class="line">last 24 hours</span>
         </div>
     </div>
     <div class="flex" style="flex-direction: column; gap: 0.2rem;">
@@ -44,7 +44,7 @@
         <div class="text fg0">
             studyset{data.monthlyCount === 1 ? "" : "s"}
             {data.recentlyUpdated ? "updated" : "created"}
-            <span class="line">this month</span>
+            <span class="line">last 30 days</span>
         </div>
     </div>
     <div class="flex" style="flex-direction: column; gap: 0.2rem;">
