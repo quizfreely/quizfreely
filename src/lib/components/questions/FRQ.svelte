@@ -56,7 +56,7 @@
                     },
                     body: JSON.stringify({
                         query: `mutation userMarkedCorrectChangeFRQ($id: ID!, $c: Boolean!, $umc: Boolean) {
-    updatePracticeTestQuestion(id: $id, correct: $c, userMarkedCorrect: $umc): { id }
+    updatePracticeTestQuestion(id: $id, correct: $c, userMarkedCorrect: $umc) { id }
 }`,
                         variables: {
                             id: questionId,
