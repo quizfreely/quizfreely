@@ -22,9 +22,37 @@
     const PAIRS_COUNT = 6;
     const RANDOM_LOOP_MAX_TRIES = 40;
     let termIds = [];
-    let history = $state(data?.studysets?.flatMap?.(s => s.matchActivities).filter(h => h != null) ?? []);
+    let history = $state([]);
     let bestRecord = $state(null);
     let loadedTermsMap = new Map();
+
+    if (data?.studysets != null) {
+        const newHistory = [];
+        const historySet = new Set();
+        for (const studyset of data.studysets) {
+            if (studyset == null) continue;
+            if (studyset.terms) {
+                for (const term of studyset.terms) {
+                    if (term == null) continue;
+                    terms.push(term);
+                    // terms is NOT reactive, so pushing directly is ok
+                }
+            }
+            if (studyset.matchActivities == null) continue;
+            for (const m of studyset.matchActivities) {
+                if (m?.id == null || historySet.has(m.id)) continue;
+                /* the same match activity might appear in multiple studysets,
+                so use a set to remove duplicates */
+                historySet.add(m.id); 
+                newHistory.push(m);
+            }
+        }
+        /* NOTE: local array, only push once to reactive vars */
+        history.push(...newHistory);
+        history.sort(
+            (a, b) => b.endTimestamp.localeCompare(a.endTimestamp)
+        );
+    }
 
     if (data.localIds.length == 0) {
         selectTerms();
