@@ -87,12 +87,12 @@ onMount(() => {
 {#if !page?.data?.header?.hideHeader}
 <Header />
 {/if}
-{const totalStudysetsSelectedCount = $derived(studysetSelection.cloudIds.size + studysetSelection.localIds.size)}
-{#if totalStudysetsSelectedCount > 0}
+{const totalSelectedCount = $derived(studysetSelection.cloudIds.size + studysetSelection.localIds.size)}
+{#if totalSelectedCount > 0}
 <div class="grid page" transition:slide={{duration:400}}>
     <div class="content">
-        <div class="box">
-            {totalStudysetsSelectedCount} Studysets Selected
+        <div class="box" style="padding: 0.8rem;">
+            {totalSelectedCount} {totalSelectedCount > 1 ? "studysets" : "studyset"} selected
         </div>
     </div>
 </div>
