@@ -184,6 +184,7 @@
             window.removeEventListener("click", windowOnclick);
         };
     });
+    let selectingMultiple = $state(false);
 </script>
 
 <svelte:head>
@@ -210,9 +211,14 @@
                     Import
                 </a>
             </div>
-            <button onclick={() => alert("test")} class="alt">
-                <GridIcon></GridIcon>
-                Select Multiple
+            <button onclick={() => selectingMultiple = !selectingMultiple} class="alt">
+                {#if selectingMultiple}
+                    <GridIcon></GridIcon>
+                    Stop Selecting
+                {:else}
+                    <GridIcon></GridIcon>
+                    Select Multiple
+                {/if}
             </button>
         </div>
     {/snippet}
@@ -311,6 +317,8 @@
         {topMenu}
         showFolderEndButton={data.authed}
         folderEndButton={newFolderButton}
+        allStudysetsAsButton={selectingMultiple}
+        allStudysetsButtonOnClick={(e, studyset) => studyset.selected = true}
     ></StudysetList>
 </div>
 {#if showNewFolderModal}

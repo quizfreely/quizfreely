@@ -7,7 +7,6 @@
         dropdownContent,
         button = false,
         buttonOnClick = () => goto(linkTemplateFunc(studyset.id)),
-        extraStyle = "",
     } = $props();
     import Dropdown from "$lib/components/Dropdown.svelte";
     import MoreIcon from "$lib/icons/MoreDotsVertical.svelte";
@@ -18,11 +17,11 @@
         <p class="h6 fg0" style="margin-top: 0px; margin-bottom: 0px;">{studyset.termsCount ?? 0} {studyset.termsCount == 1 ? "Term" : "Terms"}</p>
     {/snippet}
     {#if button}
-    <button onclick={buttonOnClick} class="button-box" style="display: flex; gap: 0.4rem; flex-direction: column; text-align: start; align-items: start; align-content: start; justify-content: space-between; height: 100%; {extraStyle}">
+    <button onclick={(e) => buttonOnClick(e, studyset)} class="button-box" style="display: flex; gap: 0.4rem; flex-direction: column; text-align: start; align-items: start; align-content: start; justify-content: space-between; height: 100%; width: 100%; {studyset.selected ? "border: 0.2rem solid var(--main);" : ""}">
         {@render inner()}
     </button>
     {:else}
-    <a href={linkTemplateFunc(studyset.id)} class="button button-box" style="display: flex; gap: 0.4rem; flex-direction: column; text-align: start; align-items: start; align-content: start; justify-content: space-between; height: 100%; {extraStyle}">
+    <a href={linkTemplateFunc(studyset.id)} class="button button-box" style="display: flex; gap: 0.4rem; flex-direction: column; text-align: start; align-items: start; align-content: start; justify-content: space-between; height: 100%; width: 100%;">
         {@render inner()}
     </a>
     {/if}

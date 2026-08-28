@@ -35,6 +35,8 @@
         topMenu,
         showFolderEndButton = false,
         folderEndButton,
+        allStudysetsAsButton = false,
+        allStudysetsButtonOnClick,
     } = $props();
 
     let localStudysetList = $state([]);
@@ -229,6 +231,8 @@
                                 linkTemplateFunc={cloudLinkTemplateFunc}
                                 showDropdown={showCloudDropdown}
                                 dropdownContent={cloudDropdownContent}
+                                button={allStudysetsAsButton}
+                                buttonOnClick={allStudysetsButtonOnClick}
                             ></StudysetLinkBox>
                         {/each}
                     {:else}
@@ -305,6 +309,8 @@
                         linkTemplateFunc={localLinkTemplateFunc}
                         showDropdown={showLocalDropdown}
                         dropdownContent={localDropdownContent}
+                        button={allStudysetsAsButton}
+                        buttonOnClick={allStudysetsButtonOnClick}
                     ></StudysetLinkBox>
                 {/each}
                 {#if !data.authed && localStudysetList.length == 0}
@@ -379,6 +385,8 @@
                             linkTemplateFunc={recentLinkFunc}
                             showDropdown={showRecentDropdown}
                             dropdownContent={recentDropdownContent}
+                            button={allStudysetsAsButton}
+                            buttonOnClick={allStudysetsButtonOnClick}
                         ></StudysetLinkBox>
                     {/each}
                 </div>
@@ -420,6 +428,8 @@
                             linkTemplateFunc={cloudLinkTemplateFunc}
                             showDropdown={showSavedDropdown}
                             dropdownContent={savedDropdownContent}
+                            button={allStudysetsAsButton}
+                            buttonOnClick={allStudysetsButtonOnClick}
                         ></StudysetLinkBox>
                     {/each}
                 </div>
