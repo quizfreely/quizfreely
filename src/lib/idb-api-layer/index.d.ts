@@ -3,7 +3,10 @@ type StudysetResolveProps = {
     terms?: boolean | TermResolveProps;
     practiceTests?: boolean;
     matchActivities?: boolean;
-    reviewEventStatsByDay?: boolean | number;
+    reviewEventStatsByDay?: {
+        lastDaysBack?: number;
+        lastDaysTotal?: number;
+    };
 };
 type TermResolveProps = {
     progress?: boolean;
@@ -40,10 +43,11 @@ export declare const idbApiLayer: {
         terms?: boolean | TermResolveProps;
         termsCount?: boolean;
     }) => Promise<(Studyset | undefined)[]>;
-    getReviewEventStatsByDay: ({ studysetId, termIds, last }?: {
+    getReviewEventStatsByDay: ({ studysetId, termIds, lastDaysBack, lastDaysTotal }?: {
         studysetId?: number | string;
         termIds?: (number | string)[];
-        last?: number;
+        lastDaysBack?: number | null;
+        lastDaysTotal?: number | null;
     }) => Promise<ReviewEventStats[]>;
     createStudyset: ({ title, draft }: {
         title: string;

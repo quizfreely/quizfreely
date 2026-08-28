@@ -112,8 +112,7 @@ export const idbApiLayer = {
         if (resolveProps?.reviewEventStatsByDay != null) {
             studysets[0].reviewEventStatsByDay = await this.getReviewEventStatsByDay({
                 studysetId: id,
-                last: typeof resolveProps.reviewEventStatsByDay === "number" ?
-                    resolveProps.reviewEventStatsByDay : 7
+                ...resolveProps.reviewEventStatsByDay
             });
         }
         return studysets[0];
@@ -254,11 +253,22 @@ export const idbApiLayer = {
         }
         return studysets;
     },
-    getReviewEventStatsByDay: async function ({ studysetId, termIds, last = 7 } = {}) {
-        const days = last > 0 ? last : 7;
-        /* resolve which term ids to look up: either the caller passes them
-           directly (e.g. cloud studyset terms with UUID ids), or we look them
-           up from the local studyset */
+    getReviewEventStatsByDay: async function ({ studysetId, termIds, lastDaysBack, lastDaysTotal } = {}) {
+        const hasLastDaysBack = lastDaysBack != null;
+        const hasLastDaysTotal = lastDaysTotal != null;
+        /* exactly one window parameter must be provided */
+        if (hasLastDaysBack && hasLastDaysTotal) {
+            throw new Error("(idbApiLayer.getReviewEventStatsByDay) only one of lastDaysBack or lastDaysTotal may be provided");
+        }
+        if (!hasLastDaysBack && !hasLastDaysTotal) {
+            throw new Error("(idbApiLayer.getReviewEventStatsByDay) either lastDaysBack or lastDaysTotal must be provided");
+        }
+        if (hasLastDaysBack && lastDaysBack < 1) {
+            throw new Error("(idbApiLayer.getReviewEventStatsByDay) lastDaysBack must be greater than 0 when not null");
+        }
+        if (hasLastDaysTotal && lastDaysTotal < 1) {
+            throw new Error("(idbApiLayer.getReviewEventStatsByDay) lastDaysTotal must be greater than 0 when not null");
+        }
         /* resolve which term ids to look up: either the caller passes them
            directly (e.g. cloud studyset terms with UUID ids), or we look them
            up from the local studyset. If neither is provided, no filtering
@@ -276,11 +286,13 @@ export const idbApiLayer = {
         /* local day buckets: JS date object math uses the user's local timezone,
            so the day cutoff differs from UTC like the cloud API's timezone handling */
         const now = new Date();
-        const oldestDayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - (days - 1)).getTime();
+        const oldestDayStart = hasLastDaysBack
+            ? new Date(now.getFullYear(), now.getMonth(), now.getDate() - (lastDaysBack - 1)).getTime()
+            : null;
         const statsByDay = new Map();
         for (const re of reviewEvents) {
             const timestamp = new Date(re.timestamp);
-            if (timestamp.getTime() < oldestDayStart) {
+            if (oldestDayStart != null && timestamp.getTime() < oldestDayStart) {
                 continue;
             }
             const dayKey = new Date(timestamp.getFullYear(), timestamp.getMonth(), timestamp.getDate()).toISOString();
@@ -298,6 +310,13 @@ export const idbApiLayer = {
         }
         const stats = Array.from(statsByDay.entries())
             .map(([timestamp, { correct, incorrect }]) => ({ timestamp, correct, incorrect }));
+        if (hasLastDaysTotal) {
+            /* lastDaysTotal returns the X most recent days that have data (non-zero
+               totals), which may span further back than X calendar days when some
+               days in between have no activity */
+            stats.sort((a, b) => b.timestamp.localeCompare(a.timestamp));
+            return stats.slice(0, lastDaysTotal).reverse();
+        }
         stats.sort((a, b) => a.timestamp.localeCompare(b.timestamp));
         return stats;
     },
