@@ -33,7 +33,6 @@
     }
     .settings-menu-nav {
         display: flex;
-        margin-top: 0px;
         flex-direction: column;
         gap: 0.4rem;
         align-items: stretch;
@@ -68,8 +67,8 @@
     <div class="content">
 <div class="settings-container">
     <div>
-        <h4 class="center settings-title-show-on-mobile-only">Settings</h4>
-        <div class="settings-menu-nav">
+        <h4 class="center settings-title-show-on-mobile-only" style="margin-bottom: 1rem;">Settings</h4>
+        <div class="settings-menu-nav" style="margin-top: 0px;">
             <a href="/settings" class="settings-menu-link {page.data.settingsSection == "general" ? "current" : ""}">
                 General
             </a>
