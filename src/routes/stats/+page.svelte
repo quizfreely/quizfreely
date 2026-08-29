@@ -15,7 +15,6 @@
     import StatsIcon from "$lib/icons/ChartGraphLine.svelte";
     let { data } = $props();
 
-    const REVIEW_EVENT_STATS_DAYS = 30;
     let terms = $state([]);
     let practiceTests = $state([]);
     let reviewEventStats = $state([]);
@@ -130,7 +129,9 @@
                         defImageUrl: true
                     },
                     practiceTests: true,
-                    reviewEventStatsByDay: REVIEW_EVENT_STATS_DAYS
+                    reviewEventStatsByDay: {
+                        lastDaysTotal: 30,
+                    }
                 })
                 if (localStudysets != null) {
                     const newTerms = [];
@@ -197,7 +198,7 @@
 
                 const termIds = terms.map(t => t.id);
                 reviewEventStats.push(...(await idbApiLayer.getReviewEventStatsByDay({
-                    last: REVIEW_EVENT_STATS_DAYS,
+                    lastDaysTotal: 30,
                     termIds: termIds,
                 })?.filter?.(d => d != null) ?? []));
 
