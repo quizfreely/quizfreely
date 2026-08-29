@@ -34,7 +34,7 @@
         ...currentLocalIds.map((id) => `localStudyset=${id}`),
     ].join("&"))
 </script>
-<div class="grid page" style="padding-top: 2rem;">
+<div class="grid page" style="padding-top: 1rem;">
     <div class="content">
         <div class="caption-size">
         <p class="h4" style="margin-bottom: 0px; font-size: 1.8rem;">{currentCloudIds.length + currentLocalIds.length} {currentCloudIds.length + currentLocalIds.length == 1 ? "Studyset" : "Studysets"}</p>
@@ -89,6 +89,6 @@
                 Progress &amp; Stats
             </a>
         </div>
-        <TermsTable {terms} />
+        <TermsTable {terms} class="caption" />
     </div>
 </div>

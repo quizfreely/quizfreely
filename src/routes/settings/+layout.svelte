@@ -33,6 +33,7 @@
     }
     .settings-menu-nav {
         display: flex;
+        margin-top: 0px;
         flex-direction: column;
         gap: 0.4rem;
         align-items: stretch;

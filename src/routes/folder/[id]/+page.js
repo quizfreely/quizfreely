@@ -57,7 +57,6 @@ export async function load({ params, url, fetch }) {
         });
 
         let apiRes = await rawApiRes.json();
-console.log(apiRes)
 
         if (apiRes?.data == null) {
             console.error("Error from gql resp in folder:", apiRes);
