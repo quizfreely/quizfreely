@@ -91,8 +91,12 @@ onMount(() => {
 {#if totalSelectedCount > 0}
 <div class="grid page" transition:slide={{duration:400}}>
     <div class="content">
-        <div class="box" style="padding: 0.8rem;">
-            {totalSelectedCount} {totalSelectedCount > 1 ? "studysets" : "studyset"} selected
+        <div class="box flex" style="padding: 0.4rem 0.8rem; justify-content: space-between; align-items: center;">
+            <span>{totalSelectedCount} {totalSelectedCount > 1 ? "studysets" : "studyset"} selected</span>
+            <div class="flex compact-gap">
+                <button class="faint">View Details</button>
+                <button class="ohno faint" style="padding: 0.6rem 0.8rem;" onclick={() => studysetSelection.clearSelection()}>Cancel</button>
+            </div>
         </div>
     </div>
 </div>

@@ -212,7 +212,7 @@
                     Import
                 </a>
             </div>
-            <button onclick={() => selectingMultiple = !selectingMultiple} class="alt {selectingMultiple ? "ohno" : ""}">
+            <button onclick={() => selectingMultiple = !selectingMultiple} class="alt {selectingMultiple ? "text fg1" : ""}">
                 {#if selectingMultiple}
                     <GridIcon></GridIcon>
                     Stop Selecting

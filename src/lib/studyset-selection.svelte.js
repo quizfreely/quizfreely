@@ -39,6 +39,12 @@ class StudysetSelection {
         this.writeSessionStorage();
     }
 
+    clearSelection() {
+        this.cloudIds.clear();
+        this.localIds.clear();
+        this.writeSessionStorage();
+    }
+
     writeSessionStorage() {
         if (browser) {
             try {
