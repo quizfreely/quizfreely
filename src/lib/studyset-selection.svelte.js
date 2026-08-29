@@ -59,8 +59,6 @@ class StudysetSelection {
             } catch (err) {
                 console.error("StudysetSelection.writeSessionStorage errored even though browser is true. Err:", err);
             }
-        } else {
-            console.log("not in browser?")
         }
     }
 
@@ -91,8 +89,6 @@ class StudysetSelection {
         } else {
             console.error("StudysetSelection.readSessionStorage called when browser is false")
         }
-        console.log(this.cloudIds)
-        console.log(this.localIds)
     }
 }
 
