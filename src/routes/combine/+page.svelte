@@ -1,6 +1,7 @@
 <script>
     import { studysetSelection } from "$lib/studyset-selection.svelte.js";
     import { onMount } from "svelte";
+    import { goto } from "$app/navigation";
     import { idbApiLayer } from "$lib/idb-api-layer";
     import TermsTable from "$lib/components/TermsTable.svelte";
     import Flashcards from "$lib/components/Flashcards.svelte";
@@ -12,6 +13,7 @@
     import AngleUpIcon from "$lib/icons/AngleUp.svelte"
     import AngleDownIcon from "$lib/icons/AngleDown.svelte"
     import FullscreenIcon from "$lib/icons/FullscreenMaximize.svelte"
+    import PlusIcon from "$lib/icons/Plus.svelte"
     let { data } = $props();
     let currentCloudIds = [...data.cloudIds];
     let currentLocalIds = [...data.localIds];
@@ -21,13 +23,13 @@
     let displayedStudysets = $derived(collapsed ? studysets.slice(0, COLLAPSE_LEN) : studysets);
     let terms = $derived(studysets.flatMap(s => s?.terms).filter(t => t != null));
     onMount(() => {
-        studysetSelection.clearSelection();
         (async () => {
             if (currentLocalIds.length > 0) {
                 studysets.push(...(await idbApiLayer.getStudysetsByIds(currentLocalIds))?.filter?.(s => s != null) ?? []);
             }
         })();
     });
+
     /* idSearchParams is URL search component WITHOUT starting question mark (`?`) */
     const idSearchParams = $derived([
         ...currentCloudIds.map((id) => `studyset=${id}`),
@@ -37,8 +39,13 @@
 <div class="grid page" style="padding-top: 1rem;">
     <div class="content">
         <div class="caption-size">
-        <p class="h4" style="margin-bottom: 0px; font-size: 1.8rem;">{currentCloudIds.length + currentLocalIds.length} {currentCloudIds.length + currentLocalIds.length == 1 ? "Studyset" : "Studysets"}</p>
-        <p class="fg0" style="margin-top: 0.2rem; font-size: 1.2rem;">{terms.length} {terms.length == 1 ? "Total Term" : "Total Terms"}</p>
+            <div class="flex" style="align-items: center; justify-content: space-between;">
+                <div>
+                    <p class="h4" style="margin-bottom: 0px; font-size: 1.8rem;">{currentCloudIds.length + currentLocalIds.length} {currentCloudIds.length + currentLocalIds.length == 1 ? "Studyset" : "Studysets"}</p>
+                    <p class="fg0" style="margin-top: 0.2rem; font-size: 1.2rem;">{terms.length} {terms.length == 1 ? "Total Term" : "Total Terms"}</p>
+                </div>
+                <button class=""><PlusIcon></PlusIcon> Add More</button>
+            </div>
         <div class="grid list" style="margin-bottom: 0px;">
         {#each displayedStudysets as studyset, index}
             <StudysetLinkBox {studyset} linkTemplateFunc={
@@ -47,7 +54,7 @@
             } showDropdown={true}>
                 {#snippet dropdownContent()}
                     <button class="ohno" onclick={() => {
-                        studyset.id
+                        studyset.id?.includes()
                     }}>
                         <TrashIcon />
                         Remove
@@ -68,26 +75,37 @@
         </div>
         {/if}
         </div>
-        <Flashcards {terms}>
+        <div style={studysets.length > COLLAPSE_LEN ? "" : "margin-top: 2rem;"}>
+        <Flashcards {terms} >
             {#snippet captionEnd()}
                 <a href={`/flashcards?${idSearchParams}`} class="button faint" aria-label="Fullscreen Flashcards">
                     <FullscreenIcon></FullscreenIcon>
                 </a>
             {/snippet}
         </Flashcards>
+        </div>
         <div class="grid list caption">
-            <a href={`/match?${idSearchParams}`} class="button alt">
+            <button onclick={() => {
+                studysetSelection.clearSelection();
+                goto(`/match?${idSearchParams}`);
+            }} class="alt">
                 <GridIcon />
                 Match
-            </a>
-            <a href={`/practice-test?${idSearchParams}`} class="button alt">
+            </button>
+            <button onclick={() => {
+                studysetSelection.clearSelection();
+                goto(`/practice-test?${idSearchParams}`);
+            }} class="alt">
                 <PTIcon />
                 Practice Test
-            </a>
-            <a href={`/stats?${idSearchParams}`} class="button alt">
+            </button>
+            <button onclick={() => {
+                studysetSelection.clearSelection();
+                goto(`/stats?${idSearchParams}`);
+            }} class="alt">
                 <GraphIcon />
                 Progress &amp; Stats
-            </a>
+            </button>
         </div>
         <TermsTable {terms} class="caption" />
     </div>

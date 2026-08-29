@@ -45,6 +45,14 @@ class StudysetSelection {
         this.writeSessionStorage();
     }
 
+    replaceSelection({ cloudIds, localIds }) {
+        this.cloudIds.clear();
+        cloudIds?.forEach?.(id => { if (id != null) this.cloudIds.add(id); });
+        this.localIds.clear();
+        localIds?.forEach?.(id => { if (id != null) this.localIds.add(id); });
+        this.writeSessionStorage();
+    }
+
     writeSessionStorage() {
         if (browser) {
             try {
@@ -73,7 +81,7 @@ class StudysetSelection {
                     // NOTE: do NOT use `new SvelteSet(JSON.parse(str))`
                     // creating a new SvelteSet instance breaks everything
                     // because components will not reference the new instance
-                    cloudIdsArr?.forEach?.(id => this.cloudIds.add(id));
+                    cloudIdsArr?.forEach?.(id => { if (id != null) this.cloudIds.add(id); });
                 }
                 const localIdsStr = sessionStorage.getItem(
                     "quizfreely:selected_local_studyset_ids",
@@ -81,7 +89,7 @@ class StudysetSelection {
                 if (localIdsStr) {
                     const localIdsArr = JSON.parse(localIdsStr);
                     // NOTE: do NOT use `new SvelteSet(JSON.parse(str))`
-                    localIdsArr?.forEach?.(id => this.localIds.add(id));
+                    localIdsArr?.forEach?.(id => { if (id != null) this.localIds.add(id); });
                 }
             } catch (err) {
                 console.error("StudysetSelection.readSessionStorage errored. (although browser is true) Err:", err);
