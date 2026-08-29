@@ -82,6 +82,15 @@ onMount(() => {
 
     studysetSelection.readSessionStorage();
 })
+
+let selectionLinkParams = $derived(
+    [
+        Array.from(studysetSelection.cloudIds, id => `studyset=${id}`).join("&"),
+        Array.from(studysetSelection.localIds, id => `localStudyset=${id}`).join("&")
+    ].filter(Boolean).join("&"),
+    /* use Boolean to filter out empty strings,
+    preventing duplicate ampersands if any set is empty */
+);
 </script>
 
 {#if !page?.data?.header?.hideHeader}
@@ -94,7 +103,7 @@ onMount(() => {
         <div class="box flex" style="padding: 0.4rem 0.8rem; justify-content: space-between; align-items: center;">
             <span>{totalSelectedCount} {totalSelectedCount > 1 ? "studysets" : "studyset"} selected</span>
             <div class="flex compact-gap">
-                <button class="faint">View Details</button>
+                <a class="button faint" href="/combine?{selectionLinkParams}">Continue</a>
                 <button class="ohno faint" style="padding: 0.6rem 0.8rem;" onclick={() => studysetSelection.clearSelection()}>Cancel</button>
             </div>
         </div>
