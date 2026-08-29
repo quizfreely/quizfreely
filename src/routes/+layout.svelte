@@ -97,7 +97,7 @@ let selectionLinkParams = $derived(
 <Header />
 {/if}
 {const totalSelectedCount = $derived(studysetSelection.cloudIds.size + studysetSelection.localIds.size)}
-{#if totalSelectedCount > 0}
+{#if totalSelectedCount > 0 && !page?.data?.studysetSelection?.hideSubHeader && !page?.data?.header?.hideHeader}
 <div class="grid page" transition:slide={{duration:400}}>
     <div class="content">
         <div class="box flex" style="padding: 0.4rem 0.8rem; justify-content: space-between; align-items: center;">
