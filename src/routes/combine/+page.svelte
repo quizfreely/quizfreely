@@ -9,16 +9,16 @@
     let { data } = $props();
     let currentCloudIds = [...data.cloudIds];
     let currentLocalIds = [...data.localIds];
-    let studysets = $state(data.studysets ?? []);
-    let terms = $derived(data.studysets.flatMap(s => s.terms).filter(t => t != null));
+    let studysets = $state(data.studysets?.filter?.(s => s != null) ?? []);
+    let terms = $derived(studysets.flatMap(s => s?.terms).filter(t => t != null));
     onMount(() => {
         studysetSelection.clearSelection();
     });
 </script>
 <div class="grid page" style="padding-top: 2rem;">
     <div class="content">
-        <p class="h4" style="margin-bottom: 0px; font-size: 1.8rem;">{currentCloudIds.length + currentLocalIds.length} {currentCloudIds.length + currentLocalIds.length > 1 ? "Studysets" : "Studyset"}</p>
-        <p class="fg0" style="margin-top: 0.2rem; font-size: 1.2rem;">{terms.length} {terms.length > 1 ? "Total Terms" : "Total Term"}</p>
+        <p class="h4" style="margin-bottom: 0px; font-size: 1.8rem;">{currentCloudIds.length + currentLocalIds.length} {currentCloudIds.length + currentLocalIds.length == 1 ? "Studyset" : "Studysets"}</p>
+        <p class="fg0" style="margin-top: 0.2rem; font-size: 1.2rem;">{terms.length} {terms.length == 1 ? "Total Term" : "Total Terms"}</p>
         <div class="grid list">
         {#each studysets as studyset, index}
             <StudysetLinkBox {studyset} linkTemplateFunc={

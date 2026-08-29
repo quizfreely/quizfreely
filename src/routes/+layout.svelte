@@ -101,7 +101,7 @@ let selectionLinkParams = $derived(
 <div class="grid page" transition:slide={{duration:400}}>
     <div class="content">
         <div class="box flex" style="padding: 0.4rem 0.8rem; justify-content: space-between; align-items: center;">
-            <span>{totalSelectedCount} {totalSelectedCount > 1 ? "studysets" : "studyset"} selected</span>
+            <span>{totalSelectedCount} {totalSelectedCount == 1 ? "studyset" : "studysets"} selected</span>
             <div class="flex compact-gap">
                 <a class="button faint" href="/combine?{selectionLinkParams}">Continue</a>
                 <button class="ohno faint" style="padding: 0.6rem 0.8rem;" onclick={() => studysetSelection.clearSelection()}>Cancel</button>
