@@ -332,7 +332,7 @@
         }
             <div class="flex" style="align-items: end; justify-content: space-between; row-gap: 0.2rem; {index != 0 ? "margin-top: 1.6rem;" : ""}">
                 <div class="flex" style="flex-direction: column; align-items: start; row-gap: 0.2rem;">
-                    <span style="font-size: 1.2rem;">{item.studysets.length} Studysets</span>
+                    <span style="font-size: 1.2rem;" class="fg0">{item.studysets.length} Studysets</span>
                     {#each item.studysets as studyset}
                         {#if studyset == null}
                             <span style="font-size: 0.9rem;" class="fg0">Deleted Studyset</span>
