@@ -13,7 +13,7 @@
     import CheckmarkIcon from "$lib/icons/Checkmark.svelte";
     import EnterIcon from "$lib/icons/Enter.svelte";
     import ExitIcon from "$lib/icons/Exit.svelte";
-    import OutlineIcon from "$lib/icons/OutlineSquare.svelte";
+    import OutlineIcon from "$lib/icons/OutlineSelect.svelte";
 
     let { data } = $props();
     let showFolderPicker = $state(false);

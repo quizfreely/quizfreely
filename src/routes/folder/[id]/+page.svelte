@@ -18,7 +18,7 @@
     import MoreIcon from "$lib/icons/MoreDotsVertical.svelte";
     import IconEyeSlash from "$lib/icons/EyeSlash.svelte";
     import IconEye from "$lib/icons/Eye.svelte";
-    import OutlineIcon from "$lib/icons/OutlineSquare.svelte";
+    import OutlineIcon from "$lib/icons/OutlineSelect.svelte";
     import CheckmarkSquareIcon from "$lib/icons/CheckmarkSquare.svelte";
 
     let { data } = $props();
