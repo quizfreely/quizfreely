@@ -169,6 +169,10 @@
 {/snippet}
 {#snippet multiselect()}
     {#if !(studysetSelection.cloudIds.size + studysetSelection.localIds.size > 0)}
+        <a class="button alt text fg1" href={data.local ?
+            `/combine?localStudyset=${data.localId}` :
+            `/combine?studyset=${data.studyset?.id}`
+        }>Combine Multiple Studysets</a>
     {/if}
 {/snippet}
 <main>
@@ -420,14 +424,6 @@
                             <IconGraph />
                             Progress &amp; Stats
                         </a>
-                    </div>
-
-                    <div class="flex caption" style="align-items: end; justify-content: space-between;">
-                        <span>15 terms</span>
-                        <a class="button alt text fg1" href={data.local ?
-                            `/combine?localStudyset=${data.localId}` :
-                            `/combine?studyset=${data.studyset?.id}`
-                        }>Combine Multiple Studysets</a>
                     </div>
                     <TermsTable {terms} class="caption" />
                 </div>
