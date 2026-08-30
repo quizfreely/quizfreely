@@ -1,7 +1,8 @@
 <script>
     import { studysetSelection } from "$lib/studyset-selection.svelte.js";
     import { onMount } from "svelte";
-    import { goto } from "$app/navigation";
+    import { goto, replaceState } from "$app/navigation";
+    import { page } from "$app/state";
     import { idbApiLayer } from "$lib/idb-api-layer";
     import TermsTable from "$lib/components/TermsTable.svelte";
     import Flashcards from "$lib/components/Flashcards.svelte";
@@ -15,8 +16,8 @@
     import FullscreenIcon from "$lib/icons/FullscreenMaximize.svelte"
     import PlusIcon from "$lib/icons/Plus.svelte"
     let { data } = $props();
-    let currentCloudIds = [...data.cloudIds];
-    let currentLocalIds = [...data.localIds];
+    let currentCloudIds = $state([...data.cloudIds]);
+    let currentLocalIds = $state([...data.localIds]);
     let studysets = $state(data.studysets?.filter?.(s => s != null) ?? []);
     const COLLAPSE_LEN = 3;
     let collapsed = $state(true);
@@ -44,7 +45,13 @@
                     <p class="h4" style="margin-bottom: 0px; font-size: 1.8rem;">{currentCloudIds.length + currentLocalIds.length} {currentCloudIds.length + currentLocalIds.length == 1 ? "Studyset" : "Studysets"}</p>
                     <p class="fg0" style="margin-top: 0.2rem; font-size: 1.2rem;">{terms.length} {terms.length == 1 ? "Total Term" : "Total Terms"}</p>
                 </div>
-                <button class=""><PlusIcon></PlusIcon> Add More</button>
+                <button onclick={() => {
+                    studysetSelection.replaceSelection({
+                        cloudIds: currentCloudIds,
+                        localIds: currentLocalIds,
+                    });
+                    goto("/dashboard");
+                }}><PlusIcon></PlusIcon> Add More</button>
             </div>
         <div class="grid list" style="margin-bottom: 0px;">
         {#each displayedStudysets as studyset, index}
@@ -52,9 +59,18 @@
                 (id) => id?.includes?.("-") ?
                     `/studysets/${id}` : `/studyset/local?id=${id}`
             } showDropdown={true}>
-                {#snippet dropdownContent()}
+                {#snippet dropdownContent(studyset, hideDropdown)}
                     <button class="ohno" onclick={() => {
-                        studyset.id?.includes()
+                        if (studyset.id?.includes?.("-")) {
+                            currentCloudIds = currentCloudIds.filter(id => id != studyset.id);
+                            studysetSelection.deselect({ cloudId: studyset.id });
+                        } else {
+                            currentLocalIds = currentLocalIds.filter(id => id != studyset.id);
+                            studysetSelection.deselect({ localId: studyset.id });
+                        }
+                        studysets.splice(index, 1); /* splice studysets because displayedStudysets is derived from studysets */
+                        replaceState(`?${idSearchParams}`, page.state);
+                        hideDropdown();
                     }}>
                         <TrashIcon />
                         Remove
@@ -75,7 +91,7 @@
         </div>
         {/if}
         </div>
-        <div style={studysets.length > COLLAPSE_LEN ? "" : "margin-top: 2rem;"}>
+        <div style={studysets.length > COLLAPSE_LEN ? "" : "margin-top: 3rem;"}>
         <Flashcards {terms} >
             {#snippet captionEnd()}
                 <a href={`/flashcards?${idSearchParams}`} class="button faint" aria-label="Fullscreen Flashcards">
