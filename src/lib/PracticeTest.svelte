@@ -693,7 +693,7 @@ FRQs: ${numFRQsToAssign}`,
     </Chart>
     </div>
 {/snippet}
-<div class="grid page">
+<div class="grid page" style="overflow-x: clip;">
     <div class="content">
         <div class="flex">
             {const studysetPageLink = ({ cloudIds, localIds }) => (
@@ -733,8 +733,7 @@ FRQs: ${numFRQsToAssign}`,
         </div>
         {#if takingActualPracticeTest}
             <div
-                style="position: sticky; top: 0px; z-index: 99; padding: 1rem; margin-top: 0px;"
-                class="trans-dots"
+                class="qzfr-pt-header trans-dots-before"
                 transition:slide={{ duration: 400 }}
             >
                 <p class="center">
@@ -751,8 +750,7 @@ FRQs: ${numFRQsToAssign}`,
         {/if}
         {#if showScore}
             <div
-                style="position: sticky; top: 0px; z-index: 99; padding: 1rem; margin-top: 0px;"
-                class="trans-dots"
+                class="qzfr-pt-header trans-dots-before"
                 transition:slide={{ duration: 400 }}
             >
                 <div class="flex" style="justify-content: space-between;">
@@ -1330,5 +1328,22 @@ FRQs: ${numFRQsToAssign}`,
         .fourpartthing-four {
             justify-self: start;
         }
+    }
+    .qzfr-pt-header {
+        position: sticky;
+        top: 0px;
+        z-index: 99;
+        padding: 1rem;
+        margin-top: 0px;
+    }
+    .qzfr-pt-header::before {
+        content: "";
+        position: absolute;
+        top: 0%;
+        bottom: 0%;
+        left: 50%;
+        width: 120vw;
+        transform: translateX(-50%);
+        z-index: -1;
     }
 </style>
