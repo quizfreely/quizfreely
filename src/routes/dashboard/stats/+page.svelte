@@ -346,7 +346,7 @@
                         s => s.id?.includes?.("-") ?
                             `studyset=${s.id}` :
                             `localStudyset=${s.id}`,
-                    )
+                    ).join("&")
                 }`}>View Combined Studysets</a>
             </div>
         {/if}

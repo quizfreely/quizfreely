@@ -24,6 +24,12 @@
     let displayedStudysets = $derived(collapsed ? studysets.slice(0, COLLAPSE_LEN) : studysets);
     let terms = $derived(studysets.flatMap(s => s?.terms).filter(t => t != null));
     onMount(() => {
+        if (studysetSelection.cloudIds.size + studysetSelection.localIds.size == 0) {
+            studysetSelection.replaceSelection({
+                cloudIds: currentCloudIds,
+                localIds: currentLocalIds,
+            });
+        }
         (async () => {
             if (currentLocalIds.length > 0) {
                 studysets.push(...(await idbApiLayer.getStudysetsByIds(currentLocalIds))?.filter?.(s => s != null) ?? []);
