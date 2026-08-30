@@ -144,7 +144,7 @@
     </button>
 {/snippet}
 {#snippet addToSelection()}
-    {#if studysetSelection.cloudIds.size + studysetSelection.localIds.size > 1}
+    {#if studysetSelection.cloudIds.size + studysetSelection.localIds.size > 0}
         {#if studysetSelection.cloudIds.has(data.studyset?.id ?? data.localId) || studysetSelection.localIds.has(data.studyset?.id ?? data.localId)}
             <button class="alt ohno with-badge" style="--badge-color: var(--warn);" onclick={() => {
                 studysetSelection.deselect({
