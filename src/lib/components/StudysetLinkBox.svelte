@@ -21,7 +21,7 @@
         {@render inner()}
     </button>
     {:else}
-    <a href={linkTemplateFunc(studyset.id)} class="button button-box" style="display: flex; gap: 0.4rem; flex-direction: column; text-align: start; align-items: start; align-content: start; justify-content: space-between; height: 100%; width: 100%;">
+    <a href={linkTemplateFunc(studyset.id)} class="button button-box" style="display: flex; gap: 0.4rem; flex-direction: column; text-align: start; align-items: start; align-content: start; justify-content: space-between; height: 100%; width: 100%; {studyset.selected ? "border: 0.2rem solid var(--fg-0);" : ""}">
         {@render inner()}
     </a>
     {/if}
