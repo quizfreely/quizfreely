@@ -15,6 +15,10 @@
     }
     .qzfr-terms-list {
         max-width: 90vw;
+        padding-top: 0.4rem;
+    }
+    .qzfr-terms-list th {
+        padding-bottom: 0.4rem;
     }
 </style>
 <table class="outer box qzfr-terms-list {classProp}" {...props}>
