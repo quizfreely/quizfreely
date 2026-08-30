@@ -100,11 +100,11 @@ let selectionLinkParams = $derived(
 {#if totalSelectedCount > 0 && !page?.data?.studysetSelection?.hideSubHeader && !page?.data?.header?.hideHeader}
 <div class="grid page" transition:slide={{duration:400}}>
     <div class="content">
-        <div class="box flex {page?.data?.studysetSelection?.subHeaderClass ?? ''}" style="padding: 0.4rem 0.8rem; justify-content: space-between; align-items: center; {page?.data?.studysetSelection?.subHeaderStyle ?? ''}">
-            <span>{totalSelectedCount} {totalSelectedCount == 1 ? "studyset" : "studysets"} selected</span>
+        <div class="box flex {page?.data?.studysetSelection?.subHeaderClass ?? ''}" style="padding: 0.4rem 0.8rem; justify-content: space-between; align-items: center; column-gap: 1rem; row-gap: 0.2rem; {page?.data?.studysetSelection?.subHeaderStyle ?? ''}">
+            <div style="padding: 0.6rem 0.8rem;">{totalSelectedCount} {totalSelectedCount == 1 ? "studyset" : "studysets"} selected</div>
             <div class="flex compact-gap">
                 <a class="button faint" href="/combine?{selectionLinkParams}">Continue</a>
-                <button class="ohno faint" style="padding: 0.6rem 0.8rem;" onclick={() => {
+                <button class="ohno faint" onclick={() => {
                     studysetSelection.clearSelection();
                     selectionUI.getCancelButtonCallback()?.();
                 }}>Cancel</button>
