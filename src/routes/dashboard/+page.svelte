@@ -13,7 +13,7 @@
     import CheckmarkIcon from "$lib/icons/Checkmark.svelte";
     import EnterIcon from "$lib/icons/Enter.svelte";
     import ExitIcon from "$lib/icons/Exit.svelte";
-    import GridIcon from "$lib/icons/AppsGrid.svelte";
+    import OutlineIcon from "$lib/icons/OutlineSquare.svelte";
 
     let { data } = $props();
     let showFolderPicker = $state(false);
@@ -220,10 +220,10 @@
             </div>
             <button onclick={() => selectingMultiple = !selectingMultiple} class="alt {selectingMultiple ? "text fg1" : ""}">
                 {#if selectingMultiple}
-                    <GridIcon></GridIcon>
+                    <OutlineIcon></OutlineIcon>
                     Stop Selecting
                 {:else}
-                    <GridIcon></GridIcon>
+                    <OutlineIcon></OutlineIcon>
                     Select Multiple
                 {/if}
             </button>

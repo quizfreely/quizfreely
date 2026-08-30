@@ -18,7 +18,7 @@
     import MoreIcon from "$lib/icons/MoreDotsVertical.svelte";
     import IconEyeSlash from "$lib/icons/EyeSlash.svelte";
     import IconEye from "$lib/icons/Eye.svelte";
-    import GridIcon from "$lib/icons/AppsGrid.svelte";
+    import OutlineIcon from "$lib/icons/OutlineSquare.svelte";
     import CheckmarkSquareIcon from "$lib/icons/CheckmarkSquare.svelte";
 
     let { data } = $props();
@@ -405,10 +405,10 @@
         </button>
         <button onclick={() => selectingMultiple = !selectingMultiple} class="alt {selectingMultiple ? "text fg1" : ""}">
             {#if selectingMultiple}
-                <GridIcon></GridIcon>
+                <OutlineIcon></OutlineIcon>
                 Stop Selecting
             {:else}
-                <GridIcon></GridIcon>
+                <OutlineIcon></OutlineIcon>
                 Select Multiple
             {/if}
         </button>
