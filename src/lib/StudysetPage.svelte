@@ -29,6 +29,7 @@
     import FullscreenIcon from "$lib/icons/FullscreenMaximize.svelte";
     import GridIcon from "$lib/icons/AppsGrid.svelte";
     import PlusIcon from "$lib/icons/Plus.svelte";
+    import XMarkIcon from "$lib/icons/CloseXMark.svelte";
 
     import { footerState } from "$lib/components/footer.svelte.js";
 
@@ -152,7 +153,7 @@
                     localId: data.localId,
                 });
             }}>
-                Deselect
+                <XMarkIcon /> Deselect
             </button>
         {:else}
             <button class="alt with-badge" style="--badge-color: var(--warn);" onclick={() => {

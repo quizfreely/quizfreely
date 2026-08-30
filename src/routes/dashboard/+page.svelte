@@ -14,6 +14,7 @@
     import EnterIcon from "$lib/icons/Enter.svelte";
     import ExitIcon from "$lib/icons/Exit.svelte";
     import OutlineIcon from "$lib/icons/OutlineSelect.svelte";
+    import XMarkIcon from "$lib/icons/CloseXMark.svelte";
 
     let { data } = $props();
     let showFolderPicker = $state(false);
@@ -220,7 +221,7 @@
             </div>
             <button onclick={() => selectingMultiple = !selectingMultiple} class="alt {selectingMultiple ? "text fg1" : ""}">
                 {#if selectingMultiple}
-                    <OutlineIcon></OutlineIcon>
+                    <XMarkIcon />
                     Stop Selecting
                 {:else}
                     <OutlineIcon></OutlineIcon>

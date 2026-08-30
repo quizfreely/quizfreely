@@ -20,6 +20,7 @@
     import IconEye from "$lib/icons/Eye.svelte";
     import OutlineIcon from "$lib/icons/OutlineSelect.svelte";
     import CheckmarkSquareIcon from "$lib/icons/CheckmarkSquare.svelte";
+    import XMarkIcon from "$lib/icons/CloseXMark.svelte";
 
     let { data } = $props();
 
@@ -405,7 +406,7 @@
         </button>
         <button onclick={() => selectingMultiple = !selectingMultiple} class="alt {selectingMultiple ? "text fg1" : ""}">
             {#if selectingMultiple}
-                <OutlineIcon></OutlineIcon>
+                <XMarkIcon />
                 Stop Selecting
             {:else}
                 <OutlineIcon></OutlineIcon>
