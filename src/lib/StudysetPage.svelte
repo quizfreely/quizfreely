@@ -144,10 +144,10 @@
         {folderId != null ? "Change Folder" : "Add to Folder"}
     </button>
 {/snippet}
-{#snippet addToSelection()}
+{#snippet multiselect()}
     {#if studysetSelection.cloudIds.size + studysetSelection.localIds.size > 0}
         {#if studysetSelection.cloudIds.has(data.studyset?.id ?? data.localId) || studysetSelection.localIds.has(data.studyset?.id ?? data.localId)}
-            <button class="alt ohno with-badge" style="--badge-color: var(--warn);" onclick={() => {
+            <button class="alt text fg1 with-badge" style="--badge-color: var(--warn);" onclick={() => {
                 studysetSelection.deselect({
                     cloudId: data.studyset?.id,
                     localId: data.localId,
@@ -165,10 +165,7 @@
                 <PlusIcon /> Select
             </button>
         {/if}
-    {/if}
-{/snippet}
-{#snippet multiselect()}
-    {#if !(studysetSelection.cloudIds.size + studysetSelection.localIds.size > 0)}
+    {:else}
         <a class="button alt" href={data.local ?
             `/combine?localStudyset=${data.localId}` :
             `/combine?studyset=${data.studyset?.id}`
@@ -230,7 +227,6 @@
                                 <IconPencil />
                                 Edit
                             </a>
-                            {@render addToSelection()}
                             {@render addToFolder()}
                             {@render multiselect()}
                             <Dropdown
@@ -263,7 +259,6 @@
                                 <IconPencil />
                                 Edit
                             </a>
-                            {@render addToSelection()}
                             {@render multiselect()}
                             <Dropdown
                                 button={{
@@ -287,8 +282,7 @@
                             </Dropdown>
                         </div>
                     {:else if data.authed}
-                        <div id="edit-menu" class="flex">
-                            {@render addToSelection()}
+                        <div id="edit-menu" class="flex" style="align-items: center;">
                             {#if saved}
                                 <button
                                     class="alt"
@@ -379,6 +373,10 @@
                                 </button>
                             {/if}
                             {@render addToFolder()}
+                            {@render multiselect()}
+                        </div>
+                    {:else}
+                        <div class="flex" style="align-items: center;">
                             {@render multiselect()}
                         </div>
                     {/if}
