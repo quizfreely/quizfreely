@@ -94,9 +94,12 @@
         <div style={studysets.length > COLLAPSE_LEN ? "" : "margin-top: 3rem;"}>
         <Flashcards {terms} >
             {#snippet captionEnd()}
-                <a href={`/flashcards?${idSearchParams}`} class="button faint" aria-label="Fullscreen Flashcards">
+                <button onclick={() => {
+                    studysetSelection.clearSelection();
+                    goto(`/flashcards?${idSearchParams}`);
+                }} class="faint" aria-label="Fullscreen Flashcards">
                     <FullscreenIcon></FullscreenIcon>
-                </a>
+                </button>
             {/snippet}
         </Flashcards>
         </div>
