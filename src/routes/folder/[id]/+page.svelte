@@ -387,7 +387,7 @@
         {/if}
     </div>
     {#snippet multiselect()}
-        <!-- Select All is commented out below for now because the studysets array is ONLY the current page. If there are more than 24 studysets in this folder, than pressing select all will only select the 24 shown right now, instead of actually selecting all. We need to design this differently to work with pagination correctly, so for now the button is just going to not be there to avoid confusion while the rest of the features can get finished, polished, and ready for production. See -->
+        <!-- Select All is commented out below for now because the studysets array is ONLY the current page. If there are more than 24 studysets in this folder, than pressing select all will only select the 24 shown right now, instead of actually selecting all. We need to design this differently to work with pagination correctly, so for now the button is just going to not be there to avoid confusion while the rest of the features can get finished, polished, and ready for production. See https://github.com/quizfreely/quizfreely/issues/158 -->
         <!-- <button class="alt" onclick={() => { -->
         <!--     selectingMultiple = true; -->
         <!--     studysets?.forEach?.(s => { -->
