@@ -311,16 +311,57 @@
 <p class="h4" style="font-size: 1.4rem; opacity: 0.9; margin-top: 1rem;">Recent Activities</p>
 {#each activityHistory as item, index}
     <!-- {JSON.stringify(item)} -->
-    {#if item?.studysets?.[0] == null}
-        <div class="flex" style="align-items: end; justify-content: start; {index != 0 ? "margin-top: 1.6rem;" : ""}">
-            <span class="fg0" style="font-size: 1.2rem;">Deleted Studyset</span>
-        </div>
-    {:else if index - 1 < 0 || activityHistory[index - 1].studysets[0]?.id != item.studysets[0].id}
-        {const studyset = $derived(item.studysets[0])}
-        <div class="flex" style="align-items: end; justify-content: space-between; row-gap: 0.2rem; {index != 0 ? "margin-top: 1.6rem;" : ""}">
-            <span style={studyset.title.length < 60 ? "font-size: 1.2rem;" : ""}>{studyset.title}</span>
-            <a href={studyset.id?.includes?.("-") ? `/studysets/${studyset.id}` : `/studyset/local?id=${studyset.id}`}>View Studyset</a>
-        </div>
+    {const arrsEqualIgnoreOrderAndDups = (arr1, arr2) => {
+        const set1 = new Set(arr1);
+        const set2 = new Set(arr2);
+        if (set1.size != set2.size) return false;
+        for (const item of set1) {
+            if (!set2.has(item)) return false;
+        }
+        return true;
+    }}
+    {#if item?.studysets?.length > 1}
+        {#if item.studysets.every(s => s == null)}
+            <div class="flex" style="align-items: end; justify-content: start; {index != 0 ? "margin-top: 1.6rem;" : ""}">
+                <span class="fg0" style="font-size: 1.2rem;">{item.studysets.length} Deleted Studysets</span>
+            </div>
+        {:else if index - 1 < 0 ||
+            /* null <= 1 is true */
+            activityHistory[index - 1]?.studysets?.length <= 1 ||
+            !arrsEqualIgnoreOrderAndDups(item.studysets, activityHistory[index - 1].studysets)
+        }
+            <div class="flex" style="align-items: end; justify-content: space-between; row-gap: 0.2rem; {index != 0 ? "margin-top: 1.6rem;" : ""}">
+                <div class="flex" style="flex-direction: column; align-items: start; row-gap: 0.2rem;">
+                    <span style="font-size: 1.2rem;">{item.studysets.length} Studysets</span>
+                    {#each item.studysets as studyset}
+                        {#if studyset == null}
+                            <span style="font-size: 0.9rem;" class="fg0">Deleted Studyset</span>
+                        {:else}
+                            <span style="font-size: 0.9rem;">{studyset.title}</span>
+                        {/if}
+                    {/each}
+                </div>
+                <a href={`/combine?${
+                    item.studysets.filter(s => s != null).map(
+                        s => s.id?.includes?.("-") ?
+                            `studyset=${s.id}` :
+                            `localStudyset=${s.id}`,
+                    )
+                }`}>View Combined Studysets</a>
+            </div>
+        {/if}
+    {:else}
+        {#if item?.studysets?.[0] == null}
+            <div class="flex" style="align-items: end; justify-content: start; {index != 0 ? "margin-top: 1.6rem;" : ""}">
+                <span class="fg0" style="font-size: 1.2rem;">Deleted Studyset</span>
+            </div>
+        {:else if index - 1 < 0 || activityHistory[index - 1].studysets[0]?.id != item.studysets[0].id}
+            {const studyset = $derived(item.studysets[0])}
+            <div class="flex" style="align-items: end; justify-content: space-between; row-gap: 0.2rem; {index != 0 ? "margin-top: 1.6rem;" : ""}">
+                <span style={studyset.title.length < 60 ? "font-size: 1.2rem;" : ""}>{studyset.title}</span>
+                <a href={studyset.id?.includes?.("-") ? `/studysets/${studyset.id}` : `/studyset/local?id=${studyset.id}`}>View Studyset</a>
+            </div>
+        {/if}
     {/if}
     {#if item.__typename == "PracticeTest"}
         <div class="box grid qzfr-pt-box">
