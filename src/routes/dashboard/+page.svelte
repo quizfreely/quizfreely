@@ -319,26 +319,14 @@
         showFolderEndButton={data.authed}
         folderEndButton={newFolderButton}
         allStudysetsAsButton={selectingMultiple}
-        allStudysetsButtonOnClick={(e, studyset) => {
-            if (studyset.selected) {
-                studyset.selected = false;
-                studysetSelection.deselect(
-                    studyset.id?.includes?.("-") ? {
-                        cloudId: studyset.id,
-                    } : {
-                        localId: studyset.id,
-                    },
-                );
-            } else {
-                studyset.selected = true;
-                studysetSelection.select(
-                    studyset.id?.includes?.("-") ? {
-                        cloudId: studyset.id,
-                    } : {
-                        localId: studyset.id,
-                    },
-                );
-            }
+        allStudysetsButtonOnClick={(_event, studyset) => {
+            studysetSelection.toggleSelect(
+                studyset.id?.includes?.("-") ? {
+                    cloudId: studyset.id,
+                } : {
+                    localId: studyset.id,
+                },
+            );
         }}
     ></StudysetList>
 </div>

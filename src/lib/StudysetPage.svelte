@@ -4,6 +4,7 @@
     import { idbApiLayer } from "$lib/idb-api-layer";
     import { goto } from "$app/navigation";
     import { fade, slide } from "svelte/transition";
+    import { studysetSelection } from "$lib/studyset-selection.svelte.js";
     let { data } = $props();
 
     import TermsTable from "$lib/components/TermsTable.svelte";
@@ -27,6 +28,7 @@
     import AngleRIcon from "$lib/icons/AngleRight.svelte";
     import FullscreenIcon from "$lib/icons/FullscreenMaximize.svelte";
     import GridIcon from "$lib/icons/AppsGrid.svelte";
+    import PlusIcon from "$lib/icons/Plus.svelte";
 
     import { footerState } from "$lib/components/footer.svelte.js";
 
@@ -141,6 +143,29 @@
         {folderId != null ? "Change Folder" : "Add to Folder"}
     </button>
 {/snippet}
+{#snippet addToSelection()}
+    {#if studysetSelection.cloudIds.size + studysetSelection.localIds.size > 1}
+        {#if studysetSelection.cloudIds.has(data.studyset?.id ?? data.localId) || studysetSelection.localIds.has(data.studyset?.id ?? data.localId)}
+            <button class="alt ohno with-badge" style="--badge-color: var(--warn);" onclick={() => {
+                studysetSelection.deselect({
+                    cloudId: data.studyset?.id,
+                    localId: data.localId,
+                });
+            }}>
+                Deselect
+            </button>
+        {:else}
+            <button class="alt with-badge" style="--badge-color: var(--warn);" onclick={() => {
+                studysetSelection.select({
+                    cloudId: data.studyset?.id,
+                    localId: data.localId,
+                });
+            }}>
+                <PlusIcon /> Select
+            </button>
+        {/if}
+    {/if}
+{/snippet}
 <main>
     <div class="grid page">
         <div class="content">
@@ -196,6 +221,7 @@
                                 <IconPencil />
                                 Edit
                             </a>
+                            {@render addToSelection()}
                             {@render addToFolder()}
                             <Dropdown
                                 button={{
@@ -227,6 +253,7 @@
                                 <IconPencil />
                                 Edit
                             </a>
+                            {@render addToSelection()}
                             <Dropdown
                                 button={{
                                     class: "dropdown-toggle",
@@ -250,6 +277,7 @@
                         </div>
                     {:else if data.authed}
                         <div id="edit-menu" class="flex">
+                            {@render addToSelection()}
                             {#if saved}
                                 <button
                                     class="alt"
