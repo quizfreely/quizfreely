@@ -12,7 +12,7 @@
         buttonOnClick = () => goto(linkTemplateFunc(studyset.id)),
     } = $props();
 
-    const selected = $derived(studyset.selected || studysetSelection.cloudIds.has(studyset.id) || studysetSelection.localIds.has(studyset.id));
+    const selected = $derived(studysetSelection.cloudIds.has(studyset.id) || studysetSelection.localIds.has(studyset.id));
 </script>
 <div>
     {#snippet inner()}
