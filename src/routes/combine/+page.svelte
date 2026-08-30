@@ -58,7 +58,7 @@
             <StudysetLinkBox {studyset} linkTemplateFunc={
                 (id) => id?.includes?.("-") ?
                     `/studysets/${id}` : `/studyset/local?id=${id}`
-            } showDropdown={true}>
+            } showDropdown={true} ignoreSelection={true}>
                 {#snippet dropdownContent(studyset, hideDropdown)}
                     <button class="ohno" onclick={() => {
                         if (studyset.id?.includes?.("-")) {

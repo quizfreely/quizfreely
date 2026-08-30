@@ -10,9 +10,13 @@
         dropdownContent,
         button = false,
         buttonOnClick = () => goto(linkTemplateFunc(studyset.id)),
+        ignoreSelection = false,
     } = $props();
 
-    const selected = $derived(studysetSelection.cloudIds.has(studyset.id) || studysetSelection.localIds.has(studyset.id));
+    const selected = $derived(!ignoreSelection && (
+        studysetSelection.cloudIds.has(studyset.id) ||
+        studysetSelection.localIds.has(studyset.id)
+    ));
 </script>
 <div>
     {#snippet inner()}
