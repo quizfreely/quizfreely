@@ -3,7 +3,7 @@
     import { slide, fade } from "svelte/transition";
     import { goto } from "$app/navigation";
     import { idbApiLayer } from "$lib/idb-api-layer/index.js";
-    import { studysetSelection } from "$lib/studyset-selection.svelte.js";
+    import { studysetSelection, selectionUI } from "$lib/studyset-selection.svelte.js";
     import Noscript from "$lib/components/Noscript.svelte";
     import StudysetList from "$lib/components/StudysetList.svelte";
     import FolderPicker from "$lib/components/FolderPicker.svelte";
@@ -141,6 +141,12 @@
     function windowOnclick() {
         lastKeydown = null;
     }
+
+    let selectingMultiple = $state(false);
+    const selectionCancelButtonCallback = () => {
+        selectingMultiple = false;
+    }
+    selectionUI.setCancelButtonCallback(selectionCancelButtonCallback);
     onMount(async () => {
         window.addEventListener("keyup", onKeyup);
         window.addEventListener("keydown", onKeydown);
@@ -183,9 +189,9 @@
             window.removeEventListener("keyup", onKeyup);
             window.removeEventListener("keydown", onKeydown);
             window.removeEventListener("click", windowOnclick);
+            selectionUI.cleanUpCancelButtonCallback(selectionCancelButtonCallback);
         };
     });
-    let selectingMultiple = $state(false);
 </script>
 
 <svelte:head>

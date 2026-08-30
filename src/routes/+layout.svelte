@@ -12,7 +12,7 @@ import { page } from '$app/state';
 import { getCancelBeforeNavigate } from "$lib/cancel-before-navigate.js";
 import { env } from "$env/dynamic/public";
 import { onMount } from "svelte";
-import { studysetSelection } from "$lib/studyset-selection.svelte.js";
+import { studysetSelection, selectionUI } from "$lib/studyset-selection.svelte.js";
 let { children, data } = $props();
 
 NProgress.configure({
@@ -104,7 +104,10 @@ let selectionLinkParams = $derived(
             <span>{totalSelectedCount} {totalSelectedCount == 1 ? "studyset" : "studysets"} selected</span>
             <div class="flex compact-gap">
                 <a class="button faint" href="/combine?{selectionLinkParams}">Continue</a>
-                <button class="ohno faint" style="padding: 0.6rem 0.8rem;" onclick={() => studysetSelection.clearSelection()}>Cancel</button>
+                <button class="ohno faint" style="padding: 0.6rem 0.8rem;" onclick={() => {
+                    studysetSelection.clearSelection();
+                    selectionUI.getCancelButtonCallback()?.();
+                }}>Cancel</button>
             </div>
         </div>
     </div>

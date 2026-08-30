@@ -100,4 +100,21 @@ class StudysetSelection {
     }
 }
 
-export const studysetSelection = new StudysetSelection();
+class SelectionUI {
+    #cancelButtonCallback;
+    getCancelButtonCallback() {
+        return this.#cancelButtonCallback;
+    }
+    setCancelButtonCallback(callback) {
+        this.#cancelButtonCallback = callback;
+    }
+    cleanUpCancelButtonCallback(callback) {
+        if (this.#cancelButtonCallback == callback) {
+            this.#cancelButtonCallback = undefined;
+        }
+    }
+}
+
+const studysetSelection = new StudysetSelection();
+const selectionUI = new SelectionUI();
+export { studysetSelection, selectionUI };
