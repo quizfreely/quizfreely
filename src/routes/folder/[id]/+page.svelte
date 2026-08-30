@@ -387,23 +387,24 @@
         {/if}
     </div>
     {#snippet multiselect()}
-        <button class="alt" onclick={() => {
-            selectingMultiple = true;
-            studysets?.forEach?.(s => {
-                if (s?.id != null) {
-                    studysetSelection.select(
-                        s.id?.includes?.("-") ? {
-                            cloudId: s.id,
-                        } : {
-                            localId: s.id,
-                        },
-                    );
-                }
-            });
-        }}>
-            <CheckmarkSquareIcon />
-            Select All
-        </button>
+        <!-- Select All is commented out below for now because the studysets array is ONLY the current page. If there are more than 24 studysets in this folder, than pressing select all will only select the 24 shown right now, instead of actually selecting all. We need to design this differently to work with pagination correctly, so for now the button is just going to not be there to avoid confusion while the rest of the features can get finished, polished, and ready for production. See -->
+        <!-- <button class="alt" onclick={() => { -->
+        <!--     selectingMultiple = true; -->
+        <!--     studysets?.forEach?.(s => { -->
+        <!--         if (s?.id != null) { -->
+        <!--             studysetSelection.select( -->
+        <!--                 s.id?.includes?.("-") ? { -->
+        <!--                     cloudId: s.id, -->
+        <!--                 } : { -->
+        <!--                     localId: s.id, -->
+        <!--                 }, -->
+        <!--             ); -->
+        <!--         } -->
+        <!--     }); -->
+        <!-- }}> -->
+        <!--     <CheckmarkSquareIcon /> -->
+        <!--     Select All -->
+        <!-- </button> -->
         <button onclick={() => selectingMultiple = !selectingMultiple} class="alt {selectingMultiple ? "text fg1" : ""}">
             {#if selectingMultiple}
                 <XMarkIcon />
