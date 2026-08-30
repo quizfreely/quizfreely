@@ -169,10 +169,10 @@
 {/snippet}
 {#snippet multiselect()}
     {#if !(studysetSelection.cloudIds.size + studysetSelection.localIds.size > 0)}
-        <a class="button alt text fg1" href={data.local ?
+        <a class="button alt" href={data.local ?
             `/combine?localStudyset=${data.localId}` :
             `/combine?studyset=${data.studyset?.id}`
-        }>Combine Multiple Studysets</a>
+        }><PlusIcon /> Select Multiple</a>
     {/if}
 {/snippet}
 <main>
@@ -232,6 +232,7 @@
                             </a>
                             {@render addToSelection()}
                             {@render addToFolder()}
+                            {@render multiselect()}
                             <Dropdown
                                 button={{
                                     class: "dropdown-toggle",
@@ -263,6 +264,7 @@
                                 Edit
                             </a>
                             {@render addToSelection()}
+                            {@render multiselect()}
                             <Dropdown
                                 button={{
                                     class: "dropdown-toggle",
@@ -377,6 +379,7 @@
                                 </button>
                             {/if}
                             {@render addToFolder()}
+                            {@render multiselect()}
                         </div>
                     {/if}
                 </div>
