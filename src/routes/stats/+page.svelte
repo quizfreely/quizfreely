@@ -13,11 +13,13 @@
     import AngleUpIcon from "$lib/icons/AngleUp.svelte";
     import AngleDownIcon from "$lib/icons/AngleDown.svelte";
     import StatsIcon from "$lib/icons/ChartGraphLine.svelte";
+    import { SvelteMap } from 'svelte/reactivity';
     let { data } = $props();
 
     let terms = $state([]);
     let practiceTests = $state([]);
     let reviewEventStats = $state([]);
+    let studysetTotals = SvelteMap();
     if (data?.studysets != null) {
         const newTerms = [];
         const newPTs = [];
@@ -27,12 +29,31 @@
         const ptSet = new Set();
         for (const s of data.studysets) {
             if (s == null) continue;
+            let totalDefCorrect = 0;
+            let totalDefIncorrect = 0;
+            let totalTermCorrect = 0;
+            let totalTermIncorrect = 0;
             if (s.terms != null) {
                 for (const t of s.terms) {
                     if (t == null) continue;
+                    t.studysetId = s.id;
                     newTerms.push(t);
+                    if (t.progress != null) {
+                        totalDefCorrect += term.progress.defCorrectCount;
+                        totalDefIncorrect += term.progress.defIncorrectCount;
+                        totalTermCorrect += term.progress.termCorrectCount;
+                        totalTermIncorrect += term.progress.termIncorrectCount;
+                    }
                 }
             }
+            studysetTotals.set(s.id, {
+                id: s.id,
+                title: s.title,
+                totalDefCorrect,
+                totalDefIncorrect,
+                totalTermCorrect,
+                totalTermIncorrect,
+            });
             if (s.practiceTests != null) {
                 for (const pt of s.practiceTests) {
                     if (pt?.id == null || ptSet.has(pt.id)) continue;
@@ -132,7 +153,7 @@
                     reviewEventStatsByDay: {
                         lastDaysTotal: 30,
                     }
-                })
+                });
                 if (localStudysets != null) {
                     const newTerms = [];
                     const newPTs = [];
@@ -142,9 +163,14 @@
                     const ptSet = new Set();
                     for (const s of localStudysets) {
                         if (s == null) continue;
+                        let totalDefCorrect = 0;
+                        let totalDefIncorrect = 0;
+                        let totalTermCorrect = 0;
+                        let totalTermIncorrect = 0;
                         if (s.terms != null) {
                             for (const t of s.terms) {
                                 if (t == null) continue;
+                                t.studysetId = s.id;
                                 newTerms.push(t);
                                 // track local term images for cleanup
                                 if (term.termImageUrl != null) {
@@ -153,8 +179,24 @@
                                 if (term.defImageUrl != null) {
                                     objectUrls.push(term.defImageUrl);
                                 }
+                                // track progress to mutate properties before adding to `studysetTotals`
+                                if (term.progress != null) {
+                                    totalDefCorrect += term.progress.defCorrectCount;
+                                    totalDefIncorrect += term.progress.defIncorrectCount;
+                                    totalTermCorrect += term.progress.termCorrectCount;
+                                    totalTermIncorrect += term.progress.termIncorrectCount;
+                                }
                             }
                         }
+                        studysetTotals.set(s.id, {
+                            id: s.id,
+                            title: s.title,
+                            totalDefCorrect,
+                            totalDefIncorrect,
+                            totalTermCorrect,
+                            totalTermIncorrect,
+                        });
+                        
                         if (s.practiceTests != null) {
                             for (const pt of s.practiceTests) {
                                 if (pt?.id == null || ptSet.has(pt.id)) continue;
@@ -205,6 +247,16 @@
                 for (const term of terms) {
                     if (term.progress == null) {
                         term.progress = (await db.termProgress.where("termId").equals(term.id).toArray())?.[0];
+                        if (term.progress != null && term.studysetId != null) {
+                            const s = studysetTotals.get(term.studysetId);
+                            if (s != null) {
+                                s.totalDefCorrect += term.progress.defCorrectCount;
+                                s.totalDefIncorrect += term.progress.defIncorrectCount;
+                                s.totalTermCorrect += term.progress.termCorrectCount;
+                                s.totalTermIncorrect += term.progress.termIncorrectCount;
+                                studysetTotals.set(term.studysetId, s);
+                            }
+                        }
                     }
                 }
             }
