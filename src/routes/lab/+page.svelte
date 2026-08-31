@@ -44,15 +44,35 @@
             title: "CAM V@ FInancial Terms and Formulas",
             accuracy: 0.8,
         },
+        {
+            id: "1b33e",
+            title: "anatomical planes and sections",
+            accuracy: 0.8,
+        },
+        {
+            id: "1b33e",
+            title: "CAM V@ FInancial Terms and Formulas",
+            accuracy: 0.8,
+        },
+        {
+            id: "1b33e",
+            title: "anatomical planes and sections",
+            accuracy: 0.8,
+        },
+        {
+            id: "1b33e",
+            title: "CAM V@ FInancial Terms and Formulas",
+            accuracy: 0.8,
+        },
     ]);
-    const chartData = $derived.by(() => {
+    const ssAccChartData = $derived.by(() => {
         const newChartData = [];
         /* loop to clone array with new objects because we can't reference the same reactive objects */
         chartDataSrc.forEach(d => {
             newChartData.push({
                 id: d.id,
                 title: d.title,
-                accuracy: d.accuracy,
+                accuracy: Math.round(d.accuracy*100),
                 titleShort: d.title?.length > 30 ? `${d.title?.slice(0, 30)}...` : d.title,
             });
         });
@@ -65,37 +85,41 @@
     });
 </script>
 <style>
+.qzfr-combined-studyset-stats-grid,
 .grid.qzfr-combined-studyset-stats-grid {
     gap: 1rem;
     grid-template-columns: 1fr 1fr;
     grid-template-rows: auto;
 }
+@media only screen and (max-width: 1000px) {
+    .qzfr-combined-studyset-stats-grid,
+    .grid.qzfr-combined-studyset-stats-grid {
+        grid-template-columns: auto;
+        grid-template-rows: auto auto;
+    }
+}
 </style>
 
 <div class="grid page">
     <div class="content">
-{const height = $derived.by(() => {
-    const v = 200 + 50*(chartData.length - 2);
-    console.log(v);
-    return v;
-})}
+{const ssAccHeight = $derived(Math.min(200 + 40*(ssAccChartData.length - 2), 500))}
 <div class="grid qzfr-combined-studyset-stats-grid">
-<div style="min-height: {height}px;">
+<div style="min-height: {ssAccHeight}px;">
 <Chart
-	data={chartData}
+	data={ssAccChartData}
 	y="index"
 	yScale={scaleBand().padding(0.6)}
 	x="accuracy"
 	xDomain={[0, null]}
 	xNice
 	padding={{ left: 100, top: 10, bottom: 20, right: 20 }}
-	height={height}
+	height={ssAccHeight}
 	tooltipContext={{ mode: 'band' }}
 >
 	<Layer>
-		<Axis placement="left" rule format={(index) => chartData[index].titleShort}/>
-		<Axis placement="bottom" grid rule format={(v) => `${Math.round(v*100)}%`} />
-        {#each chartData as d, i}
+		<Axis placement="left" rule format={(index) => ssAccChartData[index].titleShort}/>
+		<Axis placement="bottom" grid rule format={(v) => `${v}%`} />
+        {#each ssAccChartData as d, i}
             <Bar
                 data={d}
                 rounded="right"
@@ -106,28 +130,33 @@
                     easing: backOut,
                     delay: i * 80
                 }}
-                fill={d.accuracy >= 0.9 ? "var(--yay)" : (d.accuracy >= 0.8 ? "var(--warn)" : "var(--ohno)")}
+                fill={d.accuracy >= 90 ? "var(--yay)" : (d.accuracy >= 80 ? "var(--warn)" : "var(--ohno)")}
             />
         {/each}
 		<Highlight area />
 	</Layer>
 		<Tooltip.Root>
 			{#snippet children({ data })}
-				<Tooltip.Header value={data.title} format="string" />
+				<Tooltip.Header value={data.title} format={(v) => v} style="max-width: 240px; white-space: normal; overflow-wrap: break-word;" />
 				<Tooltip.List>
 					<Tooltip.Item
 						label="Accuracy"
 						value={data.accuracy}
-                        format={(v) => `${Math.round(v*100)}%`}
+                        format={(v) => `${v}%`}
 					/>
 				</Tooltip.List>
 			{/snippet}
 		</Tooltip.Root>
 </Chart>
 </div>
-            <div class="box flex" style="flex-direction: column;">
-                {#each chartData as d}
-                    <span>{d.title}</span>
+            <div class="flex" style="flex-direction: column;">
+                {#each ssAccChartData as d}
+                    <div class="box flex" style="align-items: center; justify-content: space-between;">
+                        <span>{d.title}</span>
+                        <div class="flex" style="align-items: center;">
+                            <span class="text {d.accuracy >= 90 ? 'yay' : (d.accuracy >= 80 ? 'warn' : 'ohno')}">{d.accuracy}%</span>
+                        </div>
+                    </div>
                 {/each}
             </div>
 </div>
