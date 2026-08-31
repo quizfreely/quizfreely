@@ -39,10 +39,10 @@
                     t.studysetId = s.id;
                     newTerms.push(t);
                     if (t.progress != null) {
-                        totalDefCorrect += term.progress.defCorrectCount;
-                        totalDefIncorrect += term.progress.defIncorrectCount;
-                        totalTermCorrect += term.progress.termCorrectCount;
-                        totalTermIncorrect += term.progress.termIncorrectCount;
+                        totalDefCorrect += t.progress.defCorrectCount;
+                        totalDefIncorrect += t.progress.defIncorrectCount;
+                        totalTermCorrect += t.progress.termCorrectCount;
+                        totalTermIncorrect += t.progress.termIncorrectCount;
                     }
                 }
             }
@@ -173,18 +173,18 @@
                                 t.studysetId = s.id;
                                 newTerms.push(t);
                                 // track local term images for cleanup
-                                if (term.termImageUrl != null) {
-                                    objectUrls.push(term.termImageUrl);
+                                if (t.termImageUrl != null) {
+                                    objectUrls.push(t.termImageUrl);
                                 }
-                                if (term.defImageUrl != null) {
-                                    objectUrls.push(term.defImageUrl);
+                                if (t.defImageUrl != null) {
+                                    objectUrls.push(t.defImageUrl);
                                 }
                                 // track progress to mutate properties before adding to `studysetTotals`
-                                if (term.progress != null) {
-                                    totalDefCorrect += term.progress.defCorrectCount;
-                                    totalDefIncorrect += term.progress.defIncorrectCount;
-                                    totalTermCorrect += term.progress.termCorrectCount;
-                                    totalTermIncorrect += term.progress.termIncorrectCount;
+                                if (t.progress != null) {
+                                    totalDefCorrect += t.progress.defCorrectCount;
+                                    totalDefIncorrect += t.progress.defIncorrectCount;
+                                    totalTermCorrect += t.progress.termCorrectCount;
+                                    totalTermIncorrect += t.progress.termIncorrectCount;
                                 }
                             }
                         }
