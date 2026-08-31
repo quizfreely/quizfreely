@@ -1,6 +1,6 @@
 <script>
 	import { scaleBand } from 'd3-scale';
-	import { Axis, Bar, Chart, Layer, Tooltip } from 'layerchart';
+	import { Axis, Bar, Chart, Layer, Tooltip, Highlight } from 'layerchart';
 	import { backOut } from 'svelte/easing';
 
     const chartDataSrc = $state([
@@ -52,7 +52,7 @@
 >
 	<Layer>
 		<Axis placement="left" rule format={(index) => chartData[index].title} />
-		<Axis placement="bottom" grid rule />
+		<Axis placement="bottom" grid rule format={(v) => `${Math.round(v*100)}%`} />
         {#each chartData as d, i}
             <Bar
                 data={d}
@@ -62,19 +62,21 @@
                     type: 'tween',
                     duration: 400,
                     easing: backOut,
-                    delay: i * 60
+                    delay: i * 80
                 }}
                 fill={d.accuracy >= 0.9 ? "var(--yay)" : (d.accuracy >= 0.8 ? "var(--warn)" : "var(--ohno)")}
             />
         {/each}
+		<Highlight area />
 	</Layer>
 		<Tooltip.Root>
 			{#snippet children({ data })}
 				<Tooltip.Header value={data.title} format="string" />
 				<Tooltip.List>
 					<Tooltip.Item
-						label="accuracy"
+						label="Accuracy"
 						value={data.accuracy}
+                        format={(v) => `${Math.round(v*100)}%`}
 					/>
 				</Tooltip.List>
 			{/snippet}

@@ -189,7 +189,7 @@
                     	rounded="top"
                         radius={8}
                     	style="fill: var(--yay);"
-                    	motion={{ type: 'tween', duration: 400, easing: backOut, delay: i * 20 }}
+                    	motion={{ type: 'tween', duration: 400, easing: backOut, delay: i * 60 }}
                     	initialY={context.yScale(0)}
                     />
                     <Bar
@@ -199,7 +199,7 @@
                     	rounded="bottom"
                         radius={8}
                     	style="fill: var(--ohno);"
-                    	motion={{ type: 'tween', duration: 400, easing: backOut, delay: i * 20 }}
+                    	motion={{ type: 'tween', duration: 400, easing: backOut, delay: i * 60 }}
                     	initialY={context.yScale(0)}
                     />
 				{/each}
