@@ -44,26 +44,26 @@
             title: "CAM V@ FInancial Terms and Formulas",
             accuracy: 0.8,
         },
-        {
-            id: "1b33e",
-            title: "anatomical planes and sections",
-            accuracy: 0.8,
-        },
-        {
-            id: "1b33e",
-            title: "CAM V@ FInancial Terms and Formulas",
-            accuracy: 0.8,
-        },
-        {
-            id: "1b33e",
-            title: "anatomical planes and sections",
-            accuracy: 0.8,
-        },
-        {
-            id: "1b33e",
-            title: "CAM V@ FInancial Terms and Formulas",
-            accuracy: 0.8,
-        },
+        // {
+        //     id: "1b33e",
+        //     title: "anatomical planes and sections",
+        //     accuracy: 0.8,
+        // },
+        // {
+        //     id: "1b33e",
+        //     title: "CAM V@ FInancial Terms and Formulas",
+        //     accuracy: 0.8,
+        // },
+        // {
+        //     id: "1b33e",
+        //     title: "anatomical planes and sections",
+        //     accuracy: 0.8,
+        // },
+        // {
+        //     id: "1b33e",
+        //     title: "CAM V@ FInancial Terms and Formulas",
+        //     accuracy: 0.8,
+        // },
     ]);
     const ssAccChartData = $derived.by(() => {
         const newChartData = [];
@@ -149,9 +149,9 @@
 		</Tooltip.Root>
 </Chart>
 </div>
-            <div class="flex" style="flex-direction: column;">
+            <div class="flex" style="flex-direction: column; gap: 0.4rem; flex-wrap: nowrap; max-height: 500px; overflow-y: auto; padding-right: 6px; border-radius: 0.8rem;">
                 {#each ssAccChartData as d}
-                    <div class="box flex" style="align-items: center; justify-content: space-between;">
+                    <div class="box flex" style="padding: 0.6rem 1rem; align-items: center; justify-content: space-between;">
                         <span>{d.title}</span>
                         <div class="flex" style="align-items: center;">
                             <span class="text {d.accuracy >= 90 ? 'yay' : (d.accuracy >= 80 ? 'warn' : 'ohno')}">{d.accuracy}%</span>
