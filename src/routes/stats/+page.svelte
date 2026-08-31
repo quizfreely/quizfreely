@@ -19,7 +19,7 @@
     let terms = $state([]);
     let practiceTests = $state([]);
     let reviewEventStats = $state([]);
-    let studysetTotals = SvelteMap();
+    let studysetTotals = new SvelteMap();
     if (data?.studysets != null) {
         const newTerms = [];
         const newPTs = [];
