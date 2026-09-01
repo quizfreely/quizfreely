@@ -87,7 +87,8 @@
 <style>
 .qzfr-combined-studyset-stats-grid,
 .grid.qzfr-combined-studyset-stats-grid {
-    gap: 1rem;
+    column-gap: 1rem;
+    row-gap: 2rem;
     grid-template-columns: 1fr 1fr;
     grid-template-rows: auto;
 }
@@ -102,66 +103,72 @@
 
 <div class="grid page">
     <div class="content">
-{const ssAccHeight = $derived(Math.min(200 + 40*(ssAccChartData.length - 2), 500))}
-<div class="grid qzfr-combined-studyset-stats-grid">
-<div style="min-height: {ssAccHeight}px;">
-<Chart
-	data={ssAccChartData}
-	y="index"
-	yScale={scaleBand().padding(0.6)}
-	x="accuracy"
-	xDomain={[0, null]}
-	xNice
-	padding={{ left: 100, top: 10, bottom: 20, right: 20 }}
-	height={ssAccHeight}
-	tooltipContext={{ mode: 'band' }}
->
-	<Layer>
-		<Axis placement="left" rule format={(index) => ssAccChartData[index].titleShort}/>
-		<Axis placement="bottom" grid rule format={(v) => `${v}%`} />
-        {#each ssAccChartData as d, i}
-            <Bar
-                data={d}
-                rounded="right"
-                radius={8}
-                motion={{
-                    type: 'tween',
-                    duration: 400,
-                    easing: backOut,
-                    delay: i * 80
-                }}
-                fill={d.accuracy >= 90 ? "var(--yay)" : (d.accuracy >= 80 ? "var(--warn)" : "var(--ohno)")}
-            />
-        {/each}
-		<Highlight area />
-	</Layer>
-		<Tooltip.Root>
-			{#snippet children({ data })}
-				<Tooltip.Header value={data.title} format={(v) => v} style="max-width: 240px; white-space: normal; overflow-wrap: break-word;" />
-				<Tooltip.List>
-					<Tooltip.Item
-						label="Accuracy"
-						value={data.accuracy}
-                        format={(v) => `${v}%`}
-					/>
-				</Tooltip.List>
-			{/snippet}
-		</Tooltip.Root>
-</Chart>
-</div>
-            <div class="flex" style="flex-direction: column; gap: 0.4rem; flex-wrap: nowrap; max-height: 500px; overflow-y: auto; padding-right: 6px; border-radius: 0.8rem;">
-                {#each ssAccChartData as d}
-                    <div class="box flex" style="padding: 0.6rem 1rem; align-items: center; justify-content: space-between;">
-                        <span>{d.title}</span>
-                        <div class="flex" style="align-items: center;">
-                            <span class="text {d.accuracy >= 90 ? 'yay' : (d.accuracy >= 80 ? 'warn' : 'ohno')}">{d.accuracy}%</span>
+        <div class="grid qzfr-combined-studyset-stats-grid">
+            <div>
+                <p class="center">Average Accuracy by Studyset</p>
+                {const ssAccHeight = $derived(Math.min(200 + 40*(ssAccChartData.length - 2), 500))}
+                <div style="min-height: {ssAccHeight}px;">
+                    <Chart
+                        data={ssAccChartData}
+                        y="index"
+                        yScale={scaleBand().padding(0.6)}
+                        x="accuracy"
+                        xDomain={[0, null]}
+                        xNice
+                        padding={{ left: 100, top: 0, bottom: 20, right: 20 }}
+                        height={ssAccHeight}
+                        tooltipContext={{ mode: 'band' }}
+                    >
+	                    <Layer>
+		                    <Axis placement="left" rule format={(index) => ssAccChartData[index].titleShort} />
+		                    <Axis placement="bottom" grid rule format={(v) => `${v}%`} />
+                            {#each ssAccChartData as d, i}
+                                <Bar
+                                    data={d}
+                                    rounded="right"
+                                    radius={8}
+                                    motion={{
+                                        type: 'tween',
+                                        duration: 400,
+                                        easing: backOut,
+                                        delay: i * 80
+                                    }}
+                                    fill={d.accuracy >= 90 ? "var(--yay)" : (d.accuracy >= 80 ? "var(--warn)" : "var(--ohno)")}
+                                />
+                            {/each}
+		                    <Highlight area />
+	                    </Layer>
+		                <Tooltip.Root>
+			                {#snippet children({ data })}
+				                <Tooltip.Header value={data.title} format={(v) => v} style="max-width: 240px; white-space: normal; overflow-wrap: break-word;" />
+				                <Tooltip.List>
+					                <Tooltip.Item
+						                label="Accuracy"
+						                value={data.accuracy}
+                                        format={(v) => `${v}%`}
+					                />
+				                </Tooltip.List>
+			                {/snippet}
+		                </Tooltip.Root>
+                    </Chart>
+                </div>
+            </div>
+            <div>
+                <p class="center">{ssAccChartData.length} Studysets</p>
+                <div class="flex" style="flex-direction: column; gap: 0.4rem; flex-wrap: nowrap; max-height: 500px; overflow-y: auto; padding-right: 6px; border-radius: 0.8rem;">
+                    {#each ssAccChartData as d}
+                        <div class="box flex" style="padding: 0.6rem 1rem; align-items: center; justify-content: space-between;">
+                            <span>{d.title}</span>
+                            <div class="flex" style="align-items: center;">
+                                <span class="text {d.accuracy >= 90 ? 'yay' : (d.accuracy >= 80 ? 'warn' : 'ohno')}">{d.accuracy}%</span>
+                            </div>
                         </div>
-                    </div>
-                {/each}
+                    {/each}
+                </div>
             </div>
-</div>
+        </div>
         <div class="box">
-Next box
-            </div>
-</div>
+            Next box
+        </div>
+    </div>
 </div>
