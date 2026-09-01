@@ -230,16 +230,6 @@
             </button>
         </div>
     {/snippet}
-    {#snippet newFolderButton()}
-        <button
-            class="faint"
-            style="display: flex; border-radius: 0.8rem;"
-            onclick={() => openNewFolderModal()}
-        >
-            <IconPlus></IconPlus>
-            New Folder
-        </button>
-    {/snippet}
     {#snippet emptyMsg()}
         <div class="box flex center-h center-v">
             <p class="fg0">Select "New Studyset" to enter or import terms</p>
@@ -324,7 +314,7 @@
         {savedDropdownContent}
         {topMenu}
         showFolderEndButton={data.authed}
-        folderEndButton={newFolderButton}
+        showFolderEmptyButton={data.authed}
         allStudysetsAsButton={selectingMultiple}
         allStudysetsButtonOnClick={(_event, studyset) => {
             studysetSelection.toggleSelect(
@@ -335,7 +325,28 @@
                 },
             );
         }}
-    ></StudysetList>
+    >
+        {#snippet folderEndButton()}
+            <button
+                class="faint"
+                style="display: flex; border-radius: 0.8rem;"
+                onclick={() => openNewFolderModal()}
+            >
+                <IconPlus></IconPlus>
+                New Folder
+            </button>
+        {/snippet}
+        {#snippet folderEmptyButton()}
+            <button
+                class="button-box"
+                style="display: flex;"
+                onclick={() => openNewFolderModal()}
+            >
+                <IconPlus></IconPlus>
+                New Folder
+            </button>
+        {/snippet}
+    </StudysetList>
 </div>
 {#if showNewFolderModal}
     <div class="modal" transition:fade={{ duration: 200 }}>

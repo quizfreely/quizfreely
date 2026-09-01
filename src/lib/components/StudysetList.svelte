@@ -35,6 +35,8 @@
         topMenu,
         showFolderEndButton = false,
         folderEndButton,
+        showFolderEmptyButton = false,
+        folderEmptyButton,
         allStudysetsAsButton = false,
         allStudysetsButtonOnClick,
     } = $props();
@@ -214,6 +216,10 @@
         {#if showFolderEndButton}
             {@render folderEndButton?.()}
         {/if}
+    </div>
+{:else if showFolderEmptyButton}
+    <div class="grid list" style="margin-bottom: 1rem;">
+        {@render folderEmptyButton?.()}
     </div>
 {/if}
 {#if data.authed && !(hideTypeWhenCloudEmptyAndLocalExists && !(data.studysetList?.length > 0) && localStudysetList?.length > 0)}
