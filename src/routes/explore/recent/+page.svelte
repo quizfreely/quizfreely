@@ -27,7 +27,7 @@
         name="description"
         content="Quizfreely is a free and open source learning app with flashcards, practice tests, and more tools to help you study."
     />
-    <meta name="”robots”" content="index, follow" />
+    <meta name="robots" content="index, follow" />
 </svelte:head>
 
 <div class="flex center">

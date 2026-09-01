@@ -22,7 +22,7 @@
 <svelte:head>
     <title>Explore &amp; Search | Quizfreely</title>
     <meta name="description" content="Quizfreely is a free and open source learning app with flashcards, practice tests, and more tools to help you study." />
-    <meta name=”robots” content="index, follow" />
+    <meta name="robots" content="index, follow" />
 </svelte:head>
 
             <div class="grid list" style="margin-top: 2rem;">
