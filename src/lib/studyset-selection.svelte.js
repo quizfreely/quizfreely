@@ -68,6 +68,10 @@ class StudysetSelection {
                     "quizfreely:selected_local_studyset_ids",
                     JSON.stringify([...this.localIds]),
                 );
+                sessionStorage.setItem(
+                    "quizfreely:studyset_selection_override_show",
+                    this.overrideShow,
+                );
             } catch (err) {
                 console.error("StudysetSelection.writeSessionStorage errored even though browser is true. Err:", err);
             }
@@ -77,6 +81,12 @@ class StudysetSelection {
     readSessionStorage() {
         if (browser) {
             try {
+                const overrideShowStr = sessionStorage.getItem(
+                    "quizfreely:studyset_selection_override_show",
+                );
+                if (overrideShowStr == "true") {
+                    this.overrideShow = true;
+                }
                 const cloudIdsStr = sessionStorage.getItem(
                     "quizfreely:selected_cloud_studyset_ids",
                 );
@@ -116,6 +126,7 @@ class StudysetSelection {
     }
     setOverrideShow(override) {
         this.overrideShow = Boolean(override);
+        this.writeSessionStorage();
     }
 }
 
