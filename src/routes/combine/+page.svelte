@@ -16,6 +16,7 @@
     import AngleDownIcon from "$lib/icons/AngleDown.svelte"
     import FullscreenIcon from "$lib/icons/FullscreenMaximize.svelte"
     import PlusIcon from "$lib/icons/Plus.svelte"
+    import SearchIcon from "$lib/icons/Search.svelte"
     let { data } = $props();
     let currentCloudIds = $state([...data.cloudIds]);
     let currentLocalIds = $state([...data.localIds]);
@@ -156,8 +157,26 @@
                     {#if currentCloudIds.length + currentLocalIds.length > 0}
                         <h4>Select Multiple Studysets</h4>
                     {/if}
-                    <p>Use practice tests, match activities, and flashcards with multiple studysets combined, and measure detailed progress across multiple studysets.</p>
-                    <p style="margin-top: 2rem;">Select studysets from the dashboard or inside folders with "select multiple"</p>
+                    <p class="fg0">Practice tests, match activities, and flashcards with multiple studysets combined</p>
+                    <p style="margin-top: 1.4rem;">Tap the "<b>Select Multiple</b>" button on <b>any page</b>: studysets, folders, search results, the dashboard, or any other page.</p>
+                    <div class="flex" style="flex-direction: column; align-items: start;">
+                        <button onclick={() => {
+                            studysetSelection.replaceSelection({
+                                cloudIds: currentCloudIds,
+                                localIds: currentLocalIds,
+                            });
+                            studysetSelection.setOverrideShow(true);
+                            goto("/dashboard");
+                        }}><PlusIcon /> Select in Dashboard</button>
+                        <button class="alt" onclick={() => {
+                            studysetSelection.replaceSelection({
+                                cloudIds: currentCloudIds,
+                                localIds: currentLocalIds,
+                            });
+                            studysetSelection.setOverrideShow(true);
+                            goto("/explore");
+                        }}><SearchIcon /> Select in Search/Explore</button>
+                    </div>
                 </div>
             {/if}
         </div>
