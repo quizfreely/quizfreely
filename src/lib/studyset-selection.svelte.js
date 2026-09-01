@@ -19,6 +19,7 @@ class StudysetSelection {
         } else if (localId != null) {
             this.localIds.add(localId);
         }
+        this.setOverrideShow(false);
         this.writeSessionStorage();
     }
 
@@ -29,6 +30,7 @@ class StudysetSelection {
         if (localId != null) {
             this.localIds.add(localId);
         }
+        this.setOverrideShow(false);
         this.writeSessionStorage();
     }
     
@@ -39,6 +41,7 @@ class StudysetSelection {
         if (localId != null) {
             this.localIds.delete(localId);
         }
+        this.setOverrideShow(false);
         this.writeSessionStorage();
     }
 
@@ -54,6 +57,7 @@ class StudysetSelection {
         cloudIds?.forEach?.(id => { if (id != null) this.cloudIds.add(id); });
         this.localIds.clear();
         localIds?.forEach?.(id => { if (id != null) this.localIds.add(id); });
+        this.setOverrideShow(false);
         this.writeSessionStorage();
     }
 
