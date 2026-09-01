@@ -21,6 +21,12 @@
     });
 
     const numFmt = new Intl.NumberFormat('en-US', {
+        /* we don't know the user's locale when we're in SSR,
+        using `undefined` instead of specifying 'en-US' would use the environment default,
+        but that would be en-US on the server and then whatever the user's locale is in the client,
+        which would result in mismatching UI if you load the page initially (with SSR) or navigate to it afterwords client-side,
+        so for now, we just use en-US, since for numbers it's already pretty international-friendly
+        (with 'compact' & 'short', it gives us numbers like 123K, 1.2M, etc) */
         notation: 'compact',
         compactDisplay: 'short'
     });
