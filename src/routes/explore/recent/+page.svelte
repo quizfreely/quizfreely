@@ -37,7 +37,7 @@
 
 <div class="flex center">
     <div class="flex" style="flex-direction: column; gap: 0.2rem;">
-        <span style="font-size: 2rem;">{data.dailyCount}</span>
+        <span style="font-size: 2rem;">{numFmt.format(data.dailyCount)}</span>
         <div class="text fg0">
             studyset{data.dailyCount === 1 ? "" : "s"}
             {data.recentlyUpdated ? "updated" : "created"}
@@ -45,7 +45,7 @@
         </div>
     </div>
     <div class="flex" style="flex-direction: column; gap: 0.2rem;">
-        <span style="font-size: 2rem;">{data.monthlyCount}</span>
+        <span style="font-size: 2rem;">{numFmt.format(data.monthlyCount)}</span>
         <div class="text fg0">
             studyset{data.monthlyCount === 1 ? "" : "s"}
             {data.recentlyUpdated ? "updated" : "created"}
@@ -53,7 +53,7 @@
         </div>
     </div>
     <div class="flex" style="flex-direction: column; gap: 0.2rem;">
-        <span style="font-size: 2rem;">{data.totalCount}</span>
+        <span style="font-size: 2rem;">{numFmt.format(data.totalCount)}</span>
         <div class="text fg0">
             total studyset{data.totalCount === 1 ? "" : "s"}
         </div>
