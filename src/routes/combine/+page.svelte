@@ -4,6 +4,7 @@
     import { goto, replaceState } from "$app/navigation";
     import { page } from "$app/state";
     import { idbApiLayer } from "$lib/idb-api-layer";
+    import { slide } from "svelte/transition"
     import TermsTable from "$lib/components/TermsTable.svelte";
     import Flashcards from "$lib/components/Flashcards.svelte";
     import StudysetLinkBox from "$lib/components/StudysetLinkBox.svelte";
@@ -23,6 +24,7 @@
     let collapsed = $state(true);
     let displayedStudysets = $derived(collapsed ? studysets.slice(0, COLLAPSE_LEN) : studysets);
     let terms = $derived(studysets.flatMap(s => s?.terms).filter(t => t != null));
+    let localStudysetsLoaded = $state(false);
     onMount(() => {
         if (studysetSelection.cloudIds.size + studysetSelection.localIds.size == 0) {
             studysetSelection.replaceSelection({
@@ -33,6 +35,7 @@
         (async () => {
             if (currentLocalIds.length > 0) {
                 studysets.push(...(await idbApiLayer.getStudysetsByIds(currentLocalIds))?.filter?.(s => s != null) ?? []);
+                localStudysetsLoaded = true;
             }
         })();
     });
@@ -45,12 +48,18 @@
 </script>
 <div class="grid page" style="padding-top: 1rem;">
     <div class="content">
-        <div class="caption-size">
-            <div class="flex" style="align-items: center; justify-content: space-between;">
+            <div class="flex caption-size" style="align-items: center; justify-content: space-between;">
+                {#if currentCloudIds.length+currentLocalIds.length > 0}
                 <div>
-                    <p class="h4" style="margin-bottom: 0px; font-size: 1.8rem;">{currentCloudIds.length + currentLocalIds.length} {currentCloudIds.length + currentLocalIds.length == 1 ? "Studyset" : "Studysets"}</p>
+                    <p class="h4" style="margin-bottom: 0px; font-size: 1.8rem;">{currentCloudIds.length + currentLocalIds.length} {currentCloudIds.length + currentLocalIds.length == 1 ? "Studyset Selected" : "Studysets"}</p>
                     <p class="fg0" style="margin-top: 0.2rem; font-size: 1.2rem;">{terms.length} {terms.length == 1 ? "Total Term" : "Total Terms"}</p>
                 </div>
+                {:else}
+                <div>
+                    <p class="h4" style="margin-bottom: 0px; font-size: 1.8rem;">Select Multiple Studysets</p>
+                    <p class="fg0" style="margin-top: 0.2rem; font-size: 1.2rem;">0 Studysets Selected</p>
+                </div>
+                {/if}
                 <button onclick={() => {
                     studysetSelection.replaceSelection({
                         cloudIds: currentCloudIds,
@@ -59,7 +68,15 @@
                     goto("/dashboard");
                 }}><PlusIcon></PlusIcon> Add More</button>
             </div>
-        <div class="grid list" style="margin-bottom: 0px;">
+        {#if (currentLocalIds.length == 0 && currentCloudIds.length > studysets.length) ||
+            (localStudysetsLoaded && currentCloudIds.length + currentLocalIds.length > studysets.length)}
+            {const diff = $derived(currentLocalIds.length+currentLocalIds.length-studysets.length)}
+            <div class="box ohno caption-size gap-after-this-here-2" transition:slide={{duration:400}}>
+                Failed to load {diff} {diff == 1 ? "studyset" : "studysets"} :(
+            </div>
+        {/if}
+        {#if displayedStudysets.length > 0}
+        <div class="grid list caption-size gap-after-this-here-3" style="margin-bottom: 0px;">
         {#each displayedStudysets as studyset, index}
             <StudysetLinkBox {studyset} linkTemplateFunc={
                 (id) => id?.includes?.("-") ?
@@ -85,8 +102,9 @@
             </StudysetLinkBox>
         {/each}
         </div>
+        {/if}
         {#if studysets.length > COLLAPSE_LEN}
-        <div class="flex center" style="margin-top: 0.6rem;">
+        <div class="flex center caption-size" style="margin-top: 0.6rem;">
             <button class="faint" onclick={() => collapsed = !collapsed}>
                 {#if collapsed}
                     <AngleDownIcon /> Show All
@@ -96,42 +114,59 @@
             </button>
         </div>
         {/if}
-        </div>
-        <div style={studysets.length > COLLAPSE_LEN ? "" : "margin-top: 3rem;"}>
-        <Flashcards {terms} >
-            {#snippet captionEnd()}
+        <div class="gap-before-this-here">
+            {#if studysets.length > 1}
+            <Flashcards {terms} >
+                {#snippet captionEnd()}
+                    <button onclick={() => {
+                        studysetSelection.clearSelection();
+                        goto(`/flashcards?${idSearchParams}`);
+                    }} class="faint" aria-label="Fullscreen Flashcards">
+                        <FullscreenIcon></FullscreenIcon>
+                    </button>
+                {/snippet}
+            </Flashcards>
+            <div class="grid list caption">
                 <button onclick={() => {
                     studysetSelection.clearSelection();
-                    goto(`/flashcards?${idSearchParams}`);
-                }} class="faint" aria-label="Fullscreen Flashcards">
-                    <FullscreenIcon></FullscreenIcon>
+                    goto(`/match?${idSearchParams}`);
+                }} class="alt">
+                    <GridIcon />
+                    Match
                 </button>
-            {/snippet}
-        </Flashcards>
+                <button onclick={() => {
+                    studysetSelection.clearSelection();
+                    goto(`/practice-test?${idSearchParams}`);
+                }} class="alt">
+                    <PTIcon />
+                    Practice Test
+                </button>
+                <button onclick={() => {
+                    studysetSelection.clearSelection();
+                    goto(`/stats?${idSearchParams}`);
+                }} class="alt">
+                    <GraphIcon />
+                    Progress &amp; Stats
+                </button>
+            </div>
+            <TermsTable {terms} class="caption" />
+            {:else}
+                <div class="caption-size">
+                    {#if currentCloudIds.length + currentLocalIds.length > 0}
+                        <h4>Select Multiple Studysets</h4>
+                    {/if}
+                    <p>Use practice tests, match activities, and flashcards with multiple studysets combined, and measure detailed progress across multiple studysets.</p>
+                    <p style="margin-top: 2rem;">Select studysets from the dashboard or inside folders with "select multiple"</p>
+                </div>
+            {/if}
         </div>
-        <div class="grid list caption">
-            <button onclick={() => {
-                studysetSelection.clearSelection();
-                goto(`/match?${idSearchParams}`);
-            }} class="alt">
-                <GridIcon />
-                Match
-            </button>
-            <button onclick={() => {
-                studysetSelection.clearSelection();
-                goto(`/practice-test?${idSearchParams}`);
-            }} class="alt">
-                <PTIcon />
-                Practice Test
-            </button>
-            <button onclick={() => {
-                studysetSelection.clearSelection();
-                goto(`/stats?${idSearchParams}`);
-            }} class="alt">
-                <GraphIcon />
-                Progress &amp; Stats
-            </button>
-        </div>
-        <TermsTable {terms} class="caption" />
     </div>
 </div>
+<style>
+    .gap-after-this-here-3 + .gap-before-this-here {
+        margin-top: 3rem;
+    }
+    .gap-after-this-here-2 + .gap-before-this-here {
+        margin-top: 2rem;
+    }
+</style>
