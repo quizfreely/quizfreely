@@ -65,6 +65,7 @@
                         cloudIds: currentCloudIds,
                         localIds: currentLocalIds,
                     });
+                    studysetSelection.setOverrideShow(true);
                     goto("/dashboard");
                 }}><PlusIcon></PlusIcon> Add More</button>
             </div>

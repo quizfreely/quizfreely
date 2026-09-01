@@ -3,7 +3,7 @@
     import { slide, fade, scale } from "svelte/transition";
     import { sineIn, sineOut } from "svelte/easing";
     import { goto } from "$app/navigation";
-    import { studysetSelection, selectionUI } from "$lib/studyset-selection.svelte.js";
+    import { studysetSelection } from "$lib/studyset-selection.svelte.js";
     import Dropdown from "$lib/components/Dropdown.svelte";
     import FolderPicker from "$lib/components/FolderPicker.svelte";
     import StudysetLinkBox from "$lib/components/StudysetLinkBox.svelte";
@@ -292,7 +292,7 @@
     const selectionCancelButtonCallback = () => {
         selectingMultiple = false;
     }
-    selectionUI.setCancelButtonCallback(selectionCancelButtonCallback);
+    studysetSelection.setCancelButtonCallback(selectionCancelButtonCallback);
     onMount(() => {
         window.addEventListener("keyup", onKeyup);
         window.addEventListener("keydown", onKeydown);
@@ -301,7 +301,7 @@
             window.removeEventListener("keyup", onKeyup);
             window.removeEventListener("keydown", onKeydown);
             window.removeEventListener("click", windowOnclick);
-            selectionUI.cleanUpCancelButtonCallback(selectionCancelButtonCallback);
+            studysetSelection.cleanUpCancelButtonCallback(selectionCancelButtonCallback);
         };
     });
 </script>

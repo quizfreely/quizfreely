@@ -12,7 +12,7 @@ import { page } from '$app/state';
 import { getCancelBeforeNavigate } from "$lib/cancel-before-navigate.js";
 import { env } from "$env/dynamic/public";
 import { onMount } from "svelte";
-import { studysetSelection, selectionUI } from "$lib/studyset-selection.svelte.js";
+import { studysetSelection } from "$lib/studyset-selection.svelte.js";
 let { children, data } = $props();
 
 NProgress.configure({
@@ -97,7 +97,7 @@ let selectionLinkParams = $derived(
 <Header />
 {/if}
 {const totalSelectedCount = $derived(studysetSelection.cloudIds.size + studysetSelection.localIds.size)}
-{#if totalSelectedCount > 0 && !page?.data?.studysetSelection?.hideSubHeader && !page?.data?.header?.hideHeader}
+{#if studysetSelection.show && !page?.data?.studysetSelection?.hideSubHeader && !page?.data?.header?.hideHeader}
 <div class="grid page" transition:slide={{duration:400}}>
     <div class="content">
         <div class="box flex {page?.data?.studysetSelection?.subHeaderClass ?? ''}" style="padding: 0.4rem 0.8rem; justify-content: space-between; align-items: center; column-gap: 1rem; row-gap: 0.2rem; {page?.data?.studysetSelection?.subHeaderStyle ?? ''}">
@@ -106,7 +106,8 @@ let selectionLinkParams = $derived(
                 <a class="button faint" href="/combine?{selectionLinkParams}">Continue</a>
                 <button class="ohno faint" onclick={() => {
                     studysetSelection.clearSelection();
-                    selectionUI.getCancelButtonCallback()?.();
+                    studysetSelection.setOverrideShow(false);
+                    studysetSelection.getCancelButtonCallback()?.();
                 }}>Cancel</button>
             </div>
         </div>

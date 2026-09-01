@@ -4,6 +4,9 @@ import { browser } from "$app/environment";
 class StudysetSelection {
     cloudIds = new SvelteSet();
     localIds = new SvelteSet();
+    #cancelButtonCallback;
+    overrideShow = $state(false);
+    show = $derived(this.cloudIds.size + this.localIds.size > 0 || this.overrideShow);
     
     toggleSelect({ cloudId, localId }) {
         if (cloudId != null && this.cloudIds.has(cloudId)) {
@@ -42,6 +45,7 @@ class StudysetSelection {
     clearSelection() {
         this.cloudIds.clear();
         this.localIds.clear();
+        this.setOverrideShow(false);
         this.writeSessionStorage();
     }
 
@@ -98,10 +102,7 @@ class StudysetSelection {
             console.error("StudysetSelection.readSessionStorage called when browser is false")
         }
     }
-}
 
-class SelectionUI {
-    #cancelButtonCallback;
     getCancelButtonCallback() {
         return this.#cancelButtonCallback;
     }
@@ -113,8 +114,9 @@ class SelectionUI {
             this.#cancelButtonCallback = undefined;
         }
     }
+    setOverrideShow(override) {
+        this.overrideShow = Boolean(override);
+    }
 }
 
-const studysetSelection = new StudysetSelection();
-const selectionUI = new SelectionUI();
-export { studysetSelection, selectionUI };
+export const studysetSelection = new StudysetSelection();

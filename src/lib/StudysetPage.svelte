@@ -145,7 +145,7 @@
     </button>
 {/snippet}
 {#snippet multiselect()}
-    {#if studysetSelection.cloudIds.size + studysetSelection.localIds.size > 0}
+    {#if studysetSelection.show}
         {#if studysetSelection.cloudIds.has(data.studyset?.id ?? data.localId) || studysetSelection.localIds.has(data.studyset?.id ?? data.localId)}
             <button class="alt text fg1 with-badge" style="--badge-color: var(--warn);" onclick={() => {
                 studysetSelection.deselect({
