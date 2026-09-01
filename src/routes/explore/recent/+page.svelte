@@ -19,6 +19,11 @@
                 localStorage.getItem("quizfreely:modPowersActive") == "true";
         }
     });
+
+    const numFmt = new Intl.NumberFormat('en-US', {
+        notation: 'compact',
+        compactDisplay: 'short'
+    });
 </script>
 
 <svelte:head>
