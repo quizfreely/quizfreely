@@ -83,7 +83,7 @@ onMount(() => {
     studysetSelection.readSessionStorage();
 })
 
-let selectionLinkParams = $derived(
+const selectionLinkParams = $derived(
     [
         Array.from(studysetSelection.cloudIds, id => `studyset=${id}`).join("&"),
         Array.from(studysetSelection.localIds, id => `localStudyset=${id}`).join("&")

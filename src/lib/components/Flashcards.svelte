@@ -23,7 +23,7 @@
     let defSide = $state(false);
     let index = $state(0);
     let transKeyInc = $state(0);
-    let transKey = $derived(index + transKeyInc);
+    const transKey = $derived(index + transKeyInc);
     let direction = $state(1);
 
     function flip() {

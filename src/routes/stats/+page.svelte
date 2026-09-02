@@ -78,7 +78,7 @@
         );
         reviewEventStats.push(...newREs);
     }
-    let termsStats = $derived.by(() => {
+    const termsStats = $derived.by(() => {
         if (terms) {
             let sum = 0;
             let includedTermsCount = 0;
@@ -109,7 +109,7 @@
             return null;
         }
     })
-    let practiceTestAvgScore = $derived.by(() => {
+    const practiceTestAvgScore = $derived.by(() => {
         if (practiceTests?.length > 0) {
             let sum = 0;
             for (const practiceTest of practiceTests) {

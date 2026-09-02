@@ -96,8 +96,8 @@
         }
     }
 
-    let hasNextPage = $derived(pageInfo?.hasNextPage);
-    let hasPrevPage = $derived(pageInfo?.hasPreviousPage);
+    const hasNextPage = $derived(pageInfo?.hasNextPage);
+    const hasPrevPage = $derived(pageInfo?.hasPreviousPage);
 
     async function newStudysetButton() {
         if (data.authed) {

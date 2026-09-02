@@ -18,7 +18,7 @@
 	import { backOut, cubicInOut } from 'svelte/easing';
 	import { Arc, Chart, Group, Layer, LinearGradient, Text } from 'layerchart';
     let { data } = $props();
-    let r = $derived(Number(page.url.searchParams.get("r") ?? 0));
+    const r = $derived(Number(page.url.searchParams.get("r") ?? 0));
     let terms = $state();
     let practiceTests = $state([]);
 
@@ -200,7 +200,7 @@
 
     let questionsCountEntered = $state();
 
-    let defaultQuestionsCount = $derived(
+    const defaultQuestionsCount = $derived(
         terms?.length < 30 ? terms.length : 20
     );
 
