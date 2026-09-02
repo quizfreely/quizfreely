@@ -23,8 +23,8 @@
     let studysets = $state(data.studysets?.filter?.(s => s != null) ?? []);
     const COLLAPSE_LEN = 3;
     let collapsed = $state(true);
-    let displayedStudysets = $derived(collapsed ? studysets.slice(0, COLLAPSE_LEN) : studysets);
-    let terms = $derived(studysets.flatMap(s => s?.terms).filter(t => t != null));
+    const displayedStudysets = $derived(collapsed ? studysets.slice(0, COLLAPSE_LEN) : studysets);
+    const terms = $derived(studysets.flatMap(s => s?.terms).filter(t => t != null));
     let localStudysetsLoaded = $state(false);
     onMount(() => {
         if (studysetSelection.cloudIds.size + studysetSelection.localIds.size == 0) {
@@ -49,7 +49,7 @@
 </script>
 <div class="grid page" style="padding-top: 1rem;">
     <div class="content">
-            <div class="flex caption-size" style="align-items: center; justify-content: space-between;">
+            <div class="flex caption-size gap-after-this-here-2" style="align-items: center; justify-content: space-between;">
                 {#if currentCloudIds.length+currentLocalIds.length > 0}
                 <div>
                     <p class="h4" style="margin-bottom: 0px; font-size: 1.8rem;">{currentCloudIds.length + currentLocalIds.length} {currentCloudIds.length + currentLocalIds.length == 1 ? "Studyset Selected" : "Studysets"}</p>
@@ -72,7 +72,7 @@
             </div>
         {#if (currentLocalIds.length == 0 && currentCloudIds.length > studysets.length) ||
             (localStudysetsLoaded && currentCloudIds.length + currentLocalIds.length > studysets.length)}
-            {const diff = $derived(currentLocalIds.length+currentLocalIds.length-studysets.length)}
+            {const diff = $derived((currentCloudIds.length+currentLocalIds.length)-studysets.length)}
             <div class="box ohno caption-size gap-after-this-here-2" transition:slide={{duration:400}}>
                 Failed to load {diff} {diff == 1 ? "studyset" : "studysets"} :(
             </div>
@@ -154,9 +154,6 @@
             <TermsTable {terms} class="caption" />
             {:else}
                 <div class="caption-size">
-                    {#if currentCloudIds.length + currentLocalIds.length > 0}
-                        <h4>Select Multiple Studysets</h4>
-                    {/if}
                     <p class="fg0">Practice tests, match activities, and flashcards with multiple studysets combined</p>
                     <p style="margin-top: 1.4rem;">Tap the "<b>Select Multiple</b>" button on <b>any page</b>: studysets, folders, search results, the dashboard, or any other page.</p>
                     <div class="flex" style="flex-direction: column; align-items: start;">
