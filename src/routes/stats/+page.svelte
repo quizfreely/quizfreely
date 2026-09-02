@@ -239,10 +239,11 @@
                 );
 
                 const termIds = terms.map(t => t.id);
-                reviewEventStats.push(...(await idbApiLayer.getReviewEventStatsByDay({
+                const newRE = await idbApiLayer.getReviewEventStatsByDay({
                     lastDaysTotal: 30,
                     termIds: termIds,
-                })?.filter?.(d => d != null) ?? []));
+                });
+                reviewEventStats.push(...(newRE?.filter?.(d => d != null) ?? []));
 
                 for (const term of terms) {
                     if (term.progress == null) {
