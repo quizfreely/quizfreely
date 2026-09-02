@@ -1,6 +1,7 @@
 import { error } from '@sveltejs/kit';
 
 export async function load({ fetch, url }) {
+    const r = url.searchParams.get("r"); /* NOTE: use r from search params to make sure SvelteKit re-runs load function when it changes */
     const cloudIds = url.searchParams.getAll("studyset");
     const localIds = url.searchParams.getAll("localStudyset").map(
         id => (id == "" || isNaN(id)) ?
@@ -93,7 +94,6 @@ export async function load({ fetch, url }) {
     } catch (err) {
         console.error("Error in cloud studyset practice test load func: ", err);
         data = {
-          studysetId: params.id,
           authed: false,
         };
     }
@@ -101,5 +101,6 @@ export async function load({ fetch, url }) {
         ...data,
         cloudIds,
         localIds,
+        r, /* NOTE: pass r to page, even if it's not actually used, so that SvelteKit knows this load func depends on r so it reruns when we change r in the link with r+1 */
     };
 }

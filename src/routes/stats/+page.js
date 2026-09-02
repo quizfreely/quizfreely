@@ -92,7 +92,6 @@ export async function load({ fetch, url }) {
     } catch (err) {
         console.error("Error in cloud studyset stats load func: ", err);
         data = {
-          studysetId: params.id,
           authed: false,
         };
     }
