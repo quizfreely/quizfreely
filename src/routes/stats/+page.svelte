@@ -469,6 +469,7 @@
                 Back
             </a>
         </div>
+        {#if data.cloudIds.length + data.localIds.length > 1}
         <div class="grid qzfr-combined-studyset-stats-grid" style="margin-bottom: 2rem;">
             <div>
                 <p class="center">Average Accuracy by Studyset</p>
@@ -533,6 +534,7 @@
                 </div>
             </div>
         </div>
+        {/if}
 <div class="grid grid-split-but-different">
             <div class="terms-chart-area">
         <div class="flex center">Terms/Questions per Day</div>
