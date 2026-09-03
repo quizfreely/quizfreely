@@ -250,12 +250,19 @@
                         term.progress = (await db.termProgress.where("termId").equals(term.id).toArray())?.[0];
                         if (term.progress != null && term.studysetId != null) {
                             const s = studysetTotals.get(term.studysetId);
+                            /* WARNING: whatever you do, do NOT mutate the original objects in this SvelteMap
+                               do not even mutate and then use `.set()` again with the same reference,
+                               it does NOT work even though it sounds like it should
+                               yes this still applies in SVELTE 5, no it is NOT a v4 problem
+                               please DO NOT MUTATE THE ORIGINAL OBJECT PLEASE PLEASE PLEASE */
                             if (s != null) {
-                                s.totalDefCorrect += term.progress.defCorrectCount;
-                                s.totalDefIncorrect += term.progress.defIncorrectCount;
-                                s.totalTermCorrect += term.progress.termCorrectCount;
-                                s.totalTermIncorrect += term.progress.termIncorrectCount;
-                                studysetTotals.set(term.studysetId, s);
+                                studysetTotals.set(term.studysetId, {
+                                    ...s,
+                                    totalDefCorrect: s.totalDefCorrect + term.progress.defCorrectCount,
+                                    totalDefIncorrect: s.totalDefIncorrect + term.progress.defIncorrectCount,
+                                    totalTermCorrect: s.totalTermCorrect + term.progress.termCorrectCount,
+                                    totalTermIncorrect: s.totalTermIncorrect + term.progress.termIncorrectCount,
+                                });
                             }
                         }
                     }
