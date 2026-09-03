@@ -488,7 +488,7 @@
                         y="index"
                         yScale={scaleBand().padding(0.6)}
                         x="accuracy"
-                        xDomain={[0, null]}
+                        xDomain={[0, 100]}
                         xNice
                         padding={{ left: 100, top: 0, bottom: 20, right: 20 }}
                         height={ssAccHeight}
