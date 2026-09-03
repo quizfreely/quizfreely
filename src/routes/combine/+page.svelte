@@ -26,6 +26,7 @@
     const displayedStudysets = $derived(collapsed ? studysets.slice(0, COLLAPSE_LEN) : studysets);
     const terms = $derived(studysets.flatMap(s => s?.terms).filter(t => t != null));
     let localStudysetsLoaded = $state(false);
+    let objectUrls = [];
     onMount(() => {
         if (studysetSelection.cloudIds.size + studysetSelection.localIds.size == 0) {
             studysetSelection.replaceSelection({
@@ -35,10 +36,30 @@
         }
         (async () => {
             if (currentLocalIds.length > 0) {
-                studysets.push(...(await idbApiLayer.getStudysetsByIds(currentLocalIds))?.filter?.(s => s != null) ?? []);
+                const localStudysets = await idbApiLayer.getStudysetsByIds(currentLocalIds, {
+                    terms: {
+                        termImageUrl: true,
+                        defImageUrl: true
+                    },
+                    termsCount: true,
+                });
+                studysets.push(...(localStudysets?.filter?.(s => s != null) ?? []));
                 localStudysetsLoaded = true;
+                localStudysets?.forEach?.(s => s?.terms?.forEach?.(t => {
+                    if (t?.termImageUrl != null) {
+                        objectUrls.push(t.termImageUrl);
+                    }
+                    if (t?.defImageUrl != null) {
+                        objectUrls.push(t.defImageUrl);
+                    }
+                }))
             }
         })();
+        return () => {
+            objectUrls.forEach(u => {
+                URL.revokeObjectURL(u);
+            });
+        }
     });
 
     /* idSearchParams is URL search component WITHOUT starting question mark (`?`) */

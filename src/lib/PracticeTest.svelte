@@ -114,6 +114,7 @@
                         termImageUrl: true,
                         defImageUrl: true
                     },
+                    termsCount: true,
                 });
                 if (localStudysets != null) {
                     const newTerms = [];
