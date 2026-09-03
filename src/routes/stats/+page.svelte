@@ -149,18 +149,9 @@
                         termImageUrl: true,
                         defImageUrl: true
                     },
-                    practiceTests: true,
-                    reviewEventStatsByDay: {
-                        lastDaysTotal: 30,
-                    }
                 });
                 if (localStudysets != null) {
                     const newTerms = [];
-                    const newPTs = [];
-                    const newREs = [];
-                    // use a Set to remove duplicates
-                    // because one PT can be under multiple studysets
-                    const ptSet = new Set();
                     for (const s of localStudysets) {
                         if (s == null) continue;
                         let totalDefCorrect = 0;
@@ -196,29 +187,33 @@
                             totalTermCorrect,
                             totalTermIncorrect,
                         });
-                        
-                        if (s.practiceTests != null) {
-                            for (const pt of s.practiceTests) {
-                                if (pt?.id == null || ptSet.has(pt.id)) continue;
-                                ptSet.add(pt.id);
-                                newPTs.push(pt);
-                            }
-                        }
-                        if (s.reviewEventStatsByDay != null) {
-                            for (const re of s.reviewEventStatsByDay) {
-                                if (re == null) continue;
-                                // duplicate RE timestamps are merged later in onMount
-                                newREs.push(re);
-                            }
-                        }
                     }
                     // NOTE: local arrays, so 1 reactive update at the end
                     // instead of multiple reactive updates each loop
                     terms.push(...newTerms);
+                    const newPTs = [];
+                    // use a Set to remove duplicates
+                    // because one PT can be under multiple studysets
+                    const ptSet = new Set();
+                    const localPTs = await db.practiceTests.where("studysetIds").anyOf(data.localIds).toArray();
+                    if (localPTs != null) {
+                        for (const pt of localPTs) {
+                            if (pt?.id == null || ptSet.has(pt.id)) continue;
+                            ptSet.add(pt.id);
+                            newPTs.push(pt);
+                        }
+                    }
                     practiceTests.push(...newPTs);
                     practiceTests.sort(
                         (a, b) => b.timestamp.localeCompare(a.timestamp),
                     );
+                    const newTermIds = newTerms.map(t => t.id);
+                    const newREs = (
+                        await idbApiLayer.getReviewEventStatsByDay({
+                            lastDaysTotal: 30,
+                            termIds: newTermIds,
+                        })
+                    )?.filter?.(re => re != null) ?? [];
                     reviewEventStats.push(...newREs);
                 }
             }

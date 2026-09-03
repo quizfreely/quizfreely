@@ -81,7 +81,7 @@ export async function load({ fetch, url }) {
             })
         });
         const resp = await respRaw.json();
-        if (resp?.data == null || resp?.errors != null) {
+        if (resp?.data == null) {
             console.log("Error in cloud studyset stats load func api request. Response: ", resp);
         }
         data = {

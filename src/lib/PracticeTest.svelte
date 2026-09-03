@@ -114,12 +114,9 @@
                         termImageUrl: true,
                         defImageUrl: true
                     },
-                    practiceTests: true,
                 });
                 if (localStudysets != null) {
                     const newTerms = [];
-                    const newPTs = [];
-                    const ptSet = new Set();
                     for (const s of localStudysets) {
                         if (s == null) continue;
                         if (s.terms != null) {
@@ -134,20 +131,23 @@
                                 }
                             }
                         }
-                        if (s.practiceTests != null) {
-                            for (const pt of s.practiceTests) {
-                                if (pt?.id == null || ptSet.has(pt.id)) {
-                                    continue;
-                                }
-                                ptSet.add(pt.id); 
-                                newPTs.push(pt);
-                            }
-                        }
                     }
                     terms = [
                         ...(terms ?? []),
                         ...newTerms,
                     ];
+                    const newPTs = [];
+                    const ptSet = new Set();
+                    const localPTs = await db.practiceTests.where("studysetIds").anyOf(data.localIds).toArray();
+                    if (localPTs != null) {
+                        for (const pt of localPTs) {
+                            if (pt?.id == null || ptSet.has(pt.id)) {
+                                continue;
+                            }
+                            ptSet.add(pt.id); 
+                            newPTs.push(pt);
+                        }
+                    }
                     practiceTests.push(...newPTs);
                     practiceTests.sort(
                         (a, b) => b.timestamp.localeCompare(a.timestamp),
