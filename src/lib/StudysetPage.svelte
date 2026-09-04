@@ -176,7 +176,7 @@
     <div class="grid page">
         <div class="content">
                 <div>
-                    {#if folderName}
+                    {#if folderName != null}
                         <div
                             class="flex compact-gap"
                             style="align-items: center;"
