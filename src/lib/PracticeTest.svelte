@@ -21,6 +21,9 @@
     const r = $derived(Number(page.url.searchParams.get("r") ?? 0));
     let terms = $state();
     let practiceTests = $state([]);
+    /* the same practice test might appear in multiple studysets,
+    so use a set to remove duplicates */
+    const ptSet = new Set();
 
     // maps questions from practice test data to objs with props for question components
     function mapPracticeTestQuestionToQuestionComponentFormat(q) {
@@ -45,7 +48,6 @@
         if (data.studysets != null) {
             const newTerms = [];
             const newPTs = [];
-            const ptSet = new Set();
             for (const studyset of data.studysets) {
                 if (studyset == null) continue;
                 if (studyset.terms) {
@@ -57,8 +59,6 @@
                 if (studyset.practiceTests == null) continue;
                 for (const pt of studyset.practiceTests) {
                     if (pt?.id == null || ptSet.has(pt.id)) continue;
-                    /* the same practice test might appear in multiple studysets,
-                    so use a set to remove duplicates */
                     ptSet.add(pt.id); 
                     newPTs.push(pt);
                 }
@@ -138,7 +138,6 @@
                         ...newTerms,
                     ];
                     const newPTs = [];
-                    const ptSet = new Set();
                     const localPTs = await db.practiceTests.where("studysetIds").anyOf(data.localIds).toArray();
                     if (localPTs != null) {
                         for (const pt of localPTs) {
@@ -162,10 +161,18 @@
                 so we need to map local progress to cloud terms
 
                 `terms` has already been populated during SSR (above, before onMount) */
-                practiceTests.push(...(await db.practiceTests
-                    .where("studysetIds")
-                    .anyOf(data.cloudIds)
-                    .toArray() ?? []));
+                const newPTs = [];
+                const localPTs = await db.practiceTests.where("studysetIds").anyOf(data.cloudIds).toArray();
+                if (localPTs != null) {
+                    for (const pt of localPTs) {
+                        if (pt?.id == null || ptSet.has(pt.id)) {
+                            continue;
+                        }
+                        ptSet.add(pt.id); 
+                        newPTs.push(pt);
+                    }
+                }
+                practiceTests.push(...newPTs);
                 practiceTests.sort(
                     /* timestamps are ISO strings in UTC,
                     so lexical/alphanumeric sorting is the same as chronological sorting
