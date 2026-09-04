@@ -13,22 +13,72 @@
     import AngleUpIcon from "$lib/icons/AngleUp.svelte";
     import AngleDownIcon from "$lib/icons/AngleDown.svelte";
     import StatsIcon from "$lib/icons/ChartGraphLine.svelte";
+    import { SvelteMap } from 'svelte/reactivity';
     let { data } = $props();
 
-    const REVIEW_EVENT_STATS_DAYS = 30;
-    let terms = $state(
-        data?.local ?
-            [] : data?.studyset?.terms
-    );
-    let practiceTests = $state(
-        data?.local ?
-            [] : data?.studyset?.practiceTests ?? []
-    );
-    let reviewEventStats = $state(
-        data?.local ?
-            [] : data?.studyset?.reviewEventStatsByDay ?? []
-    );
-    let termsStats = $derived.by(() => {
+    let terms = $state([]);
+    let practiceTests = $state([]);
+    let reviewEventStats = $state([]);
+    let studysetTotals = new SvelteMap();
+    if (data?.studysets != null) {
+        const newTerms = [];
+        const newPTs = [];
+        const newREs = [];
+        // use a Set to remove duplicates
+        // because one PT can be under multiple studysets
+        const ptSet = new Set();
+        for (const s of data.studysets) {
+            if (s == null) continue;
+            let totalDefCorrect = 0;
+            let totalDefIncorrect = 0;
+            let totalTermCorrect = 0;
+            let totalTermIncorrect = 0;
+            if (s.terms != null) {
+                for (const t of s.terms) {
+                    if (t == null) continue;
+                    t.studysetId = s.id;
+                    newTerms.push(t);
+                    if (t.progress != null) {
+                        totalDefCorrect += t.progress.defCorrectCount;
+                        totalDefIncorrect += t.progress.defIncorrectCount;
+                        totalTermCorrect += t.progress.termCorrectCount;
+                        totalTermIncorrect += t.progress.termIncorrectCount;
+                    }
+                }
+            }
+            studysetTotals.set(s.id, {
+                id: s.id,
+                title: s.title,
+                totalDefCorrect,
+                totalDefIncorrect,
+                totalTermCorrect,
+                totalTermIncorrect,
+            });
+            if (s.practiceTests != null) {
+                for (const pt of s.practiceTests) {
+                    if (pt?.id == null || ptSet.has(pt.id)) continue;
+                    ptSet.add(pt.id);
+                    newPTs.push(pt);
+                }
+            }
+            if (s.reviewEventStatsByDay != null) {
+                for (const re of s.reviewEventStatsByDay) {
+                    if (re == null) continue;
+                    // duplicate RE timestamps are merged later in onMount
+                    newREs.push(re);
+                }
+            }
+        }
+        // NOTE: local arrays, so 1 reactive update at the end
+        // instead of multiple reactive updates each loop
+        terms.push(...newTerms);
+        practiceTests.push(...newPTs);
+        practiceTests.sort(
+            (a, b) => b.timestamp.localeCompare(a.timestamp),
+        );
+        reviewEventStats.push(...newREs);
+    }
+    const termsStats = $derived.by(() => {
         if (terms) {
             let sum = 0;
             let includedTermsCount = 0;
@@ -59,7 +109,7 @@
             return null;
         }
     })
-    let practiceTestAvgScore = $derived.by(() => {
+    const practiceTestAvgScore = $derived.by(() => {
         if (practiceTests?.length > 0) {
             let sum = 0;
             for (const practiceTest of practiceTests) {
@@ -90,55 +140,127 @@
             fancyTimestampReady = true;
         })();
         (async () => {
-            if (data.local) {
-                /* studyset is local, so regardless of wheater the user is logged in or not,
-                we load the studyset and progress locally */
-                const studyset = await idbApiLayer.getStudysetById(data.localId, {
+            if (data.localIds.length > 0) {
+                /* at least one studyset is local, so regardless of wheater the user is logged in or not,
+                we load those studysets and progress locally */
+                const localStudysets = await idbApiLayer.getStudysetsByIds(data.localIds, {
                     terms: {
                         progress: true,
                         termImageUrl: true,
                         defImageUrl: true
                     },
-                    practiceTests: true,
-                    reviewEventStatsByDay: REVIEW_EVENT_STATS_DAYS
-                })
-                terms = studyset.terms;
-                terms.forEach(term => {
-                    if (term.termImageUrl != null) {
-                        objectUrls.push(term.termImageUrl);
+                });
+                if (localStudysets != null) {
+                    const newTerms = [];
+                    for (const s of localStudysets) {
+                        if (s == null) continue;
+                        let totalDefCorrect = 0;
+                        let totalDefIncorrect = 0;
+                        let totalTermCorrect = 0;
+                        let totalTermIncorrect = 0;
+                        if (s.terms != null) {
+                            for (const t of s.terms) {
+                                if (t == null) continue;
+                                t.studysetId = s.id;
+                                newTerms.push(t);
+                                // track local term images for cleanup
+                                if (t.termImageUrl != null) {
+                                    objectUrls.push(t.termImageUrl);
+                                }
+                                if (t.defImageUrl != null) {
+                                    objectUrls.push(t.defImageUrl);
+                                }
+                                // track progress to mutate properties before adding to `studysetTotals`
+                                if (t.progress != null) {
+                                    totalDefCorrect += t.progress.defCorrectCount;
+                                    totalDefIncorrect += t.progress.defIncorrectCount;
+                                    totalTermCorrect += t.progress.termCorrectCount;
+                                    totalTermIncorrect += t.progress.termIncorrectCount;
+                                }
+                            }
+                        }
+                        studysetTotals.set(s.id, {
+                            id: s.id,
+                            title: s.title,
+                            totalDefCorrect,
+                            totalDefIncorrect,
+                            totalTermCorrect,
+                            totalTermIncorrect,
+                        });
                     }
-                    if (term.defImageUrl != null) {
-                        objectUrls.push(term.defImageUrl);
+                    // NOTE: local arrays, so 1 reactive update at the end
+                    // instead of multiple reactive updates each loop
+                    terms.push(...newTerms);
+                    const newPTs = [];
+                    // use a Set to remove duplicates
+                    // because one PT can be under multiple studysets
+                    const ptSet = new Set();
+                    const localPTs = await db.practiceTests.where("studysetIds").anyOf(data.localIds).toArray();
+                    if (localPTs != null) {
+                        for (const pt of localPTs) {
+                            if (pt?.id == null || ptSet.has(pt.id)) continue;
+                            ptSet.add(pt.id);
+                            newPTs.push(pt);
+                        }
                     }
-                })
-                practiceTests = studyset?.practiceTests ?? [];
-                reviewEventStats = studyset?.reviewEventStatsByDay ?? [];
+                    practiceTests.push(...newPTs);
+                    practiceTests.sort(
+                        (a, b) => b.timestamp.localeCompare(a.timestamp),
+                    );
+                    const newTermIds = newTerms.map(t => t.id);
+                    const newREs = (
+                        await idbApiLayer.getReviewEventStatsByDay({
+                            lastDaysTotal: 30,
+                            termIds: newTermIds,
+                        })
+                    )?.filter?.(re => re != null) ?? [];
+                    reviewEventStats.push(...newREs);
+                }
             }
 
-            if (!data.authed && !data.local) {
+            if (!data.authed && data.cloudIds.length > 0) {
                 /* not logged in, so user data is local,
-                but studyset is a cloud studyset,
+                but at least one set is a cloud studyset,
                 so we need to map local progress to cloud terms
 
                 `terms` has already been populated during SSR (above, before onMount) */
-                practiceTests = await db.practiceTests.where("studysetIds").equals(data.studysetId).toArray();
-                practiceTests?.sort(
+                practiceTests.push(...(await db.practiceTests.where("studysetIds").anyOf(data.cloudIds).toArray() ?? []));
+                practiceTests.sort(
                     /* timestamps are ISO strings in UTC,
                     so lexical/alphanumeric sorting is the same as chronological sorting
                     also you see we're comparing `b` to `a`, so its descending,
                     so most recent is first */
                     (a, b) => b.timestamp.localeCompare(a.timestamp)
                 );
-                practiceTests = practiceTests ?? [];
 
                 const termIds = terms.map(t => t.id);
-                reviewEventStats = await idbApiLayer.getReviewEventStatsByDay({
-                    last: REVIEW_EVENT_STATS_DAYS,
-                    termIds: termIds
+                const newRE = await idbApiLayer.getReviewEventStatsByDay({
+                    lastDaysTotal: 30,
+                    termIds: termIds,
                 });
+                reviewEventStats.push(...(newRE?.filter?.(d => d != null) ?? []));
 
                 for (const term of terms) {
-                    term.progress = (await db.termProgress.where("termId").equals(term.id).toArray())?.[0];
+                    if (term.progress == null) {
+                        term.progress = (await db.termProgress.where("termId").equals(term.id).toArray())?.[0];
+                        if (term.progress != null && term.studysetId != null) {
+                            const s = studysetTotals.get(term.studysetId);
+                            /* WARNING: whatever you do, do NOT mutate the original objects in this SvelteMap
+                               do not even mutate and then use `.set()` again with the same reference,
+                               it does NOT work even though it sounds like it should
+                               yes this still applies in SVELTE 5, no it is NOT a v4 problem
+                               please DO NOT MUTATE THE ORIGINAL OBJECT PLEASE PLEASE PLEASE */
+                            if (s != null) {
+                                studysetTotals.set(term.studysetId, {
+                                    ...s,
+                                    totalDefCorrect: s.totalDefCorrect + term.progress.defCorrectCount,
+                                    totalDefIncorrect: s.totalDefIncorrect + term.progress.defIncorrectCount,
+                                    totalTermCorrect: s.totalTermCorrect + term.progress.termCorrectCount,
+                                    totalTermIncorrect: s.totalTermIncorrect + term.progress.termIncorrectCount,
+                                });
+                            }
+                        }
+                    }
                 }
             }
 
@@ -152,12 +274,20 @@
                         x: i
                     })); 
             }
-
-            reChartData = reviewEventStats.map((d) => ({
-                ...d,
-                /* create date object from iso string */
-                date: new Date(d.timestamp),
-            }));
+            const reByDate = new Map();
+            for (const d of reviewEventStats) {
+                const existing = reByDate.get(d.timestamp);
+                if (existing) {
+                    existing.correct += d.correct;
+                    existing.incorrect += d.incorrect;
+                } else {
+                    reByDate.set(d.timestamp, {
+                        ...d,
+                        date: new Date(d.timestamp),
+                    });
+                }
+            }
+            reChartData = [...reByDate.values()];
         })();
         return () => {
             objectUrls.forEach(objectUrl => {
@@ -197,6 +327,27 @@
         }
         return `${days[d.getDay()]}, ${d.getDate()} ${months[d.getMonth()]}`
     }
+    const ssAccChartData = $derived.by(() => {
+        const newSsAccChartData = Array.from(studysetTotals, ([k, s]) => {
+            const totalCorrect = (s.totalDefCorrect + s.totalTermCorrect) ?? 0;
+            let totalTotal = totalCorrect + ((s.totalDefIncorrect + s.totalTermIncorrect) ?? 0);
+            if (totalTotal < 1) {
+                totalTotal = 1;
+            }
+            return {
+                id: s.id,
+                title: s.title,
+                titleShort: s.title?.length > 30 ? `${s.title?.slice(0, 30)}...` : s.title,
+                accuracy: Math.round((totalCorrect / totalTotal) * 100),
+            };
+        });
+        newSsAccChartData.sort((a, b) => b.accuracy - a.accuracy);
+        /* loop again AFTER SORTING because index is updated */
+        newSsAccChartData.forEach((d, index) => {
+            d.index = index;
+        });
+        return newSsAccChartData;
+    });
 </script>
 <style>
     .gridfourpartthingrow {
@@ -258,6 +409,13 @@
     .grid-split-but-different .practice-tests-area {
         grid-area: practice-tests;
     }
+    .qzfr-combined-studyset-stats-grid,
+    .grid.qzfr-combined-studyset-stats-grid {
+        column-gap: 1rem;
+        row-gap: 2rem;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: auto;
+    }
     @media only screen and (max-width: 1000px) {
         .grid-split-but-different {
             gap: 2rem;
@@ -269,6 +427,11 @@
                 "terms"
                 "practice-tests-chart"
                 "practice-tests";
+        }
+        .qzfr-combined-studyset-stats-grid,
+        .grid.qzfr-combined-studyset-stats-grid {
+            grid-template-columns: auto;
+            grid-template-rows: auto auto;
         }
     }
 
@@ -294,14 +457,87 @@
 <div class="grid page">
     <div class="content">
         <div class="flex">
-            <a class="button faint" href={data.local ?
-                `/studyset/local?id=${data.localId}` :
-                `/studysets/${data.studysetId}`
+            <a class="button faint" href={
+                data.cloudIds.length + data.localIds.length > 1 ?
+                    `/combine?${[
+                        ...data.cloudIds.map((id) => `studyset=${id}`),
+                        ...data.localIds.map((id) => `localStudyset=${id}`),
+                    ].join("&")}` :
+                    data.cloudIds.length == 1 ?
+                        `/studysets/${data.cloudIds[0]}` :
+                        data.localIds.length == 1 ?
+                            `/studyset/local?id=${data.localIds[0]}` : ""
             }>
                 <BackIcon></BackIcon>
                 Back
             </a>
         </div>
+        {#if data.cloudIds.length + data.localIds.length > 1}
+        <div class="grid qzfr-combined-studyset-stats-grid" style="margin-bottom: 2rem;">
+            <div>
+                <p class="center">Average Accuracy by Studyset</p>
+                {const ssAccHeight = $derived(Math.min(200 + 40*(ssAccChartData.length - 2), 500))}
+                <div style="min-height: {ssAccHeight}px;">
+                    <Chart
+                        data={ssAccChartData}
+                        y="index"
+                        yScale={scaleBand().padding(0.6)}
+                        x="accuracy"
+                        xDomain={[0, 100]}
+                        xNice
+                        padding={{ left: 100, top: 0, bottom: 20, right: 20 }}
+                        height={ssAccHeight}
+                        tooltipContext={{ mode: 'band' }}
+                    >
+	                    <Layer>
+		                    <Axis placement="left" rule format={(index) => ssAccChartData[index].titleShort} />
+		                    <Axis placement="bottom" grid rule format={(v) => `${v}%`} />
+                            {#each ssAccChartData as d, i}
+                                <Bar
+                                    data={d}
+                                    rounded="right"
+                                    radius={8}
+                                    motion={{
+                                        type: 'tween',
+                                        duration: 400,
+                                        easing: backOut,
+                                        delay: i * 80
+                                    }}
+                                    fill={d.accuracy >= 90 ? "var(--yay)" : (d.accuracy >= 80 ? "var(--warn)" : "var(--ohno)")}
+                                />
+                            {/each}
+		                    <Highlight area />
+	                    </Layer>
+		                <Tooltip.Root>
+			                {#snippet children({ data })}
+				                <Tooltip.Header value={data.title} format={(v) => v} style="max-width: 240px; white-space: normal; overflow-wrap: break-word;" />
+				                <Tooltip.List>
+					                <Tooltip.Item
+						                label="Accuracy"
+						                value={data.accuracy}
+                                        format={(v) => `${v}%`}
+					                />
+				                </Tooltip.List>
+			                {/snippet}
+		                </Tooltip.Root>
+                    </Chart>
+                </div>
+            </div>
+            <div>
+                <p class="center">{ssAccChartData.length} Studysets</p>
+                <div class="flex" style="flex-direction: column; gap: 0.4rem; flex-wrap: nowrap; max-height: 500px; overflow-y: auto; padding-right: 6px; border-radius: 0.8rem;">
+                    {#each ssAccChartData as d}
+                        <div class="box flex" style="padding: 0.6rem 1rem; align-items: center; justify-content: space-between;">
+                            <span>{d.title}</span>
+                            <div class="flex" style="align-items: center;">
+                                <span class="text {d.accuracy >= 90 ? 'yay' : (d.accuracy >= 80 ? 'warn' : 'ohno')}">{d.accuracy}%</span>
+                            </div>
+                        </div>
+                    {/each}
+                </div>
+            </div>
+        </div>
+        {/if}
 <div class="grid grid-split-but-different">
             <div class="terms-chart-area">
         <div class="flex center">Terms/Questions per Day</div>
@@ -329,7 +565,7 @@
                     	rounded="top"
                         radius={8}
                     	style="fill: var(--yay);"
-                    	motion={{ type: 'tween', duration: 400, easing: backOut, delay: i * 20 }}
+                    	motion={{ type: 'tween', duration: 400, easing: backOut, delay: i * 60 }}
                     	initialY={context.yScale(0)}
                     />
                     <Bar
@@ -339,7 +575,7 @@
                     	rounded="bottom"
                         radius={8}
                     	style="fill: var(--ohno);"
-                    	motion={{ type: 'tween', duration: 400, easing: backOut, delay: i * 20 }}
+                    	motion={{ type: 'tween', duration: 400, easing: backOut, delay: i * 60 }}
                     	initialY={context.yScale(0)}
                     />
 				{/each}
@@ -489,11 +725,17 @@
                             </div>
                         </div>
                         <div class="flex" style="justify-content: center;">
-                            <a href="{
-                                data.local ?
-                                    `/studyset/local/stats/term?id=${term.id}&studysetId=${data?.localId}` :
-                                    `/studysets/${data.studysetId}/stats/terms/${term.id}`
-                            }" style="display: flex; flex-wrap: nowrap; align-items: center; gap: 0.4rem;">
+                            <a href={
+                                /*
+                                 *  NOTE: href="abc{def}" is NOT always the same as href={`abc${def}`}
+                                 *  ampersands (`&`) MUST be escaped as `&amp;` in href="" (double quotes) (HTML syntax)
+                                 *  do NOT escape ampersands in href={} (curly brackets) (JS syntax)
+                                 */
+                                `/term-stats?${term.id?.includes?.("-") ? "term" : "localTerm"}=${term.id}&${[
+                                    ...data.cloudIds.map((id) => `studyset=${id}`),
+                                    ...data.localIds.map((id) => `localStudyset=${id}`),
+                                ].join("&")}`
+                            } style="display: flex; flex-wrap: nowrap; align-items: center; gap: 0.4rem;">
                                 <StatsIcon></StatsIcon>
                                 <span style="margin-top: 0px;">View Details</span>
                             </a>

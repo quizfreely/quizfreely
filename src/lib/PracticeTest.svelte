@@ -11,12 +11,14 @@
     import TFQ from "$lib/components/questions/TFQ.svelte";
     import { slide, fade } from "svelte/transition";
     import { goto } from "$app/navigation";
-    import { setCancelBeforeNavigate } from "$lib/cancel-before-navigate.js";
+    import { page } from "$app/state";
+    import { setCancelBeforeNavigate, cleanUpCancelBeforeNavigate } from "$lib/cancel-before-navigate.js";
     import { fancyTimestamp } from "$lib/fancyTimestamp";
     import { Confetti } from "svelte-confetti";
 	import { backOut, cubicInOut } from 'svelte/easing';
 	import { Arc, Chart, Group, Layer, LinearGradient, Text } from 'layerchart';
     let { data } = $props();
+    const r = $derived(Number(page.url.searchParams.get("r") ?? 0));
     let terms = $state();
     let practiceTests = $state([]);
 
@@ -39,10 +41,36 @@
         };
     }
 
-    if (!data.local && !data.alreadyOver) {
-        // console.log(data.studyset)
-        terms = data?.studyset?.terms;
-        practiceTests = data?.studyset?.practiceTests;
+    if (!data.alreadyOver && data.cloudIds?.length > 0) {
+        if (data.studysets != null) {
+            const newTerms = [];
+            const newPTs = [];
+            const ptSet = new Set();
+            for (const studyset of data.studysets) {
+                if (studyset == null) continue;
+                if (studyset.terms) {
+                    for (const term of studyset.terms) {
+                        if (term == null) continue;
+                        newTerms.push(term);
+                    }
+                }
+                if (studyset.practiceTests == null) continue;
+                for (const pt of studyset.practiceTests) {
+                    if (pt?.id == null || ptSet.has(pt.id)) continue;
+                    /* the same practice test might appear in multiple studysets,
+                    so use a set to remove duplicates */
+                    ptSet.add(pt.id); 
+                    newPTs.push(pt);
+                }
+            }
+            /* use a local array, and push all of them at once at the end
+            to avoid pushing multiple times to reactive variables in the loop */
+            terms = newTerms;
+            practiceTests.push(...newPTs);
+            practiceTests.sort(
+                (a, b) => b.timestamp.localeCompare(a.timestamp),
+            );
+        }
     }
     let alreadyOverLocalPTStudysetIds = $state([]);
     let fancyTimestampReady = $state(false);
@@ -77,53 +105,82 @@
                 }
             }
 
-            if (data.local && !data.alreadyOver) {
-                /* studyset is local, so regardless of wheater the user is logged in or not,
-                we load the studyset and progress locally */
-                const studyset = await idbApiLayer.getStudysetById(data.localId, {
+            if (data.localIds?.length > 0 && !data.alreadyOver) {
+                /* (at least some) studysets are local, so regardless of wheater the user is logged in or not,
+                we load studyset(s) and progress locally */
+                const localStudysets = await idbApiLayer.getStudysetsByIds(data.localIds, {
                     terms: {
                         progress: true,
                         termImageUrl: true,
                         defImageUrl: true
                     },
-                    practiceTests: true,
+                    termsCount: true,
                 });
-                terms = studyset.terms;
-                terms.forEach(term => {
-                    if (term.termImageUrl != null) {
-                        objectKeys.push(term.termImageUrl);
+                if (localStudysets != null) {
+                    const newTerms = [];
+                    for (const s of localStudysets) {
+                        if (s == null) continue;
+                        if (s.terms != null) {
+                            for (const t of s.terms) {
+                                if (t == null) continue;
+                                newTerms.push(t);
+                                if (t.termImageUrl != null) {
+                                    objectKeys.push(t.termImageUrl);
+                                }
+                                if (t.defImageUrl != null) {
+                                    objectKeys.push(t.defImageUrl);
+                                }
+                            }
+                        }
                     }
-                    if (term.defImageUrl != null) {
-                        objectKeys.push(term.defImageUrl);
+                    terms = [
+                        ...(terms ?? []),
+                        ...newTerms,
+                    ];
+                    const newPTs = [];
+                    const ptSet = new Set();
+                    const localPTs = await db.practiceTests.where("studysetIds").anyOf(data.localIds).toArray();
+                    if (localPTs != null) {
+                        for (const pt of localPTs) {
+                            if (pt?.id == null || ptSet.has(pt.id)) {
+                                continue;
+                            }
+                            ptSet.add(pt.id); 
+                            newPTs.push(pt);
+                        }
                     }
-                });
-                practiceTests = studyset?.practiceTests;
+                    practiceTests.push(...newPTs);
+                    practiceTests.sort(
+                        (a, b) => b.timestamp.localeCompare(a.timestamp),
+                    );
+                }
             }
 
-            if (!data.authed && !data.local && !data.alreadyOver) {
+            if (!data.authed && data.cloudIds?.length > 0 && !data.alreadyOver) {
                 /* not logged in, so user data is local,
-                but studyset is a cloud studyset,
+                but studyset(s) include at least one cloud studyset,
                 so we need to map local progress to cloud terms
 
                 `terms` has already been populated during SSR (above, before onMount) */
-                practiceTests = await db.practiceTests
+                practiceTests.push(...(await db.practiceTests
                     .where("studysetIds")
-                    .equals(data.studysetId)
-                    .toArray();
-                practiceTests?.sort(
+                    .anyOf(data.cloudIds)
+                    .toArray() ?? []));
+                practiceTests.sort(
                     /* timestamps are ISO strings in UTC,
                     so lexical/alphanumeric sorting is the same as chronological sorting
                     also you see we're comparing `b` to `a`, so its descending,
                     so most recent is first */
                     (a, b) => b.timestamp.localeCompare(a.timestamp),
                 );
-                practiceTests = practiceTests;
 
                 for (const term of terms) {
-                    term.progress = await db.termProgress
-                        .where("termId")
-                        .equals(term.id)
-                        .toArray()?.[0];
+                    if (term.progress == null) {
+                        term.progress = await db.termProgress
+                            .where("termId")
+                            .equals(term.id)
+                            .toArray()?.[0];
+                    }
                 }
             }
         })();
@@ -131,7 +188,7 @@
             objectKeys.forEach(objectKey => {
                 URL.revokeObjectURL(objectKey);
             });
-            setCancelBeforeNavigate(undefined);
+            cleanUpCancelBeforeNavigate(cancelBeforeNav);
         }
     });
 
@@ -144,7 +201,7 @@
 
     let questionsCountEntered = $state();
 
-    let defaultQuestionsCount = $derived(
+    const defaultQuestionsCount = $derived(
         terms?.length < 30 ? terms.length : 20
     );
 
@@ -543,8 +600,8 @@ FRQs: ${numFRQsToAssign}`,
     var takingActualPracticeTest = $state(false);
     var bypassExitConfirmation = false;
     let navigatingToURL = $state("");
-    setCancelBeforeNavigate((navigation) => {
-        /* NOTE: ALWAYS CLEAN UP WITH setCancelBeforeNavigate(undefined) IN ONMOUNT'S CLEANUP FUNC */
+    function cancelBeforeNav(navigation) {
+        /* NOTE: ALWAYS CLEAN UP WITH cleanUpCancelBeforeNavigate(cancelBeforeNav) IN ONMOUNT'S CLEANUP FUNC */
         if (
             takingActualPracticeTest &&
             questionsAnswered > 0 &&
@@ -567,7 +624,8 @@ FRQs: ${numFRQsToAssign}`,
         } else {
             return false;
         }
-    });
+    }
+    setCancelBeforeNavigate(cancelBeforeNav);
 
     let questionsViewOnly = $state(data?.alreadyOver);
     let questionsShowAccuracy = $state(data?.alreadyOver);
@@ -636,31 +694,47 @@ FRQs: ${numFRQsToAssign}`,
     </Chart>
     </div>
 {/snippet}
-<div class="grid page">
+<div class="grid page" style="overflow-x: clip;">
     <div class="content">
         <div class="flex">
+            {const studysetPageLink = ({ cloudIds, localIds }) => (
+                cloudIds.length + localIds.length > 1 ?
+                    `/combine?${[
+                        ...cloudIds.map((id) => `studyset=${id}`),
+                        ...localIds.map((id) => `localStudyset=${id}`),
+                    ].join("&")}` :
+                    cloudIds.length == 1 ?
+                        `/studysets/${cloudIds[0]}` :
+                        localIds.length == 1 ?
+                            `/studyset/local?id=${localIds[0]}` : ""
+            )}
+            {const ptPageLink = ({ cloudIds, localIds }) => (
+                `/practice-test?r=${r+1}&${[
+                    ...cloudIds.map((id) => `studyset=${id}`),
+                    ...localIds.map((id) => `localStudyset=${id}`),
+                ].join("&")}`
+            )}
+            {const figureOutLink = (o) => (showTest ? ptPageLink(o) : studysetPageLink(o))}
             <a
                 class="button faint"
-                href={data.alreadyOver
-                    ? data.local /* when alreadyOver is true, data.local means practice test is local,
-                but the studyset might be a cloud studyset */
-                        ? alreadyOverLocalPTStudysetIds?.length > 0 && ("" + alreadyOverLocalPTStudysetIds[0]).includes("-")
-                            ? /* uuids have dashes/hyphens */
-                              `/studysets/${alreadyOverLocalPTStudysetIds[0]}`
-                            : `/studyset/local?id=${alreadyOverLocalPTStudysetIds[0]}`
-                        : `/studysets/${data.studysetId ?? data.studysetIds?.[0]}`
-                    : /* if the practice test is a cloud pt, then the studyset is always a cloud studyset,
-                    but a local practice test can be for a local OR cloud studyset */
-                      data.local
-                      ? `/studyset/local?id=${data.localId}`
-                      : `/studysets/${data.studysetId ?? data.studysetIds?.[0]}`}
-                ><BackIcon></BackIcon> Back</a
+                href={data.alreadyOver ?
+                    (data.local ?
+                        /* when alreadyOver is true, data.local means practice test is local,
+                        but the studyset(s) might be (a) cloud studyset(s) */
+                        figureOutLink({
+                            cloudIds: alreadyOverLocalPTStudysetIds?.filter?.(id => (""+id).includes("-")) ?? [],
+                            localIds: alreadyOverLocalPTStudysetIds?.filter?.(id => !(""+id).includes("-")) ?? [],
+                        }) :
+                        /* if data.alreadyOver is true, but data.local is false, the studysets must ALL be cloud
+                        (cloud studysets might have local PTs, but cloud PTs ALWAYS are for cloud studysets) */
+                        figureOutLink({ cloudIds: data.studysetIds, localIds: [] })
+                    ) : figureOutLink({ cloudIds: data.cloudIds, localIds: data.localIds })
+                }><BackIcon></BackIcon> Back</a
             >
         </div>
         {#if takingActualPracticeTest}
             <div
-                style="position: sticky; top: 0px; z-index: 99; padding: 1rem; margin-top: 0px;"
-                class="trans-dots"
+                class="qzfr-pt-header trans-dots-before"
                 transition:slide={{ duration: 400 }}
             >
                 <p class="center">
@@ -677,8 +751,7 @@ FRQs: ${numFRQsToAssign}`,
         {/if}
         {#if showScore}
             <div
-                style="position: sticky; top: 0px; z-index: 99; padding: 1rem; margin-top: 0px;"
-                class="trans-dots"
+                class="qzfr-pt-header trans-dots-before"
                 transition:slide={{ duration: 400 }}
             >
                 <div class="flex" style="justify-content: space-between;">
@@ -703,14 +776,15 @@ FRQs: ${numFRQsToAssign}`,
             <div transition:slide={{ duration: 400 }}>
                 <div class="flex" style="align-items: center; margin-bottom: 1rem;">
                     <PracticeTestIcon width="2.2rem" height="2.2rem"></PracticeTestIcon>
-                    <h1 id="practice-test" class="h3" style="margin-bottom: 0px;">Practice Test</h1>
+                    <h1 class="h3" style="margin-bottom: 0px;">Practice Test</h1>
                 </div>
                 <p>
                     There {terms?.length == 1 ? "is" : "are"}
                     {terms?.length ?? "?"}
-                    {terms?.length == 1 ? "term" : "terms"} in this studyset
+                    {const studysetsCount = $derived(data.cloudIds?.length + data.localIds?.length)}
+                    {terms?.length == 1 ? "term" : "terms"} in {studysetsCount > 1 ? `these ${studysetsCount} studysets` : "this studyset"}
                 </p>
-                <div class="flex" style="gap: 4rem; margin-top: 1rem;">
+                <div class="flex" style="column-gap: 4rem; row-gap: 2rem; margin-top: 1rem;">
                     <div>
                         <p style="margin-top: 0px;">Questions:</p>
                         <div style="margin-top: 0.4rem;">
@@ -1098,7 +1172,7 @@ FRQs: ${numFRQsToAssign}`,
                                 }
                             });
                             // console.log(questionDataArray);
-                            if (data.authed && !data.local) {
+                            if (data.authed && data.localIds?.length == 0) {
                                 try {
                                     let raw = await fetch("/api/graphql", {
                                         method: "POST",
@@ -1155,7 +1229,7 @@ FRQs: ${numFRQsToAssign}`,
                                             questions: questionDataArray,
                                         }),
                                     ),
-                                    async (_) => { return data.studysetId == null ? [] : [data.studysetId] },
+                                    async (_) => (data.cloudIds ?? []),
                                 );
                                 submitted = true;
                                 pt?.questions?.forEach?.((q, index) => {
@@ -1255,5 +1329,22 @@ FRQs: ${numFRQsToAssign}`,
         .fourpartthing-four {
             justify-self: start;
         }
+    }
+    .qzfr-pt-header {
+        position: sticky;
+        top: 0px;
+        z-index: 99;
+        padding: 1rem;
+        margin-top: 0px;
+    }
+    .qzfr-pt-header::before {
+        content: "";
+        position: absolute;
+        top: 0%;
+        bottom: 0%;
+        left: 50%;
+        width: 120vw;
+        transform: translateX(-50%);
+        z-index: -1;
     }
 </style>

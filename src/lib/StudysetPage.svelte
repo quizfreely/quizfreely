@@ -4,8 +4,10 @@
     import { idbApiLayer } from "$lib/idb-api-layer";
     import { goto } from "$app/navigation";
     import { fade, slide } from "svelte/transition";
+    import { studysetSelection } from "$lib/studyset-selection.svelte.js";
     let { data } = $props();
 
+    import TermsTable from "$lib/components/TermsTable.svelte";
     import Flashcards from "$lib/components/Flashcards.svelte";
     import Dropdown from "$lib/components/Dropdown.svelte";
     import FolderPicker from "$lib/components/FolderPicker.svelte";
@@ -26,6 +28,8 @@
     import AngleRIcon from "$lib/icons/AngleRight.svelte";
     import FullscreenIcon from "$lib/icons/FullscreenMaximize.svelte";
     import GridIcon from "$lib/icons/AppsGrid.svelte";
+    import PlusIcon from "$lib/icons/Plus.svelte";
+    import XMarkIcon from "$lib/icons/CloseXMark.svelte";
 
     import { footerState } from "$lib/components/footer.svelte.js";
 
@@ -140,11 +144,39 @@
         {folderId != null ? "Change Folder" : "Add to Folder"}
     </button>
 {/snippet}
+{#snippet multiselect()}
+    {#if studysetSelection.show}
+        {#if studysetSelection.cloudIds.has(data.studyset?.id ?? data.localId) || studysetSelection.localIds.has(data.studyset?.id ?? data.localId)}
+            <button class="alt text fg1 with-badge" style="--badge-color: var(--warn);" onclick={() => {
+                studysetSelection.deselect({
+                    cloudId: data.studyset?.id,
+                    localId: data.localId,
+                });
+            }}>
+                <XMarkIcon /> Deselect
+            </button>
+        {:else}
+            <button class="alt with-badge" style="--badge-color: var(--warn);" onclick={() => {
+                studysetSelection.select({
+                    cloudId: data.studyset?.id,
+                    localId: data.localId,
+                });
+            }}>
+                <PlusIcon /> Select
+            </button>
+        {/if}
+    {:else}
+        <a class="button alt" href={data.local ?
+            `/combine?localStudyset=${data.localId}` :
+            `/combine?studyset=${data.studyset?.id}`
+        }><PlusIcon /> Select Multiple</a>
+    {/if}
+{/snippet}
 <main>
     <div class="grid page">
         <div class="content">
                 <div>
-                    {#if folderName}
+                    {#if folderName != null}
                         <div
                             class="flex compact-gap"
                             style="align-items: center;"
@@ -196,6 +228,7 @@
                                 Edit
                             </a>
                             {@render addToFolder()}
+                            {@render multiselect()}
                             <Dropdown
                                 button={{
                                     class: "dropdown-toggle",
@@ -226,6 +259,7 @@
                                 <IconPencil />
                                 Edit
                             </a>
+                            {@render multiselect()}
                             <Dropdown
                                 button={{
                                     class: "dropdown-toggle",
@@ -248,7 +282,7 @@
                             </Dropdown>
                         </div>
                     {:else if data.authed}
-                        <div id="edit-menu" class="flex">
+                        <div id="edit-menu" class="flex" style="align-items: center;">
                             {#if saved}
                                 <button
                                     class="alt"
@@ -339,11 +373,16 @@
                                 </button>
                             {/if}
                             {@render addToFolder()}
+                            {@render multiselect()}
+                        </div>
+                    {:else}
+                        <div class="flex" style="align-items: center;">
+                            {@render multiselect()}
                         </div>
                     {/if}
                 </div>
             {#snippet flashcardsCaptionEnd()}
-                <a href="{data.local ? `/studyset/local/flashcards?id=${data.localId}` : `/studysets/${data.studyset.id}/flashcards`}" class="button faint" aria-label="Fullscreen Flashcards">
+                <a href="{data.local ? `/flashcards?localStudyset=${data.localId}` : `/flashcards?studyset=${data.studyset.id}`}" class="button faint" aria-label="Fullscreen Flashcards">
                     <FullscreenIcon></FullscreenIcon>
                 </a>
             {/snippet}
@@ -354,8 +393,8 @@
                         <!--     id="flashcards-maximize" -->
                         <!--     class="button alt" -->
                         <!--     href="{data.local ? -->
-                        <!--         `/studyset/local/flashcards?id=${data.localId}` : -->
-                        <!--         `/studysets/${data.studyset.id}/flashcards` -->
+                        <!--         `/flashcards?localStudyset=${data.localId}` : -->
+                        <!--         `/flashcards?studyset=${data.studyset.id}` -->
                         <!--     }" -->
                         <!-- > -->
                         <!--     <IconFlashcards /> -->
@@ -387,33 +426,7 @@
                             Progress &amp; Stats
                         </a>
                     </div>
-
-                    <table class="outer caption box qzfr-terms-list">
-                        <tbody>
-                            <tr>
-                                <th>Term</th>
-                                <th>Definition</th>
-                            </tr>
-                            {#if terms != null}
-                                {#each terms as term}
-                                    <tr>
-                                        <td style="vertical-align: top; padding: 0px;">
-                                            <div style="white-space: pre-wrap; overflow-wrap: break-word; padding-left: 1rem; padding-right: 1rem; padding-top: 1rem; padding-bottom: 0px;">{term.term}</div>
-                                            {#if term?.termImageUrl != null}
-                                                <div><img src={term.termImageUrl} alt="term image" class="term-image"></div>
-                                            {/if}
-                                        </td>
-                                        <td style="vertical-align: top; padding: 0px;">
-                                            <div style="white-space: pre-wrap; overflow-wrap: break-word; padding-left: 1rem; padding-right: 1rem; padding-top: 1rem; padding-bottom: 0px;">{term.def}</div>
-                                            {#if term?.defImageUrl != null}
-                                                <div style="padding-left: 0.6rem;"><img src={term.defImageUrl} alt="definition image" class="term-image"></div>
-                                            {/if}
-                                        </td>
-                                    </tr>
-                                {/each}
-                            {/if}
-                        </tbody>
-                    </table>
+                    <TermsTable {terms} class="caption" />
                 </div>
                 {#if showDeleteConfirmationModal}
                     <div class="modal" transition:fade={{ duration: 200 }}>
@@ -759,16 +772,3 @@
         </div>
     </div>
 </main>
-
-<style>
-    .term-image {
-        max-width: 18.6rem;
-        max-height: 300px;
-        margin: 0px;
-        padding: 0px;
-        border-radius: 0.8rem;
-    }
-    .qzfr-terms-list {
-        max-width: 90vw;
-    }
-</style>

@@ -33,6 +33,12 @@
         showRecentDropdown = false,
         recentDropdownContent,
         topMenu,
+        showFolderEndButton = false,
+        folderEndButton,
+        showFolderEmptyButton = false,
+        folderEmptyButton,
+        allStudysetsAsButton = false,
+        allStudysetsButtonOnClick,
     } = $props();
 
     let localStudysetList = $state([]);
@@ -207,6 +213,13 @@
                 {folder.name}
             </a>
         {/each}
+        {#if showFolderEndButton}
+            {@render folderEndButton?.()}
+        {/if}
+    </div>
+{:else if showFolderEmptyButton}
+    <div class="grid list" style="margin-bottom: 1rem;">
+        {@render folderEmptyButton?.()}
     </div>
 {/if}
 {#if data.authed && !(hideTypeWhenCloudEmptyAndLocalExists && !(data.studysetList?.length > 0) && localStudysetList?.length > 0)}
@@ -224,6 +237,8 @@
                                 linkTemplateFunc={cloudLinkTemplateFunc}
                                 showDropdown={showCloudDropdown}
                                 dropdownContent={cloudDropdownContent}
+                                button={allStudysetsAsButton}
+                                buttonOnClick={allStudysetsButtonOnClick}
                             ></StudysetLinkBox>
                         {/each}
                     {:else}
@@ -300,6 +315,8 @@
                         linkTemplateFunc={localLinkTemplateFunc}
                         showDropdown={showLocalDropdown}
                         dropdownContent={localDropdownContent}
+                        button={allStudysetsAsButton}
+                        buttonOnClick={allStudysetsButtonOnClick}
                     ></StudysetLinkBox>
                 {/each}
                 {#if !data.authed && localStudysetList.length == 0}
@@ -374,6 +391,8 @@
                             linkTemplateFunc={recentLinkFunc}
                             showDropdown={showRecentDropdown}
                             dropdownContent={recentDropdownContent}
+                            button={allStudysetsAsButton}
+                            buttonOnClick={allStudysetsButtonOnClick}
                         ></StudysetLinkBox>
                     {/each}
                 </div>
@@ -415,6 +434,8 @@
                             linkTemplateFunc={cloudLinkTemplateFunc}
                             showDropdown={showSavedDropdown}
                             dropdownContent={savedDropdownContent}
+                            button={allStudysetsAsButton}
+                            buttonOnClick={allStudysetsButtonOnClick}
                         ></StudysetLinkBox>
                     {/each}
                 </div>

@@ -14,13 +14,13 @@
     let term = $state();
     let objectUrls = [];
 
-    if (!data.local) {
-        term = data?.term;
+    if (data.term != null) {
+        term = data.term;
     }
 
     let reChartData = $state([]);
 
-    if (data?.term?.reviewEventStatsByDay?.length != null && data.term.reviewEventStatsByDay.length >= 0) {
+    if (data?.term?.reviewEventStatsByDay != null && data.term.reviewEventStatsByDay.length >= 0) {
         calcChart(data.term.reviewEventStatsByDay);
     }
     let fancyTimestampReady = $state(false);
@@ -39,7 +39,7 @@
             fancyTimestampReady = true;
         })();
         (async () => {
-            if (data.local) {
+            if (data.localTermId) {
                 term = await idbApiLayer.getTermById(data.localTermId, {
                     progress: true,
                     progressHistory: true,
@@ -54,7 +54,7 @@
                 }
             }
 
-            if (!data.authed && !data.local) {
+            if (!data.authed && data.cloudTermId != null) {
                 /* not logged in, so user data is local,
                 but studyset is a cloud studyset,
                 so we need to map local progress to cloud terms
@@ -63,11 +63,11 @@
                 term.progress = (await db.termProgress.where("termId").equals(term.id).toArray())?.[0];
             }
 
-            if (data.local || !data.authed) {
+            if (data.localTermId != null || !data.authed) {
                 term.reviewEventStatsByDay = await idbApiLayer.getReviewEventStatsByDay({
-                    last: 30,
+                    lastDaysTotal: 30,
                     termIds: [term.id]
-                });
+                })?.filter?.(d => d != null);
                 calcChart(term.reviewEventStatsByDay);
             }
         })();
@@ -154,9 +154,12 @@
 <div class="grid page">
     <div class="content">
         <div class="flex">
-            <a class="button faint" href={data.local ?
-                `/studyset/local/stats?id=${data.localStudysetId}` :
-                `/studysets/${data.studysetId}/stats`
+            <a class="button faint" href={
+                /* NOTE: href={``} lets us avoid escaping ampersands (`&`), href="" does not */
+                `/stats?${[
+                    ...data.cloudStudysetIds.map((id) => `studyset=${id}`),
+                    ...data.localStudysetIds.map((id) => `localStudyset=${id}`),
+                ].join("&")}`
             }>
                 <BackIcon></BackIcon>
                 Back
@@ -186,7 +189,7 @@
                     	rounded="top"
                         radius={8}
                     	style="fill: var(--yay);"
-                    	motion={{ type: 'tween', duration: 400, easing: backOut, delay: i * 20 }}
+                    	motion={{ type: 'tween', duration: 400, easing: backOut, delay: i * 60 }}
                     	initialY={context.yScale(0)}
                     />
                     <Bar
@@ -196,7 +199,7 @@
                     	rounded="bottom"
                         radius={8}
                     	style="fill: var(--ohno);"
-                    	motion={{ type: 'tween', duration: 400, easing: backOut, delay: i * 20 }}
+                    	motion={{ type: 'tween', duration: 400, easing: backOut, delay: i * 60 }}
                     	initialY={context.yScale(0)}
                     />
 				{/each}

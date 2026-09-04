@@ -3,7 +3,10 @@ type StudysetResolveProps = {
     terms?: boolean | TermResolveProps;
     practiceTests?: boolean;
     matchActivities?: boolean;
-    reviewEventStatsByDay?: boolean | number;
+    reviewEventStatsByDay?: {
+        lastDaysBack?: number;
+        lastDaysTotal?: number;
+    };
 };
 type TermResolveProps = {
     progress?: boolean;
@@ -40,10 +43,11 @@ export declare const idbApiLayer: {
         terms?: boolean | TermResolveProps;
         termsCount?: boolean;
     }) => Promise<(Studyset | undefined)[]>;
-    getReviewEventStatsByDay: ({ studysetId, termIds, last }?: {
+    getReviewEventStatsByDay: ({ studysetId, termIds, lastDaysBack, lastDaysTotal }?: {
         studysetId?: number | string;
         termIds?: (number | string)[];
-        last?: number;
+        lastDaysBack?: number | null;
+        lastDaysTotal?: number | null;
     }) => Promise<ReviewEventStats[]>;
     createStudyset: ({ title, draft }: {
         title: string;
@@ -64,6 +68,7 @@ export declare const idbApiLayer: {
     updatePracticeTestQuestion: (id: number, correct: boolean, userMarkedCorrect?: boolean) => Promise<Question | undefined>;
     getPracticeTestsByTermId: (termId: number | string) => Promise<import("./db").PracticeTest[]>;
     getMatchActivityById: (id: number, resolveProps?: MatchActivityResolveProps) => Promise<MatchActivity | null>;
+    getMatchActivitiesByStudysetIds: (studysetIds: (number | string)[], resolveProps?: MatchActivityResolveProps) => Promise<MatchActivity[]>;
     getMatchActivitiesByStudysetId: (studysetId: number | string, resolveProps?: MatchActivityResolveProps) => Promise<MatchActivity[]>;
     activityHistory: ({ last, getCloudStudysets }: {
         last: number;

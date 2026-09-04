@@ -50,6 +50,11 @@
   .a-little-different-grid-list > button {
     margin-top: 0px;
   }
+  .theme-button img { /* `.theme-button > picture > img` behind the scenes */
+    margin-top: 0px;
+    width: 100%;
+    height: auto;
+  }
 </style>
 
 <svelte:head>
@@ -58,16 +63,16 @@
 
 <p>Theme</p>
 <div class="a-little-different-grid-list">
-  <button onclick={() => setTheme("auto")} class="button-box no-clickable-effect {theme == 'auto' ? 'selected' : ''}">
-    <img src="/immutable/img/theme-preview-auto.png" style="width:100%;border-radius:0.8rem" alt="Auto Dark/Light Theme Preview">
+  <button onclick={() => setTheme("auto")} class="button-box no-clickable-effect theme-button {theme == 'auto' ? 'selected' : ''}">
+    <enhanced:img src="./img/theme-preview-auto.png" style="border-radius:0.8rem" alt="Auto Dark/Light Theme Preview" />
     <p>Auto</p>
   </button>
-  <button onclick={() => setTheme("dark")} class="button-box no-clickable-effect {theme == 'dark' ? 'selected' : ''}">
-    <img src="/immutable/img/theme-preview-dark.png" style="width:100%;border-radius:0.8rem" alt="Dark Theme Preview">
+  <button onclick={() => setTheme("dark")} class="button-box no-clickable-effect theme-button {theme == 'dark' ? 'selected' : ''}">
+    <enhanced:img src="./img/theme-preview-dark.png" style="border-radius:0.8rem" alt="Dark Theme Preview" />
     <p>Dark</p>
   </button>
-  <button onclick={() => setTheme("light")} class="button-box no-clickable-effect {theme == 'light' ? 'selected' : ''}">
-    <img src="/immutable/img/theme-preview-light.png" style="width:100%;border-radius:0.8rem" alt="Light Theme Preview">
+  <button onclick={() => setTheme("light")} class="button-box no-clickable-effect theme-button {theme == 'light' ? 'selected' : ''}">
+    <enhanced:img src="./img/theme-preview-light.png" style="border-radius:0.8rem" alt="Light Theme Preview" />
     <p>Light</p>
   </button>
 </div>

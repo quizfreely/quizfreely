@@ -2,7 +2,7 @@
 import Header from "$lib/components/Header.svelte";
 import Footer from "$lib/components/Footer.svelte";
 import "../app.css";
-import { fade } from "svelte/transition";
+import { fade, slide } from "svelte/transition";
 import { sineIn, sineOut } from "svelte/easing";
 import NProgress from "nprogress";
 import "$lib/nprogress/modified-nprogress.css";
@@ -12,6 +12,7 @@ import { page } from '$app/state';
 import { getCancelBeforeNavigate } from "$lib/cancel-before-navigate.js";
 import { env } from "$env/dynamic/public";
 import { onMount } from "svelte";
+import { studysetSelection } from "$lib/studyset-selection.svelte.js";
 let { children, data } = $props();
 
 NProgress.configure({
@@ -78,11 +79,40 @@ onMount(() => {
     } catch (error) {
         console.error("Failed to detect or save timezone:", error);
     }
+
+    studysetSelection.readSessionStorage();
 })
+
+const selectionLinkParams = $derived(
+    [
+        Array.from(studysetSelection.cloudIds, id => `studyset=${id}`).join("&"),
+        Array.from(studysetSelection.localIds, id => `localStudyset=${id}`).join("&")
+    ].filter(Boolean).join("&"),
+    /* use Boolean to filter out empty strings,
+    preventing duplicate ampersands if any set is empty */
+);
 </script>
 
 {#if !page?.data?.header?.hideHeader}
 <Header />
+{/if}
+{const totalSelectedCount = $derived(studysetSelection.cloudIds.size + studysetSelection.localIds.size)}
+{#if studysetSelection.show && !page?.data?.studysetSelection?.hideSubHeader && !page?.data?.header?.hideHeader}
+<div class="grid page" transition:slide={{duration:400}}>
+    <div class="content">
+        <div class="box flex {page?.data?.studysetSelection?.subHeaderClass ?? ''}" style="padding: 0.4rem 0.8rem; justify-content: space-between; align-items: center; column-gap: 1rem; row-gap: 0.2rem; {page?.data?.studysetSelection?.subHeaderStyle ?? ''}">
+            <div style="padding: 0.6rem 0.8rem;">{totalSelectedCount} {totalSelectedCount == 1 ? "studyset" : "studysets"} selected</div>
+            <div class="flex compact-gap">
+                <a class="button faint" href="/combine?{selectionLinkParams}">Continue</a>
+                <button class="ohno faint" onclick={() => {
+                    studysetSelection.clearSelection();
+                    studysetSelection.setOverrideShow(false);
+                    studysetSelection.getCancelButtonCallback()?.();
+                }}>Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
 {/if}
 {#key data.transPageKey}
 <div in:fade={{ duration: 120, delay: 120, easing: sineIn }} out:fade={{ duration: 120, easing: sineOut }}>

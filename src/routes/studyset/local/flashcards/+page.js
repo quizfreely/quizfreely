@@ -1,11 +1,5 @@
-import fetchAuthData from '$lib/fetchAuthData.js'
+import { redirect } from "@sveltejs/kit";
 
-export async function load({ fetch, url }) {
-    let localId = parseInt(url.searchParams.get("id"));
-    let userResult = await fetchAuthData({ fetch });
-    return {
-      localId: localId,
-      authed: userResult.authed,
-      authedUser: userResult?.authedUser,
-    }
+export function load({ url }) {
+    redirect(308, `/flashcards?localStudyset=${url.searchParams.get("id")}`);
 }

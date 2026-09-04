@@ -3,6 +3,7 @@
     import { slide, fade } from "svelte/transition";
     import { goto } from "$app/navigation";
     import { idbApiLayer } from "$lib/idb-api-layer/index.js";
+    import { studysetSelection } from "$lib/studyset-selection.svelte.js";
     import Noscript from "$lib/components/Noscript.svelte";
     import StudysetList from "$lib/components/StudysetList.svelte";
     import FolderPicker from "$lib/components/FolderPicker.svelte";
@@ -12,6 +13,8 @@
     import CheckmarkIcon from "$lib/icons/Checkmark.svelte";
     import EnterIcon from "$lib/icons/Enter.svelte";
     import ExitIcon from "$lib/icons/Exit.svelte";
+    import OutlineIcon from "$lib/icons/OutlineSelect.svelte";
+    import XMarkIcon from "$lib/icons/CloseXMark.svelte";
 
     let { data } = $props();
     let showFolderPicker = $state(false);
@@ -91,6 +94,10 @@
     }
     async function newFolderOnclick() {
         try {
+            let folderName = "Untitled Folder";
+            if (newFolderName?.length > 0) {
+                folderName = newFolderName;
+            }
             const raw = await fetch("/api/graphql", {
                 method: "POST",
                 headers: {
@@ -103,7 +110,7 @@
     }
 }`,
                     variables: {
-                        name: newFolderName,
+                        name: folderName,
                         private: newFolderPrivate
                     },
                 }),
@@ -139,6 +146,12 @@
     function windowOnclick() {
         lastKeydown = null;
     }
+
+    let selectingMultiple = $state(false);
+    const selectionCancelButtonCallback = () => {
+        selectingMultiple = false;
+    }
+    studysetSelection.setCancelButtonCallback(selectionCancelButtonCallback);
     onMount(async () => {
         window.addEventListener("keyup", onKeyup);
         window.addEventListener("keydown", onKeydown);
@@ -181,6 +194,7 @@
             window.removeEventListener("keyup", onKeyup);
             window.removeEventListener("keydown", onKeydown);
             window.removeEventListener("click", windowOnclick);
+            studysetSelection.cleanUpCancelButtonCallback(selectionCancelButtonCallback);
         };
     });
 </script>
@@ -198,21 +212,26 @@
         </p>
     {/if}
     {#snippet topMenu()}
-        <div class="flex">
-            <button onclick={() => newStudysetButton()}>
-                <IconPlus />
-                New Studyset
-            </button>
-            <a href="/import" class="button alt">
-                <EnterIcon></EnterIcon>
-                Import
-            </a>
-            {#if data.authed}
-                <button class="alt" onclick={() => openNewFolderModal()}>
-                    <FolderIcon></FolderIcon>
-                    New Folder
+        <div class="flex" style="justify-content: space-between;">
+            <div class="flex">
+                <button onclick={() => newStudysetButton()}>
+                    <IconPlus />
+                    New Studyset
                 </button>
-            {/if}
+                <a href="/import" class="button alt">
+                    <EnterIcon></EnterIcon>
+                    Import
+                </a>
+            </div>
+            <button onclick={() => selectingMultiple = !selectingMultiple} class="alt {selectingMultiple ? "text fg1" : ""}">
+                {#if selectingMultiple}
+                    <XMarkIcon />
+                    Stop Selecting
+                {:else}
+                    <OutlineIcon></OutlineIcon>
+                    Select Multiple
+                {/if}
+            </button>
         </div>
     {/snippet}
     {#snippet emptyMsg()}
@@ -298,7 +317,40 @@
         showSavedDropdown={true}
         {savedDropdownContent}
         {topMenu}
-    ></StudysetList>
+        showFolderEndButton={data.authed}
+        showFolderEmptyButton={data.authed}
+        allStudysetsAsButton={selectingMultiple}
+        allStudysetsButtonOnClick={(_event, studyset) => {
+            studysetSelection.toggleSelect(
+                studyset.id?.includes?.("-") ? {
+                    cloudId: studyset.id,
+                } : {
+                    localId: studyset.id,
+                },
+            );
+        }}
+    >
+        {#snippet folderEndButton()}
+            <button
+                class="faint"
+                style="display: flex; border-radius: 0.8rem;"
+                onclick={() => openNewFolderModal()}
+            >
+                <IconPlus></IconPlus>
+                New Folder
+            </button>
+        {/snippet}
+        {#snippet folderEmptyButton()}
+            <button
+                class="button-box"
+                style="display: flex;"
+                onclick={() => openNewFolderModal()}
+            >
+                <IconPlus></IconPlus>
+                New Folder
+            </button>
+        {/snippet}
+    </StudysetList>
 </div>
 {#if showNewFolderModal}
     <div class="modal" transition:fade={{ duration: 200 }}>

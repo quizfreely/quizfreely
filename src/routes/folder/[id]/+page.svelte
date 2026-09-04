@@ -3,6 +3,7 @@
     import { slide, fade, scale } from "svelte/transition";
     import { sineIn, sineOut } from "svelte/easing";
     import { goto } from "$app/navigation";
+    import { studysetSelection } from "$lib/studyset-selection.svelte.js";
     import Dropdown from "$lib/components/Dropdown.svelte";
     import FolderPicker from "$lib/components/FolderPicker.svelte";
     import StudysetLinkBox from "$lib/components/StudysetLinkBox.svelte";
@@ -17,6 +18,9 @@
     import MoreIcon from "$lib/icons/MoreDotsVertical.svelte";
     import IconEyeSlash from "$lib/icons/EyeSlash.svelte";
     import IconEye from "$lib/icons/Eye.svelte";
+    import OutlineIcon from "$lib/icons/OutlineSelect.svelte";
+    import CheckmarkSquareIcon from "$lib/icons/CheckmarkSquare.svelte";
+    import XMarkIcon from "$lib/icons/CloseXMark.svelte";
 
     let { data } = $props();
 
@@ -92,8 +96,8 @@
         }
     }
 
-    let hasNextPage = $derived(pageInfo?.hasNextPage);
-    let hasPrevPage = $derived(pageInfo?.hasPreviousPage);
+    const hasNextPage = $derived(pageInfo?.hasNextPage);
+    const hasPrevPage = $derived(pageInfo?.hasPreviousPage);
 
     async function newStudysetButton() {
         if (data.authed) {
@@ -284,6 +288,11 @@
         lastKeydown = null;
     }
 
+    let selectingMultiple = $state(false);
+    const selectionCancelButtonCallback = () => {
+        selectingMultiple = false;
+    }
+    studysetSelection.setCancelButtonCallback(selectionCancelButtonCallback);
     onMount(() => {
         window.addEventListener("keyup", onKeyup);
         window.addEventListener("keydown", onKeydown);
@@ -292,6 +301,7 @@
             window.removeEventListener("keyup", onKeyup);
             window.removeEventListener("keydown", onKeydown);
             window.removeEventListener("click", windowOnclick);
+            studysetSelection.cleanUpCancelButtonCallback(selectionCancelButtonCallback);
         };
     });
 </script>
@@ -336,43 +346,94 @@
         </button>
     </div>
     {/if}
-    <div class="flex" style="align-items: center; margin-top: 1rem;">
-        <FolderIcon width="2rem" height="2rem"></FolderIcon>
-        <p class="h3" style="margin-bottom: 0px;">
-            {folder?.name}
-        </p>
+    {const amAuthor = $derived(data?.authedUser?.id != null && data?.authedUser?.id == data?.folder?.user?.id)}
+    <div class="flex" style="align-items: center; justify-content: space-between; margin-top: 1rem;">
+        <div>
+            <div class="flex" style="align-items: center;">
+                <FolderIcon width="2rem" height="2rem"></FolderIcon>
+                <p class="h3" style="margin-bottom: 0px;">
+                    {folder?.name}
+                </p>
+            </div>
+            {#if !amAuthor}
+            <p style="margin-top: 0.4rem;">Created by <a href="/users/{data?.folder?.user?.id}">{
+                data?.folder?.user?.displayName
+            }</a></p>
+            {/if}
+        </div>
+        {#if amAuthor}
+        <div class="flex" style="align-items: center;">
+            <button class="alt" onclick={showFolderRenaming}>
+                <PencilIcon />
+                Rename Folder
+            </button>
+            <Dropdown
+                button={{ class: "dropdown-toggle" }}
+                placement="bottom-end"
+            >
+                {#snippet buttonContent()}
+                    <MoreIcon></MoreIcon>
+                {/snippet}
+                {#snippet divContent()}
+                    <button
+                        class="ohno"
+                        onclick={showDeleteFolderConfirmation}
+                    >
+                        <TrashIcon></TrashIcon> Delete Folder
+                    </button>
+                {/snippet}
+            </Dropdown>
+        </div>
+        {/if}
     </div>
-    {#if data?.authedUser?.id != null && data?.authedUser?.id == data?.folder?.user?.id}
-    <div class="flex" style="align-items: center;">
-        <button onclick={newStudysetButton}>
-            <IconPlus />
-            New Studyset
+    {#snippet multiselect()}
+        <!-- Select All is commented out below for now because the studysets array is ONLY the current page. If there are more than 24 studysets in this folder, than pressing select all will only select the 24 shown right now, instead of actually selecting all. We need to design this differently to work with pagination correctly, so for now the button is just going to not be there to avoid confusion while the rest of the features can get finished, polished, and ready for production. See https://github.com/quizfreely/quizfreely/issues/158 -->
+        <!-- <button class="alt" onclick={() => { -->
+        <!--     selectingMultiple = true; -->
+        <!--     studysets?.forEach?.(s => { -->
+        <!--         if (s?.id != null) { -->
+        <!--             studysetSelection.select( -->
+        <!--                 s.id?.includes?.("-") ? { -->
+        <!--                     cloudId: s.id, -->
+        <!--                 } : { -->
+        <!--                     localId: s.id, -->
+        <!--                 }, -->
+        <!--             ); -->
+        <!--         } -->
+        <!--     }); -->
+        <!-- }}> -->
+        <!--     <CheckmarkSquareIcon /> -->
+        <!--     Select All -->
+        <!-- </button> -->
+        <button onclick={() => selectingMultiple = !selectingMultiple} class="alt {selectingMultiple ? "text fg1" : ""}">
+            {#if selectingMultiple}
+                <XMarkIcon />
+                Stop Selecting
+            {:else}
+                <OutlineIcon></OutlineIcon>
+                Select Multiple
+            {/if}
         </button>
-        <button class="alt" onclick={showFolderRenaming}>
-            <PencilIcon />
-            Rename Folder
-        </button>
-        <Dropdown
-            button={{ class: "dropdown-toggle" }}
-            placement="bottom-end"
-        >
-            {#snippet buttonContent()}
-                <MoreIcon></MoreIcon>
-            {/snippet}
-            {#snippet divContent()}
-                <button
-                    class="ohno"
-                    onclick={showDeleteFolderConfirmation}
-                >
-                    <TrashIcon></TrashIcon> Delete Folder
-                </button>
-            {/snippet}
-        </Dropdown>
+    {/snippet}
+    {#if amAuthor}
+    <div class="flex" style="align-items: center; justify-content: space-between; column-gap: 2rem; row-gap: 1rem; margin-top: 2rem;">
+        <div class="flex" style="align-items: center;">
+            <button onclick={newStudysetButton}>
+                <IconPlus />
+                New Studyset
+            </button>
+        </div>
+        <div class="flex" style="align-items: center;">
+            {@render multiselect()}
+        </div>
     </div>
     {:else}
-        <p>Created by <a href="/users/{data?.folder?.user?.id}">{
-            data?.folder?.user?.displayName
-        }</a></p>
+        <div class="flex" style="align-items: center; justify-content: space-between; column-gap: 2rem; row-gap: 1rem;">
+            <span class="fg0" style="font-size: 1.1rem;">{studysets?.length ?? 0} {studysets?.length == 1 ? "Studyset" : "Studysets"}</span>
+            <div class="flex" style="align-items: center;">
+                {@render multiselect()}
+            </div>
+        </div>
     {/if}
     {#if studysets?.length > 0}
         <div class="grid list" style="overflow-wrap: anywhere;">
@@ -382,6 +443,16 @@
                     linkTemplateFunc={(id) => `/studysets/${id}`}
                     showDropdown={data.authed}
                     dropdownContent={studysetDropdown}
+                    button={selectingMultiple}
+                    buttonOnClick={(_event, studyset) => {
+                        studysetSelection.toggleSelect(
+                            studyset.id?.includes?.("-") ? {
+                                cloudId: studyset.id,
+                            } : {
+                                localId: studyset.id,
+                            },
+                        );
+                    }}
                 ></StudysetLinkBox>
             {/each}
         </div>

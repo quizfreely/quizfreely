@@ -5,10 +5,10 @@ export async function load({ url, fetch }) {
     const after = url.searchParams.get("after");
     const before = url.searchParams.get("before");
 
-    const now = new Date();
-    const dayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
-    const weekStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay()).toISOString();
-    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+    const now = Date.now();
+    const h24 = 24*60*60*1000;
+    const h24Ago = new Date(now - h24).toISOString();
+    const d30Ago = new Date(now - 30*h24).toISOString();
 
     let rawApiRes = await fetch("/api/graphql", {
       method: "POST",
@@ -41,8 +41,8 @@ export async function load({ url, fetch }) {
         variables: {
           after,
           before,
-          day: dayStart,
-          month: monthStart
+          day: h24Ago,
+          month: d30Ago
         }
       })
     });

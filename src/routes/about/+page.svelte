@@ -12,7 +12,7 @@
 <svelte:head>
     <title>Quizfreely: Free Open Source Studying Tool</title>
     <meta name="description" content="Quizfreely is a free and open source learning app with flashcards, practice tests, and more tools to help you study." />
-    <meta name=”robots” content="index, follow" />
+    <meta name="robots" content="index, follow" />
     <link rel="canonical" href="https://quizfreely.org" />
 </svelte:head>
 
@@ -90,7 +90,7 @@
             <span class="optional-line-600px">We're fiscally sponsored by <a class="link-love with-underline" href="https://the.hackfoundation.org">The Hack Foundation</a>, a <span style="white-space: nowrap;">501(c)(3)</span> nonprofit.</span>
         </p>
         <div class="flex">
-          <a class="button large love" href="https://hcb.hackclub.com/donations/start/quizfreely">
+          <a class="button large alt love qzfr-love-alt" href="https://hcb.hackclub.com/donations/start/quizfreely">
             <HeartIcon></HeartIcon>
             Donate
           </a>

@@ -14,7 +14,7 @@ export async function load({ fetch }) {
         username
         displayName
     }
-    reviewEventStatsByDay(last: 366) {
+    reviewEventStatsByDay(lastDaysBack: 365) {
         timestamp
         correct
         incorrect
@@ -22,7 +22,7 @@ export async function load({ fetch }) {
     myRecentActivityStudysets(first: 100) {
         edges { node { id title private termsCount updatedAt } }
     }
-    activityHistory(last: 40) {
+    activityHistory(last: 60) {
         __typename
         ... on PracticeTest {
             id

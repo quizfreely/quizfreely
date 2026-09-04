@@ -1,7 +1,7 @@
 <script>
     import { onMount, tick, onDestroy } from "svelte";
     import { goto } from "$app/navigation";
-    import { setCancelBeforeNavigate } from "$lib/cancel-before-navigate.js";
+    import { setCancelBeforeNavigate, cleanUpCancelBeforeNavigate } from "$lib/cancel-before-navigate.js";
     import { idbApiLayer, db } from "$lib/idb-api-layer";
     import { fancyTimestamp } from "$lib/fancyTimestamp";
     import { slide, fade } from "svelte/transition";
@@ -14,22 +14,47 @@
     import GridIcon from "$lib/icons/AppsGrid.svelte";
     import RepeatIcon from "$lib/icons/Repeat.svelte";
 
-    let { local, cloudId, localId, data } = $props();
-    let terms = data.terms;
+    let { data } = $props();
+    let terms = [];
     let items = $state([]);
     let showStartErr = $state(false);
     let startErrMsg = $state("");
     const PAIRS_COUNT = 6;
     const RANDOM_LOOP_MAX_TRIES = 40;
     let termIds = [];
-    let history = $state(data?.pastMatchActivities ?? []);
+    let history = $state([]);
     let bestRecord = $state(null);
     let loadedTermsMap = new Map();
 
-    if (!local && (terms == null || terms.length == 0)) {
-        showStartErr = true;
-        startErrMsg = "There aren't enough terms in this studyset!";
-    } else if (!local) {
+    if (data?.studysets != null) {
+        const newHistory = [];
+        const historySet = new Set();
+        for (const studyset of data.studysets) {
+            if (studyset == null) continue;
+            if (studyset.terms) {
+                for (const term of studyset.terms) {
+                    if (term == null) continue;
+                    terms.push(term);
+                    // terms is NOT reactive, so pushing directly is ok
+                }
+            }
+            if (studyset.matchActivities == null) continue;
+            for (const m of studyset.matchActivities) {
+                if (m?.id == null || historySet.has(m.id)) continue;
+                /* the same match activity might appear in multiple studysets,
+                so use a set to remove duplicates */
+                historySet.add(m.id); 
+                newHistory.push(m);
+            }
+        }
+        /* NOTE: local array, only push once to reactive vars */
+        history.push(...newHistory);
+        history.sort(
+            (a, b) => b.endTimestamp.localeCompare(a.endTimestamp)
+        );
+    }
+
+    if (data.localIds.length == 0) {
         selectTerms();
     }
 
@@ -118,44 +143,57 @@
             }
             fancyTimestampReady = true;
         })();
-        if (local) {
+        if (data.localIds.length > 0) {
             (async () => {
-                const studyset = await idbApiLayer.getStudysetById(localId, {
+                const studysets = await idbApiLayer.getStudysetsByIds(data.localIds, {
                     terms: {
                         termImageUrl: true,
                         defImageUrl: true
                     }
                 });
-                if (studyset == null || studyset.terms == null) {
+                if (studysets == null || studysets.length == 0) {
                     showStartErr = true;
-                    startErrMsg = "Error loading studyset";
+                    startErrMsg = "Error loading local studyset";
                     return;
                 }
-                if (studyset.terms.length == 0) {
+                const localTerms = studysets.flatMap(s => s.terms).filter(t => t != null);
+                localTerms.forEach(term => {
+                    objectUrls.push(term.termImageUrl);
+                    objectUrls.push(term.defImageUrl);
+                })
+                terms.push(...localTerms);
+                if (terms.length == 0) {
                     showStartErr = true;
                     startErrMsg = "There are 0 terms in this studyset?";
                     return;
                 }
-                terms = studyset.terms;
-                terms.forEach(term => {
-                    objectUrls.push(term.termImageUrl);
-                    objectUrls.push(term.defImageUrl);
-                })
                 selectTerms();
             })();
         }
         (async () => {
             try {
-                history = [
-                    ...history,
-                    ...(await idbApiLayer.getMatchActivitiesByStudysetId(cloudId ?? Number(localId), {
+                const newLocalHistory = await idbApiLayer.getMatchActivitiesByStudysetIds(
+                    [...data.cloudIds, ...data.localIds],
+                    {
                         termIds: true,
                         incorrectPairIds: true
-                    }))
-                ];
-                history = history.sort(
-                    (a, b) => b.endTimestamp.localeCompare(a.endTimestamp)
+                    },
                 );
+                if (newLocalHistory != null) {
+                    const newHistory = [];
+                    const historySet = new Set();
+                    for (const h of newLocalHistory) {
+                        if (h?.id == null || historySet.has(h.id)) {
+                            continue;
+                        }
+                        historySet.add(h.id);
+                        newHistory.push(h);
+                    }
+                    history.push(...newHistory);
+                    history.sort(
+                        (a, b) => b.endTimestamp.localeCompare(a.endTimestamp)
+                    );
+                }
             } catch (err) {
                 console.error("error getting local match history:", err);
             }
@@ -180,7 +218,7 @@
             objectUrls.forEach(objectUrl => {
                 URL.revokeObjectURL(objectUrl)
             });
-            setCancelBeforeNavigate(undefined);
+            cleanUpCancelBeforeNavigate(cancelBeforeNav);
         }
     })
 
@@ -188,8 +226,8 @@
     var showTest = $state(data.alreadyOver);
     var bypassExitConfirmation = false;
     let navigatingToURL = $state("");
-    setCancelBeforeNavigate((navigation) => {
-        /* NOTE: ALWAYS CLEAN UP WITH setCancelBeforeNavigate(undefined) IN ONMOUNT'S CLEANUP FUNC */
+    function cancelBeforeNav(navigation) {
+        /* NOTE: ALWAYS CLEAN UP WITH cleanUpCancelBeforeNavigate(cancelBeforeNav) IN ONMOUNT'S CLEANUP FUNC */
         if (
             inProgress &&
             !bypassExitConfirmation
@@ -211,7 +249,8 @@
         } else {
             return false;
         }
-    });
+    }
+    setCancelBeforeNavigate(cancelBeforeNav);
 
     let timeElapsedMs = $state(0);
     let showDone = $state(false);
@@ -228,16 +267,17 @@
         showPerfect = incorrectPairs.length <= 0;
 
         (async () => {
-            if (local || !data.authed) {
+            if (data.localIds.length > 0 || !data.authed) {
                 try {
-                    const res = await idbApiLayer.recordMatchActivity({
-                        durationMs: Math.floor(timeElapsedMs),
-                        termIds,
-                        incorrectPairIds: incorrectPairs
-                    // NOTE: async func param below is supposed to return cloud studyset ids by cloud term ids
-                    // in the future, we need to rewrite it to actually get the ids
-                    // right now, there's only one studyset per matching activity, so we already have the id, and just return it
-                    }, async (_) => { return cloudId == null ? [] : [cloudId]; });
+                    const res = await idbApiLayer.recordMatchActivity(
+                        {
+                            durationMs: Math.floor(timeElapsedMs),
+                            termIds,
+                            incorrectPairIds: incorrectPairs
+                        }, async (_) => {
+                            return data.cloudIds == null ? [] : data.cloudIds;
+                        },
+                    );
                     if (res?.id == null) {
                         console.error("Err saving local match activity, res:", res);
                         alert("Error saving match progress");
@@ -321,7 +361,17 @@
     <title>Match | Quizfreely</title>
 </svelte:head>
 <div class="grid qzfr-match-head">
-    <a href="{local ? `/studyset/local?id=${localId}` : `/studysets/${cloudId}`}" class="button faint" style="justify-self: start;">
+    <a href={
+        /* data.cloudIds.length+data.localIds.length is always > 0 because of +page.js */
+        data.cloudIds.length + data.localIds.length > 1 ?
+            `/combine?${[
+                ...data.cloudIds.map((id) => `studyset=${id}`),
+                ...data.localIds.map((id) => `localStudyset=${id}`),
+            ].join("&")}` :
+            data.cloudIds.length == 1 ?
+                `/studysets/${data.cloudIds[0]}` :
+                `/studyset/local?id=${data.localIds[0]}`
+    } class="button faint" style="justify-self: start;">
         <BackIcon></BackIcon>
         Back
     </a>
@@ -581,7 +631,6 @@
                 ((timeElapsedMs / PAIRS_COUNT) > 60000 ? Math.floor((timeElapsedMs/PAIRS_COUNT)/60000)+"m " : "") + ((timeElapsedMs/PAIRS_COUNT)/1000).toFixed(2)+"s"
             } average time per pair
         </p>
-        <!-- <a href={local ? `/studyset/local?id=${localId}` : `/studysets/${cloudId}`} class="button large" style="width: 100%; margin-top: 1.4rem;"> -->
         <button class="large" style="width: 100%; margin-top: 1.4rem;" onclick={() => {
             window.location.reload()
         }}>

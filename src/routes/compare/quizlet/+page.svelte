@@ -12,7 +12,7 @@
 <svelte:head>
     <title>Free Open Source Quizlet Alternative: Quizfreely vs Quizlet</title>
     <meta name="description" content="Quizfreely is a free and open source alternative to Quizlet with no ads, unlimited free practice tests, free images/media on flashcards, and many Quizlet Plus features for free!" />
-    <meta name=”robots” content="index, follow" />
+    <meta name="robots" content="index, follow" />
     <link rel="canonical" href="https://quizfreely.org/compare/quizlet" />
 </svelte:head>
 

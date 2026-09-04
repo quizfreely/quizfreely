@@ -54,7 +54,11 @@ export async function load({ params, fetch }) {
             return {
               studyset: apiRes.data.studyset,
               authed: authed,
-              authedUser: authedUser
+              authedUser: authedUser,
+              studysetSelection: {
+                subHeaderClass: "with-badge",
+                subHeaderStyle: "--badge-color: var(--warn); --badge-offset: -0.2rem;"
+              }
             }
           } else {
             console.error(
