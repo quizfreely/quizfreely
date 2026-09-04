@@ -1,5 +1,7 @@
 # Testing Checklist
 
+work in progress checklist, will need to finish and/or plan a better way to test stuff manually but consistently
+
 General:
 - [ ] New user on landing page can click get started button to get to sign up page and click continue without account to get to dashboard
     - [ ] User gets redirected to dashboard from root page
