@@ -21,6 +21,8 @@
     const r = $derived(Number(page.url.searchParams.get("r") ?? 0));
     let terms = $state();
     let practiceTests = $state([]);
+    /* the same practice test might appear in multiple studysets,
+    so use a set to remove duplicates */
     const ptSet = new Set();
 
     // maps questions from practice test data to objs with props for question components
@@ -57,8 +59,6 @@
                 if (studyset.practiceTests == null) continue;
                 for (const pt of studyset.practiceTests) {
                     if (pt?.id == null || ptSet.has(pt.id)) continue;
-                    /* the same practice test might appear in multiple studysets,
-                    so use a set to remove duplicates */
                     ptSet.add(pt.id); 
                     newPTs.push(pt);
                 }
