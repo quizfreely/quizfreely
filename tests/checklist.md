@@ -31,5 +31,5 @@ General:
         - [ ] User's history & stats shows calendar counts for all 3 PTs
         - [ ] User's history & stats shows all 3PTs in list, with correct studyset lists per event
         - [ ] Links from history & stats activities list brings user to EACH studyset's individual pages, AND combined PT brings to combined page
-        - [ ] History/Recent Studysets list displays both studysets
+        - [ ] History/Recent Studysets list displays both studysets on BOTH main dashboard and history & stats page within dashboard
 
