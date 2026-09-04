@@ -94,6 +94,10 @@
     }
     async function newFolderOnclick() {
         try {
+            let folderName = "Untitled Folder";
+            if (newFolderName?.length > 0) {
+                folderName = newFolderName;
+            }
             const raw = await fetch("/api/graphql", {
                 method: "POST",
                 headers: {
@@ -106,7 +110,7 @@
     }
 }`,
                     variables: {
-                        name: newFolderName,
+                        name: folderName,
                         private: newFolderPrivate
                     },
                 }),
