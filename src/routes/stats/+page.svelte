@@ -287,7 +287,7 @@
                     });
                 }
             }
-            reChartData = [...reByDate.values()];
+            reChartData = [...reByDate.values()].sort((a, b) => a.date - b.date);
         })();
         return () => {
             objectUrls.forEach(objectUrl => {
