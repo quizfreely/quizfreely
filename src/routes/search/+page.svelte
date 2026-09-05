@@ -1,11 +1,25 @@
 <script>
+    import { studysetSelection } from "$lib/studyset-selection.svelte.js";
+    import { onMount } from "svelte";
     import StudysetLinkBox from "$lib/components/StudysetLinkBox.svelte";
     import Noscript from "$lib/components/Noscript.svelte";
     import Searchbar from "$lib/components/Searchbar.svelte";
     import ArrowLeftIcon from "$lib/icons/ArrowLeft.svelte";
     import ArrowRightIcon from "$lib/icons/ArrowRight.svelte";
+    import OutlineIcon from "$lib/icons/OutlineSelect.svelte";
+    import XMarkIcon from "$lib/icons/CloseXMark.svelte";
 
     let { data } = $props();
+    let selectingMultiple = $state(false);
+    const selectionCancelButtonCallback = () => {
+        selectingMultiple = false;
+    }
+    studysetSelection.setCancelButtonCallback(selectionCancelButtonCallback);
+    onMount(() => {
+        return () => {
+            studysetSelection.cleanUpCancelButtonCallback(selectionCancelButtonCallback);
+        };
+    });
 </script>
 
 <svelte:head>
@@ -26,12 +40,35 @@
         <div class="content">
             {#if data.query?.length >= 1}
                 <p>Results for "{data.query}"</p>
+                <div class="flex" style="justify-content: space-between;">
+                    <div class="flex">
+                    </div>
+                    <button onclick={() => selectingMultiple = !selectingMultiple} class="alt {selectingMultiple ? "text fg1" : ""}">
+                        {#if selectingMultiple}
+                            <XMarkIcon />
+                            Stop Selecting
+                        {:else}
+                            <OutlineIcon></OutlineIcon>
+                            Select Multiple
+                        {/if}
+                    </button>
+                </div>
                 {#if data?.results?.length > 0}
                     <div class="grid list" style="overflow-wrap:anywhere">
                         {#each data.results as studyset}
                             <StudysetLinkBox
                                 {studyset}
                                 linkTemplateFunc={(id) => `/studysets/${id}`}
+                                button={selectingMultiple}
+                                buttonOnClick={(_event, studyset) => {
+                                    studysetSelection.toggleSelect(
+                                        studyset.id?.includes?.("-") ? {
+                                            cloudId: studyset.id,
+                                        } : {
+                                            localId: studyset.id,
+                                        },
+                                    );
+                                }}
                             ></StudysetLinkBox>
                         {/each}
                     </div>
