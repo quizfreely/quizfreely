@@ -15,7 +15,7 @@
 }
 .lc-tooltip-container {
     background: var(--bg-2ish);
-    border-radius: 0.8rem;
+    border-radius: 0.6rem;
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
 }
