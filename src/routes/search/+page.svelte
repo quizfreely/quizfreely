@@ -39,10 +39,8 @@
     <div class="grid page">
         <div class="content">
             {#if data.query?.length >= 1}
-                <p>Results for "{data.query}"</p>
-                <div class="flex" style="justify-content: space-between;">
-                    <div class="flex">
-                    </div>
+                <div class="flex" style="justify-content: space-between; align-items: center;">
+                    <p>Results for "{data.query}"</p>
                     <button onclick={() => selectingMultiple = !selectingMultiple} class="alt {selectingMultiple ? "text fg1" : ""}">
                         {#if selectingMultiple}
                             <XMarkIcon />
