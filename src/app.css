@@ -15,6 +15,9 @@
 }
 .lc-tooltip-container {
     background: var(--bg-2ish);
+    border-radius: 0.8rem;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
 }
 
 @layer ehui-lc-reset {
