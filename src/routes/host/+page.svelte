@@ -8,13 +8,15 @@
     let localStudyset = $state(null);
     let mins = $state("");
     const DEFAULT_MINS = 20;
-    onMount(async () => {
-        if (data.localId != null) {
-            localStudyset = (
-                await db.studysets.where("id").equals(data.localId).toArray()
-            )?.[0];
-            localStudyset.termsCount = (await idbApiLayer.getTermsByStudysetId(data.localId))?.length ?? 0;
-        }
+    onMount(() => {
+        (async () => {
+            if (data.localId != null) {
+                localStudyset = (
+                    await db.studysets.where("id").equals(data.localId).toArray()
+                )?.[0];
+                localStudyset.termsCount = (await idbApiLayer.getTermsByStudysetId(data.localId))?.length ?? 0;
+            }
+        })();
     })
 </script>
 <svelte:head>

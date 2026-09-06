@@ -15,37 +15,39 @@
     let showActionErrMsg = $state(false);
     let showCreateErrMsg = $state(false);
     let newFolderName = $state("");
-    onMount(async () => {
-        try {
-            const raw = await fetch(`/api/graphql`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    query: `{
-    myFolders {
-        edges {
-            node {
-                id
-                name
+    onMount(() => {
+        (async () => {
+            try {
+                const raw = await fetch(`/api/graphql`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        query: `{
+        myFolders {
+            edges {
+                node {
+                    id
+                    name
+                }
             }
         }
-    }
-}`,
-                }),
-            });
-            const resp = await raw.json();
-            if (resp?.data) {
-                folders = resp.data.myFolders?.edges?.map((e) => e.node) ?? [];
-            } else {
-                console.error("No data property in json response: ", resp);
+    }`,
+                    }),
+                });
+                const resp = await raw.json();
+                if (resp?.data) {
+                    folders = resp.data.myFolders?.edges?.map((e) => e.node) ?? [];
+                } else {
+                    console.error("No data property in json response: ", resp);
+                    showErrMsg = true;
+                }
+            } catch (err) {
+                console.error("Error loading folders: ", err);
                 showErrMsg = true;
             }
-        } catch (err) {
-            console.error("Error loading folders: ", err);
-            showErrMsg = true;
-        }
+        })();
     });
 
     async function newFolderButtonOnclick() {

@@ -8,33 +8,35 @@
     let showErrMsg = $state(false);
     let showActionErrMsg = $state(false);
     let searchQuery = $state("");
-    onMount(async () => {
-        try {
-            const raw = await fetch(`/api/graphql`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    query: `{
-    allSubjects {
-        id
-        name
-    }
-}`
-                })
-            });
-            const resp = await raw.json();
-            if (resp?.data) {
-                subjects = resp.data.allSubjects ?? [];
-            } else {
-                console.error("No data property in json response: ", resp);
+    onMount(() => {
+        (async () => {
+            try {
+                const raw = await fetch(`/api/graphql`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        query: `{
+        allSubjects {
+            id
+            name
+        }
+    }`
+                    })
+                });
+                const resp = await raw.json();
+                if (resp?.data) {
+                    subjects = resp.data.allSubjects ?? [];
+                } else {
+                    console.error("No data property in json response: ", resp);
+                    showErrMsg = true;
+                }
+            } catch (err) {
+                console.error("Error loading folders: ", err);
                 showErrMsg = true;
             }
-        } catch (err) {
-            console.error("Error loading folders: ", err);
-            showErrMsg = true;
-        }
+        })();
     })
 </script>
 <div class="modal" transition:fade={{ duration: 200 }}>
