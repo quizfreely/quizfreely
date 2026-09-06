@@ -122,7 +122,7 @@ const subHeaderObserver = (el) => {
     onoutrostart={() => {subHeaderTransitioning = true}}
     onintroend={() => {subHeaderTransitioning = false}}
     onoutroend={() => {subHeaderTransitioning = false}}
-    style="{stickySubHeader ? 'position: sticky; top: 0px; z-index: 99;' : ''}"
+    style="{stickySubHeader ? 'position: sticky; top: 0px; z-index: 18;' /* ehui nav sidebar has z-index 20 */ : ''}"
 >
     {#if stickySubHeader}
         <div class="sticky-subheader-observer" {@attach subHeaderObserver}></div>
