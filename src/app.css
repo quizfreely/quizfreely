@@ -13,6 +13,9 @@
     color: var(--fg-1);
     fill: var(--fg-1);
 }
+.lc-tooltip-container {
+    background: var(--bg-2ish);
+}
 
 @layer ehui-lc-reset {
     .lc-root-container * + *,
