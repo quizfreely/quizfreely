@@ -11,7 +11,7 @@
     import GridIcon from "$lib/icons/AppsGrid.svelte";
     import GraphIcon from "$lib/icons/ChartGraphLine.svelte";
     import PTIcon from "$lib/icons/PracticeTestChecklist.svelte";
-    import TrashIcon from "$lib/icons/Trash.svelte";
+    import XMarkIcon from "$lib/icons/CloseXMark.svelte";
     import AngleUpIcon from "$lib/icons/AngleUp.svelte"
     import AngleDownIcon from "$lib/icons/AngleDown.svelte"
     import FullscreenIcon from "$lib/icons/FullscreenMaximize.svelte"
@@ -118,7 +118,7 @@
                         replaceState(`?${idSearchParams}`, page.state);
                         hideDropdown();
                     }}>
-                        <TrashIcon />
+                        <XMarkIcon />
                         Remove
                     </button>
                 {/snippet}
