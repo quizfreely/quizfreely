@@ -1340,7 +1340,7 @@ FRQs: ${numFRQsToAssign}`,
     .qzfr-pt-header {
         position: sticky;
         top: 0px;
-        z-index: 99;
+        z-index: 18; /* ehui nav sidebar has z-index 20, pt header should be below it */
         padding: 1rem;
         margin-top: 0px;
     }
