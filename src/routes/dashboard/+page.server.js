@@ -1,4 +1,11 @@
 export async function load({ cookies, locals, fetch }) {
+  const pageOptions = {
+    dashboardPage: "dashboard",
+    header: { activePage: "home" },
+    studysetSelection: {
+      allowStickySubHeader: true,
+    }
+  };
   /*
     cookies are not permanent, they eventually expire
     resetting the expiration date on every page doesn't make sense
@@ -72,7 +79,7 @@ export async function load({ cookies, locals, fetch }) {
           const myRecentActivityStudysets = apiRes.data.myRecentActivityStudysets?.edges?.map((e) => e.node) ?? [];
           const myFolders = apiRes.data.myFolders?.edges?.map((e) => e.node) ?? [];
           return {
-            dashboardPage: "dashboard",
+            ...pageOptions,
             authed: apiRes.data.authed,
             authedUser: apiRes.data.authedUser,
             studysetList: myStudysets,
@@ -82,22 +89,19 @@ export async function load({ cookies, locals, fetch }) {
             myRecentActivityStudysets,
             myFolders,
             myFoldersPageInfo: apiRes.data.myFolders?.pageInfo,
-            header: { activePage: "home" },
           }
         } else {
           return {
-            dashboardPage: "dashboard",
+            ...pageOptions,
             authed: false,
-            header: { activePage: "home" },
           }
         }
       } catch (error) {
         //request.log.error(error);
         //reply.send("work in progress error message error during api response json parse")
         return {
-          dashboardPage: "dashboard",
+          ...pageOptions,
           authed: false,
-          header: { activePage: "home" },
         }
       }
     } catch (error) {
@@ -105,9 +109,8 @@ export async function load({ cookies, locals, fetch }) {
       //reply.send("work in progress error message error during api graphql fetch")
       // in addition to an error message, our dashboard.html view should still be sent so that stuff like local studysets are still usable
       return {
-        dashboardPage: "dashboard",
+        ...pageOptions,
         authed: false,
-        header: { activePage: "home" },
       }
     }
 };

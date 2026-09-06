@@ -98,45 +98,47 @@
             return cloudUuids.map(() => null);
         }
     }
-    onMount(async () => {
-        if (!data.myRecentActivityStudysets || data.myRecentActivityStudysets.length === 0) {
-            try {
-                const result = await idbApiLayer.getRecentActivityStudysets({
-                    getCloudStudysets: cloudStudysetsByIds
-                });
-                if (result?.length > 0) {
-                    myRecentActivityStudysets = result;
+    onMount(() => {
+        (async () => {
+            if (!data.myRecentActivityStudysets || data.myRecentActivityStudysets.length === 0) {
+                try {
+                    const result = await idbApiLayer.getRecentActivityStudysets({
+                        getCloudStudysets: cloudStudysetsByIds
+                    });
+                    if (result?.length > 0) {
+                        myRecentActivityStudysets = result;
+                    }
+                } catch (err) {
+                    console.error("Error loading recent activity studysets from local IDB:", err);
                 }
-            } catch (err) {
-                console.error("Error loading recent activity studysets from local IDB:", err);
             }
-        }
-        const reviewStats = await idbApiLayer.getReviewEventStatsByDay({ lastDaysBack: 365 });
-        calcChart(reviewStats);
-        const localActivityHistory = await idbApiLayer.activityHistory({
-            last: 60,
-            getCloudStudysets: cloudStudysetsByIds
-        });
-        // console.log("localActivityHistory:", localActivityHistory);
-        if (localActivityHistory == null) {
-            console.error("idbApiLayer.activityHistory returned nullish")
-        } else {
-            localActivityHistory.forEach(item => {
-                if (item.timestamp != null) {
-                    item.__typename = "PracticeTest";
-                } else if (item.endTimestamp != null) {
-                    item.__typename = "MatchActivity";
-                }
+            const reviewStats = await idbApiLayer.getReviewEventStatsByDay({ lastDaysBack: 365 });
+            calcChart(reviewStats);
+            const localActivityHistory = await idbApiLayer.activityHistory({
+                last: 60,
+                getCloudStudysets: cloudStudysetsByIds
             });
-            activityHistory = [
-                ...activityHistory,
-                ...localActivityHistory
-            ].sort((a, b) =>
-                (b.timestamp ?? b.endTimestamp ?? "").localeCompare(
-                    a.timestamp ?? a.endTimestamp ?? ""
-                )
-            );
-        }
+            // console.log("localActivityHistory:", localActivityHistory);
+            if (localActivityHistory == null) {
+                console.error("idbApiLayer.activityHistory returned nullish")
+            } else {
+                localActivityHistory.forEach(item => {
+                    if (item.timestamp != null) {
+                        item.__typename = "PracticeTest";
+                    } else if (item.endTimestamp != null) {
+                        item.__typename = "MatchActivity";
+                    }
+                });
+                activityHistory = [
+                    ...activityHistory,
+                    ...localActivityHistory
+                ].sort((a, b) =>
+                    (b.timestamp ?? b.endTimestamp ?? "").localeCompare(
+                        a.timestamp ?? a.endTimestamp ?? ""
+                    )
+                );
+            }
+        })();
     });
     function recentLinkFunc(id) {
         if (typeof id === 'number') {

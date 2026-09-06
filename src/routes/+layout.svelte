@@ -91,6 +91,23 @@ const selectionLinkParams = $derived(
     /* use Boolean to filter out empty strings,
     preventing duplicate ampersands if any set is empty */
 );
+let subHeaderTransitioning = $state(false);
+let subHeaderSticking = $state(false);
+const stickySubHeader = $derived(page?.data?.studysetSelection?.allowStickySubHeader);
+const subHeaderObserver = (el) => {
+    const observer = new IntersectionObserver( 
+        ([e]) => {
+            subHeaderSticking = e.intersectionRatio < 1;
+        },
+        {
+            threshold: [1],
+        },
+    );
+    observer.observe(el);
+    return () => { // clean up function
+        observer.disconnect()
+    };
+};
 </script>
 
 {#if !page?.data?.header?.hideHeader}
@@ -98,9 +115,20 @@ const selectionLinkParams = $derived(
 {/if}
 {const totalSelectedCount = $derived(studysetSelection.cloudIds.size + studysetSelection.localIds.size)}
 {#if studysetSelection.show && !page?.data?.studysetSelection?.hideSubHeader && !page?.data?.header?.hideHeader}
-<div class="grid page" transition:slide={{duration:400}}>
+<div
+    class="grid page {stickySubHeader && subHeaderSticking ? 'trans-dots' : ''}"
+    transition:slide={{ duration: 200 }}
+    onintrostart={() => {subHeaderTransitioning = true}}
+    onoutrostart={() => {subHeaderTransitioning = true}}
+    onintroend={() => {subHeaderTransitioning = false}}
+    onoutroend={() => {subHeaderTransitioning = false}}
+    style="{stickySubHeader ? 'position: sticky; top: 0px; z-index: 99;' : ''}"
+>
+    {#if stickySubHeader}
+        <div class="sticky-subheader-observer" {@attach subHeaderObserver}></div>
+    {/if}
     <div class="content">
-        <div class="box flex {page?.data?.studysetSelection?.subHeaderClass ?? ''}" style="padding: 0.4rem 0.8rem; justify-content: space-between; align-items: center; column-gap: 1rem; row-gap: 0.2rem; {page?.data?.studysetSelection?.subHeaderStyle ?? ''}">
+        <div class="box flex {page?.data?.studysetSelection?.subHeaderClass ?? ''}" style="padding: 0.4rem 0.8rem; justify-content: space-between; align-items: center; column-gap: 1rem; row-gap: 0.2rem; {stickySubHeader ? 'transition: background-color 0.4s ease-out, border-color 0.4s ease-out, box-shadow 0.4s ease-out;' : ''} {stickySubHeader && subHeaderSticking && !subHeaderTransitioning ? 'background-color: transparent; border-color: transparent; box-shadow: none;' : ''} {page?.data?.studysetSelection?.subHeaderStyle ?? ''}">
             <div style="padding: 0.6rem 0.8rem;">{totalSelectedCount} {totalSelectedCount == 1 ? "studyset" : "studysets"} selected</div>
             <div class="flex compact-gap">
                 <a class="button faint" href="/combine?{selectionLinkParams}">Continue</a>
@@ -124,4 +152,12 @@ const selectionLinkParams = $derived(
     {/if}
 </div>
 {/key}
-
+<style>
+    .sticky-subheader-observer {
+        position: absolute;
+        top: -11px;
+        width: 100%;
+        height: 10px;
+        visibility: hidden;
+    }
+</style>

@@ -1,5 +1,4 @@
 import { error, redirect } from '@sveltejs/kit';
-import fetchAuthData from '$lib/fetchAuthData.js';
 
 export async function load({ url, fetch }) {
   let searchQuery = (url.searchParams.get("q") ?? "")
@@ -61,7 +60,10 @@ export async function load({ url, fetch }) {
           pageInfo: searchConn?.pageInfo,
           PER_PAGE,
           authed: authed,
-          authedUser: authedUser
+          authedUser: authedUser,
+          studysetSelection: {
+            allowStickySubHeader: true
+          }
         }
       } else {
         console.log("Error in search +page.js, api res: ", apiRes)

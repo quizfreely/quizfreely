@@ -81,7 +81,10 @@ export async function load({ params, url, fetch }) {
             },
             studysets: studysetsConn?.edges?.map((e) => e.node) ?? [],
             pageInfo: studysetsConn?.pageInfo,
-            PER_PAGE
+            PER_PAGE,
+            studysetSelection: {
+                allowStickySubHeader: true,
+            }
         };
 
     } catch (err) {

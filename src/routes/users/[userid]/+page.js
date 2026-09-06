@@ -76,7 +76,10 @@ export async function load({ params, url, fetch }) {
             studysetCount: user?.studysetCount,
             // header: {
             //     activePage: ""
-            // }
+            // },
+            studysetSelection: {
+                allowStickySubHeader: true,
+            }
         };
 
     } catch (err) {

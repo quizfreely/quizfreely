@@ -1,10 +1,24 @@
 <script>
+    import { studysetSelection } from "$lib/studyset-selection.svelte.js";
+    import { onMount } from "svelte";
     import StudysetLinkBox from "$lib/components/StudysetLinkBox.svelte";
     import ArrowLeftIcon from "$lib/icons/ArrowLeft.svelte";
     import ArrowRightIcon from "$lib/icons/ArrowRight.svelte";
     import UserIcon from "$lib/icons/User.svelte";
+    import OutlineIcon from "$lib/icons/OutlineSelect.svelte";
+    import XMarkIcon from "$lib/icons/CloseXMark.svelte";
 
     let { data } = $props();
+    let selectingMultiple = $state(false);
+    const selectionCancelButtonCallback = () => {
+        selectingMultiple = false;
+    }
+    studysetSelection.setCancelButtonCallback(selectionCancelButtonCallback);
+    onMount(() => {
+        return () => {
+            studysetSelection.cleanUpCancelButtonCallback(selectionCancelButtonCallback);
+        };
+    });
 </script>
 
 <svelte:head>
@@ -51,9 +65,20 @@
         </div>
 
         {#if data?.studysetCount > 0}
+                <div class="flex" style="justify-content: space-between; align-items: end;">
             <p class="fg0">
                 {data?.studysetCount} Public Studysets
             </p>
+                    <button onclick={() => selectingMultiple = !selectingMultiple} class="alt {selectingMultiple ? "text fg1" : ""}">
+                        {#if selectingMultiple}
+                            <XMarkIcon />
+                            Stop Selecting
+                        {:else}
+                            <OutlineIcon></OutlineIcon>
+                            Select Multiple
+                        {/if}
+                    </button>
+                </div>
         {/if}
         <div class="grid list">
             {#each data.studysets as studyset}
@@ -61,6 +86,16 @@
                     {studyset}
                     linkTemplateFunc={(id) => `/studysets/${id}`}
                     showDropdown={false}
+                    button={selectingMultiple}
+                    buttonOnClick={(_event, studyset) => {
+                        studysetSelection.toggleSelect(
+                            studyset.id?.includes?.("-") ? {
+                                cloudId: studyset.id,
+                            } : {
+                                localId: studyset.id,
+                            },
+                        );
+                    }}
                 ></StudysetLinkBox>
             {/each}
             {#if data.studysets?.length == 0}
