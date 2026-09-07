@@ -19,6 +19,7 @@
     import IconMoreDotsV from "$lib/icons/MoreDotsVertical.svelte";
     import IconReviewModeBook from "$lib/icons/ReviewModeBook.svelte";
     import IconPracticeTestChecklist from "$lib/icons/PracticeTestChecklist.svelte";
+    import SRSIcon from "$lib/icons/FlaskScienceSRS.svelte";
     import IconGraph from "$lib/icons/ChartGraphLine.svelte";
     import IconFlashcards from "$lib/icons/Flashcards.svelte";
     import IconSettingsGear from "$lib/icons/SettingsGear.svelte";
@@ -387,40 +388,71 @@
                 </a>
             {/snippet}
             <Flashcards {terms} captionEnd={flashcardsCaptionEnd} />
-                <div id="terms-and-stuff-outer-div">
-                    <div class="caption grid list">
-                        <!-- <a -->
-                        <!--     id="flashcards-maximize" -->
-                        <!--     class="button alt" -->
-                        <!--     href="{data.local ? -->
-                        <!--         `/flashcards?localStudyset=${data.localId}` : -->
-                        <!--         `/flashcards?studyset=${data.studyset.id}` -->
-                        <!--     }" -->
-                        <!-- > -->
-                        <!--     <IconFlashcards /> -->
-                        <!--     Flashcards -->
-                        <!-- </a> -->
+                <div id="terms-and-stuff-outer-div" style="--qzfr-og-fg-1: var(--fg-1);">
+                    <div class="caption grid list" style="--fg-1: var(--main);">
+                        <a
+                            class="button button-box flex qzfr-activity-button-box"
+                            href="{data.local ? `/flashcards?localStudyset=${data.localId}` : `/flashcards?studyset=${data.studyset.id}`}"
+                        >
+                            <IconFlashcards />
+                            Flashcards
+                        </a>
                         <!-- <a href="/studyset/local/review-mode?id={ data.localId }" class="button alt"> -->
                         <!--   <IconReviewModeBook /> -->
                         <!--   Review Mode -->
                         <!-- </a> -->
                         <a
                             href="{data.local ? `/studyset/local/match?id=${data.localId}` : `/studysets/${data.studyset?.id}/match`}"
-                            class="button alt"
+                            class="button button-box flex qzfr-activity-button-box"
                         >
                             <GridIcon />
                             Match
                         </a>
                         <a
                             href="{data.local ? `/studyset/local/practice-test?id=${data.localId}` : `/studysets/${data.studyset?.id}/practice-test`}"
-                            class="button alt"
+                            class="button button-box flex qzfr-activity-button-box"
                         >
                             <IconPracticeTestChecklist />
                             Practice Test
                         </a>
                         <a
+                            href={data.local ? `/spaced-repetition?localStudyset=${data.localId}` : `/spaced-repetition?studyset=${data.studyset?.id}`}
+                            class="button button-box flex qzfr-activity-button-box"
+                        >
+                            <SRSIcon />
+                            Spaced Repetition
+                        </a>
+    <!-- temporary placeholder, same as `multiselect` snippet without --warn badge
+    will be replaced with "gravity" mode or similar -->
+    <!-- {#if studysetSelection.show} -->
+    <!--     {#if studysetSelection.cloudIds.has(data.studyset?.id ?? data.localId) || studysetSelection.localIds.has(data.studyset?.id ?? data.localId)} -->
+    <!--         <button class="button-box flex qzfr-activity-button-box text fg1" onclick={() => { -->
+    <!--             studysetSelection.deselect({ -->
+    <!--                 cloudId: data.studyset?.id, -->
+    <!--                 localId: data.localId, -->
+    <!--             }); -->
+    <!--         }}> -->
+    <!--             <XMarkIcon /> Deselect -->
+    <!--         </button> -->
+    <!--     {:else} -->
+    <!--         <button class="button-box flex qzfr-activity-button-box" onclick={() => { -->
+    <!--             studysetSelection.select({ -->
+    <!--                 cloudId: data.studyset?.id, -->
+    <!--                 localId: data.localId, -->
+    <!--             }); -->
+    <!--         }}> -->
+    <!--             <PlusIcon /> Select -->
+    <!--         </button> -->
+    <!--     {/if} -->
+    <!-- {:else} -->
+    <!--     <a class="button button-box flex qzfr-activity-button-box" href={data.local ? -->
+    <!--         `/combine?localStudyset=${data.localId}` : -->
+    <!--         `/combine?studyset=${data.studyset?.id}` -->
+    <!--     }><PlusIcon /> Select Multiple</a> -->
+    <!-- {/if} -->
+                        <a
                             href="{data.local ? `/studyset/local/stats?id=${data.localId}` : `/studysets/${data.studyset?.id}/stats`}"
-                            class="button alt"
+                            class="button button-box flex qzfr-activity-button-box"
                         >
                             <IconGraph />
                             Progress &amp; Stats
@@ -772,3 +804,13 @@
         </div>
     </div>
 </main>
+<style>
+    .qzfr-activity-button-box,
+    .flex.qzfr-activity-button-box,
+    .button-box.qzfr-activity-button-box,
+    .button-box.flex.qzfr-activity-button-box {
+        display: flex;
+        gap: 0.4rem;
+        align-items: center;
+    }
+</style>
