@@ -201,13 +201,13 @@
                         {title ?? "Title"}
                     </h2>
                     {#if data.local}
-                        <p class="fg0">
+                        <div class="flex text fg0" style="align-items: center; gap: 0.4rem;">
                             <IconLocal /> Local Studyset
-                        </p>
+                        </div>
                     {:else if data?.studyset?.private}
-                        <p class="fg0">
+                        <div class="flex text fg0" style="align-items: center; gap: 0.4rem;">
                             <IconEyeSlash /> Private Studyset
-                        </p>
+                        </div>
                     {:else if data?.studyset?.user?.displayName != null}
                         <p>
                             Created by <a href="/users/{data.studyset.user.id}"
