@@ -71,12 +71,15 @@
             objectUrls.forEach(objectUrl => URL.revokeObjectURL(objectUrl));
         };
     });
+    let deleteLoading = $state(false);
     async function deleteConfirmButtonClicked() {
         if (data.local) {
+            deleteLoading = true;
             await idbApiLayer.deleteStudyset(data.localId);
             goto("/dashboard");
         } else {
             try {
+                deleteLoading = true;
                 const raw = await fetch("/api/graphql", {
                     method: "POST",
                     headers: {
@@ -93,12 +96,14 @@
                 });
                 const resp = await raw.json();
                 if (resp?.data?.deleteStudyset == null) {
+                    deleteLoading = false;
                     console.log("deleteStudyset graphql resp:", resp);
                     alert("GraphQL error while trying to delete studyset");
                 } else {
                     goto("/dashboard");
                 }
             } catch (err) {
+                deleteLoading = false;
                 console.error(err);
                 alert("Network error while deleting studyset");
             }
@@ -436,9 +441,17 @@
                                 <button
                                     class="ohno"
                                     onclick={deleteConfirmButtonClicked}
+                                    disabled={deleteLoading}
+                                    style={deleteLoading ? 'opacity: 0.8;' : ''}
                                 >
-                                    <IconTrash />
-                                    Delete
+                                    {#if deleteLoading}
+                                        <div class="spinner semi-trans size-1rem ">
+                                        </div>
+                                        Deleting...
+                                    {:else}
+                                        <IconTrash />
+                                        Delete
+                                    {/if}
                                 </button>
                                 <button
                                     class="alt"
