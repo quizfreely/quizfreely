@@ -71,39 +71,42 @@
             objectUrls.forEach(objectUrl => URL.revokeObjectURL(objectUrl));
         };
     });
+    let deleteLoading = $state(false);
     async function deleteConfirmButtonClicked() {
         if (data.local) {
+            deleteLoading = true;
             await idbApiLayer.deleteStudyset(data.localId);
             goto("/dashboard");
         } else {
-            fetch("/api/graphql", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                credentials: "same-origin",
-                body: JSON.stringify({
-                    query: `mutation DeleteStudyset($id: ID!) {
-    deleteStudyset(id: $id)
-}`,
-                    variables: {
-                        id: data.studyset.id,
+            try {
+                deleteLoading = true;
+                const raw = await fetch("/api/graphql", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
                     },
-                }),
-            })
-                .then((response) => response.json())
-                .then((response) => {
-                    if (response.errors) {
-                        console.error(response.errors);
-                        alert("GraphQL error: " + response.errors[0].message);
-                    } else {
-                        goto("/dashboard");
-                    }
-                })
-                .catch((error) => {
-                    console.error(error);
-                    alert("Network error while deleting studyset");
+                    body: JSON.stringify({
+                        query: `mutation DeleteStudyset($id: ID!) {
+        deleteStudyset(id: $id)
+    }`,
+                        variables: {
+                            id: data.studyset.id,
+                        },
+                    }),
                 });
+                const resp = await raw.json();
+                if (resp?.data?.deleteStudyset == null) {
+                    deleteLoading = false;
+                    console.log("deleteStudyset graphql resp:", resp);
+                    alert("GraphQL error while trying to delete studyset");
+                } else {
+                    goto("/dashboard");
+                }
+            } catch (err) {
+                deleteLoading = false;
+                console.error(err);
+                alert("Network error while deleting studyset");
+            }
         }
     }
 
@@ -438,9 +441,17 @@
                                 <button
                                     class="ohno"
                                     onclick={deleteConfirmButtonClicked}
+                                    disabled={deleteLoading}
+                                    style={deleteLoading ? 'opacity: 0.8;' : ''}
                                 >
-                                    <IconTrash />
-                                    Delete
+                                    {#if deleteLoading}
+                                        <div class="spinner semi-trans size-1rem ">
+                                        </div>
+                                        Deleting...
+                                    {:else}
+                                        <IconTrash />
+                                        Delete
+                                    {/if}
                                 </button>
                                 <button
                                     class="alt"
