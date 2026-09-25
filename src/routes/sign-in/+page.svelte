@@ -89,11 +89,11 @@
   {#if data.authed}
     <div class="grid thin-centered">
       <div class="content">
-        <div class="box" style="margin-top: 6rem; padding: 1.6rem;">
+        <div class="box" style="margin-top: 6rem;">
           <p class="h3">You're signed in!</p>
-          <div class="flex" style="margin-top: 1.6rem; gap: 1.6rem;">
-            <a href="/dashboard" class="button yay large">Dashboard</a>
-            <a href="/settings/account" class="button yay alt large">Settings</a>
+          <div class="flex">
+            <a href="/dashboard" class="button yay">Dashboard</a>
+            <a href="/settings" class="button yay alt">Settings</a>
           </div>
         </div>
       </div>
