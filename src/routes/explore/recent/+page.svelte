@@ -41,7 +41,7 @@
     <meta name="robots" content="index, follow" />
 </svelte:head>
 
-<div class="flex center">
+<div class="flex center" style="margin-bottom: 2rem;">
     <div class="flex" style="flex-direction: column; gap: 0.2rem;">
         <span style="font-size: 2rem;">{numFmt.format(data.dailyCount)}</span>
         <div class="text fg0">
