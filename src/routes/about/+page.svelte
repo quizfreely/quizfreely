@@ -102,11 +102,11 @@
             Quizfreely is released under the AGPL-3.0 license. Our frontend web app, backend API, <a href="https://docs.quizfreely.org" class="link-love with-underline">documentation</a>, and all of our software are all open source on Codeberg and GitHub.
         </p>
         <div class="flex compact-gap">
-          <a class="button large faint" href="https://codeberg.org/quizfreely">
+          <a class="button large faint" href="https://codeberg.org/quizfreely/quizfreely">
             <IconCodeberg></IconCodeberg>
             Codeberg
           </a>
-          <a class="button large faint" href="https://github.com/quizfreely">
+          <a class="button large faint" href="https://github.com/quizfreely/quizfreely">
             <IconGitHub></IconGitHub>
             GitHub
           </a>
