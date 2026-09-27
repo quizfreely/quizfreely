@@ -21,7 +21,7 @@
 <div class="box">
     <div class="flex features-box-content">
         <enhanced:img src="./img/v2.0.0-select-multiple.png" alt="Select Multiple Studysets Feature Screenshot" />
-        <div class="flex" style="flex-direction: column; justify-content: space-between; flex-wrap: nowrap;">
+        <div class="flex" style="flex-direction: column; justify-content: space-between; flex-wrap: nowrap; gap: 0.4rem;">
         <div>
             <p style="font-size: 1.1rem; margin-bottom: 0px;">Combine Multiple Studysets</p>
             <p class="fg0" style="margin-top: 0.4rem;">v2.0.0 · 6 Sep 2026</p>
