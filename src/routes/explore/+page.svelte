@@ -1,6 +1,6 @@
 <script>
     import { onMount } from "svelte";
-    import NewFeature from "$lib/components/features/v2.0.0.svelte";
+    import NewFeature from "$lib/changelog/v2.0.0.svelte";
     import SparklesIcon from "$lib/icons/Sparkles.svelte";
     let { data } = $props();
     let modPowersActive = $state(false);
