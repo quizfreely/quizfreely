@@ -1,5 +1,7 @@
 <script>
     import { onMount } from "svelte";
+    import NewFeature from "$lib/components/features/v2.0.0.svelte";
+    import SparklesIcon from "$lib/icons/Sparkles.svelte";
     let { data } = $props();
     let modPowersActive = $state(false);
     onMount(() => {
@@ -28,6 +30,15 @@
             text-align: start;
         }
     }
+    .new-feature-container {
+        max-width: 40rem;
+        margin-top: 0.6rem;
+    }
+    @media only screen and (max-width: 1000px) {
+        .new-feature-container {
+            max-width: 100%;
+        }
+    }
 </style>
 
 <svelte:head>
@@ -36,7 +47,7 @@
     <meta name="robots" content="index, follow" />
 </svelte:head>
 
-<div class="flex center" style="margin-bottom: 2rem;">
+<div class="flex center">
     <div class="flex" style="flex-direction: column; gap: 0.2rem;">
         <span style="font-size: 2rem;">{numFmt.format(data.dailyCount)}</span>
         <div class="text fg0">
@@ -60,7 +71,14 @@
         </div>
     </div>
 </div>
-            <div class="grid list">
+        <div class="flex" style="align-items: center; gap: 0.2rem;">
+            <SparklesIcon class="text fg0" width="1.2rem" height="1.2rem" />
+            <p class="fg0">New Features</p>
+        </div>
+        <div class="new-feature-container">
+            <NewFeature />
+        </div>
+            <div class="grid list" style="margin-top: 2rem;">
                 <a class="button button-box aligndiffwhensmol" href="/categories/languages">
                     World Languages
                 </a>
