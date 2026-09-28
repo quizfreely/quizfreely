@@ -78,7 +78,8 @@
         <div class="new-feature-container">
             <NewFeature />
         </div>
-            <div class="grid list" style="margin-top: 2rem;">
+            <p class="fg0" style="margin-top: 2rem;">Subjects by Category</p>
+            <div class="grid list">
                 <a class="button button-box aligndiffwhensmol" href="/categories/languages">
                     World Languages
                 </a>
