@@ -8,6 +8,11 @@
         margin-top: 0px;
     }
 </style>
+<svelte:head>
+    <title>v1.6 Update | Quizfreely</title>
+    <meta name="description" content="Quizfreely's v1.6 update in July 2026 added a new matching activity and added a new option to make folders public and easily share them. These features are available in Quizfreely for free for all users." />
+    <meta name="robots" content="index, follow" />
+</svelte:head>
 <h2>Match Activity &amp; Shareable Folders</h2>
 <p class="fg0" style="font-size: 1.4rem; margin-bottom: 2rem;">v1.6.0 · 26 Jul 2026</p>
 <enhanced:img class="main-img" src="$lib/changelog/img/v1.6.0-match.png" alt="New Maching Activity Screenshot" />

@@ -8,6 +8,11 @@
         margin-top: 0px;
     }
 </style>
+<svelte:head>
+    <title>v1.7 Update | Quizfreely</title>
+    <meta name="description" content="Quizfreely's v1.7 update in August 2026 added new features for useful history & progress tracking across multiple studysets. These features are available for free in Quizfreely for all users." />
+    <meta name="robots" content="index, follow" />
+</svelte:head>
 <h2>Detailed History &amp; Stats</h2>
 <p class="fg0" style="font-size: 1.4rem; margin-bottom: 2rem;">v1.7.0 · 24 Aug 2026</p>
 <enhanced:img class="main-img" src="$lib/changelog/img/v1.7.0-history-stats.png" alt="New History Feature Screenshot" />
