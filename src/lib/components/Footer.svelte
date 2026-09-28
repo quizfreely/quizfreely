@@ -16,7 +16,7 @@
 >
   <h2>Quizfreely</h2>
   <p style="max-width: 24rem; margin-left: auto; margin-right: auto;">
-    Quizfreely is a free and open source nonprofit project made by Ehan A &amp;
+    Quizfreely is a free and open source non-profit project made by Ehan A &amp;
     contributors
   </p>
   <div class="flex center compact-gap">

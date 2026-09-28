@@ -69,7 +69,7 @@
       <div style="margin-top: 4rem;">
           <h2 class="h3">It's <span class="extra">actually free</span></h2>
           <p style="max-width: 40rem;">
-              Quizfreely has unlimited practice tests for free, unlike other flashcard websites or studying apps. Quizfreely is open source and nonprofit, and there are no ads and no paid features or subscriptions.
+              Quizfreely has unlimited practice tests for free, unlike other flashcard websites or studying apps. Quizfreely is open source and non-profit, and there are no ads and no paid features or subscriptions.
           </p>
       </div>
       <div style="margin-top: 4rem;">
@@ -84,9 +84,9 @@
   <div class="grid page">
     <div class="content">
       <div>
-        <h2 class="h3">Quizfreely is <span class="love">nonprofit</span></h2>
+        <h2 class="h3">Quizfreely is <span class="love">non-profit</span></h2>
         <p>
-            Quizfreely is a nonprofit project with <a href="https://hcb.hackclub.com/quizfreely" class="link-love with-underline">transparent finances</a>.
+            Quizfreely is a non-profit project with <a href="https://hcb.hackclub.com/quizfreely" class="link-love with-underline">transparent finances</a>.
             <span class="optional-line-600px">We're fiscally sponsored by <a class="link-love with-underline" href="https://the.hackfoundation.org">The Hack Foundation</a>, a <span style="white-space: nowrap;">501(c)(3)</span> nonprofit.</span>
         </p>
         <div class="flex">

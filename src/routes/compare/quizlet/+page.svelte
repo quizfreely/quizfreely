@@ -182,7 +182,7 @@
       <div style="margin-top: 6rem;">
           <h2 class="h3">Quizfreely is <span class="extra">actually free</span></h2>
           <p style="max-width: 40rem;">
-              Quizfreely has unlimited practice tests for free, unlike other flashcard websites or studying apps like Quizlet. Quizfreely is open source and nonprofit, and there are no paid features or subscriptions.
+              Quizfreely has unlimited practice tests for free, unlike other flashcard websites or studying apps like Quizlet. Quizfreely is open source and non-profit, and there are no paid features or subscriptions.
           </p>
           <div class="flex">
             <a href="/sign-up" class="button large alt yayy">
