@@ -71,7 +71,7 @@
   <title>Sign In | Quizfreely</title>
   <meta
     name="description"
-    content="Quizfreely is a free and open source studying tool."
+    content="Quizfreely is a free and open-source studying tool."
   />
 </svelte:head>
 
@@ -93,7 +93,7 @@
           <p class="h3">You're signed in!</p>
           <div class="flex">
             <a href="/dashboard" class="button yay">Dashboard</a>
-            <a href="/settings" class="button yay alt">Settings</a>
+            <a href="/settings/account" class="button yay alt">Settings</a>
           </div>
         </div>
       </div>

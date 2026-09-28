@@ -10,8 +10,8 @@
 </script>
 
 <svelte:head>
-    <title>Quizfreely: Free Open Source Studying Tool</title>
-    <meta name="description" content="Quizfreely is a free and open source learning app with flashcards, practice tests, and more tools to help you study." />
+    <title>Quizfreely: Free Open-Source Studying Tool</title>
+    <meta name="description" content="Quizfreely is a free and open-source learning app with flashcards, practice tests, and more tools to help you study." />
     <meta name="robots" content="index, follow" />
     <link rel="canonical" href="https://quizfreely.org" />
 </svelte:head>
@@ -31,7 +31,7 @@
             A studying tool that's <span class="extra">actually free</span>
         </h1>
         <p style="max-width: 28rem; margin: auto; margin-top: 1rem">
-            Quizfreely is a free and open source learning app with flashcards, review/learn mode, practice tests, & more!
+            Quizfreely is a free and open-source learning app with flashcards, review/learn mode, practice tests, & more!
         </p>
         <div class="flex center">
             <a href="/sign-up" class="button large">Get Started</a>
@@ -60,7 +60,7 @@
                 <NoIcon></NoIcon> No Paid Subscriptions
             </div>
             <div class="box" style="display: flex; gap: 0.4rem; align-items: center;">
-                <CheckmarkIcon></CheckmarkIcon> Free & Open Source
+                <CheckmarkIcon></CheckmarkIcon> Free & Open-Source
             </div>
             <div class="box" style="display: flex; gap: 0.4rem; align-items: center;">
                 <CheckmarkIcon></CheckmarkIcon> Privacy-Friendly
@@ -69,7 +69,7 @@
       <div style="margin-top: 4rem;">
           <h2 class="h3">It's <span class="extra">actually free</span></h2>
           <p style="max-width: 40rem;">
-              Quizfreely has unlimited practice tests for free, unlike other flashcard websites or studying apps. Quizfreely is open source and nonprofit, and there are no ads and no paid features or subscriptions.
+              Quizfreely has unlimited practice tests for free, unlike other flashcard websites or studying apps. Quizfreely is open-source and non-profit, and there are no ads and no paid features or subscriptions.
           </p>
       </div>
       <div style="margin-top: 4rem;">
@@ -84,9 +84,9 @@
   <div class="grid page">
     <div class="content">
       <div>
-        <h2 class="h3">Quizfreely is <span class="love">nonprofit</span></h2>
+        <h2 class="h3">Quizfreely is <span class="love">non-profit</span></h2>
         <p>
-            Quizfreely is a nonprofit project with <a href="https://hcb.hackclub.com/quizfreely" class="link-love with-underline">transparent finances</a>.
+            Quizfreely is a non-profit project with <a href="https://hcb.hackclub.com/quizfreely" class="link-love with-underline">transparent finances</a>.
             <span class="optional-line-600px">We're fiscally sponsored by <a class="link-love with-underline" href="https://the.hackfoundation.org">The Hack Foundation</a>, a <span style="white-space: nowrap;">501(c)(3)</span> nonprofit.</span>
         </p>
         <div class="flex">
@@ -97,16 +97,16 @@
         </div>
       </div>
       <div style="margin-top: 4rem;">
-        <h2 class="h3">Fully <span class="love">open source</span></h2>
+        <h2 class="h3">Fully <span class="love">open-source</span></h2>
         <p style="max-width: 36rem;">
-            Quizfreely is released under the AGPL-3.0 license. Our frontend web app, backend API, <a href="https://docs.quizfreely.org" class="link-love with-underline">documentation</a>, and all of our software are all open source on Codeberg and GitHub.
+            Quizfreely is released under the AGPL-3.0 license. Our frontend web app, backend API, <a href="https://docs.quizfreely.org" class="link-love with-underline">documentation</a>, and all of our software are all open-source on Codeberg and GitHub.
         </p>
         <div class="flex compact-gap">
-          <a class="button large faint" href="https://codeberg.org/quizfreely">
+          <a class="button large faint" href="https://codeberg.org/quizfreely/quizfreely">
             <IconCodeberg></IconCodeberg>
             Codeberg
           </a>
-          <a class="button large faint" href="https://github.com/quizfreely">
+          <a class="button large faint" href="https://github.com/quizfreely/quizfreely">
             <IconGitHub></IconGitHub>
             GitHub
           </a>

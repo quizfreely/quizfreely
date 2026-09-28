@@ -16,7 +16,7 @@
 >
   <h2>Quizfreely</h2>
   <p style="max-width: 24rem; margin-left: auto; margin-right: auto;">
-    Quizfreely is a free and open source nonprofit project made by Ehan A &amp;
+    Quizfreely is a free and open-source non-profit project made by Ehan A &amp;
     contributors
   </p>
   <div class="flex center compact-gap">
@@ -48,6 +48,7 @@
       >
         <a href="/about">Landing Page</a>
         <a href="/compare/quizlet">Quizfreely vs Quizlet</a>
+        <a href="/changelog">Changelog</a>
       </div>
       <p class="fg0">Resources</p>
       <div
@@ -103,9 +104,9 @@
     </div>
   </div>
   <div style="text-align: start; padding: 0px 2rem">
-    <!-- <p> -->
-    <!--   v0.32.1 · <a href="https://codeberg.org/quizfreely/quizfreely/releases">Changelog (on Codeberg)</a> or <a href="https://github.com/quizfreely/quizfreely/releases">on GitHub</a> -->
-    <!-- </p> -->
+    <p>
+      v2.1.3 · <a href="/changelog/v2.0.0">New Features</a>
+    </p>
     <p class="fg0" style="font-size: 0.9rem;">
       © 2022-2026 Ehan Ahamed and contributors
       <span class="line">Licensed under AGPL-3.0</span>

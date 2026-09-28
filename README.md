@@ -1,6 +1,6 @@
 # Quizfreely
 
-Quizfreely is a free and open source studying tool.
+Quizfreely is a free and open-source studying tool.
 
 [quizfreely.org](https://quizfreely.org)
 
