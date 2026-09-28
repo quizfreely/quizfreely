@@ -71,7 +71,7 @@
   <title>Sign In | Quizfreely</title>
   <meta
     name="description"
-    content="Quizfreely is a free and open source studying tool."
+    content="Quizfreely is a free and open-source studying tool."
   />
 </svelte:head>
 

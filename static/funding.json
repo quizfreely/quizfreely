@@ -1,12 +1,11 @@
 {
     "$schema": "https://fundingjson.org/schema/v1.1.0.json",
-    "version": "v1.1.0",
     "entity": {
         "type": "organisation",
         "role": "owner",
         "name": "Quizfreely",
         "email": "quizfreely@quizfreely.org",
-        "description": "Quizfreely is an open source project with 501(c)(3) nonprofit status that provides free digital study tools.",
+        "description": "Quizfreely is an open-source project with 501(c)(3) nonprofit status that provides free digital study tools.",
         "webpageUrl": {
             "url": "https://quizfreely.org"
         }
@@ -14,7 +13,7 @@
     "projects": [{
         "guid": "quizfreely",
         "name": "Quizfreely",
-        "description": "Quizfreely is a free and open source studying platform that provides free digital study tools used by both students and teachers.",
+        "description": "Quizfreely is a free and open-source studying platform that provides free digital study tools used by both students and teachers.",
         "webpageUrl": {
             "url": "https://quizfreely.org"
         },

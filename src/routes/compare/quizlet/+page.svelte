@@ -10,8 +10,8 @@
 </script>
 
 <svelte:head>
-    <title>Free Open Source Quizlet Alternative: Quizfreely vs Quizlet</title>
-    <meta name="description" content="Quizfreely is a free and open source alternative to Quizlet with no ads, unlimited free practice tests, free images/media on flashcards, and many Quizlet Plus features for free!" />
+    <title>Free Open-Source Quizlet Alternative: Quizfreely vs Quizlet</title>
+    <meta name="description" content="Quizfreely is a free and open-source alternative to Quizlet with no ads, unlimited free practice tests, free images/media on flashcards, and many Quizlet Plus features for free!" />
     <meta name="robots" content="index, follow" />
     <link rel="canonical" href="https://quizfreely.org/compare/quizlet" />
 </svelte:head>
@@ -19,7 +19,7 @@
 <div class="grid page" style="margin-top: 4rem;">
     <div class="content">
         <h1 class="h2">Quizfreely vs Quizlet</h1>
-        <p style="max-width: 40rem;">Quizfreely is a free and open source studying platform. Quizfreely has no ads, unlimited free practice tests, free images/media for flashcards, and many more features that are free on Quizfreely but require a paid subscription on Quizlet.</p>
+        <p style="max-width: 40rem;">Quizfreely is a free and open-source studying platform. Quizfreely has no ads, unlimited free practice tests, free images/media for flashcards, and many more features that are free on Quizfreely but require a paid subscription on Quizlet.</p>
         <div class="flex">
             <a href="/sign-up" class="button large">
                 Get Started
@@ -163,7 +163,7 @@
                     </td>
                 </tr>
                 <tr>
-                    <td>Open Source</td>
+                    <td>Open-Source</td>
                     <td>
                         <div class="flex text yay" style="gap: 0.4rem; align-items: center;">
                             <CheckmarkIcon></CheckmarkIcon>
@@ -182,7 +182,7 @@
       <div style="margin-top: 6rem;">
           <h2 class="h3">Quizfreely is <span class="extra">actually free</span></h2>
           <p style="max-width: 40rem;">
-              Quizfreely has unlimited practice tests for free, unlike other flashcard websites or studying apps like Quizlet. Quizfreely is open source and non-profit, and there are no paid features or subscriptions.
+              Quizfreely has unlimited practice tests for free, unlike other flashcard websites or studying apps like Quizlet. Quizfreely is open-source and non-profit, and there are no paid features or subscriptions.
           </p>
           <div class="flex">
             <a href="/sign-up" class="button large alt yayy">
@@ -204,7 +204,7 @@
                 <NoIcon></NoIcon> No Paid Subscriptions
             </div>
             <div class="box" style="display: flex; gap: 0.4rem; align-items: center;">
-                <CheckmarkIcon></CheckmarkIcon> Free &amp; Open Source
+                <CheckmarkIcon></CheckmarkIcon> Free &amp; Open-Source
             </div>
             <div class="box" style="display: flex; gap: 0.4rem; align-items: center;">
                 <CheckmarkIcon></CheckmarkIcon> Privacy-Friendly
@@ -216,9 +216,9 @@
   <div class="grid page">
     <div class="content">
       <div>
-        <h2 class="h3">Quizfreely is <span class="love">open source</span></h2>
+        <h2 class="h3">Quizfreely is <span class="love">open-source</span></h2>
         <p style="max-width: 36rem;">
-            Quizfreely is fully open source, allowing community contributions and transparency. Users can inspect the code, suggest improvements, and even self-host the platform. Quizfreely is also more respectful of user privacy and less reliant on tracking or data monetization.
+            Quizfreely is fully open-source, built transparently with community contributions. Users can inspect the code, suggest improvements, and even self-host the platform. Quizfreely is also more respectful of user privacy and less reliant on tracking or data monetization.
         </p>
           <div class="flex">
             <a href="/sign-up" class="button large alt love">

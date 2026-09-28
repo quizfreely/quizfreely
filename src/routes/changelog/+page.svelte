@@ -7,7 +7,7 @@
 </script>
 <svelte:head>
     <title>Changelog | Quizfreely</title>
-    <meta name="description" content="Quizfreely's Changelog lists new features and updates to Quizfreely. Quizfreely is open source and is made by students and contributors who work on this project for free to add these advanced new features." />
+    <meta name="description" content="Quizfreely's Changelog lists new features and updates to Quizfreely. Quizfreely is open-source and is made by students and contributors who work on these new features for free." />
     <meta name="robots" content="index, follow" />
 </svelte:head>
 <div class="grid page">

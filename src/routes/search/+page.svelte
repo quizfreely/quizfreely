@@ -30,7 +30,7 @@
         <title>Search Quizfreely</title>
         <meta
             name="description"
-            content="Quizfreely is a free and open source learning app with flashcards, practice tests, and more tools to help you study."
+            content="Quizfreely is a free and open-source learning app with flashcards, practice tests, and more tools to help you study."
         />
     {/if}
 </svelte:head>
