@@ -393,13 +393,13 @@
             <Flashcards {terms} captionEnd={flashcardsCaptionEnd} />
                 <div id="terms-and-stuff-outer-div" style="--qzfr-og-fg-1: var(--fg-1);">
                     <div class="caption grid list" style="--fg-1: var(--main);">
-                        <a
-                            class="button button-box flex qzfr-activity-button-box"
-                            href="{data.local ? `/flashcards?localStudyset=${data.localId}` : `/flashcards?studyset=${data.studyset.id}`}"
-                        >
-                            <IconFlashcards />
-                            Flashcards
-                        </a>
+                        <!-- <a -->
+                        <!--     class="button button-box flex qzfr-activity-button-box" -->
+                        <!--     href="{data.local ? `/flashcards?localStudyset=${data.localId}` : `/flashcards?studyset=${data.studyset.id}`}" -->
+                        <!-- > -->
+                        <!--     <IconFlashcards /> -->
+                        <!--     Flashcards -->
+                        <!-- </a> -->
                         <!-- <a href="/studyset/local/review-mode?id={ data.localId }" class="button alt"> -->
                         <!--   <IconReviewModeBook /> -->
                         <!--   Review Mode -->
@@ -418,13 +418,13 @@
                             <IconPracticeTestChecklist />
                             Practice Test
                         </a>
-                        <a
-                            href={data.local ? `/spaced-repetition?localStudyset=${data.localId}` : `/spaced-repetition?studyset=${data.studyset?.id}`}
-                            class="button button-box flex qzfr-activity-button-box"
-                        >
-                            <SRSIcon />
-                            Spaced Repetition
-                        </a>
+                        <!-- <a -->
+                        <!--     href={data.local ? `/spaced-repetition?localStudyset=${data.localId}` : `/spaced-repetition?studyset=${data.studyset?.id}`} -->
+                        <!--     class="button button-box flex qzfr-activity-button-box" -->
+                        <!-- > -->
+                        <!--     <SRSIcon /> -->
+                        <!--     Spaced Repetition -->
+                        <!-- </a> -->
     <!-- temporary placeholder, same as `multiselect` snippet without --warn badge
     will be replaced with "gravity" mode or similar -->
     <!-- {#if studysetSelection.show} -->
