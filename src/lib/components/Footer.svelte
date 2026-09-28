@@ -105,7 +105,7 @@
   </div>
   <div style="text-align: start; padding: 0px 2rem">
     <p>
-      v2.1.3 · <a href="/changelog/v2.0.0">New Features</a>
+      v2.1.4 · <a href="/changelog/v2.0.0">New Features</a>
     </p>
     <p class="fg0" style="font-size: 0.9rem;">
       © 2022-2026 Ehan Ahamed and contributors
