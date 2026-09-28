@@ -20,7 +20,7 @@
 </style>
 <div class="box">
     <div class="flex features-box-content">
-        <enhanced:img src="./img/v1.6.0-match.png" alt="Select Multiple Studysets Feature Screenshot" />
+        <enhanced:img src="./img/v1.6.0-match.png" alt="New Maching Activity Screenshot" />
         <div class="flex" style="flex-direction: column; justify-content: space-between; flex-wrap: nowrap; gap: 0.4rem;">
         <div>
             <p style="font-size: 1.1rem; margin-bottom: 0px;">Match Activity & Shareable Folders</p>

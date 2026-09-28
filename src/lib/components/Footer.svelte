@@ -48,6 +48,7 @@
       >
         <a href="/about">Landing Page</a>
         <a href="/compare/quizlet">Quizfreely vs Quizlet</a>
+        <a href="/changelog">Changelog</a>
       </div>
       <p class="fg0">Resources</p>
       <div
@@ -104,7 +105,7 @@
   </div>
   <div style="text-align: start; padding: 0px 2rem">
     <p>
-      v2.2.3 · <a href="/changelog/v2.0.0">Changelog</a>
+      v2.1.3 · <a href="/changelog/v2.0.0">New Features</a>
     </p>
     <p class="fg0" style="font-size: 0.9rem;">
       © 2022-2026 Ehan Ahamed and contributors
