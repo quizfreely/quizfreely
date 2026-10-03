@@ -391,71 +391,71 @@
                 </a>
             {/snippet}
             <Flashcards {terms} captionEnd={flashcardsCaptionEnd} />
-                <div id="terms-and-stuff-outer-div" style="--qzfr-og-fg-1: var(--fg-1);">
-                    <div class="caption grid list" style="--fg-1: var(--main);">
-                        <!-- <a -->
-                        <!--     class="button button-box flex qzfr-activity-button-box" -->
-                        <!--     href="{data.local ? `/flashcards?localStudyset=${data.localId}` : `/flashcards?studyset=${data.studyset.id}`}" -->
-                        <!-- > -->
-                        <!--     <IconFlashcards /> -->
-                        <!--     Flashcards -->
-                        <!-- </a> -->
+                <div id="terms-and-stuff-outer-div">
+                    <div class="caption grid list">
+                        <a
+                            class="button button-box flex qzfr-activity-button-box text main"
+                            href="{data.local ? `/flashcards?localStudyset=${data.localId}` : `/flashcards?studyset=${data.studyset.id}`}"
+                        >
+                            <IconFlashcards />
+                            Flashcards
+                        </a>
                         <!-- <a href="/studyset/local/review-mode?id={ data.localId }" class="button alt"> -->
                         <!--   <IconReviewModeBook /> -->
                         <!--   Review Mode -->
                         <!-- </a> -->
                         <a
                             href="{data.local ? `/studyset/local/match?id=${data.localId}` : `/studysets/${data.studyset?.id}/match`}"
-                            class="button button-box flex qzfr-activity-button-box"
+                            class="button button-box flex qzfr-activity-button-box text main"
                         >
                             <GridIcon />
                             Match
                         </a>
                         <a
                             href="{data.local ? `/studyset/local/practice-test?id=${data.localId}` : `/studysets/${data.studyset?.id}/practice-test`}"
-                            class="button button-box flex qzfr-activity-button-box"
+                            class="button button-box flex qzfr-activity-button-box text main"
                         >
                             <IconPracticeTestChecklist />
                             Practice Test
                         </a>
-                        <!-- <a -->
-                        <!--     href={data.local ? `/spaced-repetition?localStudyset=${data.localId}` : `/spaced-repetition?studyset=${data.studyset?.id}`} -->
-                        <!--     class="button button-box flex qzfr-activity-button-box" -->
-                        <!-- > -->
-                        <!--     <SRSIcon /> -->
-                        <!--     Spaced Repetition -->
-                        <!-- </a> -->
+                        <a
+                            href={data.local ? `/spaced-repetition?localStudyset=${data.localId}` : `/spaced-repetition?studyset=${data.studyset?.id}`}
+                            class="button button-box flex qzfr-activity-button-box text main"
+                        >
+                            <SRSIcon />
+                            Spaced Repetition
+                        </a>
     <!-- temporary placeholder, same as `multiselect` snippet without --warn badge
     will be replaced with "gravity" mode or similar -->
-    <!-- {#if studysetSelection.show} -->
-    <!--     {#if studysetSelection.cloudIds.has(data.studyset?.id ?? data.localId) || studysetSelection.localIds.has(data.studyset?.id ?? data.localId)} -->
-    <!--         <button class="button-box flex qzfr-activity-button-box text fg1" onclick={() => { -->
-    <!--             studysetSelection.deselect({ -->
-    <!--                 cloudId: data.studyset?.id, -->
-    <!--                 localId: data.localId, -->
-    <!--             }); -->
-    <!--         }}> -->
-    <!--             <XMarkIcon /> Deselect -->
-    <!--         </button> -->
-    <!--     {:else} -->
-    <!--         <button class="button-box flex qzfr-activity-button-box" onclick={() => { -->
-    <!--             studysetSelection.select({ -->
-    <!--                 cloudId: data.studyset?.id, -->
-    <!--                 localId: data.localId, -->
-    <!--             }); -->
-    <!--         }}> -->
-    <!--             <PlusIcon /> Select -->
-    <!--         </button> -->
-    <!--     {/if} -->
-    <!-- {:else} -->
-    <!--     <a class="button button-box flex qzfr-activity-button-box" href={data.local ? -->
-    <!--         `/combine?localStudyset=${data.localId}` : -->
-    <!--         `/combine?studyset=${data.studyset?.id}` -->
-    <!--     }><PlusIcon /> Select Multiple</a> -->
-    <!-- {/if} -->
+    {#if studysetSelection.show}
+        {#if studysetSelection.cloudIds.has(data.studyset?.id ?? data.localId) || studysetSelection.localIds.has(data.studyset?.id ?? data.localId)}
+            <button class="button-box flex qzfr-activity-button-box" onclick={() => {
+                studysetSelection.deselect({
+                    cloudId: data.studyset?.id,
+                    localId: data.localId,
+                });
+            }}>
+                <XMarkIcon /> Deselect
+            </button>
+        {:else}
+            <button class="button-box flex qzfr-activity-button-box text main" onclick={() => {
+                studysetSelection.select({
+                    cloudId: data.studyset?.id,
+                    localId: data.localId,
+                });
+            }}>
+                <PlusIcon /> Select
+            </button>
+        {/if}
+    {:else}
+        <a class="button button-box flex qzfr-activity-button-box text main" href={data.local ?
+            `/combine?localStudyset=${data.localId}` :
+            `/combine?studyset=${data.studyset?.id}`
+        }><PlusIcon /> Select Multiple</a>
+    {/if}
                         <a
                             href="{data.local ? `/studyset/local/stats?id=${data.localId}` : `/studysets/${data.studyset?.id}/stats`}"
-                            class="button button-box flex qzfr-activity-button-box"
+                            class="button button-box flex qzfr-activity-button-box text main"
                         >
                             <IconGraph />
                             Progress &amp; Stats
