@@ -17,6 +17,8 @@
     import FullscreenIcon from "$lib/icons/FullscreenMaximize.svelte"
     import PlusIcon from "$lib/icons/Plus.svelte"
     import SearchIcon from "$lib/icons/Search.svelte"
+    import IconFlashcards from "$lib/icons/Flashcards.svelte";
+    import SRSIcon from "$lib/icons/FlaskScienceSRS.svelte";
     let { data } = $props();
     let currentCloudIds = $state([...data.cloudIds]);
     let currentLocalIds = $state([...data.localIds]);
@@ -67,6 +69,15 @@
         ...currentCloudIds.map((id) => `studyset=${id}`),
         ...currentLocalIds.map((id) => `localStudyset=${id}`),
     ].join("&"))
+
+    function addMoreButtonOnclick() {
+        studysetSelection.replaceSelection({
+            cloudIds: currentCloudIds,
+            localIds: currentLocalIds,
+        });
+        studysetSelection.setOverrideShow(true);
+        goto("/dashboard");
+    }
 </script>
 <div class="grid page" style="padding-top: 1rem;">
     <div class="content">
@@ -82,14 +93,7 @@
                     <p class="fg0" style="margin-top: 0.2rem; font-size: 1.2rem;">0 Studysets Selected</p>
                 </div>
                 {/if}
-                <button onclick={() => {
-                    studysetSelection.replaceSelection({
-                        cloudIds: currentCloudIds,
-                        localIds: currentLocalIds,
-                    });
-                    studysetSelection.setOverrideShow(true);
-                    goto("/dashboard");
-                }}><PlusIcon></PlusIcon> Add More</button>
+                <button onclick={addMoreButtonOnclick}><PlusIcon></PlusIcon> Add More</button>
             </div>
         {#if (currentLocalIds.length == 0 && currentCloudIds.length > studysets.length) ||
             (localStudysetsLoaded && currentCloudIds.length + currentLocalIds.length > studysets.length)}
@@ -152,22 +156,43 @@
             <div class="grid list caption">
                 <button onclick={() => {
                     studysetSelection.clearSelection();
+                    goto(`/flashcards?${idSearchParams}`);
+                }} class="button button-box flex qzfr-activity-button-box text main">
+                    <IconFlashcards />
+                    Flashcards
+                </button>
+                <button onclick={() => {
+                    studysetSelection.clearSelection();
                     goto(`/match?${idSearchParams}`);
-                }} class="alt">
+                }} class="button-box flex qzfr-activity-button-box text main">
                     <GridIcon />
                     Match
                 </button>
                 <button onclick={() => {
                     studysetSelection.clearSelection();
                     goto(`/practice-test?${idSearchParams}`);
-                }} class="alt">
+                }} class="button-box flex qzfr-activity-button-box text main">
                     <PTIcon />
                     Practice Test
                 </button>
                 <button onclick={() => {
                     studysetSelection.clearSelection();
+                    goto(`/spaced-repetition?${idSearchParams}`);
+                }} class="button button-box flex qzfr-activity-button-box text main">
+                    <SRSIcon />
+                    Spaced Repetition
+                </button>
+                <button
+                    onclick={addMoreButtonOnclick}
+                    class="button button-box flex qzfr-activity-button-box text main"
+                >
+                    <PlusIcon />
+                    Select More
+                </button>
+                <button onclick={() => {
+                    studysetSelection.clearSelection();
                     goto(`/stats?${idSearchParams}`);
-                }} class="alt">
+                }} class="button-box flex qzfr-activity-button-box text main">
                     <GraphIcon />
                     Progress &amp; Stats
                 </button>
@@ -206,5 +231,13 @@
     }
     .gap-after-this-here-2 + .gap-before-this-here {
         margin-top: 2rem;
+    }
+    .qzfr-activity-button-box,
+    .flex.qzfr-activity-button-box,
+    .button-box.qzfr-activity-button-box,
+    .button-box.flex.qzfr-activity-button-box {
+        display: flex;
+        gap: 0.4rem;
+        align-items: center;
     }
 </style>
