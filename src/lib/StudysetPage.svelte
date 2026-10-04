@@ -403,45 +403,60 @@
                     {/if}
                 </div>
             {#snippet flashcardsCaptionEnd()}
-                <a href="{`/flashcards?${idSearchParams}`}" class="button faint" aria-label="Fullscreen Flashcards">
+                <button onclick={() => {
+                    studysetSelection.clearSelection();
+                    goto(`/flashcards?${idSearchParams}`);
+                }} class="faint" aria-label="Fullscreen Flashcards">
                     <FullscreenIcon></FullscreenIcon>
-                </a>
+                </button>
             {/snippet}
             <Flashcards {terms} captionEnd={flashcardsCaptionEnd} />
                 <div id="terms-and-stuff-outer-div">
                     <div class="caption grid list">
-                        <a
-                            class="button button-box flex qzfr-activity-button-box text main"
-                            href="{`/flashcards?${idSearchParams}`}"
+                        <button
+                            class="button-box flex qzfr-activity-button-box text main"
+                            onclick={() => {
+                                studysetSelection.clearSelection();
+                                goto(`/flashcards?${idSearchParams}`);
+                            }}
                         >
                             <IconFlashcards />
                             Flashcards
-                        </a>
+                        </button>
                         <!-- <a href="/studyset/local/review-mode?id={ data.localId }" class="button alt"> -->
                         <!--   <IconReviewModeBook /> -->
                         <!--   Review Mode -->
                         <!-- </a> -->
-                        <a
-                            href="{`/match?${idSearchParams}`}"
-                            class="button button-box flex qzfr-activity-button-box text main"
+                        <button
+                            class="button-box flex qzfr-activity-button-box text main"
+                            onclick={() => {
+                                studysetSelection.clearSelection();
+                                goto(`/match?${idSearchParams}`);
+                            }}
                         >
                             <GridIcon />
                             Match
-                        </a>
-                        <a
-                            href="{`/practice-test?${idSearchParams}`}"
-                            class="button button-box flex qzfr-activity-button-box text main"
+                        </button>
+                        <button
+                            class="button-box flex qzfr-activity-button-box text main"
+                            onclick={() => {
+                                studysetSelection.clearSelection();
+                                goto(`/practice-test?${idSearchParams}`);
+                            }}
                         >
                             <IconPracticeTestChecklist />
                             Practice Test
-                        </a>
-                        <a
-                            href={`/spaced-repetition?${idSearchParams}`}
-                            class="button button-box flex qzfr-activity-button-box text main"
+                        </button>
+                        <button
+                            class="button-box flex qzfr-activity-button-box text main"
+                            onclick={() => {
+                                studysetSelection.clearSelection();
+                                goto(`/spaced-repetition?${idSearchParams}`);
+                            }}
                         >
                             <SRSIcon />
                             Spaced Repetition
-                        </a>
+                        </button>
     <!-- temporary placeholder, same as `multiselect` snippet without --warn badge
     will be replaced with "gravity" mode or similar -->
     {#if studysetSelection.show}
@@ -470,13 +485,16 @@
             `/combine?studyset=${data.studyset?.id}`
         }><PlusIcon /> Select Multiple</a>
     {/if}
-                        <a
-                            href="{`/stats?${idSearchParams}`}"
-                            class="button button-box flex qzfr-activity-button-box text main"
+                        <button
+                            class="button-box flex qzfr-activity-button-box text main"
+                            onclick={() => {
+                                studysetSelection.clearSelection();
+                                goto(`/stats?${idSearchParams}`);
+                            }}
                         >
                             <IconGraph />
                             Progress &amp; Stats
-                        </a>
+                        </button>
                     </div>
                     <TermsTable {terms} class="caption" />
                 </div>
