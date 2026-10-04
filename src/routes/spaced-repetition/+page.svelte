@@ -1,4 +1,6 @@
 <script>
+    import { onMount } from "svelte";
+    import { idbApiLayer } from "$lib/idb-api-layer";
     import BackIcon from "$lib/icons/BackArrow.svelte";
     import SRSIcon from "$lib/icons/FlaskScienceSRS.svelte";
     let { data } = $props();
@@ -8,6 +10,17 @@
             terms.push(t);
         })
     });
+    let objUrls = [];
+    onMount(() => {
+        if (data.localIds.length > 0) {
+            const idbApiLayer.getStudysetsByIds()
+        }
+        return () => {
+            objUrls.forEach(objUrl => {
+                URL.revokeObjectURL(objUrl);
+            });
+        };
+    })
 </script>
 <div class="grid page">
     <div class="content">
