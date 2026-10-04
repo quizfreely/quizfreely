@@ -115,6 +115,23 @@
     let folderId = $state(data?.studyset?.myFolder?.id ?? null);
     let folderName = $state(data?.studyset?.myFolder?.name ?? null);
     let showFolderChooser = $state(false);
+    
+    /* idSearchParams is URL search component WITHOUT starting question mark (`?`) */
+    const idSearchParams = $derived.by(() => {
+        let params = [];
+        studysetSelection?.cloudIds?.forEach?.((id) => {
+            params.push(`studyset=${id}`);
+        });
+        studysetSelection?..localIds?.forEach?.((id) => {
+            params.push(`localStudyset=${id}`);
+        });
+        if (data.local && data.localId != null && !studysetSelection?.localIds?.has?.(data.localId)) {
+            params.push(`localStudyset=${data.localId}`);
+        } else if (data.studyset?.id != null && !studysetSelection?.cloudIds?.has?.(data.studyset.id)) {
+            params.push(`studyset=${data.studyset.id}`);
+        }
+        return params.join("&");
+    })
 </script>
 
 <svelte:head>
@@ -386,7 +403,7 @@
                     {/if}
                 </div>
             {#snippet flashcardsCaptionEnd()}
-                <a href="{data.local ? `/flashcards?localStudyset=${data.localId}` : `/flashcards?studyset=${data.studyset.id}`}" class="button faint" aria-label="Fullscreen Flashcards">
+                <a href="{`/flashcards?${idSearchParams}`}" class="button faint" aria-label="Fullscreen Flashcards">
                     <FullscreenIcon></FullscreenIcon>
                 </a>
             {/snippet}
@@ -395,7 +412,7 @@
                     <div class="caption grid list">
                         <a
                             class="button button-box flex qzfr-activity-button-box text main"
-                            href="{data.local ? `/flashcards?localStudyset=${data.localId}` : `/flashcards?studyset=${data.studyset.id}`}"
+                            href="{`/flashcards?${idSearchParams}`}"
                         >
                             <IconFlashcards />
                             Flashcards
@@ -405,21 +422,21 @@
                         <!--   Review Mode -->
                         <!-- </a> -->
                         <a
-                            href="{data.local ? `/studyset/local/match?id=${data.localId}` : `/studysets/${data.studyset?.id}/match`}"
+                            href="{`/match?${idSearchParams}`}"
                             class="button button-box flex qzfr-activity-button-box text main"
                         >
                             <GridIcon />
                             Match
                         </a>
                         <a
-                            href="{data.local ? `/studyset/local/practice-test?id=${data.localId}` : `/studysets/${data.studyset?.id}/practice-test`}"
+                            href="{`/practice-test?${idSearchParams}`}"
                             class="button button-box flex qzfr-activity-button-box text main"
                         >
                             <IconPracticeTestChecklist />
                             Practice Test
                         </a>
                         <a
-                            href={data.local ? `/spaced-repetition?localStudyset=${data.localId}` : `/spaced-repetition?studyset=${data.studyset?.id}`}
+                            href={`/spaced-repetition?${data.localId}`}
                             class="button button-box flex qzfr-activity-button-box text main"
                         >
                             <SRSIcon />
@@ -454,7 +471,7 @@
         }><PlusIcon /> Select Multiple</a>
     {/if}
                         <a
-                            href="{data.local ? `/studyset/local/stats?id=${data.localId}` : `/studysets/${data.studyset?.id}/stats`}"
+                            href="{`/stats?${idSearchParams}`}"
                             class="button button-box flex qzfr-activity-button-box text main"
                         >
                             <IconGraph />
