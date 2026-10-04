@@ -32,7 +32,12 @@
             <span class="h3" style="margin-bottom: 0px;">Spaced Repetition</span>
         </div>
         <div class="flex" style="align-items: center; justify-content: center;">
-            <span>{terms.length} Terms</span>
+            <span style="font-size: 1.4rem;">
+                {terms.length} total terms
+                {#if data.cloudIds.length+data.localIds.length > 1}
+                    <span class="fg0">from {data.cloudIds.length+data.localIds.length} studysets</span>
+                {/if}
+            </span>
         </div>
     </div>
 </div>
