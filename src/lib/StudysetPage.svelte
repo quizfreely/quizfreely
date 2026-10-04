@@ -404,7 +404,10 @@
                 </div>
             {#snippet flashcardsCaptionEnd()}
                 <button onclick={() => {
-                    studysetSelection.clearSelection();
+                    studysetSelection.select({
+                        cloudId: data.studyset?.id,
+                        localId: data.localId,
+                    });
                     goto(`/flashcards?${idSearchParams}`);
                 }} class="faint" aria-label="Fullscreen Flashcards">
                     <FullscreenIcon></FullscreenIcon>
@@ -416,7 +419,10 @@
                         <button
                             class="button-box flex qzfr-activity-button-box text main"
                             onclick={() => {
-                                studysetSelection.clearSelection();
+                                studysetSelection.select({
+                                    cloudId: data.studyset?.id,
+                                    localId: data.localId,
+                                });
                                 goto(`/flashcards?${idSearchParams}`);
                             }}
                         >
@@ -430,7 +436,10 @@
                         <button
                             class="button-box flex qzfr-activity-button-box text main"
                             onclick={() => {
-                                studysetSelection.clearSelection();
+                                studysetSelection.select({
+                                    cloudId: data.studyset?.id,
+                                    localId: data.localId,
+                                });
                                 goto(`/match?${idSearchParams}`);
                             }}
                         >
@@ -440,7 +449,10 @@
                         <button
                             class="button-box flex qzfr-activity-button-box text main"
                             onclick={() => {
-                                studysetSelection.clearSelection();
+                                studysetSelection.select({
+                                    cloudId: data.studyset?.id,
+                                    localId: data.localId,
+                                });
                                 goto(`/practice-test?${idSearchParams}`);
                             }}
                         >
@@ -450,7 +462,10 @@
                         <button
                             class="button-box flex qzfr-activity-button-box text main"
                             onclick={() => {
-                                studysetSelection.clearSelection();
+                                studysetSelection.select({
+                                    cloudId: data.studyset?.id,
+                                    localId: data.localId,
+                                });
                                 goto(`/spaced-repetition?${idSearchParams}`);
                             }}
                         >
@@ -488,7 +503,10 @@
                         <button
                             class="button-box flex qzfr-activity-button-box text main"
                             onclick={() => {
-                                studysetSelection.clearSelection();
+                                studysetSelection.select({
+                                    cloudId: data.studyset?.id,
+                                    localId: data.localId,
+                                });
                                 goto(`/stats?${idSearchParams}`);
                             }}
                         >
