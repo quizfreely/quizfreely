@@ -122,7 +122,7 @@
         studysetSelection?.cloudIds?.forEach?.((id) => {
             params.push(`studyset=${id}`);
         });
-        studysetSelection?..localIds?.forEach?.((id) => {
+        studysetSelection?.localIds?.forEach?.((id) => {
             params.push(`localStudyset=${id}`);
         });
         if (data.local && data.localId != null && !studysetSelection?.localIds?.has?.(data.localId)) {
@@ -436,7 +436,7 @@
                             Practice Test
                         </a>
                         <a
-                            href={`/spaced-repetition?${data.localId}`}
+                            href={`/spaced-repetition?${idSearchParams}`}
                             class="button button-box flex qzfr-activity-button-box text main"
                         >
                             <SRSIcon />
