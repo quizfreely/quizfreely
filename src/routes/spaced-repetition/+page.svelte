@@ -2,6 +2,12 @@
     import BackIcon from "$lib/icons/BackArrow.svelte";
     import SRSIcon from "$lib/icons/FlaskScienceSRS.svelte";
     let { data } = $props();
+    let terms = $state([]);
+    data.studysets.forEach(s => {
+        s.terms.forEach(t => {
+            terms.push(t);
+        })
+    });
 </script>
 <div class="grid page">
     <div class="content">
@@ -24,6 +30,9 @@
         <div class="flex" style="align-items: center; justify-content: center; gap: 1.2rem; margin-top: 2rem;">
             <SRSIcon width="2rem" height="2rem" />
             <span class="h3" style="margin-bottom: 0px;">Spaced Repetition</span>
+        </div>
+        <div class="flex" style="align-items: center; justify-content: center;">
+            <span>{terms.length} Terms</span>
         </div>
     </div>
 </div>
