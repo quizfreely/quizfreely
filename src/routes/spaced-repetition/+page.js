@@ -1,6 +1,7 @@
 import { error } from '@sveltejs/kit';
 
 export async function load({ fetch, url }) {
+    const flashcardsMode = url.searchParams.get("mode") == "flashcards";
     const cloudIds = url.searchParams.getAll("studyset");
     const localIds = url.searchParams.getAll("localStudyset").map(
         id => (id == "" || isNaN(id)) ?
@@ -90,5 +91,6 @@ export async function load({ fetch, url }) {
         ...data,
         cloudIds,
         localIds,
+        flashcardsMode,
     };
 }
