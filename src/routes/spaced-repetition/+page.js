@@ -39,6 +39,17 @@ export async function load({ fetch, url }) {
                         def
                         termImageUrl
                         defImageUrl
+                        fsrsCard {
+                            difficulty,
+                            due,
+                            lapses,
+                            lastReview,
+                            learningSteps,
+                            reps,
+                            scheduledDays,
+                            stability,
+                            state
+                        }
                     }
                 }
             }`;
