@@ -71,7 +71,7 @@ export async function load({ params, fetch }) {
             })
         });
         const resp = await respRaw.json();
-console.log(JSON.stringify(resp, null, 4));
+        // console.log(JSON.stringify(resp, null, 4));
         if (resp?.data == null || resp?.errors != null) {
             console.log("Error in cloud practice test (viewing) load func api request. Response: ", resp);
         }
