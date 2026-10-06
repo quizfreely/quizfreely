@@ -209,6 +209,7 @@ newTermsIndex: ${newTermsIndex}`);
                 <div style="min-height: 6rem;">
                     {#if testYourself}
                         <div class="flex center" style="--og-warn: var(--warn);">
+                            <div class="flex" style="flex-wrap: nowrap;">
                             <div class="flex col card-rating-button-container">
                                 <button class="button-box ohno">Again</button>
                                 <span class="fg0">{preview == null ? "" : show_diff_message(
@@ -227,6 +228,8 @@ newTermsIndex: ${newTermsIndex}`);
                                     TIMEUNITFORMAT
                                 )}</span>
                             </div>
+                            </div>
+                            <div class="flex" style="flex-wrap: nowrap;">
                             <div class="flex col card-rating-button-container">
                                 <button class="button-box text main">Good</button>
                                 <span class="fg0">{preview == null ? "" : show_diff_message(
@@ -244,6 +247,7 @@ newTermsIndex: ${newTermsIndex}`);
                                     true,
                                     TIMEUNITFORMAT
                                 )}</span>
+                            </div>
                             </div>
                         </div>
                     {/if}
