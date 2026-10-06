@@ -90,7 +90,7 @@
                 <div class="box">
                 <div class="flex" style="align-items: center; justify-content: space-between; flex-wrap: nowrap;">
                     <div class="flex" style="align-items: center; gap: 0.6rem; font-size: 1.2rem; flex-wrap: nowrap;">
-                        <FlashcardsIcon width="1em" height="1em" style="color: color-mix(in srgb, var(--fg-1) 50%, var(--fg-0));" />
+                        <FlashcardsIcon width="1em" height="1em" style="color: color-mix(in srgb, var(--fg-1) 60%, var(--fg-0));" />
                         <span> Flashcards</span>
                     </div>
                     <button><CheckmarkIcon /> Start</button>
@@ -98,7 +98,7 @@
                 <div class="separator">or</div>
                 <div class="flex" style="align-items: center; justify-content: space-between; flex-wrap: nowrap;">
                     <div class="flex" style="align-items: center; gap: 0.6rem; font-size: 1.2rem; flex-wrap: nowrap;">
-                        <GridIcon width="1em" height="1em" style="color: color-mix(in srgb, var(--fg-1) 50%, var(--fg-0));" />
+                        <GridIcon width="1em" height="1em" />
                         <span>Multiple Choice Questions</span>
                     </div>
                     <button><CheckmarkIcon /> Start</button>
