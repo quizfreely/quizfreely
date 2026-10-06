@@ -20,58 +20,58 @@
 
     let showPrompt = $state(false);
 
-    // let preview = $state(null);
-    // const TIMEUNITFORMAT = ['s', 'm', 'h', 'd', ' months', ' years'];
-    // const fsrsStates = ["NEW", "LEARNING", "REVIEW", "RELEARNING"];
-    // const fsrsRatings = ["MANUAL", "HARD", "GOOD", "EASY"];
-    // function fsrsNextAfterHandler({card, log}) {
-    //     return {
-    //         card: {
-    //             ...card,
-    //             due: card.due.toISOString(),
-    //             last_review: card?.last_review?.toISOString() ?? null,
-    //             state: fsrsCards[card.state]
-    //         },
-    //         log: {
-    //             ...log,
-    //             due: log.due.toISOString(),
-    //             rating: fsrsRatings[log.rating],
-    //             review: log.review.toISOString(),
-    //             state: fsrsStates[log.state]
-    //         }
-    //     };
-    // }
-    //
-    // function prepareTermsByCards() {
-    //     terms = allTerms.filter(term => {
-    //
-    //         let isNew = false;
-    //         if (term.fsrsCard == null) {
-    //             term.fsrsCard = createEmptyCard();
-    //             isNew = true;
-    //         } else {
-    //             term.fsrsCard = TypeConvert.card(term.fsrsCard);
-    //             if (term.fsrsCard.state == State.New) {
-    //                 isNew = true;
-    //             }
-    //         }
-    //
-    //         if (isNew) {
-    //             newTerms.push(term);
-    //         }
-    //         return !isNew;
-    //     });
-    //     terms.sort((a, b) => a.fsrsCard.due - b.fsrsCard.due);
-    //     if (terms.length > 0) {
-    //         term = terms[0];
-    //         termsIndex = 0;
-    //     } else {
-    //         term = newTerms[0];
-    //         newTermsIndex = 0;
-    //     }
-    // }
-    //
-    // const scheduler = fsrs();
+    let preview = $state(null);
+    const TIMEUNITFORMAT = [' s', ' min', ' h', ' d', ' mo', ' yr'];
+    const fsrsStates = ["NEW", "LEARNING", "REVIEW", "RELEARNING"];
+    const fsrsRatings = ["MANUAL", "HARD", "GOOD", "EASY"];
+    function fsrsNextAfterHandler({card, log}) {
+        return {
+            card: {
+                ...card,
+                due: card.due.toISOString(),
+                last_review: card?.last_review?.toISOString() ?? null,
+                state: fsrsCards[card.state]
+            },
+            log: {
+                ...log,
+                due: log.due.toISOString(),
+                rating: fsrsRatings[log.rating],
+                review: log.review.toISOString(),
+                state: fsrsStates[log.state]
+            }
+        };
+    }
+
+    function prepareTermsByCards() {
+        terms = allTerms.filter(term => {
+
+            let isNew = false;
+            if (term.fsrsCard == null) {
+                term.fsrsCard = createEmptyCard();
+                isNew = true;
+            } else {
+                term.fsrsCard = TypeConvert.card(term.fsrsCard);
+                if (term.fsrsCard.state == State.New) {
+                    isNew = true;
+                }
+            }
+
+            if (isNew) {
+                newTerms.push(term);
+            }
+            return !isNew;
+        });
+        terms.sort((a, b) => a.fsrsCard.due - b.fsrsCard.due);
+        if (terms.length > 0) {
+            term = terms[0];
+            termsIndex = 0;
+        } else {
+            term = newTerms[0];
+            newTermsIndex = 0;
+        }
+    }
+
+    const scheduler = fsrs();
 
     onMount(() => {
         if (data.localIds.length > 0) {
@@ -91,24 +91,24 @@
                         objectUrls.push(t.defImageUrl);
                     }
                 });
-                // prepareTermsByCards();
+                prepareTermsByCards();
             })();
-        }
-        // } else {
-        //     prepareTermsByCards();
         // }
+        } else {
+            prepareTermsByCards();
+        }
 
-        // const card = createEmptyCard();
-        // console.log(card)
-        // preview = scheduler.repeat(card, new Date());
-        // console.log(preview[Rating.Again].card)
-        // console.log(preview[Rating.Hard].card)
-        // console.log(preview[Rating.Good].card)
-        // console.log(preview[Rating.Easy].card)
-        // console.log(
-        //     scheduler.next(card, new Date(), Rating.Good, ({ card, log }) => ({
-        //     }))
-        // )
+        const card = createEmptyCard();
+        console.log(card)
+        preview = scheduler.repeat(card, new Date());
+        console.log(preview[Rating.Again].card)
+        console.log(preview[Rating.Hard].card)
+        console.log(preview[Rating.Good].card)
+        console.log(preview[Rating.Easy].card)
+        console.log(
+            scheduler.next(card, new Date(), Rating.Good, ({ card, log }) => ({
+            }))
+        )
 
         /* return cleanup func to revoke image object urls for local terms */
         return () => {
@@ -117,7 +117,7 @@
     });
 
     // let testYourself = $state(true);
-    let testYourself = $state(false);
+    let testYourself = $state(true);
 
     function prevFunc() {
         console.log(`sessionTermsIndex: ${sessionTermsIndex},
@@ -204,68 +204,68 @@ newTermsIndex: ${newTermsIndex}`);
                 {nextFunc}
             ></Flashcards>
         {/if}
-        <!-- <div class="caption" style="min-height: 4rem;"> -->
-        <!--     <div> -->
-        <!--         <div style="min-height: 6rem;"> -->
-        <!--             {#if testYourself} -->
-        <!--                 <div class="flex center"> -->
-        <!--                     <div class="flex col card-rating-button-container"> -->
-        <!--                         <button class="button-box ohno">Again</button> -->
-        <!--                         <span class="fg0">{preview == null ? "" : show_diff_message( -->
-        <!--                             preview[Rating.Again].card.due, -->
-        <!--                             preview[Rating.Again].card.last_review, -->
-        <!--                             true, -->
-        <!--                             TIMEUNITFORMAT -->
-        <!--                         )}</span> -->
-        <!--                     </div> -->
-        <!--                     <div class="flex col card-rating-button-container"> -->
-        <!--                         <button class="button-box">Hard</button> -->
-        <!--                         <span class="fg0">{preview == null ? "" : show_diff_message( -->
-        <!--                             preview[Rating.Hard].card.due, -->
-        <!--                             preview[Rating.Hard].card.last_review, -->
-        <!--                             true, -->
-        <!--                             TIMEUNITFORMAT -->
-        <!--                         )}</span> -->
-        <!--                     </div> -->
-        <!--                     <div class="flex col card-rating-button-container"> -->
-        <!--                         <button class="button-box">Good</button> -->
-        <!--                         <span class="fg0">{preview == null ? "" : show_diff_message( -->
-        <!--                             preview[Rating.Good].card.due, -->
-        <!--                             preview[Rating.Good].card.last_review, -->
-        <!--                             true, -->
-        <!--                             TIMEUNITFORMAT -->
-        <!--                         )}</span> -->
-        <!--                     </div> -->
-        <!--                     <div class="flex col card-rating-button-container"> -->
-        <!--                         <button class="button-box">Easy</button> -->
-        <!--                         <span class="fg0">{preview == null ? "" : show_diff_message( -->
-        <!--                             preview[Rating.Easy].card.due, -->
-        <!--                             preview[Rating.Easy].card.last_review, -->
-        <!--                             true, -->
-        <!--                             TIMEUNITFORMAT -->
-        <!--                         )}</span> -->
-        <!--                     </div> -->
-        <!--                 </div> -->
-        <!--             {/if} -->
-        <!--         </div> -->
-        <!--         <div class="flex center" style="margin-top: 2rem;"> -->
-        <!--             <button class="button-box flashcard-mode-button {testYourself ? "selected" : ""}" onclick={() => testYourself = true}> -->
-        <!--                 <Checkmark class="button-box-selected-icon"></Checkmark> -->
-        <!--                 <div> -->
-        <!--                     <p class="top-text">Test Yourself</p> -->
-        <!--                     <p class="btm-text">Flashcards with Spaced Repetition</p> -->
-        <!--                 </div> -->
-        <!--             </button> -->
-        <!--             <button class="button-box flashcard-mode-button {testYourself ? "" : "selected"}" onclick={() => testYourself = false}> -->
-        <!--                 <Checkmark class="button-box-selected-icon"></Checkmark> -->
-        <!--                 <div> -->
-        <!--                     <p class="top-text">View</p> -->
-        <!--                     <p class="btm-text">Flip through flashcards</p> -->
-        <!--                 </div> -->
-        <!--             </button> -->
-        <!--         </div> -->
-        <!--     </div> -->
-        <!-- </div> -->
+        <div class="caption" style="min-height: 4rem;">
+            <div>
+                <div style="min-height: 6rem;">
+                    {#if testYourself}
+                        <div class="flex center" style="--og-warn: var(--warn);">
+                            <div class="flex col card-rating-button-container">
+                                <button class="button-box ohno">Again</button>
+                                <span class="fg0">{preview == null ? "" : show_diff_message(
+                                    preview[Rating.Again].card.due,
+                                    preview[Rating.Again].card.last_review,
+                                    true,
+                                    TIMEUNITFORMAT
+                                )}</span>
+                            </div>
+                            <div class="flex col card-rating-button-container" style="--warn: color-mix(in srgb, var(--fg-1) 20%, var(--og-warn));">
+                                <button class="button-box warn">Hard</button>
+                                <span class="fg0">{preview == null ? "" : show_diff_message(
+                                    preview[Rating.Hard].card.due,
+                                    preview[Rating.Hard].card.last_review,
+                                    true,
+                                    TIMEUNITFORMAT
+                                )}</span>
+                            </div>
+                            <div class="flex col card-rating-button-container">
+                                <button class="button-box text main">Good</button>
+                                <span class="fg0">{preview == null ? "" : show_diff_message(
+                                    preview[Rating.Good].card.due,
+                                    preview[Rating.Good].card.last_review,
+                                    true,
+                                    TIMEUNITFORMAT
+                                )}</span>
+                            </div>
+                            <div class="flex col card-rating-button-container">
+                                <button class="button-box yay">Easy</button>
+                                <span class="fg0">{preview == null ? "" : show_diff_message(
+                                    preview[Rating.Easy].card.due,
+                                    preview[Rating.Easy].card.last_review,
+                                    true,
+                                    TIMEUNITFORMAT
+                                )}</span>
+                            </div>
+                        </div>
+                    {/if}
+                </div>
+                <div class="flex center" style="margin-top: 2rem;">
+                    <button class="button-box flashcard-mode-button {testYourself ? "selected" : ""}" onclick={() => testYourself = true}>
+                        <Checkmark class="button-box-selected-icon"></Checkmark>
+                        <div>
+                            <p class="top-text">Test Yourself</p>
+                            <p class="btm-text">Flashcards with Spaced Repetition</p>
+                        </div>
+                    </button>
+                    <button class="button-box flashcard-mode-button {testYourself ? "" : "selected"}" onclick={() => testYourself = false}>
+                        <Checkmark class="button-box-selected-icon"></Checkmark>
+                        <div>
+                            <p class="top-text">View</p>
+                            <p class="btm-text">Flip through flashcards</p>
+                        </div>
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 

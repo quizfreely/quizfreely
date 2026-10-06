@@ -111,19 +111,19 @@
                 <div style="margin-top: 3rem;">
                     <div class="box flex ohno" style="justify-content: space-between; color: color-mix(in srgb, var(--fg-1) 30%, var(--ohno)); {relearningTerms.size > 0 ? '' : 'opacity: 0.6;'}">
                         <span>Relearning</span>
-                        <span>{relearningTerms.size} Terms</span>
+                        <span>{relearningTerms.size} terms</span>
                     </div>
                     <div class="box flex warn" style="justify-content: space-between; color: color-mix(in srgb, var(--fg-1) 30%, var(--warn)); {learningTerms.size > 0 ? '' : 'opacity: 0.6;'}">
                         <span>Learning</span>
-                        <span>{learningTerms.size} Terms</span>
+                        <span>{learningTerms.size} terms</span>
                     </div>
                     <div class="box flex yay" style="justify-content: space-between; color: color-mix(in srgb, var(--fg-1) 30%, var(--yay)); {reviewTerms.size > 0 ? '' : 'opacity: 0.6;'}">
                         <span>Review</span>
-                        <span>{reviewTerms.size} Terms</span>
+                        <span>{reviewTerms.size} terms</span>
                     </div>
                     <div class="box flex" style="justify-content: space-between; color: color-mix(in srgb, var(--fg-1) 30%, var(--main)); border-color: var(--main); {newTerms.size > 0 ? '' : 'opacity: 0.6;'}">
                         <span>New</span>
-                        <span>{newTerms.size} Terms</span>
+                        <span>{newTerms.size} terms</span>
                     </div>
                 </div>
             </div>
