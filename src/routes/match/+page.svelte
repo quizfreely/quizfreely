@@ -223,7 +223,6 @@
     })
 
     var showExitConfirmationModal = $state(false);
-    var showTest = $state(data.alreadyOver);
     var bypassExitConfirmation = false;
     let navigatingToURL = $state("");
     function cancelBeforeNav(navigation) {

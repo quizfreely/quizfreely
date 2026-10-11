@@ -10,14 +10,15 @@
         termsList = true,
         terms,
         term,
-        nextFunc, /* called when termsList false, return false to hide next trans */
-        prevFunc, /* called when termsList false, return false to hide prev trans */
-        onFlip, /* called when flipped (all the time, return nothing) */
-        onNext, /* called when termsList true (return nothing) */
-        onPrev, /* called when termsList true (return nothing) */
         showPrompt = false,
         prompt,
-        captionEnd
+        captionEnd,
+        showBar = true,
+        showCaption = true,
+        reqNextFunc,
+        reqPrevFunc,
+        reqFlipFunc,
+        viewerControls = true,
     } = $props();
 
     let defSide = $state(false);
@@ -31,10 +32,6 @@
             return;
         }
         defSide = !defSide;
-
-        if (onFlip) {
-            onFlip();
-        }
     }
     function prev() {
         if (showPrompt) {
@@ -44,16 +41,6 @@
             direction = -1;
             index -= 1;
             defSide = false;
-            if (onPrev) {
-                onPrev();
-            }
-        }
-        if (!termsList && prevFunc) {
-            const transToPrev = prevFunc();
-            if (transToPrev !== false) {
-                direction = -1;
-                transKeyInc++;
-            }
         }
     }
     function next() {
@@ -64,17 +51,21 @@
             direction = 1;
             index += 1;
             defSide = false;
-            if (onNext) {
-                onNext();
-            }
         }
-        if (!termsList && nextFunc) {
-            const transToNext = nextFunc();
-            if (transToNext !== false) {
-                direction = 1;
-                transKeyInc++;
-            }
-        }
+    }
+    export function triggerNext() {
+        direction = 1;
+        transKeyInc++;
+    }
+    export function triggerPrev() {
+        direction = -1;
+        transKeyInc++;
+    }
+    export function triggerFlip() {
+        defSide = !defSide;
+    }
+    export function triggerDefSide(showDefSide) {
+        defSide = showDefSide;
     }
 
     onMount(function () {
@@ -93,19 +84,27 @@
                 case "ArrowLeft":
                 case "h":
                 case "j":
-                    prev();
+                    if (viewerControls) {
+                        prev();
+                    } else {
+                        reqPrevFunc?.();
+                    }
                     break;
                 case "ArrowRight":
                 case "l":
                 case "k":
-                    next();
+                    if (viewerControls) {
+                        next();
+                    } else {
+                        reqNextFunc?.();
+                    }
                     break;
                 case " " /* space */:
                     /* prevent scrolling,
                     but don't flip here in keydown,
                     to avoid spam-flipping */
                     e.preventDefault();
-
+                    break;
                 /* next/prev is in keydown to allow spamming to move quickly,
                 flip is in keyup to prevent spam reflipping */
             }
@@ -124,7 +123,11 @@
             if (e.key == " ") {
                 /* flip in keyup to only flip once */
                 e.preventDefault();
-                flip();
+                if (viewerControls) {
+                    flip();
+                } else {
+                    reqFlipFunc?.();
+                }
             }
         }
 
@@ -148,7 +151,13 @@
             <!-- there's an accessible flip button as a seperate element, and you can also press space to flip (without any focus) -->
             <div
                 class="card double {defSide && !showPrompt ? "flip" : ""}"
-                onclick={flip}
+                onclick={() => {
+                    if (viewerControls) {
+                        flip();
+                    } else {
+                        reqFlipFunc?.();
+                    }
+                }}
                 in:fly={{
                     x: prefersReducedMotion.current ?
                         0 : (direction * 100),
@@ -192,48 +201,52 @@
             {/key}
         </div>
     </div>
-    <div class="caption">
-        <div
-            class="progress-bar thin yay"
-            style="margin-left: 0.4rem; margin-right: 0.4rem;"
-        >
+    {#if showBar}
+        <div class="caption">
             <div
-                style="width: {terms != null
-                    ? ((index + 1) / terms?.length) *
-                      100
-                    : '20'}%"
-            ></div>
-        </div>
-    </div>
-    <div class="caption centerThree">
-        <p>{index + 1}<span class="fg0">/{terms?.length ?? "1"}</span></p>
-        <div class="flex justifyselfcenter compact-gap">
-            <button
-                class="faint"
-                aria-label="Previous Card"
-                onclick={prev}
-                disabled={showPrompt}
+                class="progress-bar thin yay"
+                style="margin-left: 0.4rem; margin-right: 0.4rem;"
             >
-                <IconArrowLeft />
-            </button>
-            <button
-                class="faint"
-                onclick={flip}
-                disabled={showPrompt}>Flip</button
-            >
-            <button
-                class="faint"
-                aria-label="Next Card"
-                onclick={next}
-                disabled={showPrompt}
-            >
-                <IconArrowRight />
-            </button>
+                <div
+                    style="width: {terms != null
+                        ? ((index + 1) / terms?.length) *
+                          100
+                        : '20'}%"
+                ></div>
+            </div>
         </div>
-        <div class="flex end">
-            {@render captionEnd?.()}
+    {/if}
+    {#if showCaption}
+        <div class="caption centerThree">
+            <p>{index + 1}<span class="fg0">/{terms?.length ?? "1"}</span></p>
+            <div class="flex justifyselfcenter compact-gap">
+                <button
+                    class="faint"
+                    aria-label="Previous Card"
+                    onclick={prev}
+                    disabled={showPrompt}
+                >
+                    <IconArrowLeft />
+                </button>
+                <button
+                    class="faint"
+                    onclick={flip}
+                    disabled={showPrompt}>Flip</button
+                >
+                <button
+                    class="faint"
+                    aria-label="Next Card"
+                    onclick={next}
+                    disabled={showPrompt}
+                >
+                    <IconArrowRight />
+                </button>
+            </div>
+            <div class="flex end">
+                {@render captionEnd?.()}
+            </div>
         </div>
-    </div>
+    {/if}
 </div>
 
 <style>
