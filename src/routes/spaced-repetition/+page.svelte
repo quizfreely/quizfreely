@@ -203,72 +203,64 @@
                 <!-- </button> -->
                 <div style="margin-top: 2rem;">
                     <div class="flex" style="flex-direction: column; flex-wrap: nowrap; align-items: start;">
-                        <div>
-                            <div class="flex" style="align-items: center; justify-content: space-between; flex-wrap: nowrap;">
+                        <div class="grid srs-overview-grid">
+                            <div class="flex srs-overview-state-head" style="grid-area: rl-head;">
                                 <div class="qzfr-tag" style="--qzfr-tag-color: var(--ohno);">Relearning</div>
                                 {const relearningTotal = $derived(termIds.backlog.relearning.size + termIds.due.relearning.size + termIds.future.relearning.size)}
                                 <span class="fg0" style={relearningTotal > 0 ? "" : "opacity: 0.8;"} >{relearningTotal} {relearningTotal == 1 ? "term" : "terms"}</span>
                             </div>
-                            <div class="flex" style="margin-top: 0.4rem;">
-                                <div class="box" style={termIds.backlog.relearning.size > 0 ? "" : "opacity: 0.8;"}>
-                                    <span style="font-size: 1.2rem;">{termIds.backlog.relearning.size}</span> {termIds.backlog.relearning.size == 1 ? "term" : "terms"}
-                                    <div class="text center fg0" style="font-size: 0.9rem; margin-top: 0.2rem;">Backlog</div>
-                                </div>
-                                <div class="box" style={termIds.due.relearning.size > 0 ? "" : "opacity: 0.8;"}>
-                                    <span style="font-size: 1.2rem;">{termIds.due.relearning.size}</span> {termIds.due.relearning.size == 1 ? "term" : "terms"}
-                                    <div class="text center fg0" style="font-size: 0.9rem; margin-top: 0.2rem;">Now</div>
-                                </div>
-                                <div class="box" style={termIds.future.relearning.size > 0 ? "" : "opacity: 0.8;"}>
-                                    <span style="font-size: 1.2rem;">{termIds.future.relearning.size}</span> {termIds.future.relearning.size == 1 ? "term" : "terms"}
-                                    <div class="text center fg0" style="font-size: 0.9rem; margin-top: 0.2rem;">Later</div>
-                                </div>
+                            <div class="box" style="grid-area: rl-backlog; {termIds.backlog.relearning.size > 0 ? '' : 'opacity: 0.8;'}">
+                                <span style="font-size: 1.2rem;">{termIds.backlog.relearning.size}</span> {termIds.backlog.relearning.size == 1 ? "term" : "terms"}
+                                <div class="text center fg0" style="font-size: 0.9rem; margin-top: 0.2rem;">Backlog</div>
                             </div>
-                            <div class="flex" style="align-items: center; justify-content: space-between; flex-wrap: nowrap;">
+                            <div class="box" style="grid-area: rl-due; {termIds.due.relearning.size > 0 ? '' : 'opacity: 0.8;'}">
+                                <span style="font-size: 1.2rem;">{termIds.due.relearning.size}</span> {termIds.due.relearning.size == 1 ? "term" : "terms"}
+                                <div class="text center fg0" style="font-size: 0.9rem; margin-top: 0.2rem;">Now</div>
+                            </div>
+                            <div class="box" style="grid-area: rl-future; {termIds.future.relearning.size > 0 ? '' : 'opacity: 0.8;'}">
+                                <span style="font-size: 1.2rem;">{termIds.future.relearning.size}</span> {termIds.future.relearning.size == 1 ? "term" : "terms"}
+                                <div class="text center fg0" style="font-size: 0.9rem; margin-top: 0.2rem;">Later</div>
+                            </div>
+                            <div class="flex srs-overview-state-head" style="grid-area: l-head;">
                                 <div class="qzfr-tag" style="--qzfr-tag-color: var(--warn);">Learning</div>
                                 {const learningTotal = $derived(termIds.backlog.learning.size + termIds.due.learning.size + termIds.future.learning.size)}
                                 <span class="fg0" style={learningTotal > 0 ? "" : "opacity: 0.8;"} >{learningTotal} {learningTotal == 1 ? "term" : "terms"}</span>
                             </div>
-                            <div class="flex" style="margin-top: 0.4rem;">
-                                <div class="box" style={termIds.backlog.learning.size > 0 ? "" : "opacity: 0.8;"}>
-                                    <span style="font-size: 1.2rem;">{termIds.backlog.learning.size}</span> {termIds.backlog.learning.size == 1 ? "term" : "terms"}
-                                    <div class="text center fg0" style="font-size: 0.9rem; margin-top: 0.2rem;">Backlog</div>
-                                </div>
-                                <div class="box" style={termIds.due.learning.size > 0 ? "" : "opacity: 0.8;"}>
-                                    <span style="font-size: 1.2rem;">{termIds.due.learning.size}</span> {termIds.due.learning.size == 1 ? "term" : "terms"}
-                                    <div class="text center fg0" style="font-size: 0.9rem; margin-top: 0.2rem;">Now</div>
-                                </div>
-                                <div class="box" style={termIds.future.learning.size > 0 ? "" : "opacity: 0.8;"}>
-                                    <span style="font-size: 1.2rem;">{termIds.future.learning.size}</span> {termIds.future.learning.size == 1 ? "term" : "terms"}
-                                    <div class="text center fg0" style="font-size: 0.9rem; margin-top: 0.2rem;">Later</div>
-                                </div>
+                            <div class="box" style="grid-area: l-backlog; {termIds.backlog.learning.size > 0 ? '' : 'opacity: 0.8;'}">
+                                <span style="font-size: 1.2rem;">{termIds.backlog.learning.size}</span> {termIds.backlog.learning.size == 1 ? "term" : "terms"}
+                                <div class="text center fg0" style="font-size: 0.9rem; margin-top: 0.2rem;">Backlog</div>
                             </div>
-                            <div class="flex" style="align-items: center; justify-content: space-between; flex-wrap: nowrap;">
+                            <div class="box" style="grid-area: l-due; {termIds.due.learning.size > 0 ? '' : 'opacity: 0.8;'}">
+                                <span style="font-size: 1.2rem;">{termIds.due.learning.size}</span> {termIds.due.learning.size == 1 ? "term" : "terms"}
+                                <div class="text center fg0" style="font-size: 0.9rem; margin-top: 0.2rem;">Now</div>
+                            </div>
+                            <div class="box" style="grid-area: l-future; {termIds.future.learning.size > 0 ? '' : 'opacity: 0.8;'}">
+                                <span style="font-size: 1.2rem;">{termIds.future.learning.size}</span> {termIds.future.learning.size == 1 ? "term" : "terms"}
+                                <div class="text center fg0" style="font-size: 0.9rem; margin-top: 0.2rem;">Later</div>
+                            </div>
+                            <div class="flex srs-overview-state-head" style="grid-area: r-head;">
                                 <div class="qzfr-tag" style="--qzfr-tag-color: var(--yay);">Review</div>
                                 {const reviewTotal = $derived(termIds.backlog.review.size + termIds.due.review.size + termIds.future.review.size)}
                                 <span class="fg0" style={reviewTotal > 0 ? "" : "opacity: 0.8;"} >{reviewTotal} {reviewTotal == 1 ? "term" : "terms"}</span>
                             </div>
-                            <div class="flex" style="margin-top: 0.4rem;">
-                                <div class="box" style={termIds.backlog.review.size > 0 ? "" : "opacity: 0.8;"}>
-                                    <span style="font-size: 1.2rem;">{termIds.backlog.review.size}</span> {termIds.backlog.review.size == 1 ? "term" : "terms"}
-                                    <div class="text center fg0" style="font-size: 0.9rem; margin-top: 0.2rem;">Backlog</div>
-                                </div>
-                                <div class="box" style={termIds.due.review.size > 0 ? "" : "opacity: 0.8;"}>
-                                    <span style="font-size: 1.2rem;">{termIds.due.review.size}</span> {termIds.due.review.size == 1 ? "term" : "terms"}
-                                    <div class="text center fg0" style="font-size: 0.9rem; margin-top: 0.2rem;">Now</div>
-                                </div>
-                                <div class="box" style={termIds.future.review.size > 0 ? "" : "opacity: 0.8;"}>
-                                    <span style="font-size: 1.2rem;">{termIds.future.review.size}</span> {termIds.future.review.size == 1 ? "term" : "terms"}
-                                    <div class="text center fg0" style="font-size: 0.9rem; margin-top: 0.2rem;">Later</div>
-                                </div>
+                            <div class="box" style="grid-area: r-backlog; {termIds.backlog.review.size > 0 ? '' : 'opacity: 0.8;'}">
+                                <span style="font-size: 1.2rem;">{termIds.backlog.review.size}</span> {termIds.backlog.review.size == 1 ? "term" : "terms"}
+                                <div class="text center fg0" style="font-size: 0.9rem; margin-top: 0.2rem;">Backlog</div>
                             </div>
-                            <div class="flex" style="align-items: center; justify-content: space-between; flex-wrap: nowrap;">
+                            <div class="box" style="grid-area: r-due; {termIds.due.review.size > 0 ? '' : 'opacity: 0.8;'}">
+                                <span style="font-size: 1.2rem;">{termIds.due.review.size}</span> {termIds.due.review.size == 1 ? "term" : "terms"}
+                                <div class="text center fg0" style="font-size: 0.9rem; margin-top: 0.2rem;">Now</div>
+                            </div>
+                            <div class="box" style="grid-area: r-future; {termIds.future.review.size > 0 ? '' : 'opacity: 0.8;'}">
+                                <span style="font-size: 1.2rem;">{termIds.future.review.size}</span> {termIds.future.review.size == 1 ? "term" : "terms"}
+                                <div class="text center fg0" style="font-size: 0.9rem; margin-top: 0.2rem;">Later</div>
+                            </div>
+                            <div class="flex srs-overview-state-head" style="grid-area: n-head;">
                                 <div class="qzfr-tag" style="--qzfr-tag-color: var(--main);">New</div>
                                 <span class="fg0" style={termIds.new.size > 0 ? "" : "opacity: 0.8;"} >{termIds.new.size} {termIds.new.size == 1 ? "term" : "terms"}</span>
                             </div>
-                            <div class="flex" style="margin-top: 0.4rem;">
-                                <div class="box" style={termIds.new.size > 0 ? "" : "opacity: 0.8;"}>
-                                    <span style="font-size: 1.2rem;">{termIds.new.size}</span> {termIds.new.size == 1 ? "term" : "terms"}
-                                </div>
+                            <div class="box" style="grid-area: new; {termIds.new.size > 0 ? '' : 'opacity: 0.8;'}">
+                                <span style="font-size: 1.2rem;">{termIds.new.size}</span> {termIds.new.size == 1 ? "term" : "terms"}
                             </div>
                         </div>
                     </div>
@@ -308,6 +300,26 @@
     </div>
 {/if}
 <style>
+    .srs-overview-state-head {
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: nowrap;
+    }
+    .srs-overview-grid,
+    .grid.srs-overview-grid {
+        grid-template-columns: 1fr 1fr 1fr;
+        grid-template-rows: repeat(8, auto);
+        column-gap: 1rem;
+        row-gap: 0.8rem;
+        grid-template-areas: "rl-head rl-head rl-head"
+            "rl-backlog rl-due rl-future"
+            "l-head l-head l-head"
+            "l-backlog l-due l-future"
+            "r-head r-head r-head"
+            "r-backlog r-due r-future"
+            "n-head n-head n-head"
+            "new . ."
+    }
     @media only screen and (min-width: 800px) {
         .min-and-max-width-here {
             width: 25rem;
