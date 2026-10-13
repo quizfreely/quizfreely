@@ -3,6 +3,7 @@
     import { onMount } from "svelte";
     import { idbApiLayer } from "$lib/idb-api-layer";
     import { setCancelBeforeNavigate, cleanUpCancelBeforeNavigate } from "$lib/cancel-before-navigate.js";
+    import { createEmptyCard, fsrs, Rating, State, TypeConvert, show_diff_message } from "ts-fsrs";
     import { goto } from "$app/navigation";
     import { slide, fade } from "svelte/transition";
     import Flashcards from "$lib/components/Flashcards.svelte";
@@ -14,10 +15,24 @@
     import ExitIcon from "$lib/icons/Exit.svelte";
     let { data } = $props();
     let terms = new SvelteMap();
-    let newTerms = new SvelteSet();
-    let learningTerms = new SvelteSet();
-    let reviewTerms = new SvelteSet();
-    let relearningTerms = new SvelteSet();
+    let termIds = {
+        due: {
+            learning: new SvelteSet(),
+            relearning: new SvelteSet(),
+            review: new SvelteSet(),
+        },
+        backlog: {
+            learning: new SvelteSet(),
+            relearning: new SvelteSet(),
+            review: new SvelteSet(),
+        },
+        new: new SvelteSet(),
+        future: {
+            learning: new SvelteSet(),
+            relearning: new SvelteSet(),
+            review: new SvelteSet(),
+        }
+    };
     let showFlashcards = $state(false);
     let showMCQs = $state(false);
     let flashcards;
@@ -26,43 +41,38 @@
             if (t?.id == null) {
                 return;
             }
-            terms.set(t.id, t);
-            switch (t?.fsrsCard?.state ?? "NEW") {
-                case "NEW":
-                    newTerms.add(t.id);
-                    break;
-                case "LEARNING":
-                    learningTerms.add(t.id);
-                    break;
-                case "REVIEW":
-                    reviewTerms.add(t.id);
-                    break;
-                case "RELEARNING":
-                    relearningTerms.add(t.id);
-                    break;
+            if (t.fsrsCard != null) {
+                t.fsrsCard = TypeConvert.card(t.fsrsCard);
+            } else {
+                t.fsrsCard = createEmptyCard();
             }
-        })
+            terms.set(t.id, t);
+            if (t.fsrsCard.state === State.New) {
+                termIds.new.add(t.id);
+            } else {
+                let due = "future";
+                if (t.fsrsCard.due != null) {
+                    const diff = t.fsrsCard.due.getTime() - Date.now();
+                    if (diff < 24*60*60*1_000) {
+                        due = "backlog";
+                    } else if (diff <= 0) {
+                        due = "due";
+                    }
+                }
+                switch (t.fsrsCard.state) {
+                    case State.Learning:
+                        termIds[due].learning.add(t.id);
+                        break;
+                    case State.Review:
+                        termIds[due].review.add(t.id);
+                        break;
+                    case State.Relearning:
+                        termIds[due].relearning.add(t.id);
+                        break;
+                }
+            }
+        });
     });
-    let objUrls = [];
-    onMount(() => {
-        if (data.localIds.length > 0) {
-            (async () => {
-                const localStudysets = await idbApiLayer.getStudysetsByIds(data.localIds, {
-                    terms: {
-                        progress: true,
-                        termImageUrl: true,
-                        defImageUrl: true
-                    },
-                });
-            })();
-        }
-        return () => {
-            cleanUpCancelBeforeNavigate(cancelBeforeNav);
-            objUrls.forEach(objUrl => {
-                URL.revokeObjectURL(objUrl);
-            });
-        };
-    })
 
     var showExitConfirmationModal = $state(false);
     var bypassExitConfirmation = false;
@@ -92,6 +102,29 @@
         }
     }
     setCancelBeforeNavigate(cancelBeforeNav);
+    let objUrls = [];
+    onMount(() => {
+        if (data.localIds.length > 0) {
+            (async () => {
+                const localStudysets = await idbApiLayer.getStudysetsByIds(data.localIds, {
+                    terms: {
+                        progress: true,
+                        termImageUrl: true,
+                        defImageUrl: true
+                    },
+                });
+            })();
+        }
+        return () => {
+            cleanUpCancelBeforeNavigate(cancelBeforeNav);
+            objUrls.forEach(objUrl => {
+                URL.revokeObjectURL(objUrl);
+            });
+        };
+    })
+    function pickTerms() {
+        
+    }
 </script>
 <div class="grid page">
     <div class="content">
@@ -168,22 +201,76 @@
                 <!--     <CheckmarkIcon /> -->
                 <!--     Start -->
                 <!-- </button> -->
-                <div style="margin-top: 3rem;">
-                    <div class="box flex ohno" style="justify-content: space-between; color: color-mix(in srgb, var(--fg-1) 30%, var(--ohno)); {relearningTerms.size > 0 ? '' : 'opacity: 0.6;'}">
-                        <span>Relearning</span>
-                        <span>{relearningTerms.size} terms</span>
-                    </div>
-                    <div class="box flex warn" style="justify-content: space-between; color: color-mix(in srgb, var(--fg-1) 30%, var(--warn)); {learningTerms.size > 0 ? '' : 'opacity: 0.6;'}">
-                        <span>Learning</span>
-                        <span>{learningTerms.size} terms</span>
-                    </div>
-                    <div class="box flex yay" style="justify-content: space-between; color: color-mix(in srgb, var(--fg-1) 30%, var(--yay)); {reviewTerms.size > 0 ? '' : 'opacity: 0.6;'}">
-                        <span>Review</span>
-                        <span>{reviewTerms.size} terms</span>
-                    </div>
-                    <div class="box flex" style="justify-content: space-between; color: color-mix(in srgb, var(--fg-1) 30%, var(--main)); border-color: var(--main); {newTerms.size > 0 ? '' : 'opacity: 0.6;'}">
-                        <span>New</span>
-                        <span>{newTerms.size} terms</span>
+                <div style="margin-top: 2rem;">
+                    <div class="flex" style="flex-direction: column; flex-wrap: nowrap; align-items: start;">
+                        <div>
+                            <div class="flex" style="align-items: center; justify-content: space-between; flex-wrap: nowrap;">
+                                <div class="qzfr-tag" style="--qzfr-tag-color: var(--ohno);">Relearning</div>
+                                {const relearningTotal = $derived(termIds.backlog.relearning.size + termIds.due.relearning.size + termIds.future.relearning.size)}
+                                <span class="fg0" style={relearningTotal > 0 ? "" : "opacity: 0.8;"} >{relearningTotal} {relearningTotal == 1 ? "term" : "terms"}</span>
+                            </div>
+                            <div class="flex" style="margin-top: 0.4rem;">
+                                <div class="box" style={termIds.backlog.relearning.size > 0 ? "" : "opacity: 0.8;"}>
+                                    <span style="font-size: 1.2rem;">{termIds.backlog.relearning.size}</span> {termIds.backlog.relearning.size == 1 ? "term" : "terms"}
+                                    <div class="text center fg0" style="font-size: 0.9rem; margin-top: 0.2rem;">Backlog</div>
+                                </div>
+                                <div class="box" style={termIds.due.relearning.size > 0 ? "" : "opacity: 0.8;"}>
+                                    <span style="font-size: 1.2rem;">{termIds.due.relearning.size}</span> {termIds.due.relearning.size == 1 ? "term" : "terms"}
+                                    <div class="text center fg0" style="font-size: 0.9rem; margin-top: 0.2rem;">Now</div>
+                                </div>
+                                <div class="box" style={termIds.future.relearning.size > 0 ? "" : "opacity: 0.8;"}>
+                                    <span style="font-size: 1.2rem;">{termIds.future.relearning.size}</span> {termIds.future.relearning.size == 1 ? "term" : "terms"}
+                                    <div class="text center fg0" style="font-size: 0.9rem; margin-top: 0.2rem;">Later</div>
+                                </div>
+                            </div>
+                            <div class="flex" style="align-items: center; justify-content: space-between; flex-wrap: nowrap;">
+                                <div class="qzfr-tag" style="--qzfr-tag-color: var(--warn);">Learning</div>
+                                {const learningTotal = $derived(termIds.backlog.learning.size + termIds.due.learning.size + termIds.future.learning.size)}
+                                <span class="fg0" style={learningTotal > 0 ? "" : "opacity: 0.8;"} >{learningTotal} {learningTotal == 1 ? "term" : "terms"}</span>
+                            </div>
+                            <div class="flex" style="margin-top: 0.4rem;">
+                                <div class="box" style={termIds.backlog.learning.size > 0 ? "" : "opacity: 0.8;"}>
+                                    <span style="font-size: 1.2rem;">{termIds.backlog.learning.size}</span> {termIds.backlog.learning.size == 1 ? "term" : "terms"}
+                                    <div class="text center fg0" style="font-size: 0.9rem; margin-top: 0.2rem;">Backlog</div>
+                                </div>
+                                <div class="box" style={termIds.due.learning.size > 0 ? "" : "opacity: 0.8;"}>
+                                    <span style="font-size: 1.2rem;">{termIds.due.learning.size}</span> {termIds.due.learning.size == 1 ? "term" : "terms"}
+                                    <div class="text center fg0" style="font-size: 0.9rem; margin-top: 0.2rem;">Now</div>
+                                </div>
+                                <div class="box" style={termIds.future.learning.size > 0 ? "" : "opacity: 0.8;"}>
+                                    <span style="font-size: 1.2rem;">{termIds.future.learning.size}</span> {termIds.future.learning.size == 1 ? "term" : "terms"}
+                                    <div class="text center fg0" style="font-size: 0.9rem; margin-top: 0.2rem;">Later</div>
+                                </div>
+                            </div>
+                            <div class="flex" style="align-items: center; justify-content: space-between; flex-wrap: nowrap;">
+                                <div class="qzfr-tag" style="--qzfr-tag-color: var(--yay);">Review</div>
+                                {const reviewTotal = $derived(termIds.backlog.review.size + termIds.due.review.size + termIds.future.review.size)}
+                                <span class="fg0" style={reviewTotal > 0 ? "" : "opacity: 0.8;"} >{reviewTotal} {reviewTotal == 1 ? "term" : "terms"}</span>
+                            </div>
+                            <div class="flex" style="margin-top: 0.4rem;">
+                                <div class="box" style={termIds.backlog.review.size > 0 ? "" : "opacity: 0.8;"}>
+                                    <span style="font-size: 1.2rem;">{termIds.backlog.review.size}</span> {termIds.backlog.review.size == 1 ? "term" : "terms"}
+                                    <div class="text center fg0" style="font-size: 0.9rem; margin-top: 0.2rem;">Backlog</div>
+                                </div>
+                                <div class="box" style={termIds.due.review.size > 0 ? "" : "opacity: 0.8;"}>
+                                    <span style="font-size: 1.2rem;">{termIds.due.review.size}</span> {termIds.due.review.size == 1 ? "term" : "terms"}
+                                    <div class="text center fg0" style="font-size: 0.9rem; margin-top: 0.2rem;">Now</div>
+                                </div>
+                                <div class="box" style={termIds.future.review.size > 0 ? "" : "opacity: 0.8;"}>
+                                    <span style="font-size: 1.2rem;">{termIds.future.review.size}</span> {termIds.future.review.size == 1 ? "term" : "terms"}
+                                    <div class="text center fg0" style="font-size: 0.9rem; margin-top: 0.2rem;">Later</div>
+                                </div>
+                            </div>
+                            <div class="flex" style="align-items: center; justify-content: space-between; flex-wrap: nowrap;">
+                                <div class="qzfr-tag" style="--qzfr-tag-color: var(--main);">New</div>
+                                <span class="fg0" style={termIds.new.size > 0 ? "" : "opacity: 0.8;"} >{termIds.new.size} {termIds.new.size == 1 ? "term" : "terms"}</span>
+                            </div>
+                            <div class="flex" style="margin-top: 0.4rem;">
+                                <div class="box" style={termIds.new.size > 0 ? "" : "opacity: 0.8;"}>
+                                    <span style="font-size: 1.2rem;">{termIds.new.size}</span> {termIds.new.size == 1 ? "term" : "terms"}
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -221,14 +308,6 @@
     </div>
 {/if}
 <style>
-    .qzfr-tag {
-        color: color-mix(in srgb, var(--qzfr-tag-color) 70%, var(--fg-1));
-        border: 0.15rem solid var(--qzfr-tag-color);
-        border-radius: 2rem;
-        padding: 0.2rem 0.6rem;
-        background-color: color-mix(in srgb, var(--qzfr-tag-color) 12%, var(--bg-1));
-    }
-
     @media only screen and (min-width: 800px) {
         .min-and-max-width-here {
             width: 25rem;

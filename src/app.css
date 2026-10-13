@@ -52,6 +52,14 @@
     }
 }
 
+.qzfr-tag {
+    color: color-mix(in srgb, var(--qzfr-tag-color) 70%, var(--fg-1));
+    border: 0.15rem solid var(--qzfr-tag-color);
+    border-radius: 2rem;
+    padding: 0.2rem 0.6rem;
+    background-color: color-mix(in srgb, var(--qzfr-tag-color) 12%, var(--bg-1));
+}
+
 .love.alt.qzfr-love-alt,
 button.love.alt.qzfr-love-alt,
 .button.love.alt.qzfr-love-alt {
