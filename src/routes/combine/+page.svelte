@@ -184,7 +184,7 @@
                 </button>
                 <button
                     onclick={addMoreButtonOnclick}
-                    class="button button-box flex qzfr-activity-button-box text main"
+                    class="button button-box flex qzfr-activity-button-box text main hide-when-vertical-grid-list"
                 >
                     <PlusIcon />
                     Select More
@@ -239,5 +239,15 @@
         display: flex;
         gap: 0.4rem;
         align-items: center;
+    }
+    @media only screen and (max-width: 800px) {
+        .hide-when-vertical-grid-list,
+        .hide-when-vertical-grid-list.flex,
+        .hide-when-vertical-grid-list.qzfr-activity-button-box,
+        .hide-when-vertical-grid-list.flex.qzfr-activity-button-box,
+        .hide-when-vertical-grid-list.button-box.qzfr-activity-button-box,
+        .hide-when-vertical-grid-list.button-box.flex.qzfr-activity-button-box {
+            display: none;
+        }
     }
 </style>

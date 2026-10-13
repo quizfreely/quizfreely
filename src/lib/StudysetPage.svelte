@@ -467,6 +467,7 @@
                         </button>
     <!-- temporary placeholder, same as `multiselect` snippet without --warn badge
     will be replaced with "gravity" mode or similar -->
+                    <div class="hide-when-vertical-grid-list" style="display: contents;">
     {#if studysetSelection.show}
         {#if studysetSelection.cloudIds.has(data.studyset?.id ?? data.localId) || studysetSelection.localIds.has(data.studyset?.id ?? data.localId)}
             <button class="button-box flex qzfr-activity-button-box" onclick={() => {
@@ -493,6 +494,7 @@
             `/combine?studyset=${data.studyset?.id}`
         }><PlusIcon /> Select Multiple</a>
     {/if}
+                        </div>
                         <button
                             class="button-box flex qzfr-activity-button-box text main"
                             onclick={() => {
@@ -866,5 +868,10 @@
         display: flex;
         gap: 0.4rem;
         align-items: center;
+    }
+    @media only screen and (max-width: 800px) {
+        .hide-when-vertical-grid-list {
+            display: none;
+        }
     }
 </style>
