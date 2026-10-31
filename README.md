@@ -10,7 +10,7 @@ Developer/contributor documentation is at [docs.quizfreely.org](https://docs.qui
 
 This repository, `quizfreely/quizfreely`, is Quizfreely's web app, written in JavaScript with Node.js & SvelteKit.
 
-Quizfreely's backend API's repository is `quizfreely/api`. ([Codeberg](https://codeberg.org/quizfreely/api) & [GitHub](https://github.com/quizfreely/api)) It's a GraphQL API written in Go/Golang.
+Quizfreely's backend API's repository is `quizfreely/api`. ([Codeberg](https://codeberg.org/quizfreely/api) & [GitHub](https://github.com/quizfreely/api)) The backend is a GraphQL API written in Go/Golang.
 
 ---
 
