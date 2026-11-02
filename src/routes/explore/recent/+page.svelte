@@ -42,6 +42,7 @@
 </svelte:head>
 
 <div class="flex center" style="margin-bottom: 2rem;">
+    {#if data.dailyCount > 24}
     <div class="flex" style="flex-direction: column; gap: 0.2rem;">
         <span style="font-size: 2rem;">{numFmt.format(data.dailyCount)}</span>
         <div class="text fg0">
@@ -50,6 +51,7 @@
             <span class="line">last 24 hours</span>
         </div>
     </div>
+    {/if}
     <div class="flex" style="flex-direction: column; gap: 0.2rem;">
         <span style="font-size: 2rem;">{numFmt.format(data.monthlyCount)}</span>
         <div class="text fg0">
@@ -62,6 +64,12 @@
         <span style="font-size: 2rem;">{numFmt.format(data.totalCount)}</span>
         <div class="text fg0">
             total studyset{data.totalCount === 1 ? "" : "s"}
+        </div>
+    </div>
+    <div class="flex" style="flex-direction: column; gap: 0.2rem;">
+        <span style="font-size: 2rem;">{numFmt.format(data.totalTermCount)}</span>
+        <div class="text fg0">
+            total term{data.totalTermCount === 1 ? "" : "s"}
         </div>
     </div>
 </div>

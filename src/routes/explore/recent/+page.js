@@ -37,6 +37,7 @@ export async function load({ url, fetch }) {
               countDay: ${recentlyUpdated ? 'studysetUpdateCount' : 'studysetCount'}(after: $day, includePrivate: true)
               countMonth: ${recentlyUpdated ? 'studysetUpdateCount' : 'studysetCount'}(after: $month, includePrivate: true)
               countTotal: ${recentlyUpdated ? 'studysetUpdateCount' : 'studysetCount'}(includePrivate: true)
+              termCount
             }`,
         variables: {
           after,
@@ -66,6 +67,7 @@ export async function load({ url, fetch }) {
       dailyCount: apiRes?.data?.countDay ?? 0,
       monthlyCount: apiRes?.data?.countMonth ?? 0,
       totalCount: apiRes?.data?.countTotal ?? 0,
+      totalTermCount: apiRes?.data?.termCount ?? 0,
       authed: authed,
       authedUser: authedUser,
       header: {
