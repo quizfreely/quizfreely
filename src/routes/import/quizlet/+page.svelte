@@ -8,6 +8,7 @@
     import CheckmarkIcon from "$lib/icons/Checkmark.svelte";
     import GridIcon from "$lib/icons/AppsGrid.svelte"
     import QuizevilLogotype from "$lib/svg/QuizevilLogotype.svelte"
+    import FlaskIcon from "$lib/icons/FlaskScienceSRS.svelte"
     let { data } = $props();
 
     let link = $state("");
@@ -335,7 +336,13 @@
                     {/if}
                 {/if}
                 </div>
-                <div style="margin-top: 2rem; text-align: start;">
+                <div class="box warn" style="text-align: start; color: color-mix(in srgb, var(--warn) 60%, var(--fg-1));  border-color: color-mix(in srgb, var(--warn) 80%, var(--fg-1)); background-color: color-mix(in srgb, var(--warn) 15%, var(--bg-1));">
+                    <div class="flex" style="align-items: center; gap: 0.6rem; flex-wrap: nowrap;">
+                        <FlaskIcon /> <span>This import feature is experimental and might not work</span>
+                    </div>
+                </div>
+                <!-- style="margin-top: 2rem; -->
+                <div style="margin-top: 1rem; text-align: start;">
                     <p class="fg0">Import terms from other sources?</p>
                     <a href="/import" class="button alt text fg1" style="margin-top: 0.4rem;">
                         <GridIcon></GridIcon>
