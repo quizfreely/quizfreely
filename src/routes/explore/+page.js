@@ -28,6 +28,7 @@ export async function load({ fetch }) {
                     countDay: studysetCount(after: $day, includePrivate: true)
                     countMonth: studysetCount(after: $month, includePrivate: true)
                     countTotal: studysetCount(includePrivate: true)
+                    termCount
                 }`,
                 variables: {
                     day: h24Ago,
@@ -51,6 +52,7 @@ export async function load({ fetch }) {
             dailyCount: apiRes?.data?.countDay ?? 0,
             monthlyCount: apiRes?.data?.countMonth ?? 0,
             totalCount: apiRes?.data?.countTotal ?? 0,
+            totalTermCount: apiRes?.data?.termCount ?? 0,
             header: {
                 activePage: "explore"
             },
@@ -63,6 +65,7 @@ export async function load({ fetch }) {
             dailyCount: 0,
             monthlyCount: 0,
             totalCount: 0,
+            totalTermCount: 0,
             header: {
                 activePage: "explore"
             },
