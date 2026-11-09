@@ -1,6 +1,6 @@
 import { redirect } from "@sveltejs/kit";
 
-function landingPageLoad({ fetch }) {
+async function landingPageLoad({ fetch }) {
   try {
         const now = Date.now();
         const h24 = 24*60*60*1000;
