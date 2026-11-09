@@ -24,7 +24,7 @@
             <a href="/sign-up" class="button large">
                 Get Started
             </a>
-            <a href="/landing-page" class="button large alt">
+            <a href="/?landing-page" class="button large alt">
                 Learn More
             </a>
         </div>

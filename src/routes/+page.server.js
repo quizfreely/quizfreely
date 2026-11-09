@@ -71,7 +71,7 @@ console.log(responseJson)
         }
       // }
     } catch (err) {
-      console.error("Error in landing-page/+page.js: ", err);
+      console.error("Error in routes/+page.js: ", err);
       return {
         // featuredRows: false,
             dailyCount: 0,
@@ -82,7 +82,7 @@ console.log(responseJson)
       }
     };
   } catch (err) {
-    console.error("Error in landing-page/+page.js: ", err);
+    console.error("Error in routes/+page.js: ", err);
     return {
       // featuredRows: false,
             dailyCount: 0,
