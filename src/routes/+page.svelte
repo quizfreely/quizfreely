@@ -138,7 +138,7 @@
 <div class="wave-bottom extra-bg" style="margin-bottom: 0px;"></div>
 <div class="grid page" style="margin-top: 0px;">
     <div class="content">
-        <h2 class="h4">Constantly updated with new features</h2>
+        <h2 class="h4" style="opacity: 0.9;">Constantly updated with new features</h2>
         <div class="flex" style="align-items: center; gap: 0.2rem;">
             <SparklesIcon class="text fg0" width="1.2rem" height="1.2rem" />
             <p class="fg0">New Features</p>
