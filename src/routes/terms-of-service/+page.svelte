@@ -5,6 +5,7 @@
 </style>
 <svelte:head>
     <title>Terms of Service | Quizfreely</title>
+    <link rel="canonical" href="https://quizfreely.org/terms-of-service" />
 </svelte:head>
 <main>
     <div class="grid page">

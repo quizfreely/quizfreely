@@ -1,3 +1,5 @@
-import fetchAuthData from "$lib/fetchAuthData.js";
+import { redirect } from '@sveltejs/kit';
 
-export { fetchAuthData as load };
+export function load() {
+    redirect(301, "/terms-of-service");
+}
