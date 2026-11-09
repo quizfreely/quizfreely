@@ -1,5 +1,5 @@
 import { redirect } from "@sveltejs/kit";
-import { load as landingPageLoad } from "./about/+page.js";
+import { load as landingPageLoad } from "./landing-page/+page.js";
 
 export async function load({ cookies, fetch }) {
     if (cookies.get("dashboard") == "true" || cookies.get("auth") !== undefined) {

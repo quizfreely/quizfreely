@@ -10,16 +10,13 @@
     import CheckmarkIcon from "$lib/icons/Checkmark.svelte";
     import InfinityIcon from "$lib/icons/Infinity.svelte";
 
-    const numFmt = new Intl.NumberFormat('en-US', {
-        /* we don't know the user's locale when we're in SSR,
-        using `undefined` instead of specifying 'en-US' would use the environment default,
-        but that would be en-US on the server and then whatever the user's locale is in the client,
-        which would result in mismatching UI if you load the page initially (with SSR) or navigate to it afterwords client-side,
-        so for now, we just use en-US, since for numbers it's already pretty international-friendly
-        (with 'compact' & 'short', it gives us numbers like 123K, 1.2M, etc) */
-        notation: 'compact',
-        compactDisplay: 'short'
-    });
+    /* we don't know the user's locale when we're in SSR,
+    using `undefined` instead of specifying 'en-US' would use the environment default,
+    but that would be en-US on the server and then whatever the user's locale is in the client,
+    which would result in mismatching UI if you load the page initially (with SSR) or navigate to it afterwords client-side,
+    so for now, we just use en-US, since for numbers it's already pretty international-friendly
+    (with 'compact' & 'short', it gives us numbers like 123K, 1.2M, etc) */
+    const numFmt = new Intl.NumberFormat("en-US");
 </script>
 
 <svelte:head>
@@ -82,8 +79,30 @@
         </div>
     </div>
 </div>
-<div class="wave-bottom extra-bg"></div>
-<div class="grid page">
+<div class="wave-bottom extra-bg" style="margin-bottom: 0px;"></div>
+<div class="grid page" style="margin-top: 0px;">
+    <div class="content">
+        <div class="flex center">
+            <h2 class="h4 center" style="opacity: 0.9; max-width: 30rem;">Thousands of free resources made by other students and teachers</h2>
+        </div>
+        <div class="flex center" style="gap: 2rem;">
+            <div class="flex" style="flex-direction: column; gap: 0.2rem;">
+                <span style="font-size: 2.2rem;">{numFmt.format(data.totalCount)}</span>
+                <div class="text fg0">
+                    studyset{data.totalCount === 1 ? "" : "s"}
+                </div>
+            </div>
+            <div class="flex" style="flex-direction: column; gap: 0.2rem;">
+                <span style="font-size: 2.2rem;">{numFmt.format(data.totalTermCount)}</span>
+                <div class="text fg0">
+                    term{data.totalTermCount === 1 ? "" : "s"}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="wave-top extra-bg" style="margin-top: 0px;"></div>
+<div class="grid page extra" style="padding-bottom: 0px;">
     <div class="content">
         <div>
             <h2 class="h3">Quizfreely is <span class="love">non-profit</span></h2>
@@ -112,46 +131,6 @@
                     <IconGitHub></IconGitHub>
                     GitHub
                 </a>
-            </div>
-        </div>
-    </div>
-</div>
-<div class="wave-top extra-bg" style="margin-top: 0px;"></div>
-<div class="grid page extra" style="padding-bottom: 0px;">
-    <div class="content">
-        <div class="flex center">
-            <h2 class="h4 center" style="opacity: 0.9; max-width: 30rem;">Thousands of free resources made by other students and teachers</h2>
-        </div>
-        <div class="flex center">
-            <!-- {#if data.dailyCount > 24} -->
-            <div class="flex" style="flex-direction: column; gap: 0.2rem;">
-                <span style="font-size: 2.2rem;">{numFmt.format(data.dailyCount)}</span>
-                <div class="text fg0">
-                    studyset{data.dailyCount === 1 ? "" : "s"}
-                    {data.recentlyUpdated ? "updated" : "created"}
-                    <span class="line">last 24 hours</span>
-                </div>
-            </div>
-            <!-- {/if} -->
-            <div class="flex" style="flex-direction: column; gap: 0.2rem;">
-                <span style="font-size: 2.2rem;">{numFmt.format(data.monthlyCount)}</span>
-                <div class="text fg0">
-                    studyset{data.monthlyCount === 1 ? "" : "s"}
-                    {data.recentlyUpdated ? "updated" : "created"}
-                    <span class="line">last 30 days</span>
-                </div>
-            </div>
-            <div class="flex" style="flex-direction: column; gap: 0.2rem;">
-                <span style="font-size: 2.2rem;">{numFmt.format(data.totalCount)}</span>
-                <div class="text fg0">
-                    total studyset{data.totalCount === 1 ? "" : "s"}
-                </div>
-            </div>
-            <div class="flex" style="flex-direction: column; gap: 0.2rem;">
-                <span style="font-size: 2.2rem;">{numFmt.format(data.totalTermCount)}</span>
-                <div class="text fg0">
-                    total term{data.totalTermCount === 1 ? "" : "s"}
-                </div>
             </div>
         </div>
     </div>
