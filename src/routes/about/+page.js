@@ -1,5 +1,3 @@
-import { redirect } from "@sveltejs/kit";
+import fetchAuthData from "$lib/fetchAuthData.js";
 
-export function load() {
-    redirect(308, "/landing-page");
-}
+export { fetchAuthData as load };
