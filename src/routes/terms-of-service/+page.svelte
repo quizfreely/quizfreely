@@ -11,7 +11,7 @@
     <div class="grid page">
         <div class="content">
             <h2>Terms of Service</h2>
-            <p class="fg0">Updated September 15, 2025 (2025-09-15)</p>
+            <p class="fg0">Updated 9 November 2026</p>
             <p class="nice-paragraph-size">
                 Quizfreely's website, quizfreely.org, is a hosted service ("Service"), and any use of the Serivce is subject to the following Terms and Conditions of Service ("Terms of Service") as well as <a href="/privacy">Quizfreely's Privacy Policy</a>.
             </p>
