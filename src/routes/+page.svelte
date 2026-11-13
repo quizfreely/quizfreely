@@ -40,7 +40,7 @@
             A studying tool that's <span class="extra">actually free</span>
         </h1>
         <p style="max-width: 28rem; margin: auto; margin-top: 1rem">
-            Quizfreely is a free and open-source learning app with flashcards, practice tests, and !
+            Quizfreely is a free and open-source learning app with flashcards, practice tests, matching activities, and no ads!
         </p>
         <div class="flex center">
             <a href="/sign-up" class="button large">Get Started</a>
@@ -68,13 +68,13 @@
         <div style="margin-top: 3rem;">
             <h2 class="h3">It's <span class="extra">actually free</span></h2>
             <p style="max-width: 40rem;">
-                Quizfreely has unlimited practice tests for free, unlike other flashcard websites or studying apps. Quizfreely is open-source and non-profit, and there are no ads and no paid features or subscriptions.
+                Quizfreely has unlimited free practice tests, unlike other flashcard websites/studying apps. Quizfreely is open-source and non-profit, and there are no ads and no paid subscriptions.
             </p>
         </div>
         <div style="margin-top: 4rem;">
-            <h2 class="h3" style="max-width: 40rem;"><span class="extra">Advanced features</span> to measure &amp; improve your studying habits</h2>
+            <h2 class="h3" style="max-width: 40rem;"><span class="extra">Advanced features</span> to improve your studying</h2>
             <p style="max-width: 40rem;">
-                Quizfreely records individual terms' &amp; flashcards' progress &amp; accuracy. It calculates frequently confused terms or definitions and finds which incorrect answer choices are selected the most. Quizfreely gives users deep, detailed, insights on their learning.
+                Quizfreely measures detailed progress for each term/flashcard and calculates the pairs of terms and definitions that are confused with each other the most. Quizfreely also finds the most frequently selected incorrect answer choices and uses them to make answer choices reflect the questions users miss.
             </p>
         </div>
     </div>
@@ -108,7 +108,7 @@
             <h2 class="h3">Quizfreely is <span class="love">non-profit</span></h2>
             <p>
                 Quizfreely is a non-profit project with <a href="https://hcb.hackclub.com/quizfreely" class="link-love with-underline">transparent finances</a>.
-                <span class="optional-line-600px">We're fiscally sponsored by <a class="link-love with-underline" href="https://the.hackfoundation.org">The Hack Foundation</a>, a <span style="white-space: nowrap;">501(c)(3)</span> nonprofit.</span>
+                <span class="optional-line-600px">Quizfreely is fiscally sponsored by <a class="link-love with-underline" href="https://the.hackfoundation.org">The Hack Foundation</a>, a <span style="white-space: nowrap;">501(c)(3)</span> nonprofit.</span>
             </p>
             <div class="flex">
                 <a class="button large alt love qzfr-love-alt" href="https://hcb.hackclub.com/donations/start/quizfreely">
