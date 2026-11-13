@@ -46,7 +46,7 @@
         class="flex col compact-gap"
         style="width:fit-content; margin-top: 0.6rem;"
       >
-        <a href="/about">Landing Page</a>
+        <a href="/?landing-page">Landing Page</a>
         <a href="/compare/quizlet">Quizfreely vs Quizlet</a>
         <a href="/changelog">Changelog</a>
       </div>

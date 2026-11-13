@@ -1,3 +1,6 @@
+<script>
+    let { boxStyle = "", boxClass = "" } = $props();
+</script>
 <style>
     .features-box-content picture,
     .features-box-content img {
@@ -18,7 +21,7 @@
         }
     }
 </style>
-<div class="box">
+<div class="box {boxClass}" style={boxStyle}>
     <div class="flex features-box-content">
         <enhanced:img src="./img/v1.7.0-history-stats.png" alt="New History Feature Screenshot" />
         <div class="flex" style="flex-direction: column; justify-content: space-between; flex-wrap: nowrap; gap: 0.4rem;">
