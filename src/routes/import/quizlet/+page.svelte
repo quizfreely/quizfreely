@@ -110,7 +110,7 @@
             return;
         }
 
-        if (terms.length == 0) {
+        if (terms == null || terms.length == 0) {
             errMsgTxt = "Sorry, it couldn't find any terms to copy :("
             showErrMsg = true;
             return;
