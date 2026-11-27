@@ -1,7 +1,7 @@
 name: End-to-End Tests
 on:
-  pull_request:
-    types: [opened, synchronize]
+  # pull_request:
+  #   types: [opened, synchronize]
   workflow_dispatch:
 jobs:
   tests:
