@@ -13,9 +13,11 @@
             defer
             src="/umami/script.js"
             data-website-id="%umami_site_id%"
-            data-auto-track="false"
+            data-auto-pageview="false"
             data-performance="true"
-            onload="window.umami.track()"
+            data-errors="true"
+            data-release="v2.1.5+2026-11-26"
+            onload="window.qzfrUmamiOnload?.()"
         ></script>%enable_umami_end%
     </head>
     <body data-sveltekit-preload-data="hover">

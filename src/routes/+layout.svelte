@@ -38,26 +38,34 @@ afterNavigate(nav => {
     nprogressTimeout = undefined;
     NProgress.done();
 
-    if (window?.umami != null && page?.data?.authed) {
-        window.umami.identify({
-            id: page?.data?.authedUser?.id,
-            displayName: page?.data?.authedUser?.displayName,
-            username: page?.data?.authedUser?.username,
-            authType: page?.data?.authedUser?.authType,
-            oauthGoogleEmail: page?.data?.authedUser?.oauthGoogleEmail,
-            authed: page?.data?.authed
-        });
-    } else if (window?.umami != null) {
-        window.umami.identify({
-            authed: false
-        });
-    }
-    if (window?.umami != null && nav.type !== "enter") {
-        window.umami.track(payload => ({
-            ...payload,
-            title: document.title,
-            url: window.location.href
-        }));
+    if (window != null) {
+        if (page?.data?.authed) {
+            window.qzfrUmamiIdObj = {
+                id: page?.data?.authedUser?.id,
+                displayName: page?.data?.authedUser?.displayName,
+                username: page?.data?.authedUser?.username,
+                authType: page?.data?.authedUser?.authType,
+                oauthGoogleEmail: page?.data?.authedUser?.oauthGoogleEmail,
+                authed: page?.data?.authed
+            };
+        } else {
+            window.qzfrUmamiIdObj = {
+                authed: false
+            };
+        }
+        if (window?.umami != null) {
+            window.umami.identify(window.qzfrUmamiIdObj);
+            window.umami.track(payload => ({
+                ...payload,
+                title: document.title,
+                url: window.location.href
+            }));
+        } else {
+            window.qzfrUmamiOnload = () => {
+                window.umami.identify(window.qzfrUmamiIdObj);
+                window.umami.track();
+            }
+        }
     }
 })
 
