@@ -58,6 +58,7 @@ export default defineConfig(({ mode }) => {
             enhancedImages(),
 	    	sveltekit()
 	    ],
+        build: { sourcemap: true },
 	    server: {
 	    	port: process?.env?.PORT ?? 8080,
             proxy
@@ -65,6 +66,6 @@ export default defineConfig(({ mode }) => {
 	    preview: {
 	    	port: process?.env?.PORT ?? 8080,
 	    	proxy
-        }
+        },
     };
 });
